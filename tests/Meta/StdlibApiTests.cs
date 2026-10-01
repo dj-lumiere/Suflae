@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace RazorForge.Tests.Meta;
+namespace Suflae.Tests.Meta;
 
 /// <summary>
 /// Runs each <c>tests/Fixtures/Stdlib/*.rf</c> fixture through <c>buildandrun</c> and
@@ -52,29 +52,6 @@ public sealed partial class StdlibApiTests
         pattern:
         @"error\[RF-|Warning:|Codegen bug|Synthesized body codegen failed|Unresolved generic|Error type found|undefined symbol|never defined|MARKER-LEAK|Unhandled exception|\bE0\d")]
     private static partial Regex StderrDiagnosticRe();
-
-    /// <summary>
-    /// Single-compile stdlib e2e test: generates <c>all_stdlib.rf</c> + <c>razorforge.toml</c> from
-    /// every <c>Stdlib/*.rf</c> fixture (importing each by its declared module and calling its
-    /// <c>start()</c> via the module leaf), compiles + runs the ONE program, splits the combined
-    /// stdout on the <c>##### fixture #####</c> delimiters, and diffs each section against its
-    /// <c>.expected.txt</c>. Compiles the stdlib + all fixtures ONCE instead of ~165 times.
-    /// </summary>
-    [Fact]
-    public void StdlibHarness_AllFixturesOutputMatchExpected()
-    {
-        int fixtureCount = RunFixtureBundle(fixturesDir: FixturesDir,
-            glob: "*.rf",
-            harnessDir: HarnessDir,
-            harnessModule: HarnessModule,
-            bundleFileName: "all_stdlib.rf",
-            packageName: "stdlib-harness",
-            libraryRel: "../Stdlib");
-        // Guard against a silently-empty bundle passing vacuously (e.g. fixtures dir moved/renamed).
-        Assert.True(condition: fixtureCount > 0,
-            userMessage:
-            "No RazorForge stdlib fixtures were discovered — the harness ran nothing.");
-    }
 
     /// <summary>
     /// Suflae (.sf) sibling of the stdlib harness. Bundles every <c>StdlibSf/*.sf</c> fixture into one
@@ -242,30 +219,6 @@ public sealed partial class StdlibApiTests
         }
 
         return entries.Count;
-    }
-
-    /// <summary>
-    /// In-process coverage twin of <see cref="StdlibHarness_AllFixturesOutputMatchExpected"/>. Builds
-    /// the same all-fixtures bundle but drives the compile pipeline IN-PROCESS (tokenize → parse →
-    /// declaration → desugaring → collection → verification → instantiation → codegen; no opt/clang/
-    /// link, and the produced program is NOT executed). The subprocess harness above runs that stack
-    /// in a child process that coverage instrumentation cannot see; this variant runs it inside the
-    /// test process so codegen/desugaring/collection/instantiation are actually measured. Compile-only,
-    /// so it does not diff program output — the subprocess harness owns behavior + stderr-clean checks.
-    /// </summary>
-    [Fact]
-    public void StdlibHarness_InProcessCompileSucceeds()
-    {
-        AssertBundleCompilesInProcess(fixturesDir: FixturesDir,
-            glob: "*.rf",
-            harnessDir: Path.Combine(path1: RepoRoot,
-                path2: "tests",
-                path3: "Fixtures",
-                path4: "StdlibHarnessInProc"),
-            harnessModule: "StdlibHarnessInProc",
-            bundleFileName: "all_stdlib_inproc.rf",
-            packageName: "stdlib-harness-inproc",
-            libraryRel: "../Stdlib");
     }
 
     /// <summary>Suflae in-process compile twin — see <see cref="StdlibHarness_InProcessCompileSucceeds"/>.</summary>

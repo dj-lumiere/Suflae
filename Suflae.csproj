@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="RazorForge.Tests"/>
+    <InternalsVisibleTo Include="Suflae.Tests"/>
   </ItemGroup>
 
   <!-- The Suflae standard library, laid out as Standard\Suflae next to the executable. -->
@@ -34,4 +34,12 @@
   </ItemGroup>
 
   <Import Project="..\Ingrid\StageIngridRuntime.targets"/>
+
+  <!-- tests\ is its own project. -->
+  <ItemGroup>
+    <Compile Remove="tests\**"/>
+    <None Remove="tests\**"/>
+    <Content Remove="tests\**"/>
+    <EmbeddedResource Remove="tests\**"/>
+  </ItemGroup>
 </Project>

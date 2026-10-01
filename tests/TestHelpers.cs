@@ -8,7 +8,7 @@ using TypeModel.Enums;
 using TypeModel.Symbols;
 using TypeModel.Types;
 
-namespace RazorForge.Tests;
+namespace Suflae.Tests;
 
 /// <summary>
 /// Helper memberRoutines for parsing and analyzing test code.
@@ -23,14 +23,11 @@ public static class TestHelpers
         Suflae.SuflaeFrontend.Register();
     }
 
-    /// <summary>The toolchain that builds <paramref name="sourcePath"/>: <c>Suflae.dll</c> for a <c>.sf</c>
-    /// file, <c>RazorForge.dll</c> otherwise, from this test assembly's output directory.</summary>
+    /// <summary>The toolchain that builds <paramref name="sourcePath"/>: <c>Suflae.dll</c> from this test
+    /// assembly's output directory.</summary>
     public static string ToolchainDll(string sourcePath)
     {
-        return Path.Combine(path1: AppContext.BaseDirectory,
-            path2: sourcePath.EndsWith(value: ".sf", comparisonType: StringComparison.OrdinalIgnoreCase)
-                ? "Suflae.dll"
-                : "RazorForge.dll");
+        return Path.Combine(path1: AppContext.BaseDirectory, path2: "Suflae.dll");
     }
 
     private const string ExpectedAtLeastOneError = "Expected at least one error";

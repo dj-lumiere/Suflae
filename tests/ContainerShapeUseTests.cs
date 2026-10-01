@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace RazorForge.Tests.Meta;
+namespace Suflae.Tests.Meta;
 
 /// <summary>
 /// End-to-end check of Suflae container shape use (the runtime IterGuard): an `each` loop marks its list's
@@ -83,7 +83,7 @@ public sealed class ContainerShapeUseTests
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "RazorForge.sln")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
             {
                 return dir;
             }
@@ -98,6 +98,6 @@ public sealed class ContainerShapeUseTests
         }
 
         throw new InvalidOperationException(
-            message: "Could not locate RazorForge.sln walking up from test assembly directory.");
+            message: "Could not locate Suflae.csproj walking up from test assembly directory.");
     }
 }

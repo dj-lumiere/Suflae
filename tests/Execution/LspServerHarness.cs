@@ -3,7 +3,7 @@ using System.Text.Json;
 using Builder;
 using Builder.Execution;
 
-namespace RazorForge.Tests.Execution;
+namespace Suflae.Tests.Execution;
 
 /// <summary>
 /// In-process driver for <see cref="LspServer.Run(System.IO.Stream, System.IO.Stream)"/>. Builds a

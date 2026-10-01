@@ -1,0 +1,49 @@
+# Suflae — front end, command line and standard library
+# Build outputs
+bin/
+obj/
+/packages/
+/_ReSharper.Caches/
+
+# IDE files (personal settings)
+.idea/
+.vs/
+.vscode/
+*.sln.DotSettings.user
+riderModule.iml
+.mcp.json
+
+# Claude Code (personal configuration, scratch, memory)
+.claude/
+.claude-memory/
+CLAUDE.md
+
+# Local release helper
+RELEASE!.ps1
+
+# Scratch
+playground/
+scratch/
+temp/
+tmp/
+*.old
+*.backup
+
+# Compiled/generated files
+*.exe
+*.dll
+*.pdb
+*.ll
+*.out
+*.o
+*.so
+*.dylib
+
+# Generated test artifacts (in-process compile bundles, harness inputs, coverage output)
+tests/Fixtures/SuflaeHarnessInProc/
+tests/Fixtures/SuflaeHarness/all_suflae.sf
+tests/Fixtures/SuflaeHarness/razorforge.toml
+tests/TestResults/
+
+# Wiki (managed in its own repository)
+Suflae-Wiki/
