@@ -147,8 +147,7 @@ internal sealed class EntityLoweringPass
         // codegen, but its declaration name is the type name here.)
         _inCreateRoutine = r.ReturnType is { Name: var rn } && r.Name == rn;
         foreach (Parameter p in r.Parameters.Where(predicate: p =>
-                     p.Type?.ResolvedType is WrapperTypeSymbol { Name: RuntimeContract.Roamed }
-                         or RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed }))
+                     p.Type?.ResolvedType is RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed }))
         {
             _borrowNames.Add(item: p.Name);
         }
@@ -838,25 +837,18 @@ internal sealed class EntityLoweringPass
             : inner;
     }
 
-    // True if the type is a `Roamed[E]` handle in either representation the pipeline produces: a
-    // WrapperTypeSymbol (from this pass's WrapInRoam) or a RecordTypeSymbol (from a field read, whose type
-    // TypeBodyResolver builds via GetOrCreateResolution).
+    // True if the type is a `Roamed[E]` handle (the standard library record's resolution).
     private static bool IsRoamedType(TypeSymbol? t)
     {
-        return t is WrapperTypeSymbol { Name: RuntimeContract.Roamed } or RecordTypeSymbol
-        {
-            GenericDefinition.Name: RuntimeContract.Roamed
-        };
+        return t is RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed };
     }
 
-    // The bare entity `E` inside a `Roamed[E]` handle, in either representation the pipeline produces
-    // (WrapperTypeSymbol from WrapInRoam, RecordTypeSymbol from a resolver-built handle). Null when the
-    // type is not a Roamed handle over an entity.
+    // The bare entity `E` inside a `Roamed[E]` handle. Null when the type is not a Roamed handle over an
+    // entity.
     private static EntityTypeSymbol? RoamedInnerEntity(TypeSymbol? t)
     {
         return t switch
         {
-            WrapperTypeSymbol { Name: RuntimeContract.Roamed, InnerType: EntityTypeSymbol e } => e,
             RecordTypeSymbol
             {
                 GenericDefinition.Name: RuntimeContract.Roamed,
@@ -887,9 +879,7 @@ internal sealed class EntityLoweringPass
     // construct `E(...).roam()`, a call) are already owned and are left alone.
     private static Expression MaybeRoamCopy(Expression expr)
     {
-        // Accept BOTH Roamed representations: WrapperTypeSymbol (from this pass's WrapInRoam) and
-        // RecordTypeSymbol (from the resolver's GetOrCreateResolution — e.g. `me`/params/fields typed via
-        // MeType / TypeBodyResolver). The `.roam()` copy verb retains the shared controller either way.
+        // The `.share()` copy verb retains the shared controller.
         if (expr is IdentifierExpression or MemberExpression && IsRoamedType(t: expr.ResolvedType))
         {
             TypeSymbol roamed = expr.ResolvedType!;
