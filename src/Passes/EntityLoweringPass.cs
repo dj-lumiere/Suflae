@@ -29,7 +29,7 @@ internal sealed class EntityLoweringPass
     private readonly TypeRegistry _registry;
 
     // Per-routine scope: local name -> the Roamed[E] type it now carries. Reset per routine body.
-    private readonly Dictionary<string, WrapperTypeSymbol> _roamedLocals = new();
+    private readonly Dictionary<string, TypeSymbol> _roamedLocals = new();
 
     // Per-routine scope: names that are BORROWED Roamed handles (`me` + Roamed parameters). Returning
     // one hands a fresh reference to the caller while the borrow itself is NOT released at scope exit
@@ -277,9 +277,9 @@ internal sealed class EntityLoweringPass
         // Track the local as Roamed[E] when its initializer resolved to a Roamed wrapper, so
         // later references (aliasing / access) retype consistently. `var` locals infer their
         // type from the initializer at codegen, so no declared-type rewrite is needed here.
-        if (init.ResolvedType is WrapperTypeSymbol { Name: RuntimeContract.Roamed } w)
+        if (IsRoamedType(t: init.ResolvedType))
         {
-            _roamedLocals[key: vd.Name] = w;
+            _roamedLocals[key: vd.Name] = init.ResolvedType!;
         }
 
         return ReferenceEquals(objA: init, objB: vd.Initializer)
@@ -431,7 +431,7 @@ internal sealed class EntityLoweringPass
             // Reference to a local we've retyped to Roamed[E] -> flip its resolved type so aliasing
             // and access see the wrapper.
             IdentifierExpression id when _roamedLocals.TryGetValue(key: id.Name,
-                                             value: out WrapperTypeSymbol? w) &&
+                                             value: out TypeSymbol? w) &&
                                          id.ResolvedType is EntityTypeSymbol => RetypeIdentifier(
                 id: id,
                 w: w),
@@ -476,7 +476,7 @@ internal sealed class EntityLoweringPass
     }
 
     private static IdentifierExpression RetypeIdentifier(IdentifierExpression id,
-        WrapperTypeSymbol w)
+        TypeSymbol w)
     {
         id.ResolvedType = w;
         return id;
@@ -940,7 +940,7 @@ internal sealed class EntityLoweringPass
 
     private CallExpression WrapInRoam(Expression inner, EntityTypeSymbol entity)
     {
-        WrapperTypeSymbol roamed = _registry.GetOrCreateWrapperType(
+        TypeSymbol roamed = _registry.GetOrCreateWrapperType(
             wrapperName: RuntimeContract.Roamed,
             innerType: entity,
             isReadOnly: false);
