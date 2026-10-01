@@ -13,5 +13,5 @@ jobs:
   workspace:
     uses: dj-lumiere/Anvila/.github/workflows/workspace.yaml@master
     with:
-      sonar-project: suflae
+      sonar-project: Suflae
     secrets: inherit
