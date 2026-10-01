@@ -1,0 +1,17 @@
+name: Release
+
+# A Suflae release (sf-v* tag, e.g. sf-v0.1.0): the RazorForge repository's release workflow builds the
+# Linux, Windows and macOS packages (the same toolchain, with Suflae branding chosen from the tag) and
+# attaches them to a release in this repository.
+
+on:
+  push:
+    tags:
+      - 'sf-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: dj-lumiere/RazorForge/.github/workflows/release.yaml@master
