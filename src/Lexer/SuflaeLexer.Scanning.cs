@@ -1,11 +1,13 @@
 using Builder.Diagnostics;
 
-namespace Builder.Tokenizer;
+using Builder.Tokenizer;
+
+namespace Suflae.Lexer;
 
 /// <summary>
-/// Partial class containing the main token scanning dispatch logic for the unified tokenizer.
+/// Partial class containing the main token scanning dispatch logic for the Suflae lexer.
 /// </summary>
-public partial class Tokenizer
+public partial class SuflaeLexer
 {
     #region Main Token Scanning
 

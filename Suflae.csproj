@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Suflae: the Suflae front end (its lexer) and the `suflae` command line, over the Anvila builder core.
+       A Suflae build analyzes the RazorForge standard library as well, so this references the RazorForge
+       front end (its lexer and standard library) until the shared library moves to Ingrid. -->
+  <PropertyGroup>
+    <SonarQubeTestProject>false</SonarQubeTestProject>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Version>0.1.0</Version>
+    <AssemblyName>Suflae</AssemblyName>
+    <RootNamespace>Suflae</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>suflae</ToolCommandName>
+    <PackageId>Suflae</PackageId>
+    <Description>The Suflae toolchain.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Anvila\Anvila.csproj"/>
+    <ProjectReference Include="..\RazorForge\RazorForge.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RazorForge.Tests"/>
+  </ItemGroup>
+
+  <!-- The Suflae standard library, laid out as Standard\Suflae next to the executable. -->
+  <ItemGroup>
+    <Content Include="Standard\**\*" Link="Standard\Suflae\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" PackageCopyToOutput="true"/>
+    <None Remove="Standard\**\*"/>
+  </ItemGroup>
+
+  <Import Project="..\Ingrid\StageIngridRuntime.targets"/>
+</Project>

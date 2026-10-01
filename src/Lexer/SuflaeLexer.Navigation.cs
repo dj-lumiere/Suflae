@@ -1,9 +1,11 @@
-namespace Builder.Tokenizer;
+using Builder.Tokenizer;
+
+namespace Suflae.Lexer;
 
 /// <summary>
-/// Partial class containing character navigation and token management memberRoutines for the unified tokenizer.
+/// Partial class containing character navigation and token management memberRoutines for the Suflae lexer.
 /// </summary>
-public partial class Tokenizer
+public partial class SuflaeLexer
 {
     #region Character Navigation
 

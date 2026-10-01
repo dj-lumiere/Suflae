@@ -1,9 +1,11 @@
 using Builder.Diagnostics;
 
-namespace Builder.Tokenizer;
+using Builder.Tokenizer;
+
+namespace Suflae.Lexer;
 
 /// <summary>
-/// Partial class containing indentation and newline handling memberRoutines for the unified tokenizer.
+/// Partial class containing indentation and newline handling memberRoutines for the Suflae lexer.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -17,7 +19,7 @@ namespace Builder.Tokenizer;
 ///   <item><description>Determining which newlines are significant</description></item>
 /// </list>
 /// </remarks>
-public partial class Tokenizer
+public partial class SuflaeLexer
 {
     #region Indentation Handling
 

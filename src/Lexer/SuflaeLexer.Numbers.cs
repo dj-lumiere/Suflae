@@ -1,16 +1,18 @@
 using Builder.Diagnostics;
 
-namespace Builder.Tokenizer;
+using Builder.Tokenizer;
+
+namespace Suflae.Lexer;
 
 /// <summary>
-/// Partial class containing numeric literal scanning memberRoutines for the unified tokenizer.
+/// Partial class containing numeric literal scanning memberRoutines for the Suflae lexer.
 /// </summary>
 /// <remarks>
 /// Key language-conditional: unsuffixed defaults differ between RF and SF.
 /// RF: integer -> S64Literal, float -> B64Literal
 /// SF: integer -> Integer, float -> Decimal
 /// </remarks>
-public partial class Tokenizer
+public partial class SuflaeLexer
 {
     #region Decimal Numbers
 
