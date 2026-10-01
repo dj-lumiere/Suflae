@@ -659,11 +659,11 @@ public sealed partial class StdlibApiTests
 
     private static string LocateRepoRoot()
     {
-        // Walk up from the test assembly until we find RazorForge.csproj.
+        // Walk up from the test assembly until we find Suflae.csproj (the project folder holding tests/).
         string dir = AppContext.BaseDirectory;
         while (!string.IsNullOrEmpty(value: dir))
         {
-            if (File.Exists(path: Path.Combine(path1: dir, path2: "RazorForge.sln")))
+            if (File.Exists(path: Path.Combine(path1: dir, path2: "Suflae.csproj")))
             {
                 return dir;
             }
@@ -679,6 +679,6 @@ public sealed partial class StdlibApiTests
 
         throw new InvalidOperationException(
             message:
-            "Could not locate RazorForge.sln walking up from test assembly directory.");
+            "Could not locate Suflae.csproj walking up from test assembly directory.");
     }
 }

@@ -142,8 +142,13 @@ public class FeatureCoverageTests
                               show(f"{name} {counter}")
                               """;
         string ir = GenerateIrSuflae(source: source);
-        int defAt = ir.IndexOf(value: "SfGlobalTeardown.start()\"", comparisonType: StringComparison.Ordinal);
-        defAt = ir.LastIndexOf(value: "define ", startIndex: defAt, comparisonType: StringComparison.Ordinal);
+        // The definition line itself: the first mention of start() may be a call from main.
+        int defAt = ir.Split(separator: '\n')
+                      .Select(selector: (line, index) => (line, index))
+                      .Where(predicate: l => l.line.StartsWith(value: "define ", comparisonType: StringComparison.Ordinal) &&
+                                             l.line.Contains(value: "SfGlobalTeardown.start()\"", comparisonType: StringComparison.Ordinal))
+                      .Select(selector: l => ir.IndexOf(value: l.line, comparisonType: StringComparison.Ordinal))
+                      .First();
         int endAt = ir.IndexOf(value: "\n}", startIndex: defAt, comparisonType: StringComparison.Ordinal);
         string start = ir[defAt..endAt];
         Assert.Contains(expectedSubstring: "__ModuleGlobals].destroy()", actualString: start);
