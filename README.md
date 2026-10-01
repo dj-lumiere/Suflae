@@ -102,7 +102,7 @@ suflae hello.sf
 ### From source
 
 Suflae is built from four repositories checked out side by side: the builder core
-([Anvila](https://github.com/dj-lumiere/Anvila)), the native runtime
+([Anvila](https://github.com/dj-lumiere/Anvila)), the shared library
 ([Ingrid](https://github.com/dj-lumiere/Ingrid)), [RazorForge](https://github.com/dj-lumiere/RazorForge)
 (whose standard library Suflae uses), and this repository.
 
@@ -207,9 +207,9 @@ Suflae/
 └── SUFLAE-FOR-AI.md       # Reference for AI assistants
 ```
 
-The builder itself is [Anvila](https://github.com/dj-lumiere/Anvila), the C runtime is
-[Ingrid](https://github.com/dj-lumiere/Ingrid), and the standard library lives in
-[RazorForge](https://github.com/dj-lumiere/RazorForge/tree/master/Standard).
+The builder itself is [Anvila](https://github.com/dj-lumiere/Anvila), the standard library lives in
+[RazorForge](https://github.com/dj-lumiere/RazorForge/tree/master/Standard), and the shared library
+under it is [Ingrid](https://github.com/dj-lumiere/Ingrid).
 
 ## Contributing
 
