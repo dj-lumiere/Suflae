@@ -442,6 +442,7 @@ public sealed partial class StdlibApiTests
         const int timeoutMs = 300_000;
         if (!p.WaitForExit(milliseconds: timeoutMs))
         {
+            string hang = HangDiagnostics.Capture(root: p);
             try { p.Kill(entireProcessTree: true); }
             catch
             {
@@ -450,7 +451,7 @@ public sealed partial class StdlibApiTests
 
             return new FixtureRun(ExitCode: -1,
                 Stdout: outTask.Result,
-                Stderr: errTask.Result,
+                Stderr: errTask.Result + "\n" + hang,
                 TimedOut: true,
                 TimeoutMs: timeoutMs);
         }
@@ -617,12 +618,13 @@ public sealed partial class StdlibApiTests
         const int timeoutMs = 60_000;
         if (!p.WaitForExit(milliseconds: timeoutMs))
         {
+            string hang = HangDiagnostics.Capture(root: p);
             try { p.Kill(entireProcessTree: true); }
             catch { }
 
             return new FixtureRun(ExitCode: -1,
                 Stdout: stdoutTask.Result,
-                Stderr: stderrTask.Result,
+                Stderr: stderrTask.Result + "\n" + hang,
                 TimedOut: true,
                 TimeoutMs: timeoutMs);
         }
