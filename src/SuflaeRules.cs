@@ -58,7 +58,6 @@ public sealed class SuflaeRules : LanguageRules
     public override bool HasTargetDirectives => false;
     public override bool DefaultsToArbitraryPrecision => true;
     public override bool HasDataSizeQuery => false;
-    public override bool HasMemoryWrappers => false;
 
     public override bool EntitiesAreShared => true;
     public override bool ChecksOwnership => false;
