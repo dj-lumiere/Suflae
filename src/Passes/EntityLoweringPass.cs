@@ -469,6 +469,11 @@ internal sealed class SuflaeEntityLoweringPass
             BinaryExpression bin => LowerBinaryExpression(bin: bin),
             UnaryExpression un => LowerUnaryExpression(un: un),
             NamedArgumentExpression namedArg => LowerNamedArgumentExpression(namedArg: namedArg),
+            // An analyzed `try`/`grab`/`lookup` is its recovery-variant call: lower that call in its place
+            // (as AstRewriter splices it) so a Roamed receiver inside it retypes.
+            RecoveryExpression recovery => recovery.LoweredCall is { } lowered
+                ? LowerExpression(expr: lowered)
+                : recovery with { Inner = LowerExpression(expr: recovery.Inner) },
             _ => expr
         };
     }
@@ -643,7 +648,7 @@ internal sealed class SuflaeEntityLoweringPass
 
     // Receiver projection: a Roamed handle flowing as the RECEIVER into a BARE-`me` memberRoutine
     // must be projected through `.raw_inner()` to the real entity pointer. Stdlib entities
-    // (analyzed in RF mode — e.g. an iterator's `emit!`/`try_emit`) have a bare `me`
+    // (analyzed in RF mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
     // (MeType is NOT Roamed), so passing the RoamController handle makes the callee read the
     // controller as the entity and crash. USER SF entity memberRoutines have MeType=Roamed and
     // correctly take the handle; memberRoutines declared on Roamed/RoamController itself
