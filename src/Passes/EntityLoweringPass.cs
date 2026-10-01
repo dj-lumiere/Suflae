@@ -294,7 +294,7 @@ internal sealed class EntityLoweringPass
         // REASSIGNMENT has a separate pre-existing codegen crash (baseline AVs with or without the
         // former RoamBump), so the share placement for that path is deferred until that bug is fixed.
         // The former RcRetainLoweringPass.RoamBump auto-share for field targets is removed (it was the
-        // compiler hand-simulating the refcount; RF now spells the co-owner explicitly `x.share()`).
+        // builder hand-simulating the refcount; RF now spells the co-owner explicitly `x.share()`).
         if (assign.Target is IdentifierExpression)
         {
             v = MaybeRoamCopy(expr: v);

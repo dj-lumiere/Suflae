@@ -37,7 +37,7 @@ When unsure, consult ground truth in the repo:
     like the RF twins, but an SF `entity` slot roams them (§4).
   - The "approachable surface" (hide `dangerous`/`steal`/fixed-width) is enforced
     by **realm-scoped access rules on the shared types** (§5, §7), not by wrapping.
-- The compiler selects Suflae by the `.sf` extension. `import IO/Console` +
+- The builder selects Suflae by the `.sf` extension. `import IO/Console` +
   `show(...)` work as in RF.
 - **Type arguments are `List[Text]`, never `List<Text>`** — by design, as in RF
   (RAZORFORGE-FOR-AI §8): `<` is a comparison and chained comparisons are one
@@ -84,13 +84,13 @@ When unsure, consult ground truth in the repo:
    ordering is **transitive through free-routine calls** — `global a = compute()` where
    `compute` reads global `b` still orders `b` before `a`, all at build time. A dependency
    **cycle** (including a self-reference, and cycles that only show up through a call) is a
-   compile error (SF-S436). Entity initializers work: `global origin: Point = Point(x: 10,
+   build error (SF-S436). Entity initializers work: `global origin: Point = Point(x: 10,
    y: 20)` heap-allocates once and is shared. Globals cross module boundaries — another module
    can `import Mod.the_global` and read AND write it (it is one shared storage cell). **Use it
    for process-singular state** (a logger, config, an asset registry); per-frame / per-world
    context (delta time, input, the current world) belongs in engine-injected parameters, not a
    global. **Every global is thread-safe** — the scheduler is M:N (real per-core worker threads),
-   so parallel agents can touch a global at the same time, and the compiler backs ALL globals with
+   so parallel agents can touch a global at the same time, and the builder backs ALL globals with
    one hidden `Roamed` object: each module's globals become fields of a single synthesized
    `__ModuleGlobals` entity, held behind one promoted-to-ESCAPED `Roamed` singleton, and every bare
    global reference `g` is rewritten to a field access `__globals.g`. So a single-statement
@@ -202,7 +202,7 @@ routine start()
 
   Valid on any reference-carrying operand — an `entity` (`Roamed`) or a wrapper
   (`Viewing`/`Modifying`/`Consulting`/`Amending`/`Retained`/`Guarded`/`Tracked`/
-  `Witnessed`). A `record` or scalar is a compile error (**SF-S440**): a value has no
+  `Witnessed`). A `record` or scalar is a build error (**SF-S440**): a value has no
   identity — use `==`. It is a primitive pointer compare (not a `.eq()` call).
 
 ## 5. What Suflae deliberately HIDES
@@ -263,7 +263,7 @@ Fatal-tier details:
   exhausting them is just the one memory wall (OOM), reported as such. There is no
   depth/watermark concept surfaced.
 - **AccessViolation / segfault** — cannot occur in pure SF (memory-safe by
-  construction). If one appears, it is a compiler/runtime bug (or unsafe code SF
+  construction). If one appears, it is a builder/runtime bug (or unsafe code SF
   called) → report as an internal error, not a language failure mode.
 
 Every crash — an unrecovered `throw`/`absent` or a fatal wall — exits the process
@@ -304,7 +304,7 @@ suflae build hello.sf  # build to a native executable, don't run
 ```
 
 Configuration lives in `config.toml` (see `RAZORFORGE-FOR-AI.md` §11); there
-are no build flags. The shared stdlib resolves relative to the compiler, not the
+are no build flags. The shared stdlib resolves relative to the builder, not the
 current directory, so a repo-external `.sf` still finds `Core`.
 
 ## 9. Interop: importing and holding RazorForge types
