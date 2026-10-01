@@ -1,0 +1,41 @@
+module Tests/StdlibSf/EntitySharingApi
+import IO/Console
+
+# Entities are shared handles: a nullable `E?` parameter, a walk that reassigns a handle local under the
+# access lock (the lock is released on the object it was taken on), a list literal of entities (its element
+# is the shared handle, not the bare entity), and copying an element out by index.
+entity Account
+    owner: Text
+    balance: S64
+
+routine Account.deposit(amount: S64)
+    me.balance = me.balance + amount
+    return
+
+entity Node
+    value: S64
+    next: Node?
+
+routine sum_list(head: Node?) -> S64
+    var total = 0_s64
+    var current = head
+    while current isnot None
+        total = total + current.value
+        current = current.next
+    return total
+
+routine start()
+    var third = Node(value: 3, next: none)
+    var second = Node(value: 2, next: third)
+    var first = Node(value: 1, next: second)
+    show(f"sum: {sum_list(head: first)}")
+    show(f"empty sum: {sum_list(head: none)}")
+
+    var mine = Account(owner: "Lumi", balance: 100)
+    var other = Account(owner: "Kim", balance: 150)
+    var accounts = [mine, other]
+    each account in accounts
+        account.deposit(amount: 1)
+    show(f"after: {mine.balance} {other.balance}")
+    show(f"first: {accounts[0].owner}, same as mine: {accounts[0] === mine}")
+    return
