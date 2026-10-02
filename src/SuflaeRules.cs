@@ -76,6 +76,74 @@ public sealed class SuflaeRules : LanguageRules
     public override bool ChecksReadonly => false;
     public override bool ChecksShapeAtRunTime => true;
 
+    /// <summary>A Suflae user writes and reads <c>Account</c>, never the <c>Roamed[Account]</c> handle the
+    /// builder carries an entity in.</summary>
+    public override TypeModel.Types.TypeSymbol SurfaceType(TypeModel.Types.TypeSymbol type)
+    {
+        return type is TypeModel.Types.RecordTypeSymbol
+        {
+            GenericDefinition.Name: RuntimeContract.Roamed, TypeArguments: [var entity]
+        }
+            ? entity
+            : type;
+    }
+
+    /// <summary>Drops every <c>Roamed[...]</c> wrapper from the text, keeping what it wraps, at any depth
+    /// (<c>List[Roamed[Account]]</c> reads <c>List[Account]</c>).</summary>
+    public override string SurfaceText(string text)
+    {
+        const string wrapper = RuntimeContract.Roamed + "[";
+        int at = FindWrapper(text: text, wrapper: wrapper, from: 0);
+        while (at >= 0)
+        {
+            int close = MatchingBracket(text: text, open: at + wrapper.Length - 1);
+            if (close < 0)
+            {
+                break;
+            }
+
+            text = text[..at] + text[(at + wrapper.Length)..close] + text[(close + 1)..];
+            at = FindWrapper(text: text, wrapper: wrapper, from: at);
+        }
+
+        return text;
+    }
+
+    /// <summary>The next <paramref name="wrapper"/> that starts a name (not the tail of a longer one), or -1.</summary>
+    private static int FindWrapper(string text, string wrapper, int from)
+    {
+        for (int at = text.IndexOf(value: wrapper, startIndex: from, comparisonType: StringComparison.Ordinal);
+             at >= 0;
+             at = text.IndexOf(value: wrapper, startIndex: at + 1, comparisonType: StringComparison.Ordinal))
+        {
+            if (at == 0 || !(char.IsLetterOrDigit(c: text[index: at - 1]) || text[index: at - 1] == '_'))
+            {
+                return at;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>The <c>]</c> that closes the <c>[</c> at <paramref name="open"/>, or -1 when it is unbalanced.</summary>
+    private static int MatchingBracket(string text, int open)
+    {
+        int depth = 0;
+        for (int i = open; i < text.Length; i++)
+        {
+            if (text[index: i] == '[')
+            {
+                depth++;
+            }
+            else if (text[index: i] == ']' && --depth == 0)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     public override bool RequiresLateinitForDeferredInit => false;
     public override bool RequiresInferableLambdaParameters => false;
     public override bool RequiresEnterableForUsing => false;

@@ -1,0 +1,35 @@
+<idea-plugin>
+    <id>com.suflae.rider</id>
+    <name>Suflae</name>
+    <vendor email="djminstar573@gmail.com">suflae</vendor>
+
+    <description><![CDATA[
+        Suflae (<code>.sf</code>) in Rider: syntax highlighting, comment and bracket handling, and the Suflae
+        language server (<code>Suflae lsp</code>) for diagnostics, completion, hover, navigation, rename, inlay hints
+        and formatting.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lsp</depends>
+    <depends>org.jetbrains.plugins.textmate</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <textmate.bundleProvider implementation="com.suflae.rider.SuflaeBundleProvider"/>
+        <fileIconProvider implementation="com.suflae.rider.SuflaeIconProvider"/>
+        <platform.lsp.integrationProvider implementation="com.suflae.rider.SuflaeLanguageServer"/>
+        <colorSettingsPage implementation="com.suflae.rider.SuflaeColorSettingsPage"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/SuflaeDarcula.xml"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/SuflaeDefault.xml"/>
+        <applicationConfigurable
+            parentId="language"
+            id="com.suflae.rider.settings"
+            displayName="Suflae"
+            instance="com.suflae.rider.SuflaeConfigurable"/>
+    </extensions>
+
+    <projectListeners>
+        <listener
+            class="com.suflae.rider.SuflaeFileOpenListener"
+            topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </projectListeners>
+</idea-plugin>

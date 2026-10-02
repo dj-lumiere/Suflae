@@ -1,0 +1,21 @@
+{
+  "name": "suflae",
+  "displayName": "Suflae",
+  "contributes": {
+    "languages": [
+      {
+        "id": "suflae",
+        "aliases": ["Suflae", "suflae"],
+        "extensions": [".sf"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "suflae",
+        "scopeName": "source.sf",
+        "path": "./syntaxes/Suflae.tmLanguage.json"
+      }
+    ]
+  }
+}
