@@ -21,4 +21,11 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
 
     /// <inheritdoc/>
     public override IReadOnlyList<string> Keywords => SuflaeLexer.KeywordSpellings;
+
+    /// <inheritdoc/>
+    public override string? Format(string text, string fileName)
+    {
+        return Builder.Formatting.SourceFormatter.Format(source: text, fileName: fileName, language: Language)
+                      .Output;
+    }
 }
