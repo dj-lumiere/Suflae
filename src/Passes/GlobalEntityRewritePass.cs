@@ -326,15 +326,6 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
                             .Select(selector: RW)
                             .ToList()
             },
-            WithExpression x => x with
-            {
-                Base = RW(e: x.Base),
-                Updates = x.Updates
-                           .Select(selector: u => (u.MemberVariablePath, Index: u.Index is null
-                                ? null
-                                : RW(e: u.Index), Value: RW(e: u.Value)))
-                           .ToList()
-            },
             IsPatternExpression x => x with
             {
                 Expression = RW(e: x.Expression), Pattern = RewritePattern(p: x.Pattern)

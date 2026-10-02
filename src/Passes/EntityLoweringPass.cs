@@ -418,14 +418,21 @@ internal sealed class EntityLoweringPass
             // (else a bare-list pointer is bound to a `Roamed` handle and reinterpreted as a controller →
             // AccessViolation on first access). ExpressionLoweringPass later expands the literal to a
             // `create + add_last` temp; the `.roam()` wraps that temp reference.
-            ListLiteralExpression when expr.ResolvedType is EntityTypeSymbol le => WrapInRoam(
-                inner: expr,
+            // Its elements are lowered first: `[Plain(x: 1)]` constructs each entity into its own handle,
+            // or the list would hold bare entity pointers where it expects Roamed handles.
+            ListLiteralExpression list when expr.ResolvedType is EntityTypeSymbol le => WrapInRoam(
+                inner: list with { Elements = list.Elements.Select(selector: LowerExpression).ToList() },
                 entity: le),
-            SetLiteralExpression when expr.ResolvedType is EntityTypeSymbol se => WrapInRoam(
-                inner: expr,
+            SetLiteralExpression set when expr.ResolvedType is EntityTypeSymbol se => WrapInRoam(
+                inner: set with { Elements = set.Elements.Select(selector: LowerExpression).ToList() },
                 entity: se),
-            DictLiteralExpression when expr.ResolvedType is EntityTypeSymbol de => WrapInRoam(
-                inner: expr,
+            DictLiteralExpression dict when expr.ResolvedType is EntityTypeSymbol de => WrapInRoam(
+                inner: dict with
+                {
+                    Pairs = dict.Pairs
+                                .Select(selector: p => (LowerExpression(expr: p.Key), LowerExpression(expr: p.Value)))
+                                .ToList()
+                },
                 entity: de),
             // Reference to a local we've retyped to Roamed[E] -> flip its resolved type so aliasing
             // and access see the wrapper.
