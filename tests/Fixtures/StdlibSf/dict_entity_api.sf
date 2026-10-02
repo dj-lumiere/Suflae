@@ -1,7 +1,7 @@
 module Tests/StdlibSf/DictEntityApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # SF entities held as Dict values lower to `Roamed[Node]`. The cycle collector's auto roam-trace must
 # walk the Dict's live `vals` buffer (the sparse-buffer trace, skipping tombstoned slots) so container-
 # held entities stay visible to collection — the open-addressing counterpart of the dense List buffer.

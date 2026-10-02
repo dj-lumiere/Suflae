@@ -1,6 +1,6 @@
 module Tests/ShapeUse/IndirectReshapeInEach
-import IO/Console
 
+import IO/Console
 # `grow` adds to the list the loop is visiting. Suflae cannot trace that at build time (its list is a shared
 # handle), so the loop marks the list's shape as in use and `add_last` crashes with ReshapingWhileInUseError.
 

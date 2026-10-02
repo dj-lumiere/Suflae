@@ -1,8 +1,8 @@
 module Tests/StdlibSf/BitListApi
-import Numerics
-import IO/Console
-import Collections
 
+import Collections
+import IO/Console
+import Numerics
 routine start()
     var bl = BitList()
     show(f"new size: {bl.count()}")

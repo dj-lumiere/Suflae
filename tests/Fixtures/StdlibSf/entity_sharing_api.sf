@@ -1,6 +1,6 @@
 module Tests/StdlibSf/EntitySharingApi
-import IO/Console
 
+import IO/Console
 # Entities are shared handles: a nullable `E?` parameter, a walk that reassigns a handle local under the
 # access lock (the lock is released on the object it was taken on), a list literal of entities (its element
 # is the shared handle, not the bare entity), and copying an element out by index.
@@ -8,13 +8,13 @@ entity Account
     owner: Text
     balance: S64
 
-routine Account.deposit(amount: S64)
-    me.balance = me.balance + amount
-    return
-
 entity Node
     value: S64
     next: Node?
+
+routine Account.deposit(amount: S64)
+    me.balance = me.balance + amount
+    return
 
 routine sum_list(head: Node?) -> S64
     var total = 0_s64

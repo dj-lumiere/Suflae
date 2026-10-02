@@ -1,7 +1,7 @@
 module Tests/StdlibSf/FTextApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # F-string formatting — covers the {value} / {value:?} forms and conversion paths.
 routine start()
     var n: S64 = 42

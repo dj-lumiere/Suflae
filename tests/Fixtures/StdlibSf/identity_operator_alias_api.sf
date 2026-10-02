@@ -1,7 +1,7 @@
 module Tests/StdlibSf/IdentityOperatorAliasApi
+
 import IO/Console
 import Numerics
-
 # Reference identity (=== / !==) in Suflae. Unlike RazorForge (single-owner entities), SF entities
 # alias freely — `var b = a` shares the SAME entity — so identity has a distinct, first-class use
 # here (like Python's `is`). This fixture is intentionally SF-only (no RF twin): the aliasing

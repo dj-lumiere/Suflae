@@ -1,7 +1,7 @@
 module Tests/StdlibSf/WhenExpressionApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # Verifies subjectless (condition-based) `when` in expression and statement positions.
 # Regression lock for the `var x = when` misparse: a bare-identifier condition
 # (`flag => 1_s64`) was previously consumed as a lambda expression, cascading into

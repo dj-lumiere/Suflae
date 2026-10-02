@@ -1,7 +1,7 @@
 module Tests/StdlibSf/NamedArgumentsApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # Multi-parameter calls REQUIRE named arguments (S510). Single-param + universal
 # method receivers are exempt. Default values + reordering also exercised here.
 

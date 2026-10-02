@@ -1,6 +1,6 @@
 module Tests/ShapeUse/IndirectReshapeFieldEach
-import IO/Console
 
+import IO/Console
 # The loop goes through a field (`me.items`), not a plain name, and `grow` adds to that same list through
 # another handle. The loop still marks the list's shape as in use, so `add_last` crashes with
 # ReshapingWhileInUseError instead of the loop silently skipping the new element.

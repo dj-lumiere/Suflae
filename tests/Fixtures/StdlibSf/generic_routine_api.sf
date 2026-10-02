@@ -1,7 +1,7 @@
 module Tests/StdlibSf/GenericRoutineApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # Free generic functions with type constraints.
 
 routine identity[T](x: T) -> T

@@ -1,8 +1,7 @@
 module Tests/StdlibSf/CoroSuspendedApi
-import Numerics
 
 import IO/Console
-
+import Numerics
 # SF twin of Stdlib/coro_suspended_api.rf. `suspended` is a SHARED keyword (SUFLAE-FOR-AI §2.8) — SF's
 # single-thread/cooperative model is exactly where stackful coroutines fit. Calling a `suspended routine`
 # yields a Coroutine[T] handle; `retrieve()` drives it to completion (pumping through every yield) and

@@ -1,6 +1,6 @@
 module Tests/StdlibSf/WhenComparisonIntegerApi
-import IO/Console
 
+import IO/Console
 # A comparison arm (`>= 100 =>`) over an Integer subject: its literal is an Integer like the subject.
 routine rank(score: Integer) -> Text
     when score

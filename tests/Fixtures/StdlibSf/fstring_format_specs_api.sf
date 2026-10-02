@@ -1,7 +1,7 @@
 module Tests/StdlibSf/FStringFormatSpecsApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # Exercises the four f-string format specs:
 #   {x}    -> represent()
 #   {x:?}  -> diagnose()

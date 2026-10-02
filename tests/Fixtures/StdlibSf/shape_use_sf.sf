@@ -1,5 +1,8 @@
 module Tests/StdlibSf/ShapeUseSf
+
 import IO/Console
+entity Bag
+    items: List[Integer]
 
 # Suflae containers are shared handles, so a change hidden behind a call cannot be traced at build time: an
 # `each` loop marks its list's shape as in use and a change during the loop crashes at runtime
@@ -11,9 +14,6 @@ routine first_big(xs: List[Integer]) -> Integer
         if x > 5
             return x
     return 0
-
-entity Bag
-    items: List[Integer]
 
 routine Bag.sum_then_add() -> Integer
     var sum = 0

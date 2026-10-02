@@ -1,7 +1,7 @@
 module Tests/StdlibSf/EntityReprApi
-import Numerics
-import IO/Console
 
+import IO/Console
+import Numerics
 # SF twin of Stdlib/entity_repr_api.rf. The `Point` local lowers to `Roamed[Point]`, but `f"{p}"`
 # must ALWAYS read the inner entity — the shared snapshot locks SF-Roamed render == RF-bare render.
 entity Point
