@@ -51,6 +51,17 @@ public sealed class SuflaeRules : LanguageRules
         return new SuflaeLexer(source: source, fileName: fileName).Tokenize();
     }
 
+    /// <inheritdoc/>
+    public override LanguageServerProfile LanguageServer { get; } = new SuflaeLanguageServer();
+
+    /// <inheritdoc/>
+    public override (List<Token> Tokens, List<CommentTrivia> Comments) TokenizeWithComments(string source,
+        string fileName)
+    {
+        var lexer = new SuflaeLexer(source: source, fileName: fileName);
+        return (lexer.Tokenize(), lexer.Comments);
+    }
+
     public override bool AllowsUnsafeCode => false;
     public override bool HasPassStatement => false;
     public override bool HasThreadedRoutines => false;

@@ -25,6 +25,9 @@ public partial class SuflaeLexer
     private int _tokenStartColumn;
     private int _tokenStartLine;
     private readonly List<Token> _tokens = [];
+
+    /// <summary>Every comment, in source order (the formatter reads them; the token stream drops `#` ones).</summary>
+    public List<CommentTrivia> Comments { get; } = [];
     private readonly Stack<int> _indentStack = new(collection: [0]);
     private bool _hasTokenOnLine;
     private int _bracketDepth;
@@ -39,6 +42,10 @@ public partial class SuflaeLexer
     /// Guarded keywords are always present; RF-only keywords are added conditionally.
     /// </summary>
     private readonly Dictionary<string, TokenType> _keywords;
+
+    /// <summary>Every word this lexer reserves as a keyword (what the Language Server offers as completions).</summary>
+    public static IReadOnlyList<string> KeywordSpellings { get; } =
+        new SuflaeLexer(source: "", fileName: "<keywords>")._keywords.Keys.Order(comparer: StringComparer.Ordinal).ToList();
 
     #endregion
 

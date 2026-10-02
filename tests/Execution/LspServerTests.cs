@@ -58,6 +58,66 @@ public sealed class LspServerTests
         return LspTestHarness.PositionOf(text: Source, needle: needle, occurrence: occurrence);
     }
 
+    /// <summary>The labels of a <c>textDocument/completion</c> reply.</summary>
+    private static List<string> CompletionLabels(JsonElement? reply)
+    {
+        return reply!.Value.GetProperty(propertyName: "result")
+                     .GetProperty(propertyName: "items")
+                     .EnumerateArray()
+                     .Select(selector: item => item.GetProperty(propertyName: "label").GetString() ?? "")
+                     .ToList();
+    }
+
+    /// <summary>The <c>serverInfo.name</c> of an <c>initialize</c> reply.</summary>
+    private static string? ServerName(JsonElement? reply)
+    {
+        return reply!.Value.GetProperty(propertyName: "result")
+                     .GetProperty(propertyName: "serverInfo")
+                     .GetProperty(propertyName: "name")
+                     .GetString();
+    }
+
+    [Fact]
+    public void Initialize_NamesTheSuflaeServer()
+    {
+        IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(Initialize(id: 1), Shutdown, Exit);
+
+        Assert.Equal(expected: "suflae-lsp", actual: ServerName(reply: LspTestHarness.ReplyWithId(replies: replies, id: 1)));
+    }
+
+    [Fact]
+    public void RazorForgeDocument_IsLeftToTheRazorForgeServer()
+    {
+        IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
+            LspTestHarness.DidOpen(uri: Uri, text: Source),
+            Exit);
+
+        // A .rf file is the RazorForge server's: this one publishes nothing for it.
+        Assert.Null(@object: LspTestHarness.Diagnostics(replies: replies, uri: Uri));
+    }
+
+    [Fact]
+    public void Completion_OffersOnlySuflaeKeywords()
+    {
+        const string sfUri = "file:///test/Keywords.sf";
+        const string sf =
+            "routine start()\n" +
+            "    var total = 1\n" +
+            "    return\n";
+        (int line, int character) = LspTestHarness.PositionOf(text: sf, needle: "total");
+        IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
+            LspTestHarness.DidOpen(uri: sfUri, text: sf, languageId: "suflae"),
+            LspTestHarness.Positional(id: 40, method: "textDocument/completion", uri: sfUri, line: line,
+                character: character + 1),
+            Exit);
+
+        List<string> labels = CompletionLabels(reply: LspTestHarness.ReplyWithId(replies: replies, id: 40));
+        Assert.Contains(expected: "routine", collection: labels);
+        // RazorForge-only keywords are not Suflae's.
+        Assert.DoesNotContain(expected: "danger", collection: labels);
+        Assert.DoesNotContain(expected: "steal", collection: labels);
+    }
+
     [Fact]
     public void SuflaeDocument_Analyzes()
     {
