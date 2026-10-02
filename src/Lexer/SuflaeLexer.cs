@@ -235,6 +235,11 @@ public partial class SuflaeLexer
             // Concurrency (SF has cooperative coroutines; `threaded` stays RF-only)
             [key: "suspended"] = TokenType.Suspended,
 
+            // Unsafe code: the same `danger` blocks and `dangerous` routines as RazorForge (Hijacked,
+            // peek/poke, addresses), so a Suflae library can manage its own memory.
+            [key: "danger"] = TokenType.Danger,
+            [key: "dangerous"] = TokenType.Dangerous,
+
             // `needs P everywhere` — the structural-conferral gate of the protocol model (a `needs`-clause
             // modifier, NOT a reflection construct). It lives with `needs`/`obeys`/`protocol`, which SF
             // shares, so it is a SHARED keyword. The derive TEMPLATES it gates (e.g. `routine T.eq` with an

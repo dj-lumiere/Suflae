@@ -62,7 +62,7 @@ public sealed class SuflaeRules : LanguageRules
         return (lexer.Tokenize(), lexer.Comments);
     }
 
-    public override bool AllowsUnsafeCode => false;
+    public override bool AllowsUnsafeCode => true;
     public override bool HasPassStatement => false;
     public override bool HasThreadedRoutines => false;
     public override bool HasModuleGlobals => true;

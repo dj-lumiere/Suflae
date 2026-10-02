@@ -114,7 +114,6 @@ public sealed class LspServerTests
         List<string> labels = CompletionLabels(reply: LspTestHarness.ReplyWithId(replies: replies, id: 40));
         Assert.Contains(expected: "routine", collection: labels);
         // RazorForge-only keywords are not Suflae's.
-        Assert.DoesNotContain(expected: "danger", collection: labels);
         Assert.DoesNotContain(expected: "steal", collection: labels);
     }
 

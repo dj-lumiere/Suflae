@@ -35,7 +35,7 @@ When unsure, consult ground truth in the repo:
     `Set`, `CircularList`, `PriorityQueue`, `SortedDict`, `SortedList`, `SortedSet`,
     `SplitList`. Every method is auto-forwarded to `inner`; you use them exactly
     like the RF twins, but an SF `entity` slot roams them (§4).
-  - The "approachable surface" (hide `dangerous`/`steal`/fixed-width) is enforced
+  - The "approachable surface" (hide `steal`/fixed-width) is enforced
     by **realm-scoped access rules on the shared types** (§5, §7), not by wrapping.
 - The builder selects Suflae by the `.sf` extension. `import IO/Console` +
   `show(...)` work as in RF.
@@ -69,7 +69,7 @@ When unsure, consult ground truth in the repo:
    entity just works (both refer to the same shared thing). Ownership transfer,
    `steal`, and RF-S413 do not exist at the SF surface.
 7. **Suflae hides low-level concepts** RazorForge surfaces (see §5). You will not
-   write `danger`, `Hijacked`, access tokens (`Viewing`/`Modifying`/`Consulting`/
+   write access tokens (`Viewing`/`Modifying`/`Consulting`/
    `Amending`), `steal`, `@reshaping`, or anything about iterator invalidation.
 8. **`global` = module-level mutable state — Suflae-only.** Suflae HAS module globals;
    RazorForge does not (its deterministic teardown has no owning scope for one). Syntax:
@@ -109,7 +109,7 @@ When unsure, consult ground truth in the repo:
    followed by the build-time ordering.)
 9. **Keyword set = RazorForge's, minus the RF-only reserved words.** The shared
    keyword inventory is RAZORFORGE-FOR-AI §16; Suflae does NOT reserve the
-   RF-only ones: `steal` `danger` `dangerous` `threaded`, and `expand` — the single
+   RF-only ones: `steal` `threaded`, and `expand` — the single
    buildtime-reflection keyword. The reflection *sources* (`openmemvarof`
    `allmemvarof` `branchof` `caseof`) and the `*of` accessors (`nameof`/`typeof`/
    `valueof`/…) are NOT reserved keywords — they are buildtime builtin intrinsics
@@ -218,14 +218,15 @@ Concretely, none of these appear at the SF surface:
 - **`steal` / ownership transfer** — entities are shared (`Roamed`); no move.
 - **Access tokens** (`Viewing`/`Modifying`/`Consulting`/`Amending`) and the
   `using ... as` lock ceremony — SF reads/writes entities directly.
-- **`danger` blocks / `dangerous` routines / `Hijacked`** — SF users cannot reach
-  unsafe operations at all: a `danger` block is rejected, and CALLING any
-  `dangerous` routine (member OR free, e.g. `hollow[T]()`) from `.sf` user code is
-  rejected (**SF-S800**, "unsafe surface, not available in Suflae"). Entity
-  wrappers additionally omit their `dangerous` members from the forwarded surface.
-  The RF-realm Core still uses `Hijacked`/`danger` internally — fine, because RF
-  Core is analyzed in RF mode.
 - **`@reshaping` / iterator invalidation / `migrate`** — never surfaced. See below.
+
+**Unsafe code is the SAME as RazorForge's.** Suflae has `danger` blocks and
+`dangerous` routines with RF's rules: `Hijacked[T]`, `peek`/`poke`, addresses,
+strides, and C `external` declarations are available, and a `dangerous` routine
+can only be called inside a `danger` block. This is what lets a Suflae library
+manage its own memory. Entity wrappers still omit their `dangerous` members from
+the forwarded surface (a forwarder is a plain routine); reach the inner value
+through RF surface inside `danger` instead.
 
 **Iterate-and-mutate a collection is BLOCKED, not silently reinterpreted.**
 Mutating a collection while it is being `each`-looped is banned. At the SF
@@ -263,8 +264,8 @@ Fatal-tier details:
   exhausting them is just the one memory wall (OOM), reported as such. There is no
   depth/watermark concept surfaced.
 - **AccessViolation / segfault** — cannot occur in pure SF (memory-safe by
-  construction). If one appears, it is a builder/runtime bug (or unsafe code SF
-  called) → report as an internal error, not a language failure mode.
+  construction). If one appears, it is a builder/runtime bug (or a `danger`
+  block's bug) → report as an internal error, not a language failure mode.
 
 Every crash — an unrecovered `throw`/`absent` or a fatal wall — exits the process
 with **status 82** (`0x52`, `'R'` for Runtime error), the same as RF. If a run ended
@@ -377,8 +378,8 @@ Suflae is at v0.1, and the core is now standing end-to-end:
 - **Realm-scoped Core stdlib:** value records shared from RF; entity collections
   wrapped under `Standard/Suflae/Collections/*.sf` (List/Dict/Set/CircularList/
   PriorityQueue/Sorted{Dict,List,Set}/SplitList), auto-forwarded + re-wrapped.
-- **Approachable-surface gates:** `danger`/`extern` rejected; `dangerous` calls
-  rejected (SF-S800); `@readonly`/`@reshaping` absent.
+- **Approachable-surface gates:** `@readonly`/`@reshaping` absent. `danger`/`dangerous`/`extern`
+  follow RF's rules (a `dangerous` call needs a `danger` block).
 - **Verified:** the `StdlibSf/*.sf` fixtures run in the main harness (StdlibApiTests)
   with an RF-twin output-equivalence lock.
 
