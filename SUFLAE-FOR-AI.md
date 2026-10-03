@@ -764,6 +764,10 @@ Suflae is memory-safe without `danger`. When a library must manage memory itself
 - A foreign C function is declared as a routine qualified by its realm, with no body:
   `routine C::labs(n: S64) -> S64`. Calls use the same qualifier and pass arguments positionally:
   `C::labs(x)`. LLVM intrinsics use `LLVM::`. There is no `external` keyword.
+- Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait) `@blocking`:
+  called from a `suspended` coroutine it runs on one of the runtime's I/O threads while the coroutine parks,
+  so other coroutines keep running; called anywhere else it is an ordinary call. Suflae has no OS threads of
+  its own, so this is how a blocking library call stays out of the scheduler's way.
 - Mark only what can actually corrupt memory. Arithmetic, collections and failable calls are never wrapped
   in `danger`.
 
@@ -904,8 +908,7 @@ surface. The `StdlibSf` fixtures run in CI with their expected output.
 Not built yet:
 
 - a REPL and hot reload;
-- stronger runtime reflection in `ObjectHacker` beyond reading, writing and watching member variables;
-- offloading a blocking `C::` call so that other coroutines keep running while it waits.
+- stronger runtime reflection in `ObjectHacker` beyond reading, writing and watching member variables.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every
 argument, end every routine with `return`, use bare `Integer`/`Decimal` numbers, and prefer `when` over
