@@ -1,0 +1,41 @@
+module Tests/StdlibSf/ObjectHackerApi
+
+import IO/Console
+import ObjectHacker
+# ObjectHacker reads and changes live objects from the outside: what an object is made of, one member
+# variable (secret ones included), and a change every alias sees.
+entity Hero
+    name: Text
+    hp: S64
+    secret seed: S64
+
+record Point
+    x: S64
+    y: S64
+
+routine start()
+    var hero = Hero(name: "Ada", hp: 10, seed: 7)
+    var alias = hero
+
+    show(f"type: {type_name(of: hero)}")
+    each info in memvars(of: hero)
+        show(f"memvar {info.order}: {info.name}: {info.type_name}, secret: {info.is_secret}")
+
+    show(f"peek: {peek(target: hero)}")
+    show(f"peek hp: {peek(target: hero, memvar: "hp")}")
+    show(f"peek seed: {peek(target: hero, memvar: "seed")}")
+    when try peek(target: hero, memvar: "mana")
+        is None => show("peek mana: absent")
+        else v => show(f"peek mana: {v}")
+
+    poke(target: hero, memvar: "hp", value: SerialValue(from: 25_s64))
+    show(f"after poke, alias.hp: {alias.hp}")
+
+    var p = Point(x: 3, y: 4)
+    show(f"point: {type_name(of: p)} {peek(target: p, memvar: "y")}")
+
+    var seen = watch(target: hero)
+    show(f"watched alive: {seen.is_alive()}")
+
+    show("DONE")
+    return

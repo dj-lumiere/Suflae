@@ -1,0 +1,101 @@
+module ObjectHacker
+
+import BuilderExpansion
+import BuilderQuery
+import Collections
+
+### ObjectHacker works on live objects from the outside: it reads a member variable, changes it, and tells
+### what an object is made of. Every verb takes the object as an argument (`peek(target: hero, memvar: "hp")`),
+### never as a receiver: the hacker acts on the object. Values travel as `SerialValue`, the form `serialize`
+### gives every value, so one routine handles every type.
+###
+### Suflae's module. It is written in RazorForge for its buildtime member walk (`expand`), and lives with
+### Suflae's standard library, which only Suflae builds read. Every routine is monomorphized per target type,
+### so a type that nothing inspects costs nothing, and `secret` member variables are reachable too.
+
+### A member variable as `memvars` reports it.
+record MemberVariableInfo
+    ### The member variable's name.
+    name: Text
+    ### The name of the member variable's type.
+    type_name: Text
+    ### Whether the member variable is `secret`.
+    is_secret: Bool
+    ### The member variable's position in its type's declaration, from 0.
+    order: U64
+
+### Raised when `poke` names a member variable its target does not have.
+crashable NoSuchMemberVariableError
+    ### The target's type.
+    type_name: Text
+    ### The member variable that was asked for.
+    memvar: Text
+
+### Returns the message for a member variable the target does not have.
+### :returns: The message.
+@readonly
+routine NoSuchMemberVariableError.crash_message() -> Text
+    return f"'{me.type_name}' has no member variable '{me.memvar}'"
+
+### The name of target's type.
+### :param of: Any value or entity.
+### :returns: The unqualified type name.
+routine type_name(of: T) -> Text
+needs AnyType T
+    return of.type_name()
+
+### What target is made of: every member variable, `secret` ones included, in declaration order.
+### :param of: Any value or entity.
+### :returns: One entry per member variable.
+routine memvars(of: T) -> List[MemberVariableInfo]
+needs AnyType T
+    var found = List[MemberVariableInfo]()
+    expand m in allmemvarof(T)
+        found.add_last(MemberVariableInfo(
+            name: nameof(m),
+            type_name: $typeof(m).type_name(),
+            is_secret: visibilityof(m) == Visibility.SECRET,
+            order: orderof(m),
+        ))
+    return found
+
+### The whole of target, as `serialize` gives it.
+### :param target: Any value or entity.
+### :returns: The serialized target.
+routine peek(target: T) -> SerialValue
+needs AnyType T
+    return target.serialize()
+
+### One member variable of target, `secret` ones included.
+### :param target: Any value or entity.
+### :param memvar: The member variable's name.
+### :returns: The member variable's serialized value. Absent when target has no member variable of that name.
+routine peek!(target: T, memvar: Text) -> SerialValue
+needs AnyType T
+    expand m in allmemvarof(T)
+        if memvar == nameof(m)
+            return target.$nameof(m).serialize()
+    absent
+
+### Changes one member variable of an entity, `secret` ones included: every alias sees the new value. Only an
+### entity can be poked: a record is a value, and changing a copy would reach nobody.
+### :param target: The entity.
+### :param memvar: The member variable's name.
+### :param value: The new value, in the form `serialize` gives it.
+### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
+### :throws: {SerialShapeError} when value does not fit the member variable's type.
+routine poke!(target: T, memvar: Text, value: SerialValue)
+needs EntityType T
+    expand m in allmemvarof(T)
+        if memvar == nameof(m)
+            target.$nameof(m) = $typeof(m)(from: value)
+            return
+    throw NoSuchMemberVariableError(type_name: target.type_name(), memvar: memvar)
+
+### A non-pinning observation of an entity: it answers `is_alive()` after the entity is gone, and does not
+### keep it alive.
+### :param target: The entity.
+### :returns: The observation.
+routine watch(target: Roamed[T]) -> Watching[T]
+needs EntityType T
+    return target.watch()

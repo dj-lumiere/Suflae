@@ -1,0 +1,12 @@
+type: Hero
+memvar 0: name: Text, secret: false
+memvar 1: hp: S64, secret: false
+memvar 2: seed: S64, secret: true
+peek: SerialValue({"name": SerialValue(Ada), "hp": SerialValue(10)})
+peek hp: SerialValue(10)
+peek seed: SerialValue(7)
+peek mana: absent
+after poke, alias.hp: 25
+point: Point SerialValue(4)
+watched alive: true
+DONE
