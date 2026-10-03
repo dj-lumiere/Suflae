@@ -112,7 +112,7 @@ internal static class WrapperForwarderSynthesis
 
         foreach ((Program prog, string filePath, string _) in allProgs)
         {
-            if (Languages.RealmOf(fileName: filePath) != "SF")
+            if (Languages.RealmOf(fileName: filePath) != SuflaeRules.Instance.ShortName)
             {
                 continue;
             }
@@ -148,7 +148,7 @@ internal static class WrapperForwarderSynthesis
             new Dictionary<string, List<RoutineDeclaration>>(comparer: StringComparer.Ordinal);
         foreach ((Program prog, string filePath, string module) in allProgs)
         {
-            if (Languages.RealmOf(fileName: filePath) != "RF")
+            if (Languages.RealmOf(fileName: filePath) != TypeModel.Realms.Shared)
             {
                 continue;
             }
@@ -185,7 +185,7 @@ internal static class WrapperForwarderSynthesis
     {
         var sfWrapperNames = new HashSet<string>(comparer: StringComparer.Ordinal);
         foreach ((Program prog, _, _) in allProgs.Where(predicate: p =>
-                     Languages.RealmOf(fileName: p.FilePath) == "SF"))
+                     Languages.RealmOf(fileName: p.FilePath) == SuflaeRules.Instance.ShortName))
         {
             foreach (EntityDeclaration e in prog.Declarations
                                                 .OfType<EntityDeclaration>()
@@ -193,7 +193,7 @@ internal static class WrapperForwarderSynthesis
                                                     .OfType<VariableDeclaration>()
                                                     .Any(predicate: v =>
                                                          v.Name == "inner" && v.Type is
-                                                             { Realm: "RF" })))
+                                                             { Realm: TypeModel.Realms.Shared })))
             {
                 sfWrapperNames.Add(item: BareTypeName(name: e.Name));
             }
@@ -216,7 +216,7 @@ internal static class WrapperForwarderSynthesis
                                                 .OfType<VariableDeclaration>()
                                                 .FirstOrDefault(predicate: v =>
                                                      v.Name == "inner" && v.Type is
-                                                         { Realm: "RF" });
+                                                         { Realm: TypeModel.Realms.Shared });
         if (innerField?.Type is not { } innerType)
         {
             return;

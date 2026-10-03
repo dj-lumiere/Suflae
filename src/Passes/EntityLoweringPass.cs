@@ -913,7 +913,7 @@ internal sealed class EntityLoweringPass
     // (Parser.Expressions parses `RF::Core.List` into `IdentifierExpression { Realm = "RF" }`).
     private static bool IsRfRealmRef(Expression callee)
     {
-        return callee is IdentifierExpression { Realm: "RF" };
+        return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared };
     }
 
     // Recognizes the `Roamed(from: X)` wrapper construction that <see cref="WrapInRoam"/> builds and
