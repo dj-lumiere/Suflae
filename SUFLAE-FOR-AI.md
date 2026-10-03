@@ -575,7 +575,8 @@ show(f"{n:=}")            # n=42
 show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
 ```
 
-- `show(value)` prints `value.represent()` and a newline; `show(value, end: "")` changes the ending.
+- `show(value)` prints `value.represent()` and a newline; `show(value: v, end: "")` changes the ending
+  (all arguments named once there are two).
   `alert(value)` writes the `diagnose()` form to stderr.
 - f-string specs are only `=`, `?` and `=?`. Everything else is a member routine called inside the braces:
   integers have `hex()`, `bin()`, `oct()`, `to_text(radix:)`; `Decimal` and floats have `fixed(places)`;
@@ -762,8 +763,8 @@ Suflae is memory-safe without `danger`. When a library must manage memory itself
 - `dangerous routine name(...)` marks a routine whose signature exposes that unsafety; it can only be
   called inside a `danger` block.
 - A foreign C function is declared as a routine qualified by its realm, with no body:
-  `routine C::labs(n: S64) -> S64`. Calls use the same qualifier and pass arguments positionally:
-  `C::labs(x)`. LLVM intrinsics use `LLVM::`. There is no `external` keyword.
+  `routine C::labs(n: S64) -> S64`. Calls use the same qualifier, with named arguments:
+  `C::labs(n: x)`. LLVM intrinsics use `LLVM::`. There is no `external` keyword.
 - Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait) `@blocking`:
   called from a `suspended` coroutine it runs on one of the runtime's I/O threads while the coroutine parks,
   so other coroutines keep running; called anywhere else it is an ordinary call. Suflae has no OS threads of
@@ -867,8 +868,8 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Recovery**: `try` `grab` `lookup`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
-- **Other**: `using` `as` `define` `given` `discard` `pass` (`pass` only as an empty type body, never as a
-  statement)
+- **Other**: `using` `as` `define` `given` `discard` `pass` (an empty body: a type's, or a block's that
+  does nothing)
 - **Logic**: `and` `or` `not` `but`
 - **Literals**: `true` `false` `None` `none`
 - **Concurrency**: `suspended`
