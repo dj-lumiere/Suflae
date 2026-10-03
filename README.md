@@ -89,38 +89,47 @@ build time when you do it directly, at run time when a called routine does it.
 
 ## Quick start
 
-### From a release package
+### 1. Install
 
-Prebuilt packages for win-x64, linux-x64, and osx-arm64 are on the
-[releases page](https://github.com/dj-lumiere/Suflae/releases). Each one bundles the LLVM toolchain
-it needs, so unpack it, put it on your `PATH`, and run:
+Download the package for your platform from the
+[releases page](https://github.com/dj-lumiere/Suflae/releases). Suflae and RazorForge ship in one
+package, so the file name starts with `razorforge-`:
 
-```bash
-suflae hello.sf
+| Platform              | File                                 |
+|-----------------------|--------------------------------------|
+| Windows x64           | `razorforge-v<version>-win-x64.zip`    |
+| Linux x64             | `razorforge-v<version>-linux-x64.tar.gz` |
+| macOS (Apple Silicon) | `razorforge-v<version>-osx-arm64.tar.gz` |
+
+The package is self-contained: the builder, the standard library, the runtime, and the LLVM
+toolchain are all inside it. Unpack it anywhere and run the installer from that folder:
+
+```bat
+:: Windows: adds the folder to your user PATH
+install.cmd
 ```
 
-### From source
-
-Suflae is built from four repositories checked out side by side: the builder core
-([Anvila](https://github.com/dj-lumiere/Anvila)), the shared library
-([Ingrid](https://github.com/dj-lumiere/Ingrid)), [RazorForge](https://github.com/dj-lumiere/RazorForge)
-(whose standard library Suflae uses), and this repository.
-
-You need the .NET 10 SDK, LLVM 22 (`clang` and `opt` on `PATH`), CMake 3.20+, and Ninja on Windows.
-
 ```bash
-mkdir LumiFoundry && cd LumiFoundry
-git clone https://github.com/dj-lumiere/Anvila.git
-git clone https://github.com/dj-lumiere/Ingrid.git
-git clone https://github.com/dj-lumiere/RazorForge.git
-git clone https://github.com/dj-lumiere/Suflae.git
-git clone https://github.com/dj-lumiere/Tessera.git   # the Tessera builder compiles part of the native runtime
-
-dotnet build Suflae/Suflae.csproj                # also builds the native runtime
-dotnet test Suflae/tests/Suflae.Tests.csproj     # optional
+# Linux / macOS: links the commands into ~/.local/bin
+./install.sh
 ```
 
-### Hello, world
+Open a new terminal and check that it works:
+
+```bash
+suflae version
+```
+
+The short alias `sf` works as well.
+
+> **Linux:** linking needs the C library's development files. Most machines have them; otherwise
+> install `libc6-dev` (Debian/Ubuntu) or `glibc-devel` (Fedora) once.
+>
+> **macOS:** linking uses Apple's Command Line Tools; run `xcode-select --install` once if you have
+> never built anything on this Mac. This alpha is not notarized, and `install.sh` clears the
+> Gatekeeper quarantine on the unpacked folder for you.
+
+### 2. Hello, world
 
 ```suflae
 # hello.sf
@@ -130,12 +139,11 @@ show("Hello from Suflae!")
 ```
 
 ```bash
-./Suflae/bin/Debug/net10.0/Suflae hello.sf
-# Windows: .\Suflae\bin\Debug\net10.0\Suflae.exe hello.sf
+suflae run hello.sf
 ```
 
-A bare `suflae <file>.sf` builds the file and runs it. `suflae build hello.sf` builds a native
-executable without running it.
+`run` builds the file and runs it. `suflae build hello.sf` stops after building
+and leaves `hello.exe` next to the source.
 
 ### Using an AI assistant?
 
@@ -207,6 +215,31 @@ Suflae/
 The builder itself is [Anvila](https://github.com/dj-lumiere/Anvila), the standard library lives in
 [RazorForge](https://github.com/dj-lumiere/RazorForge/tree/master/Standard), and the shared library
 under it is [Ingrid](https://github.com/dj-lumiere/Ingrid).
+
+## Building from source
+
+You only need this to work on the builder or the standard library. Suflae is built from five
+repositories checked out side by side: the builder core
+([Anvila](https://github.com/dj-lumiere/Anvila)), the shared library
+([Ingrid](https://github.com/dj-lumiere/Ingrid)), [RazorForge](https://github.com/dj-lumiere/RazorForge)
+(whose standard library Suflae uses), this repository, and
+[Tessera](https://github.com/dj-lumiere/Tessera), whose builder compiles part of the native runtime.
+
+You need the .NET 10 SDK, LLVM 22 (`clang` and `opt` on `PATH`), CMake 3.20+, and Ninja on Windows.
+
+```bash
+mkdir LumiFoundry && cd LumiFoundry
+git clone https://github.com/dj-lumiere/Anvila.git
+git clone https://github.com/dj-lumiere/Ingrid.git
+git clone https://github.com/dj-lumiere/RazorForge.git
+git clone https://github.com/dj-lumiere/Suflae.git
+git clone https://github.com/dj-lumiere/Tessera.git
+
+dotnet build Suflae/Suflae.csproj                # also builds the native runtime
+dotnet test Suflae/tests/Suflae.Tests.csproj     # optional
+```
+
+The built command is `Suflae/bin/Debug/net10.0/Suflae` (`Suflae.exe` on Windows).
 
 ## Contributing
 

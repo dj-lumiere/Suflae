@@ -53,9 +53,9 @@ When unsure, consult ground truth in the repo:
    implicit `routine start()`, in source order, with a trailing return. This is
    **script mode** — write a `.sf` like a Python script. (RazorForge has the same
    script mode.) Only the program's entry file may be a script.
-2. **A bare `.sf` file runs like `python hello.py`.** `suflae hello.sf` (or any
-   bare `.sf` invocation) builds AND executes the file. (A bare `.rf` under
-   `razorforge` dumps the parse instead.)
+2. **`suflae run hello.sf` builds and runs a file.** The commands are the same
+   in all three tools (`check`, `build`, `run`, `test`, `fmt`, `lint`, `lsp`,
+   `help`, `version`); a bare file is not a command.
 3. **`module` is optional** — the module path is inferred from the file's
    location (relative to `config.toml`). Declare `module` only to override.
 4. **The default number types are `Integer` and `Decimal`, not fixed-width.**
@@ -222,7 +222,8 @@ Concretely, none of these appear at the SF surface:
 
 **Unsafe code is the SAME as RazorForge's.** Suflae has `danger` blocks and
 `dangerous` routines with RF's rules: `Hijacked[T]`, `peek`/`poke`, addresses,
-strides, and C `external` declarations are available, and a `dangerous` routine
+strides, and foreign routines (`routine C::name(...)`, realm-qualified; there is no
+`external` keyword) are available, and a `dangerous` routine
 can only be called inside a `danger` block. This is what lets a Suflae library
 manage its own memory. Entity wrappers still omit their `dangerous` members from
 the forwarded surface (a forwarder is a plain routine); reach the inner value
@@ -300,8 +301,11 @@ Fatal messages name what the PROGRAM did, never the machine (no malloc/OS/signal
 ## 8. CLI
 
 ```
-suflae hello.sf        # build + run the file (like `python hello.py`)
+suflae run hello.sf    # build + run the file
 suflae build hello.sf  # build to a native executable, don't run
+suflae check hello.sf  # check without building
+suflae test <dir>      # run programs against <name>.expected / .exit / .error / .input
+suflae fmt / lint      # canonical layout: rewrite / report
 ```
 
 Configuration lives in `config.toml` (see `RAZORFORGE-FOR-AI.md` §11); there
@@ -378,7 +382,7 @@ Suflae is at v0.1, and the core is now standing end-to-end:
 - **Realm-scoped Core stdlib:** value records shared from RF; entity collections
   wrapped under `Standard/Suflae/Collections/*.sf` (List/Dict/Set/CircularList/
   PriorityQueue/Sorted{Dict,List,Set}/SplitList), auto-forwarded + re-wrapped.
-- **Approachable-surface gates:** `@readonly`/`@reshaping` absent. `danger`/`dangerous`/`extern`
+- **Approachable-surface gates:** `@readonly`/`@reshaping` absent. `danger`/`dangerous`/`C::` routines
   follow RF's rules (a `dangerous` call needs a `danger` block).
 - **Verified:** the `StdlibSf/*.sf` fixtures run in the main harness (StdlibApiTests)
   with an RF-twin output-equivalence lock.

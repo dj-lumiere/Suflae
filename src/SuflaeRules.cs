@@ -32,7 +32,6 @@ public sealed class SuflaeRules : LanguageRules
     public override string Version => RazorForgeRules.VersionOf(assembly: typeof(SuflaeRules).Assembly);
     public override string FileExtension => ".sf";
     public override string ShortName => "SF";
-    public override bool BareSourceRuns => true;
     public override bool HasOwnStandardLibrary => true;
 
     /// <summary>
