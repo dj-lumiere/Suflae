@@ -30,6 +30,9 @@ routine start()
 
     poke(target: hero, memvar: "hp", value: SerialValue(from: 25_s64))
     show(f"after poke, alias.hp: {alias.hp}")
+    when grab poke(target: hero, memvar: "mana", value: SerialValue(from: 1_s64))
+        is NoSuchMemberVariableError e => show(f"poke mana: {e.crash_message()}")
+        else => show("poke mana: done")
 
     var p = Point(x: 3, y: 4)
     show(f"point: {type_name(of: p)} {peek(target: p, memvar: "y")}")

@@ -7,6 +7,7 @@ peek hp: SerialValue(10)
 peek seed: SerialValue(7)
 peek mana: absent
 after poke, alias.hp: 25
+poke mana: 'Hero' has no member variable 'mana'
 point: Point SerialValue(4)
 watched alive: true
 DONE
