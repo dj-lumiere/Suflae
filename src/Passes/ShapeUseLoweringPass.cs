@@ -20,11 +20,13 @@ namespace Suflae.Passes;
 /// after it. A <c>return</c> value or an <c>if</c> condition holding such a token is first bound to a
 /// temporary, so the use closes right after its evaluation.</item>
 /// </list>
-/// Every <c>@reshaping</c> routine of such a container starts with <c>require_shape_free</c> (added by
-/// SemanticVerifier), which crashes with ReshapingWhileInUseError while a use is open. That catches the
-/// change even when it is hidden behind a call, where the build-time checks (RF-S625, RF-S639) cannot see
-/// it. Uses are counted, so nested loops and element calls on one container stack. A failure inside an open
-/// use ends the program, so that use never needs closing.
+/// The count lives on the entity's <c>Roamed</c> controller, which every name of the entity shares. Every call
+/// through a handle to a <c>@reshaping</c> routine (one that can add, remove or move elements) is preceded by
+/// <c>handle.require_shape_free()</c>, which crashes with ReshapingWhileInUseError while a use is open. A
+/// Suflae entity is reached only through handles, so this catches the change even when it is hidden behind
+/// other calls, where the build-time checks (RF-S625, RF-S639) cannot see it. Uses are counted, so nested
+/// loops and element calls on one entity stack. A failure inside an open use ends the program, so that use
+/// never needs closing.
 /// <para>Runs on user programs after OperatorLoweringPass. The begin/end calls are spliced into the
 /// enclosing block rather than wrapped in a new one, so a declaration stays visible to the statements after
 /// it.</para>
@@ -127,12 +129,13 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             default:
             {
                 List<Expression> containers = TokenContainers(root: stmt);
+                List<Statement> guards = ReshapeGuards(root: stmt);
                 if (containers.Count == 0)
                 {
-                    return [stmt];
+                    return [.. guards, stmt];
                 }
 
-                var result = new List<Statement>();
+                var result = new List<Statement>(collection: guards);
                 result.AddRange(collection: ShapeUseCalls(containers: containers, verb: RuntimeContract.ShapeUse.Begin));
                 result.Add(item: stmt);
                 result.AddRange(collection: ShapeUseCalls(containers: containers,
@@ -246,8 +249,9 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             {
                 if (e is CallExpression
                     {
-                        Callee: MemberExpression { MemberName: ModifyAt or ViewAt, Object: var container }
-                    } && IsNamedPath(expr: container) && HasShapeUse(container: container))
+                        Callee: MemberExpression { MemberName: ModifyAt or ViewAt, Object: var target }
+                    } && Unprojected(expr: target) is var container && IsNamedPath(expr: container) &&
+                    HasShapeUse(container: container))
                 {
                     containers.Add(item: container);
                 }
@@ -357,24 +361,44 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         };
     }
 
+    /// <summary>Whether <paramref name="container"/> is a handle whose controller counts shape uses (a Suflae
+    /// <c>Roamed</c>).</summary>
     private bool HasShapeUse(Expression container)
     {
-        return container.ResolvedType is { } type && ShapeOwner(type: type) is { } owner &&
-               ctx.Registry.LookupMemberRoutine(type: owner,
-                   memberRoutineName: RuntimeContract.ShapeUse.Begin) != null;
+        return container.ResolvedType is { } type && IsRoamed(type: type) &&
+               ctx.Registry.LookupMemberRoutine(type: type, memberRoutineName: RuntimeContract.ShapeUse.Begin) != null;
+    }
+
+    /// <summary>The handle behind <c>handle.control()</c>, the projection RoamedProjectionLoweringPass puts on a call
+    /// through a handle; any other expression as it is.</summary>
+    private static Expression Unprojected(Expression expr)
+    {
+        return expr is CallExpression
+        {
+            Callee: MemberExpression { MemberName: RuntimeContract.Control, Object: var handle }
+        } && handle.ResolvedType is { } type && IsRoamed(type: type)
+            ? handle
+            : expr;
     }
 
     /// <summary>
-    /// The type that counts the shape uses: the container itself, or for a Suflae <c>Roamed[C]</c> handle
-    /// the inner container <c>C</c>, reached through the handle's <c>control()</c> projection.
+    /// <c>handle.require_shape_free()</c> for every call in <paramref name="root"/> made through a named handle
+    /// to a <c>@reshaping</c> routine, so the change crashes while a loop or an element call uses the shape.
     /// </summary>
-    private static TypeSymbol? ShapeOwner(TypeSymbol type)
+    private List<Statement> ReshapeGuards(object root)
     {
-        return IsRoamed(type: type)
-            ? type.TypeArguments is [{ } inner]
-                ? inner
-                : null
-            : type;
+        var handles = new List<Expression>();
+        AstWalker.WalkExpressions(root: root,
+            visit: e =>
+            {
+                if (e is CallExpression { ResolvedRoutine.IsReshaping: true, Callee: MemberExpression { Object: var target } } &&
+                    Unprojected(expr: target) is var handle && !ReferenceEquals(objA: handle, objB: target) &&
+                    IsNamedPath(expr: handle) && HasShapeUse(container: handle))
+                {
+                    handles.Add(item: handle);
+                }
+            });
+        return ShapeUseCalls(containers: handles, verb: RuntimeContract.ShapeUse.RequireFree);
     }
 
     private static bool IsRoamed(TypeSymbol type)
@@ -398,15 +422,11 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         foreach (Expression container in containers)
         {
             TypeSymbol type = container.ResolvedType!;
-            TypeSymbol owner = ShapeOwner(type: type)!;
-            Expression receiver = IsRoamed(type: type)
-                ? ProjectRoamed(handle: container, handleType: type, inner: owner)
-                : container;
             RoutineInfo routine =
-                ctx.Registry.LookupMemberRoutine(type: owner, memberRoutineName: verb)!;
-            var callee = new MemberExpression(Object: receiver,
+                ctx.Registry.LookupMemberRoutine(type: type, memberRoutineName: verb)!;
+            var callee = new MemberExpression(Object: CopyReadPath(expr: container),
                 MemberName: verb,
-                Location: container.Location) { ResolvedType = owner };
+                Location: container.Location) { ResolvedType = type };
             var call = new CallExpression(Callee: callee, Arguments: [], Location: container.Location)
             {
                 ResolvedRoutine = routine,
@@ -417,30 +437,6 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         }
 
         return calls;
-    }
-
-    /// <summary>
-    /// <c>handle.control()</c>: the inner container of a Suflae <c>Roamed</c> handle, the same projection
-    /// RoamedProjectionLoweringPass puts on a call through the handle (this pass runs after it). The
-    /// access lock around the statement comes from RoamedLockBracketLoweringPass, which recognizes it.
-    /// </summary>
-    private Expression ProjectRoamed(Expression handle, TypeSymbol handleType, TypeSymbol inner)
-    {
-        RoutineInfo? control = ctx.Registry.LookupMemberRoutine(type: handleType,
-            memberRoutineName: RuntimeContract.Control);
-        if (control is null)
-        {
-            return handle;
-        }
-
-        var callee = new MemberExpression(Object: handle,
-            MemberName: RuntimeContract.Control,
-            Location: handle.Location) { ResolvedType = inner };
-        return new CallExpression(Callee: callee, Arguments: [], Location: handle.Location)
-        {
-            ResolvedRoutine = control,
-            ResolvedType = inner
-        };
     }
 
     private (DeclarationStatement Declaration, IdentifierExpression Reference) MakeTemporary(
