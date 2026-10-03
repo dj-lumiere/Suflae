@@ -13,8 +13,8 @@ import javax.swing.Icon
 /**
  * Suflae's own colors. Each starts as the C# color of its counterpart (record as struct, entity as class,
  * routine as method, module as namespace, global and preset as constant), so Suflae reads like C# in any scheme until
- * Settings | Editor | Color Scheme | Suflae says otherwise. A protocol is the exception: it
- * starts light blue and italic (colorSchemes/).
+ * Settings | Editor | Color Scheme | Suflae says otherwise. A protocol and an annotation are the
+ * exceptions: a protocol starts light blue and italic, an annotation yellow (colorSchemes/).
  */
 object SuflaeColors {
     val RECORD = key("SUFLAE_RECORD", TextAttributesKey.find("ReSharper.STRUCT_IDENTIFIER"))
@@ -25,6 +25,7 @@ object SuflaeColors {
     val MODULE = key("SUFLAE_MODULE", TextAttributesKey.find("ReSharper.NAMESPACE_IDENTIFIER"))
     val PRESET = key("SUFLAE_PRESET", DefaultLanguageHighlighterColors.CONSTANT)
     val OPERATOR = key("SUFLAE_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
+    val ANNOTATION = key("SUFLAE_ANNOTATION", DefaultLanguageHighlighterColors.METADATA)
 
     private fun key(name: String, csharp: TextAttributesKey) = TextAttributesKey.createTextAttributesKey(name, csharp)
 }
@@ -40,6 +41,7 @@ internal object SuflaeSemanticTokens : LspSemanticTokensSupport() {
         "namespace" to SuflaeColors.MODULE,
         "constant" to SuflaeColors.PRESET,
         "operator" to SuflaeColors.OPERATOR,
+        "decorator" to SuflaeColors.ANNOTATION,
     )
 
     override val tokenTypes: List<String> = (super.tokenTypes + keys.keys).distinct()
@@ -59,6 +61,7 @@ class SuflaeColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Module", SuflaeColors.MODULE),
         AttributesDescriptor("Global and preset", SuflaeColors.PRESET),
         AttributesDescriptor("Operator", SuflaeColors.OPERATOR),
+        AttributesDescriptor("Annotation", SuflaeColors.ANNOTATION),
     )
 
     private val tags = mapOf(
@@ -70,6 +73,7 @@ class SuflaeColorSettingsPage : ColorSettingsPage {
         "module" to SuflaeColors.MODULE,
         "preset" to SuflaeColors.PRESET,
         "op" to SuflaeColors.OPERATOR,
+        "annotation" to SuflaeColors.ANNOTATION,
     )
 
     override fun getDisplayName(): String = "Suflae"
@@ -105,6 +109,7 @@ class SuflaeColorSettingsPage : ColorSettingsPage {
             me.balance <op>+=</op> amount
             return
 
+        <annotation>@positional</annotation>
         routine <routine>largest</routine>[<generic>T</generic>](items: <entity>List</entity>[<generic>T</generic>]) -> <generic>T</generic>
             return items.<routine>first</routine>()
 
