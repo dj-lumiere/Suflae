@@ -38,6 +38,7 @@ private val LOG = logger<SuflaeLanguageServer>()
  */
 class SuflaeLanguageServer : LspIntegrationProvider {
     override fun fileOpened(project: Project, file: VirtualFile, clientStarter: LspIntegrationProvider.LspClientStarter) {
+        SuflaeLanguage.ensureRegistered()
         if (file.isSuflae()) {
             clientStarter.ensureClientStarted(SuflaeClientDescriptor(project))
         }
@@ -57,6 +58,7 @@ class SuflaeLanguageServer : LspIntegrationProvider {
  */
 internal class SuflaeFileOpenListener(private val project: Project) : FileEditorManagerListener {
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
+        SuflaeLanguage.ensureRegistered()
         if (file.isSuflae()) {
             LspClientManager.getInstance(project)
                 .ensureClientStarted(SuflaeLanguageServer::class.java, SuflaeClientDescriptor(project))
@@ -90,8 +92,10 @@ private class SuflaeClientDescriptor(project: Project) :
         } else {
             GeneralCommandLine(staged.toString(), "lsp")
         }
-        // The server finds its standard library next to itself, under Standard/.
+        // The server finds its standard library next to itself, under Standard/. It names a stdlib location by the
+        // source the build copied it from, which it finds from the build folder this copy was made of.
         return command.withWorkDirectory(staged.parent.toFile()).withCharset(StandardCharsets.UTF_8)
+            .withEnvironment("ANVILA_BUILD_DIR", server.parent.toString())
     }
 }
 

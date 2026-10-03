@@ -17,6 +17,7 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
     public override string ServerName => "suflae-lsp";
 
     /// <inheritdoc/>
+    /// <remarks>The language id the Rider plugin registers for highlighting code in hover.</remarks>
     public override string CodeBlockLanguage => "suflae";
 
     /// <inheritdoc/>

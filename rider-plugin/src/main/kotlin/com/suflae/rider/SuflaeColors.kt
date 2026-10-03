@@ -25,6 +25,8 @@ object SuflaeColors {
     val MODULE = key("SUFLAE_MODULE", TextAttributesKey.find("ReSharper.NAMESPACE_IDENTIFIER"))
     val PRESET = key("SUFLAE_PRESET", DefaultLanguageHighlighterColors.CONSTANT)
     val OPERATOR = key("SUFLAE_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
+    val DOC_TAG = key("SUFLAE_DOC_TAG", DefaultLanguageHighlighterColors.DOC_COMMENT_TAG)
+    val DOC_VALUE = key("SUFLAE_DOC_VALUE", DefaultLanguageHighlighterColors.DOC_COMMENT_TAG_VALUE)
     val ANNOTATION = key("SUFLAE_ANNOTATION", DefaultLanguageHighlighterColors.METADATA)
 
     private fun key(name: String, csharp: TextAttributesKey) = TextAttributesKey.createTextAttributesKey(name, csharp)
@@ -41,6 +43,8 @@ internal object SuflaeSemanticTokens : LspSemanticTokensSupport() {
         "namespace" to SuflaeColors.MODULE,
         "constant" to SuflaeColors.PRESET,
         "operator" to SuflaeColors.OPERATOR,
+        "docTag" to SuflaeColors.DOC_TAG,
+        "docValue" to SuflaeColors.DOC_VALUE,
         "decorator" to SuflaeColors.ANNOTATION,
     )
 
@@ -61,6 +65,8 @@ class SuflaeColorSettingsPage : ColorSettingsPage {
         AttributesDescriptor("Module", SuflaeColors.MODULE),
         AttributesDescriptor("Global and preset", SuflaeColors.PRESET),
         AttributesDescriptor("Operator", SuflaeColors.OPERATOR),
+        AttributesDescriptor("Doc comment//Field (:param, :returns)", SuflaeColors.DOC_TAG),
+        AttributesDescriptor("Doc comment//Field name, reference", SuflaeColors.DOC_VALUE),
         AttributesDescriptor("Annotation", SuflaeColors.ANNOTATION),
     )
 

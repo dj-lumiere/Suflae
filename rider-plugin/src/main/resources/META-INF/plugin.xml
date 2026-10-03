@@ -15,6 +15,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <textmate.bundleProvider implementation="com.suflae.rider.SuflaeBundleProvider"/>
+        <lang.syntaxHighlighterFactory language="suflae" implementationClass="com.suflae.rider.SuflaeSyntaxHighlighterFactory"/>
         <fileIconProvider implementation="com.suflae.rider.SuflaeIconProvider"/>
         <platform.lsp.integrationProvider implementation="com.suflae.rider.SuflaeLanguageServer"/>
         <colorSettingsPage implementation="com.suflae.rider.SuflaeColorSettingsPage"/>
