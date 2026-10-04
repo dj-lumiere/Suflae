@@ -301,6 +301,17 @@ loop
 `.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
+A `while` or `each` may end with an `else`, which runs only when the body ran zero times: the condition was
+false at the very first check, or the source was empty. Once the body has run, the `else` never runs, however
+the loop ended (condition false, source exhausted, or `break`).
+
+```suflae
+each item in items
+    show(item)
+else
+    show("no items")
+```
+
 **`when` is the pattern match**, as a statement or an expression:
 
 ```suflae
