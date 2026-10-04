@@ -539,7 +539,9 @@ logic limit** is fatal and cannot be caught.
 **Exit status.** Every crash (an unrecovered `throw`/`absent`, a checked-arithmetic failure, out of memory)
 exits with **status 82** (`0x52`, `'R'`). A run that ended with 82 crashed: read stderr for the error and
 the stack trace. Status 1 is not a crash. A process killed from outside (SIGKILL, the OS out-of-memory
-killer) dies before Suflae gets control and reports nothing.
+killer) dies before Suflae gets control and reports nothing. A run that returns from `start` normally exits with 0,
+or with the status `set_exit_code(code)` (an `S32`, in Core) set last: one atomic value, so any task may set it
+and the last call wins. A crash keeps 82 whatever was set.
 
 ## 12. Generics and protocols
 
