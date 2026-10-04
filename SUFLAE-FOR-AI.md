@@ -252,8 +252,11 @@ routine start()
   a negative base to a non-integer power with `NumericDomainError`, and `exp`, `sinh`, `cosh`, `**` or
   any result too large for `Real` with `NumericOverflowError`. `Real(text: "nan")` / `"inf"` is an
   `InvalidValueError`, and a `Real` made from an infinite or NaN `B64` crashes too.
-- Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. `==` compares values (it calls
-  `eq`); `===` / `!==` ask whether two entities are the same object (§10).
+- Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. Every operand of a chain is
+  evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`
+  is false), and only the comparisons stop at the first false link, so a failure in any operand is a failure
+  like any other (`try 1 < 5 < 10 // n` recovers it). `==` compares values (it calls `eq`); `===` / `!==`
+  ask whether two entities are the same object (§10).
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
   sign fill for `>>`).
@@ -503,9 +506,15 @@ routine start()
   `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
   (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `grab`: the
   error, an absence as `AbsentValueError`; `lookup`: the error or `None`), and evaluation stops at the first
-  one. A bare call still crashes loudly. Not covered: a lambda handed to another routine
-  (`items.select(transform: x => 10 // x)`) runs inside the routine that receives it, so its failure crashes
-  even under a keyword around the call. The fatal walls below stay fatal.
+  one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
+  inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).List()`,
+  `grab items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
+  several levels or kept in a record) is recovered by the keyword above the call that reaches it, at any
+  depth. A routine value called with no keyword above that call still crashes on failure. An `each` loop over
+  an adapter holding a lambda ends only when its source ends: a failure inside the lambda is the loop's
+  failure, recovered by a keyword above the loop or crashing without one. Not covered: a crash inside a
+  library routine declared without `!` (other than in a routine value you handed it) stays a crash, and the
+  fatal walls below stay fatal.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
 - **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
   `throw` (status 82), and it crashes the same way under `try`/`grab`/`lookup` at any depth. Use it for a
