@@ -244,7 +244,8 @@ routine start()
   integers, `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
   `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
-  Division by zero crashes (`DivisionByZeroError`).
+  Division by zero crashes (`DivisionByZeroError`), on `Real` and `Complex` too. On the floats, `Decimal`,
+  `Real` and `Complex`, `0 / 0` crashes with `NumericDomainError` instead.
 - Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. `==` compares values (it calls
   `eq`); `===` / `!==` ask whether two entities are the same object (§10).
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
