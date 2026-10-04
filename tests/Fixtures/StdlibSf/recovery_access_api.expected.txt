@@ -1,0 +1,17 @@
+try pick(1): 5
+try pick(9): none
+grab pick(9): Index 9 is out of bounds for collection with 2 elements
+lookup pick(9): Index 9 is out of bounds for collection with 2 elements
+try letter(1): b
+grab letter(9): Index 9 is out of bounds for collection with 3 elements
+try score(ann): 30
+lookup score(bob): none
+grab score(empty): nope: empty
+try narrow(100): 100
+grab narrow(300): Integer overflow: value does not fit in the target type.
+try parsed(42): 42
+grab parsed(4x): Cannot parse "4x" as Integer.
+try last_plus_one(nums): 6
+grab last_plus_one(empty): Index -1 is negative: positions count from 0
+try nums[7]: none
+DONE

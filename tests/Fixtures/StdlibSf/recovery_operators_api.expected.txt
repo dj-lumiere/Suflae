@@ -1,0 +1,26 @@
+try ten_over(5): 2
+try ten_over(0): none
+grab ten_over(0): You tried to divide by zero, which is not allowed.
+lookup ten_over(0): You tried to divide by zero, which is not allowed.
+grab ten_over(-1): nope: negative
+try grow(100): none
+grab grow(100): Integer overflow: value does not fit in the target type.
+lookup grow(-1): none
+try bump(7): 9223372036854775807
+grab bump(100): Integer overflow: value does not fit in the target type.
+try sum_quotients(10): 19
+lookup sum_quotients(1): You tried to divide by zero, which is not allowed.
+try via_bare(2): 6
+grab via_bare(0): You tried to divide by zero, which is not allowed.
+grab via_plain(0): You tried to divide by zero, which is not allowed.
+try hundred_over(0): none
+try outer(3): 7
+grab outer(0): nope: zero
+lookup outer(0): nope: zero
+lookup outer(-1): none
+grab p.ratio(): You tried to divide by zero, which is not allowed.
+when: Division by zero error
+try count_below: 5 none
+grab pick_branch: 5 You tried to divide by zero, which is not allowed.
+lookup or_quotient: -3 2 You tried to divide by zero, which is not allowed.
+DONE

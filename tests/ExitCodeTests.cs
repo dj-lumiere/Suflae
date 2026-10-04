@@ -22,6 +22,23 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "returning", actualString: stdout);
     }
 
+    /// <summary>A recovery keyword recovers every failure beneath it except <c>pierce</c>: a <c>pierce</c> two
+    /// calls under <c>try</c> still crashes with status 82, after the same call recovered a plain throw.</summary>
+    [Fact]
+    public void PierceUnderTry_CrashesLoudly()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "pierce_under_try.sf");
+
+        Assert.True(condition: exit == 82,
+            userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Contains(expectedSubstring: "recovered throw: none", actualString: stdout);
+        Assert.Contains(expectedSubstring: "value: 6", actualString: stdout);
+        Assert.Contains(expectedSubstring: "piercing", actualString: stdout);
+        Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+        Assert.Contains(expectedSubstring: "BrokenInvariantError: the ledger no longer balances",
+            actualString: stdout + stderr);
+    }
+
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
     {
         string sfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ExitCode", fixture]);

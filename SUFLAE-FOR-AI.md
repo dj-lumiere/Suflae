@@ -496,9 +496,21 @@ routine start()
     return
 ```
 
-- The keyword covers every failable call in the expression after it, and every checked operation
-  (`try a + b` recovers a fixed-width overflow, `grab a // b` a division by zero), stopping at the first
-  failure. It reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
+- **With a keyword in front, every failure beneath it is recovered, at any depth; only `pierce` still
+  crashes.** That covers a `throw`/`absent` in the called routine and in every routine it calls, bare calls
+  included (failable or not: `try f()` also recovers a division by zero inside a plain helper `f` calls), a
+  checked operation (`try a + b` recovers a fixed-width overflow, `grab a // b` a division by zero,
+  `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
+  (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `grab`: the
+  error, an absence as `AbsentValueError`; `lookup`: the error or `None`), and evaluation stops at the first
+  one. A bare call still crashes loudly. Not covered: a lambda handed to another routine
+  (`items.select(transform: x => 10 // x)`) runs inside the routine that receives it, so its failure crashes
+  even under a keyword around the call. The fatal walls below stay fatal.
+- The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
+- **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
+  `throw` (status 82), and it crashes the same way under `try`/`grab`/`lookup` at any depth. Use it for a
+  broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
+  does not make a routine failable (no `!` needed for it).
 - Typical use: `try` when only absence matters, `grab` for a routine that throws, `lookup` for one that can
   both throw and be absent.
 - A routine that returns nothing gives `Check[None]` under `grab` (its success arm is `is None`) and `Bool`
