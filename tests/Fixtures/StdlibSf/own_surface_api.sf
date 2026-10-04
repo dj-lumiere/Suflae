@@ -1,0 +1,46 @@
+module Tests/StdlibSf/OwnSurfaceApi
+
+import IO/Console
+import IterTools
+
+# Suflae's surface of the types it shares with RazorForge: Array, Text, Bytes, Character and the iterable
+# terminals count and index with Integer and build Suflae lists, while the values stay the same types.
+routine total(nums...: Integer) -> Integer
+    var sum = 0
+    var i = 0
+    while i < nums.count()
+        sum = sum + nums[i]
+        i = i + 1
+    return sum
+
+routine last_two(nums...: Integer) -> List[Integer]
+    return nums[nums.count() - 2 til nums.count()]
+
+routine start()
+    show(f"total={total(1, 2, 3)} tail={last_two(4, 5, 6, 7)}")
+
+    var t = "hello world"
+    var n = t.count() + 1
+    show(f"count={t.count()} n={n} t[1]={t[1]} slice={t[0 til 5]} back={t[4 to 0]}")
+    show(f"find={t.find(letter: 'o')} last={t.find_last(other: "o")} count_of={t.count_of(character: 'l')}")
+    var parts = t.split(separator: ' ')
+    show(f"parts={parts} count={parts.count()} first={parts[0]}")
+    show(f"pad=[{"7".zero_pad(width: 3)}] [{"ab".pad_start(width: 4)}] [{"ab".center(width: 6, fill: '*')}]")
+    show(f"words={"a  b c".words()} lines={"x\ny".lines().count()} rep={"ab".repeat(times: 3)}")
+    var built = Text(from_list: ['h', 'i'])
+    show(f"built={built} empty=[{Text()}] one={Text(from_character: 'x')}")
+
+    var b = "a,b,c".encode_as_utf8()
+    show(f"bytes={b.count() + 1} b0={b[0]} find={b.find(byte: b[1])} parts={b.split(separator: b[1]).count()}")
+    show(f"slice={b[0 til 3].count()} rep={b.repeat(times: 2).count()} commas={b.count_of(byte: b[1])}")
+    var c = 'a'
+    show(f"cp={c.codepoint() + 1} digit={'7'.digit_value()} off={c.offset(delta: 2)}")
+
+    var xs = [10, 20, 30, 40]
+    var weighted = 0
+    each (i, x) in xs.enumerate()
+        weighted = weighted + i * x
+    show(f"weighted={weighted} skip={xs.skip(count: 1).List()} take={xs.take(count: 2).List().count()}")
+    show(f"n={xs.get_count() + 1} set={xs.Set().count()}")
+    show("DONE")
+    return

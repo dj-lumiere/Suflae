@@ -1,0 +1,13 @@
+module Core
+
+import Numerics
+
+### Raised when a collection is given a negative position. Positions count from 0.
+crashable NegativeIndexError
+    ### The position that was asked for.
+    index: Integer
+
+### Returns the message the crash shows.
+@override
+routine NegativeIndexError.crash_message() -> Text
+    return f"Index {me.index} is negative: positions count from 0"

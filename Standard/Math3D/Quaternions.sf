@@ -1,0 +1,21 @@
+module Math3D
+
+import Numerics
+
+# Suflae's surface of the fixed-width numbers: the values stay fixed-width, but the counts, positions,
+# shift amounts, radixes and places they take or give are `Integer`. A Suflae program calls these in
+# place of the RazorForge routines called the same way.
+
+### Formats this quaternion as `w+xi+yj+zk` with exactly `places` digits after the point in each part
+### (see `B32.fixed`).
+### :param places: The number of digits after the point.
+### :returns: The resulting `Text` value.
+routine Q128.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Formats this quaternion as `w+xi+yj+zk` with exactly `places` digits after the point in each part
+### (see `B64.fixed`).
+### :param places: The number of digits after the point.
+### :returns: The resulting `Text` value.
+routine Q256.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))

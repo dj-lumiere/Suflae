@@ -1,0 +1,13 @@
+total=6 tail=[6, 7]
+count=11 n=12 t[1]=e slice=hello back=olleh
+find=4 last=7 count_of=3
+parts=["hello", "world"] count=2 first=hello
+pad=[007] [  ab] [**ab**]
+words=["a", "b", "c"] lines=2 rep=ababab
+built=hi empty=[] one=x
+bytes=6 b0=\x61 find=1 parts=3
+slice=3 rep=10 commas=2
+cp=98 digit=7 off=c
+weighted=200 skip=[20, 30, 40] take=2
+n=5 set=4
+DONE

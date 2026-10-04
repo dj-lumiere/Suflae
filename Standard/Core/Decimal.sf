@@ -1,0 +1,28 @@
+module Core
+
+import Numerics
+
+# Suflae's surface of the numbers it shares with RazorForge: the same values, with `Integer` in place of the
+# fixed-width integers that give a precision, a number of places, an exponent or a radix. A Suflae program
+# calls these in place of the RazorForge routines called the same way.
+
+### Returns `me` raised to the integer power `n` via exponentiation by squaring.
+### A negative `n` inverts the result. A non-finite intermediate crashes, as for all `Decimal`
+### arithmetic.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+routine Decimal.powi(n: Integer) -> Decimal
+    return me.powi(n: S32(from: S64(from: n)))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+@readonly
+routine Decimal.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### me * 10^n (the decimal analog of ldexp).
+routine Decimal.scaleb!(n: Integer) -> Decimal
+    return me.scaleb(n: S64(from: n))

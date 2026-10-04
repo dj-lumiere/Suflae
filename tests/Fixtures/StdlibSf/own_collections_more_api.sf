@@ -1,0 +1,56 @@
+module Tests/StdlibSf/OwnCollectionsMoreApi
+
+import IO/Console
+import Collections
+
+# Suflae's own CircularList, BitList, BitArray, PriorityQueue and sorted collections count and index with
+# Integer, like List, Dict and Set.
+routine start()
+    var q = CircularList[Integer]()
+    q.add_last(value: 1)
+    q.add_last(value: 2)
+    q.add_first(value: 0)
+    var n = q.count() + 1
+    show(f"q={q} count={q.count()} n={n} q[1]={q[1]}")
+    q[0] = 10
+    q.rotate_left(n: 1)
+    show(f"rotated={q} slice={q[0 til 2]} first={q.first()}")
+    q.rotate_right(n: 1)
+    q.keep_last(n: 2)
+    var total = 0
+    each x in q
+        total = total + x
+    show(f"kept={q} total={total} has1={q have 1}")
+
+    var bits = BitList()
+    bits.add_last(value: true)
+    bits.add_last(value: false)
+    bits.add_last(value: true)
+    bits[1] = true
+    show(f"bits={bits} count={bits.count()} ones={bits.count_ones()} b0={bits[0]}")
+    var fixed = BitArray[8]()
+    fixed[0] = true
+    fixed[7] = true
+    show(f"fixed={fixed} count={fixed.count()} ones={fixed.count_ones()} f7={fixed[7]}")
+
+    var pq = PriorityQueue[Integer, Text]()
+    pq.add(element: "low", priority: 5)
+    pq.add(element: "high", priority: 1)
+    show(f"pq count={pq.count()} first={pq.remove()} then={pq.count()}")
+
+    var sl = SortedList[Integer]()
+    sl.add(value: 3)
+    sl.add(value: 1)
+    sl.add(value: 2)
+    sl.add(value: 2)
+    show(f"sl={sl} count={sl.count()} twos={sl.count_of(value: 2)} rank1={sl.get_by_rank(rank: 1)}")
+    var ss = SortedSet[Integer]()
+    discard ss.add(value: 5)
+    discard ss.add(value: 3)
+    show(f"ss={ss} count={ss.count()} rank0={ss.get_by_rank(rank: 0)}")
+    var sd = SortedDict[Text, Integer]()
+    discard sd.add(key: "b", value: 2)
+    discard sd.add(key: "a", value: 1)
+    show(f"sd={sd} count={sd.count()} rank0={sd.get_by_rank(i: 0)}")
+    show("DONE")
+    return

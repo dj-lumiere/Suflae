@@ -1,0 +1,44 @@
+module Tests/StdlibSf/OwnCollectionsApi
+
+import IO/Console
+
+# Suflae's own List, Dict and Set count and index with Integer: a count adds to an Integer with no
+# conversion, an Integer variable indexes a list, and a slice takes an Integer range. The rest of each
+# collection is RazorForge's, passed through.
+routine start()
+    var xs = List[Integer]()
+    xs.add_last(value: 3)
+    xs.add_last(value: 5)
+    var n = xs.count()
+    n = n + 10
+    var i = 1
+    show(f"count={xs.count()} n={n} xs[i]={xs[i]} first={xs[0]}")
+    xs[1] = 50
+    xs.add_at(index: 0, value: 1)
+    var total = 0
+    each x in xs
+        total = total + x
+    show(f"total={total} xs={xs} removed={xs.remove_at(index: 0)} xs={xs}")
+
+    var ys = [7, 8, 9]
+    var zs = ys.duplicate()
+    show(f"ys={ys} has8={ys have 8} eq={ys == zs} sorted={[3, 1, 2].sorted()} slice={ys[1 til 3]}")
+    var filled = List[Text](count: 2, fill_value: "ab")
+    show(f"filled={filled} capacity_ok={List[Integer](capacity: 8).capacity() >= 8}")
+
+    var d = {"a": 1, "b": 2}
+    discard d.add(key: "c", value: 3)
+    var sum = 0
+    each e in d
+        sum = sum + e.value
+    show(f"d={d} count={d.count()} d[a]={d["a"]} sum={sum} keys={d.keys()} keys_count={d.keys().count()}")
+    discard d.remove(key: "a")
+    show(f"after remove={d} count={d.count()} has_a={d have "a"}")
+
+    var s = {1, 2, 3}
+    var t = {2, 3, 4}
+    show(f"s={s} count={s.count()} has2={s have 2}")
+    show(f"union={s.union(other: t)} inter={s.intersection(other: t)} diff={s.difference(other: t)}")
+    show(f"subset={s.is_subset(other: t)} list={List[Integer](from: s)}")
+    show("DONE")
+    return

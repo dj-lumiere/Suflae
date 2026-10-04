@@ -1,0 +1,10 @@
+ones=5 rot=3840 lead=24 hex=f0
+sign=-1 shr=-3
+fixed=2.8 scaled=11
+dfixed=1.500
+big=255 plain=12 shl=4080 pow=65025 sign=-1
+bits=8 hex=ff
+powi=15.625 fixed=2.50
+sqrt=1.4142135624 pi=3.14159
+csqrt=2.000 + 1.000i
+DONE

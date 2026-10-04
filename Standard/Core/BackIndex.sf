@@ -1,0 +1,12 @@
+module Core
+
+import Numerics
+
+### Resolves an end-relative position `^offset` against a collection's `count`, for a Suflae collection, which
+### counts with `Integer`. `^1` is the last position and `^0` the one past the end (a slice bound only).
+### :param count: The number of elements.
+### :param offset: The end-relative position, where `1` means the last element.
+### :returns: The forward position.
+### :throws: {IndexOutOfBoundsError} when `offset` is larger than `count`.
+routine back_resolve(count: Integer, offset: Integer) -> Integer
+    return Integer(from: back_resolve(count: U64(from: count), offset: U64(from: offset)))

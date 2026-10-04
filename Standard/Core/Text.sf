@@ -1,0 +1,138 @@
+module Core
+
+import Numerics
+
+# Suflae's surface of `Text`: the same value as RazorForge's, counted, indexed and padded with `Integer`, and
+# split into Suflae lists. A Suflae program calls these in place of the RazorForge routines of the same names.
+
+### Creates an empty text.
+routine Text() -> Text
+    return Text()
+
+### Creates a text of the characters of `from_list`, in order.
+### :param from_list: The characters.
+routine Text(from_list: List[Character]) -> Text
+    return Text(from_list: from_list.to_razorforge())
+
+### Creates a text of one character.
+### :param from_character: The character.
+routine Text(from_character: Character) -> Text
+    return Text(from_character: from_character)
+
+### Returns the number of characters.
+@readonly
+routine Text.count() -> Integer
+    return Integer(from: me.count())
+
+### Returns how many times `character` appears.
+### :param character: The character to count.
+@readonly
+routine Text.count_of(character: Character) -> Integer
+    return Integer(from: me.count_of(character: character))
+
+### Returns how many times `other` appears without overlapping (`"aaa".count_of("aa")` is 1). An empty `other`
+### appears 0 times.
+### :param other: The text to count.
+@readonly
+routine Text.count_of(other: Text) -> Integer
+    return Integer(from: me.count_of(other: other))
+
+### Returns the character at `index` (`text[i]`).
+### :param index: The position, from 0.
+@readonly
+routine Text.getitem!(index: Integer) -> Character
+    return me.getitem(index: position_of(value: index))
+
+### Returns the characters at the positions in `range` (`text[a til b]`). Positions past the end are skipped,
+### and a range that runs downward gives the characters in reverse.
+### :param range: The positions, from 0.
+@readonly
+routine Text.getitem(range: Range[Integer]) -> Text
+    return me.getitem(range: positions_of(range: range))
+
+### Returns the position of the first `letter`.
+### :param letter: The character to look for.
+### :absent: The text has no such character.
+@readonly
+routine Text.find!(letter: Character) -> Integer
+    return Integer(from: me.find(letter: letter))
+
+### Returns the position where the first `other` starts.
+### :param other: The text to look for.
+### :absent: The text does not contain `other`.
+@readonly
+routine Text.find!(other: Text) -> Integer
+    return Integer(from: me.find(other: other))
+
+### Returns the position of the last `letter`.
+### :param letter: The character to look for.
+### :absent: The text has no such character.
+@readonly
+routine Text.find_last!(letter: Character) -> Integer
+    return Integer(from: me.find_last(letter: letter))
+
+### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
+### :param other: The text to look for.
+### :absent: The text does not contain `other`.
+@readonly
+routine Text.find_last!(other: Text) -> Integer
+    return Integer(from: me.find_last(other: other))
+
+### Returns the text written `times` times in a row.
+### :param times: How many copies.
+@readonly
+routine Text.repeat(times: Integer) -> Text
+    return me.repeat(times: position_of(value: times))
+
+### Returns the text padded on the left with `fill` to `width` characters. A text already that wide is returned
+### as it is.
+### :param width: The width to reach.
+### :param fill: The character to pad with.
+@readonly
+routine Text.pad_start(width: Integer, fill: Character = ' ') -> Text
+    return me.pad_start(width: position_of(value: width), fill: fill)
+
+### Returns the text padded on the right with `fill` to `width` characters. A text already that wide is returned
+### as it is.
+### :param width: The width to reach.
+### :param fill: The character to pad with.
+@readonly
+routine Text.pad_end(width: Integer, fill: Character = ' ') -> Text
+    return me.pad_end(width: position_of(value: width), fill: fill)
+
+### Returns the text centered in `width` characters of `fill`, an odd extra one on the right. A text already that
+### wide is returned as it is.
+### :param width: The width to reach.
+### :param fill: The character to pad with.
+@readonly
+routine Text.center(width: Integer, fill: Character = ' ') -> Text
+    return me.center(width: position_of(value: width), fill: fill)
+
+### Returns the text padded on the left with `0` to `width`, a leading sign kept in front (`"-5".zero_pad(4)` is
+### `-005`).
+### :param width: The width to reach, sign included.
+@readonly
+routine Text.zero_pad(width: Integer) -> Text
+    return me.zero_pad(width: position_of(value: width))
+
+### Returns the parts between the `separator` characters.
+### :param separator: The character between parts.
+@readonly
+routine Text.split(separator: Character) -> List[Text]
+    return List[Text](from: me.split(separator: separator))
+
+### Returns the parts between the `separator` texts. An empty separator gives one part per character.
+### :param separator: The text between parts.
+@readonly
+routine Text.split(separator: Text) -> List[Text]
+    return List[Text](from: me.split(separator: separator))
+
+### Returns the lines of the text. Windows line endings count as one.
+@readonly
+routine Text.lines() -> List[Text]
+    return List[Text](from: me.lines())
+
+### Returns the words of the text: the parts between runs of whitespace.
+@readonly
+routine Text.words() -> List[Text]
+    return List[Text](from: me.words())

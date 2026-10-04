@@ -160,6 +160,12 @@ public sealed class SuflaeRules : LanguageRules
         return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report);
     }
 
+    /// <summary>The split (struct-of-arrays) collections choose a memory layout, which a Suflae program does
+    /// not: a Suflae program never sees them.</summary>
+    public override IReadOnlySet<string> HiddenStandardTypes { get; } =
+        new HashSet<string>(collection: ["Collections.SplitList", "Collections.SplitArray"],
+            comparer: StringComparer.Ordinal);
+
     public override void SynthesizeStandardLibrary(
         IReadOnlyList<(Program Program, string FilePath, string Module)> programs)
     {

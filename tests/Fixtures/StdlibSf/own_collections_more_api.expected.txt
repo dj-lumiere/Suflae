@@ -1,0 +1,10 @@
+q=CircularList[Integer]([0, 1, 2]) count=3 n=4 q[1]=1
+rotated=CircularList[Integer]([1, 2, 10]) slice=CircularList[Integer]([1, 2]) first=1
+kept=CircularList[Integer]([1, 2]) total=3 has1=true
+bits=BitList([true, true, true]) count=3 ones=3 b0=true
+fixed=BitArray([true, false, false, false, false, false, false, true]) count=8 ones=2 f7=true
+pq count=2 first=high then=1
+sl=SortedList[Integer]([1, 2, 2, 3]) count=4 twos=2 rank1=2
+ss=SortedSet[Integer]({3, 5}) count=2 rank0=3
+sd=SortedDict[Text, Integer]({"a": 1, "b": 2}) count=2 rank0=DictEntry[Text, Integer](key: a, value: 1)
+DONE

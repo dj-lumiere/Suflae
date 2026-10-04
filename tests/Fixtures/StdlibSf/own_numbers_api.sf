@@ -1,0 +1,29 @@
+module Tests/StdlibSf/OwnNumbersApi
+
+import IO/Console
+import Numerics
+
+# Suflae's surface of the numbers: counts, positions, shift amounts, radixes and places are Integer.
+routine start()
+    var a: U32 = 0xF0
+    var ones = a.count_ones() + 1
+    show(f"ones={ones} rot={a.rotate_left(bits: 4)} lead={a.leading_zeros()} hex={a.to_text(radix: 16)}")
+    var s: S64 = -5
+    show(f"sign={s.signum()} shr={s.ashr(bits: 1)}")
+    var f = 2.75_b64
+    show(f"fixed={f.fixed(places: 1)} scaled={f.scalbn(n: 2)}")
+    var d = 1.5_d64
+    show(f"dfixed={d.fixed(places: 3)}")
+
+    var big = Integer(text: "ff", radix: 16)
+    var plain = Integer(text: "12")
+    show(f"big={big} plain={plain} shl={big.shl(bits: 4)} pow={big.pow(exp: 2)} sign={(0 - big).signum()}")
+    show(f"bits={big.bit_length() + 0} hex={big.to_text(radix: 16)}")
+    var x = 2.5
+    show(f"powi={x.powi(n: 3)} fixed={x.fixed(places: 2)}")
+    var r = Real(from: 2)
+    show(f"sqrt={r.sqrt(precision: 20).fixed(places: 10)} pi={Real.pi(precision: 20).fixed(places: 5)}")
+    var c = Complex(real: Real(from: 3), imag: Real(from: 4))
+    show(f"csqrt={c.sqrt().fixed(places: 3)}")
+    show("DONE")
+    return

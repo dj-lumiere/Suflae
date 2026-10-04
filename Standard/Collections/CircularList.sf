@@ -1,0 +1,681 @@
+module Collections
+
+import Numerics
+import BuilderQuery
+### A growable, rotatable sequence backed by a power-of-two circular buffer.
+###
+### `CircularList[T]` supports O(1) amortized insertion and removal at both the front
+### and the back. A bitmask wraps the buffer indices instead of a modulo, so
+### the capacity is always kept at a power of two. Random access by index is O(1)
+### after resolving the physical slot from the logical position.
+###
+### **When to use**
+### - You need O(1) rotation — cycle elements in place without copying.
+### - You need a bounded "keep the latest N" history in FIXED space — `add_last_keeping(value, keeping: n)`
+###   (or `add_last` then `keep_last(n)`) retains only the most recent `n` elements without ever
+###   reallocating. `List[T]` cannot do this in O(1): dropping from the front is O(n) there. This is
+###   `CircularList`'s sharpest edge.
+### - You need a sliding window or rolling history — advance in O(1) (drop the front, push the back).
+### - You need fast insertion and removal at both ends — e.g. a BFS frontier or an event stream.
+### - You want a **stack**, **queue**, or **deque**: RazorForge has no separate types for these —
+###   `CircularList[T]` is all three. Stack = `add_last` / `remove_last!`; queue = `add_last` /
+###   `remove_first!`; deque = insert and remove at either end.
+### - Use {List[T]} instead when you only ever add or remove at the back.
+### - Use {PriorityQueue[TPriority, TElement]} instead when removal order depends on priority.
+###
+### **Complexity**
+### | Operation | Time |
+### |---|---|
+### | `add_last` / `add_first` | O(1) amortized |
+### | `remove_last!` / `remove_first!` | O(1) |
+### | `first!` / `last!` | O(1) |
+### | `getitem!` / `setitem!` | O(1) |
+### | `rotate_left` / `rotate_right` | O(1) |
+### | `contains` | O(n) |
+### | Iteration | O(n) |
+###
+### :typeparam T: The element type stored in the circular list.
+### :see: {List[T]} for a simpler growable sequence optimized for back-only append.
+### :see: {PriorityQueue[TPriority, TElement]} for priority-ordered removal.
+entity CircularList[T]
+relates CircularListEmittable[T] as Iter
+obeys Iterable[T], Container, ListLiteral[T]
+    ### Stores the circular buffer backing the circular list.
+    ### Elements are laid out in allocation order and interpreted through
+    ### `start` and `count` rather than by physical position alone.
+    secret data: Hijacked[T]
+    ### Stores the physical index of the logical front element.
+    secret start: U64
+    ### Stores the number of live elements currently in the circular list.
+    secret count: U64
+    ### Stores the number of element slots allocated in the circular buffer.
+    ### Capacity is always kept as a power of two so index wrapping can use a mask.
+    secret capacity: U64
+
+# ============================================================================
+# Iteration Support
+# ============================================================================
+
+### Walks the elements of a `CircularList[T]` from logical front to back.
+### The iterator captures a raw pointer, the start index, element count, and capacity
+### at creation time so the source circular list does not need to remain alive during iteration.
+### :typeparam T: The element type yielded by the iterator.
+entity CircularListEmittable[T]
+obeys Emittable[T]
+    ### Raw pointer into the source circular list's circular buffer.
+    secret data: Hijacked[T]
+    ### Front-of-queue physical index captured at iterator creation.
+    secret start: U64
+    ### Element count captured at iterator creation.
+    secret count: U64
+    ### Buffer capacity captured at iterator creation.
+    secret capacity: U64
+    ### Current logical position.
+    secret index: U64
+
+# ============================================================================
+# Creators
+# ============================================================================
+
+### Creates a circular list containing exactly the given `elements`, in order. Variadic constructor behind the
+### `[a, b, c]` list-literal syntax (the `ListLiteral` opt-in): the builder packs the elements into a
+### fixed `Array[T, K]` and monomorphizes one body per element count `K`.
+### :param elements: The elements to populate the circular list with, in order.
+### :returns: A circular list of the given elements.
+common routine CircularList[T].from_literal(elements...: T) -> CircularList[T]
+    var result = CircularList[T]()
+    var i = 0u64
+    while i < elements.count()
+        result.add_last(value: elements.get_raw(index: i))
+        i = i +% 1u64
+    return result
+
+### Creates an empty circular list with no allocated storage.
+### The backing buffer is acquired lazily on first insertion.
+routine CircularList[T]() -> CircularList[T]
+    return CircularList[T](
+        data: hijacked_none[T](),
+        start: 0u64,
+        count: 0u64,
+        capacity: 0u64,
+    )
+
+### Creates an empty circular list with storage pre-allocated for at least `capacity` elements.
+### The requested capacity is rounded up to the next power of two so index wrapping
+### can use a bitmask.
+### :param capacity: The minimum number of elements to reserve space for.
+secret routine CircularList[T](capacity: U64) -> CircularList[T]
+    var actual = 1u64
+    while actual < capacity
+        actual = actual *% 2u64
+    var byte_size = T.data_size() * actual
+    danger
+        return CircularList[T](
+            data: hijacked_from[T](rf_allocate_dynamic_uninit(byte_size)),
+            start: 0u64,
+            count: 0u64,
+            capacity: actual,
+        )
+
+### Creates an empty circular list with storage pre-allocated for at least `capacity` elements.
+### The requested capacity is rounded up to the next power of two so index wrapping
+### can use a bitmask.
+### :param capacity: The minimum number of elements to reserve space for.
+routine CircularList[T](capacity: Integer) -> CircularList[T]
+    return CircularList[T](capacity: position_of(value: capacity))
+
+# ============================================================================
+# Internal Helpers
+# ============================================================================
+
+### Maps a physical index into the range [0, capacity) using a power-of-two bitmask.
+### :param index: The raw physical index to normalize.
+### :returns: The equivalent in-range slot index for the current buffer.
+@readonly
+secret routine CircularList[T].wrap_index(index: U64) -> U64
+    # Capacity is always a power of 2 — use bitmask instead of modulo.
+    return index & me.capacity -% 1u64
+
+### Converts a logical position (0 = front) to the physical slot in the ring buffer.
+### :param logical_index: The zero-based distance from the logical front.
+### :returns: The physical slot index that currently holds that element.
+@readonly
+secret routine CircularList[T].physical_index(logical_index: U64) -> U64
+    # Convert logical index (0 = front) to physical index in buffer
+    return me.wrap_index(me.start +% logical_index)
+
+### Reads the element from physical slot `physical_idx` without bounds checking.
+### :param physical_idx: The slot index inside the backing buffer.
+### :returns: The element stored in that slot.
+@readonly
+secret routine CircularList[T].read_at(physical_idx: U64) -> T
+    var byte_offset = T.data_size() * physical_idx
+    danger
+        return me.data.offset(byte_offset).peek()
+
+### Writes `value` into physical slot `physical_idx` without bounds checking.
+### :param physical_idx: The slot index inside the backing buffer.
+### :param value: The element to store.
+secret routine CircularList[T].write_at(physical_idx: U64, value: T)
+    var byte_offset = T.data_size() * physical_idx
+    danger
+        me.data.offset(byte_offset).poke(value)
+    return
+
+# ============================================================================
+# Core Operations
+# ============================================================================
+
+@readonly
+secret routine CircularList[T].count_raw() -> U64
+    return me.count
+
+### Returns the number of live elements currently stored in the circular list.
+### :returns: The live element count.
+@readonly
+routine CircularList[T].count() -> Integer
+    return Integer(from: me.count_raw())
+
+@readonly
+secret routine CircularList[T].capacity_raw() -> U64
+    return me.capacity
+
+### Returns the number of element slots available before the next growth step.
+### :returns: The current backing-buffer slot count.
+@readonly
+routine CircularList[T].capacity() -> Integer
+    return Integer(from: me.capacity_raw())
+
+### Returns true if the circular list currently contains no elements.
+### :returns: `true` when `count()` is zero.
+@readonly
+routine CircularList[T].is_empty() -> Bool
+    return me.count == 0u64
+
+### Appends `value` at the logical back of the circular list.
+### The buffer is doubled automatically when the current capacity is exhausted.
+### :param value: The element to add at the back.
+routine CircularList[T].add_last(value: T)
+    # Add element to back - O(1) amortized
+    if me.count >= me.capacity
+        me.grow()
+    var idx = me.physical_index(me.count)
+    me.write_at(physical_idx: idx, value: value)
+    me.count = me.count +% 1u64
+    return
+
+### Prepends `value` at the logical front of the circular list.
+### The front index is decremented with wraparound using the ring-buffer mask.
+### The buffer is doubled automatically when the current capacity is exhausted.
+### :param value: The element to add at the front.
+routine CircularList[T].add_first(value: T)
+    # Add element to front - O(1) amortized
+    if me.count >= me.capacity
+        me.grow()
+    # Decrement start with wrap: (start + cap - 1) & (cap - 1) — branchless
+    me.start = me.wrap_index(me.start +% me.capacity -% 1u64)
+    me.write_at(physical_idx: me.start, value: value)
+    me.count = me.count +% 1u64
+    return
+
+### Removes and returns the element at the logical back of the circular list.
+### :returns: The element that was at the back.
+### :absent: The circular list is empty.
+routine CircularList[T].remove_last!() -> T
+    # Remove and return back element - O(1)
+    if me.is_empty()
+        absent
+    me.count = me.count - 1u64
+    var idx = me.physical_index(me.count)
+    return me.read_at(idx)
+
+### Removes and returns the element at the logical front of the circular list.
+### :returns: The element that was at the front.
+### :absent: The circular list is empty.
+routine CircularList[T].remove_first!() -> T
+    # Remove and return front element - O(1)
+    if me.is_empty()
+        absent
+    var value = me.read_at(me.start)
+    me.start = me.wrap_index(me.start + 1u64)
+    me.count = me.count - 1u64
+    return value
+
+secret routine CircularList[T].keep_last_raw(n: U64)
+    # Drop the oldest (count - n) elements in O(count - n), no reallocation
+    if n >= me.count
+        return
+    var drop = me.count -% n
+    var i = 0u64
+    danger
+        while i < drop
+            me.data
+                .offset(T.data_size() * me.start)
+                .peek()
+                .destroy()
+            me.start = me.wrap_index(me.start +% 1u64)
+            i = i +% 1u64
+    me.count = n
+    return
+
+### Discards the oldest elements so at most the latest `n` remain, keeping the current
+### allocation. Nothing is copied and no growth occurs — the front index simply advances,
+### so this is the fixed-space "keep the latest N" primitive (a rolling history that never
+### reallocates). When `n` is at least the current count, the list is left unchanged.
+### Dropped elements are torn down in place, mirroring `destroy` — they are discarded, not
+### handed back (a no-op for value types; frees owned entity elements).
+### :param n: The maximum number of most-recent elements to retain.
+routine CircularList[T].keep_last(n: Integer)
+    me.keep_last_raw(n: position_of(value: n))
+    return
+
+secret routine CircularList[T].keep_first_raw(n: U64)
+    # Drop the newest (count - n) elements from the back in O(count - n), no reallocation
+    if n >= me.count
+        return
+    var i = n
+    danger
+        while i < me.count
+            var physical = me.wrap_index(me.start +% i)
+            me.data
+                .offset(T.data_size() * physical)
+                .peek()
+                .destroy()
+            i = i +% 1u64
+    me.count = n
+    return
+
+### Discards the newest elements so at most the first `n` remain, keeping the current allocation.
+### The mirror of `keep_last`: elements are dropped from the back (the front index is untouched),
+### so this retains the OLDEST `n` in fixed space with no copy and no growth. When `n` is at least
+### the current count, the list is left unchanged.
+### Dropped elements are torn down in place, mirroring `destroy` — they are discarded, not handed
+### back (a no-op for value types; frees owned entity elements).
+### :param n: The maximum number of oldest elements to retain.
+routine CircularList[T].keep_first(n: Integer)
+    me.keep_first_raw(n: position_of(value: n))
+    return
+
+secret routine CircularList[T].add_last_keeping_raw(value: T, keeping: U64)
+    me.add_last(value: value)
+    me.keep_last_raw(n: keeping)
+    return
+
+### Appends `value` at the back, then drops the oldest elements so at most `keeping` remain.
+### This is the one-call "push into a fixed-size latest-N history" — `add_last` followed by
+### `keep_last` — the canonical ring-buffer rolling log that never reallocates once warm.
+### With `keeping` of zero the value is added and then immediately dropped, leaving the list empty.
+### :param value: The element to add at the back.
+### :param keeping: The maximum number of most-recent elements to retain afterward.
+routine CircularList[T].add_last_keeping(value: T, keeping: Integer)
+    me.add_last_keeping_raw(value: value, keeping: position_of(value: keeping))
+    return
+
+secret routine CircularList[T].add_first_keeping_raw(value: T, keeping: U64)
+    me.add_first(value: value)
+    me.keep_first_raw(n: keeping)
+    return
+
+### Prepends `value` at the front, then drops the oldest elements (from the back) so at most
+### `keeping` remain. The front-pushing mirror of `add_last_keeping` — `add_first` followed by
+### `keep_first` — a fixed-size latest-N history where the newest element sits at the front.
+### With `keeping` of zero the value is added and then immediately dropped, leaving the list empty.
+### :param value: The element to add at the front.
+### :param keeping: The maximum number of most-recent elements to retain afterward.
+routine CircularList[T].add_first_keeping(value: T, keeping: Integer)
+    me.add_first_keeping_raw(value: value, keeping: position_of(value: keeping))
+    return
+
+### Returns the front element without removing it.
+### :returns: The current front element.
+### :absent: The circular list is empty.
+@readonly
+routine CircularList[T].first!() -> T
+    # Peek at front element without removing
+    if me.is_empty()
+        absent
+    return me.read_at(me.start)
+
+### Returns the back element without removing it.
+### :returns: The current back element.
+### :absent: The circular list is empty.
+@readonly
+routine CircularList[T].last!() -> T
+    # Peek at back element without removing
+    if me.is_empty()
+        absent
+    var idx = me.physical_index(me.count - 1u64)
+    return me.read_at(idx)
+
+### Removes every element while preserving the current circular-buffer allocation.
+routine CircularList[T].clear()
+    me.start = 0u64
+    me.count = 0u64
+    return
+
+# ============================================================================
+# Growth
+# ============================================================================
+
+### Grows the backing storage using the circular list's standard doubling policy.
+### Empty circular lists start at four slots; subsequent growth always doubles.
+### NOTE: Unlike `List`/`PriorityQueue`, this deliberately does NOT use the hybrid
+### `next_grow_capacity` (double-then-1.5x) policy. Capacity is pinned to a power of two so
+### index wrapping can use a bitmask (`reserve` rounds up), and a 1.5x request would round
+### straight back up to the next power of two — a no-op. Staying at 2x is intentional here.
+@reshaping
+secret routine CircularList[T].grow()
+    var new_capacity = if me.capacity == 0u64 then 4u64 else me.capacity *% 2u64
+    me.reserve_raw(new_capacity)
+    return
+
+@reshaping
+secret routine CircularList[T].reserve_raw(new_capacity: U64)
+    var actual = 1u64
+    while actual < new_capacity
+        actual = actual *% 2u64
+    if actual <= me.capacity
+        return
+
+    var new_byte_size = T.data_size() * actual
+    danger
+        var _new_data = hijacked_from[T](rf_allocate_dynamic_uninit(new_byte_size))
+
+        # Copy elements in logical order (unwrap the ring)
+        var i = 0u64
+        while i < me.count
+            var old_idx = me.physical_index(i)
+            var value = me.read_at(old_idx)
+            var new_byte_offset = T.data_size() * i
+            _new_data.offset(new_byte_offset).poke(value)
+            i = i +% 1u64
+
+        me.data = _new_data
+        me.start = 0u64
+        me.capacity = actual
+        return
+
+### Ensures the circular list can hold at least `new_capacity` elements without another growth step.
+### The requested capacity is rounded up to the next power of two. Elements are copied into
+### the new buffer in logical order so the front moves to physical slot 0.
+### Requests no larger than the current capacity are ignored.
+### :param new_capacity: The minimum element count to accommodate.
+@reshaping
+routine CircularList[T].reserve(new_capacity: Integer)
+    me.reserve_raw(new_capacity: position_of(value: new_capacity))
+    return
+
+# ============================================================================
+# Indexing with Integral (forward index)
+# ============================================================================
+
+@readonly
+secret routine CircularList[T].getitem_raw!(index: U64) -> T
+needs T obeys Assignable
+    if index >= me.count
+        throw IndexOutOfBoundsError(index: index, count: me.count)
+    var physical_idx = me.physical_index(index)
+    return me.read_at(physical_idx).assign()
+
+### Returns the element at the given zero-based logical position.
+### Logical index 0 refers to the front element regardless of its physical slot.
+### :param index: The zero-based logical position to read.
+### :returns: The element at that logical position.
+### :throws: {IndexOutOfBoundsError} if `index >= count()`.
+@readonly
+routine CircularList[T].getitem!(index: Integer) -> T
+needs T obeys Assignable
+    return me.getitem_raw(index: position_of(value: index))
+
+
+secret routine CircularList[T].setitem_raw!(index: U64, value: T)
+    if index >= me.count
+        throw IndexOutOfBoundsError(index: index, count: me.count)
+    var physical_idx = me.physical_index(index)
+    me.write_at(physical_idx: physical_idx, value: value)
+    return
+
+### Replaces the element at the given zero-based logical position.
+### :param index: The zero-based logical position to update.
+### :param value: The replacement element.
+### :throws: {IndexOutOfBoundsError} if `index >= count()`.
+routine CircularList[T].setitem!(index: Integer, value: T)
+    me.setitem_raw(index: position_of(value: index), value: value)
+    return
+
+
+
+@readonly
+secret routine CircularList[T].getitem_raw(range: Range[U64]) -> CircularList[T]
+needs T obeys Assignable
+    var result = CircularList[T]()
+    each i in range
+        if i < me.count
+            result.add_last(value: me.getitem_raw(index: i))
+    return result
+
+### Returns a NEW circular list holding independent copies of the elements in `range` — the slice form of
+### indexing (`circular list[a til b]`), over LOGICAL positions (front = 0). A half-open `a til b` yields
+### `[a, b)`; an inclusive `a to b` yields `[a, b]`; a descending range reverses. Positions at or past
+### `count` are skipped. Each element is copied through `copy`, so the result shares no structure with
+### the original — the value-semantics counterpart to `List`/`Text` slicing.
+### :param range: The logical index range to extract.
+### :returns: A new `CircularList[T]` owning copies of the selected elements.
+@readonly
+routine CircularList[T].getitem(range: Range[Integer]) -> CircularList[T]
+needs T obeys Assignable
+    return me.getitem_raw(range: Range[U64](start: position_of(value: range.start), end: position_of(value: range.end), step: position_of(value: range.step), inclusive: range.inclusive))
+
+# ============================================================================
+# Rotation
+# ============================================================================
+
+secret routine CircularList[T].rotate_left_raw(n: U64)
+    # Rotate elements left by n positions
+    # Front elements move to back
+    if me.count == 0u64
+        return
+    var shift = LLVM::unsigned_rem(n, me.count)
+    if me.count == me.capacity
+        me.start = me.wrap_index(me.start +% shift)
+        return
+    # With free slots after the back, moving the front index alone would bring them into the list: each
+    # front element moves into the free slot after the back instead.
+    var i = 0u64
+    while i < shift
+        var value = me.read_at(physical_idx: me.start)
+        me.start = me.wrap_index(me.start +% 1u64)
+        me.write_at(physical_idx: me.physical_index(me.count -% 1u64), value: value)
+        i = i +% 1u64
+    return
+
+### Shifts the logical front toward the back by `n` positions.
+### Elements that fall off the front reappear at the back. Only the front index
+### changes when the buffer is full; otherwise `n` elements move.
+### :param n: The number of positions to rotate left.
+routine CircularList[T].rotate_left(n: Integer)
+    me.rotate_left_raw(n: position_of(value: n))
+    return
+
+secret routine CircularList[T].rotate_right_raw(n: U64)
+    # Rotate elements right by n positions
+    # Back elements move to front
+    if me.count == 0u64
+        return
+    var shift = LLVM::unsigned_rem(n, me.count)
+    if me.count != me.capacity
+        # With free slots before the front, each back element moves into the free slot before the front.
+        var i = 0u64
+        while i < shift
+            var value = me.read_at(physical_idx: me.physical_index(me.count -% 1u64))
+            me.start = me.wrap_index(me.start +% me.capacity -% 1u64)
+            me.write_at(physical_idx: me.start, value: value)
+            i = i +% 1u64
+        return
+    if shift > me.start
+        me.start = me.capacity -% (shift -% me.start)
+    else
+        me.start = me.start -% shift
+    return
+
+### Shifts the logical back toward the front by `n` positions.
+### Elements that fall off the back reappear at the front. Only the front index
+### changes when the buffer is full; otherwise `n` elements move.
+### :param n: The number of positions to rotate right.
+routine CircularList[T].rotate_right(n: Integer)
+    me.rotate_right_raw(n: position_of(value: n))
+    return
+
+@readonly
+routine CircularList[T].iter() -> CircularListEmittable[T]
+    danger
+        return CircularListEmittable[T](
+            data: me.data,
+            start: me.start,
+            count: me.count,
+            capacity: me.capacity,
+            index: 0u64,
+        )
+
+### Returns the next element from the iterator in front-to-back order.
+### :returns: The next logical element.
+### :absent: All elements captured at iterator creation have been yielded.
+routine CircularListEmittable[T].emit!() -> T
+    if me.index >= me.count
+        absent
+    var physical = me.start +% me.index & me.capacity -% 1u64
+    lateinit var _result: T
+    danger
+        _result = me.data.offset(T.data_size() * physical).peek()
+    me.index = me.index + 1u64
+    return _result
+
+# ============================================================================
+# Utility Operations
+# ============================================================================
+
+### Returns the front element or `default_value` if the circular list is empty.
+### :param default_value: The fallback to return when no element is stored.
+### :returns: The front element if present; `default_value` otherwise.
+@readonly
+routine CircularList[T].first_or_default(default_value: T) -> T
+    if me.is_empty()
+        return default_value
+    return me.first()
+
+### Returns the back element or `default_value` if the circular list is empty.
+### :param default_value: The fallback to return when no element is stored.
+### :returns: The back element if present; `default_value` otherwise.
+@readonly
+routine CircularList[T].last_or_default(default_value: T) -> T
+    if me.is_empty()
+        return default_value
+    return me.last()
+
+### Returns true if any element in the circular list equals `value`.
+### Scans in logical front-to-back order using the element type's equality operator.
+### :param value: The value to search for.
+### :returns: `true` if `value` is found; `false` if no element matches.
+@readonly
+routine CircularList[T].contains(value: T) -> Bool
+needs T obeys Equatable
+    var i = 0u64
+    while i < me.count
+        if me.getitem_raw(index: i) == value
+            return true
+        i = i +% 1u64
+    return false
+
+# ============================================================================
+# Comparison Operations
+# ============================================================================
+
+@readonly
+@override
+routine CircularList[T].represent() -> Text
+    var result = me.type_name() + "(["
+    var i = 0u64
+    each v in me
+        if i > 0u64
+            result = result + ", "
+        result = result + nested_repr(v)
+        i = i +% 1u64
+    result = result + "])"
+    return result
+
+@readonly
+@override
+routine CircularList[T].diagnose() -> Text
+    var result = me.full_type_name() + "(count: " + me.count_raw().represent() + ", ["
+    var i = 0u64
+    each v in me
+        if i > 0u64
+            result = result + ", "
+        result = result + nested_repr(v)
+        i = i +% 1u64
+    result = result + "])"
+    return result
+
+### Returns true if both circular lists contain the same elements in the same logical order.
+### :param you: The other circular list to compare against.
+### :returns: `true` if both have equal count and all corresponding elements are equal.
+@readonly
+routine CircularList[T].eq(you: Accessing[CircularList[T]]) -> Bool
+needs T obeys Equatable
+    if me.count != you.count
+        return false
+    var i = 0u64
+    while i < me.count
+        if me.getitem_raw(index: i) != you.getitem_raw(index: i)
+            return false
+        i = i +% 1u64
+    return true
+
+@override
+dangerous routine CircularList[T].destroy()
+    # Tear down each live element in logical front-to-back (ring) order before freeing the buffer
+    # (mirrors CircularListEmittable.emit!). No-op for value types; frees owned entity elements.
+    var i = 0u64
+    while i < me.count
+        var physical = me.start +% i & me.capacity -% 1u64
+        me.data
+            .offset(T.data_size() * physical)
+            .peek()
+            .destroy()
+        i = i + 1u64
+    me.data.invalidate()
+    me.hijack().invalidate()
+    return
+
+### Cycle-collector TRACE: report every live element to the collector, walking the ring in logical
+### order (elements are NOT contiguous, so `cyclic_trace_buffer` cannot be used — this mirrors the
+### physical-index walk in `destroy` but calls `cyclic_visit` instead of `destroy`).
+@override
+dangerous routine CircularList[T].roam_trace()
+    var i = 0u64
+    while i < me.count
+        var physical = me.start +% i & me.capacity -% 1u64
+        me.data
+            .offset(T.data_size() * physical)
+            .peek()
+            .cyclic_visit()
+        i = i + 1u64
+    return
+
+### Cycle-collector FREE: free the backing buffer and this list's own box, but NOT the elements (the
+### collector frees the whole white cycle directly).
+@override
+dangerous routine CircularList[T].roam_free()
+    me.data.invalidate()
+    me.hijack().invalidate()
+    return
+
+### Serializes this collection to a `SerialValue.List`, serializing each element.
+### :returns: The `SerialValue.List` of each element's serialized form.
+@readonly
+@override
+routine CircularList[T].serialize() -> SerialValue
+    var __sv = List[SerialValue]()
+    each __x in me
+        __sv.add_last(value: __x.serialize())
+    return SerialValue(__sv.duplicate())

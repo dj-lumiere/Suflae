@@ -1,0 +1,25 @@
+module Core
+
+import Numerics
+
+### The position or count a collection keeps for `value`. Collections count with `Integer` on their surface
+### and with `U64` inside.
+### :param value: The position or count, from 0.
+### :throws: {NegativeIndexError} if `value` is negative.
+routine position_of!(value: Integer) -> U64
+    if value.is_negative()
+        throw NegativeIndexError(index: value)
+    return U64(from: value)
+
+### The buffer positions a collection keeps for `range`: the same range, counted with `U64`. A range that
+### runs downward keeps its direction, since a `Range` counts down from a higher start without a negative
+### step.
+### :param range: The positions, from 0.
+### :throws: {NegativeIndexError} if the range starts or ends at a negative position.
+routine positions_of!(range: Range[Integer]) -> Range[U64]
+    return Range[U64](
+        start: position_of(value: range.start),
+        end: position_of(value: range.end),
+        step: position_of(value: range.step.abs()),
+        inclusive: range.inclusive,
+    )

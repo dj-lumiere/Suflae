@@ -43,7 +43,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
 
     public void Run(Program program)
     {
-        BodyDispatch.RunOnProgram(program: program, lower: r => LowerNested(stmt: r.Body));
+        BodyDispatch.RunOnProgram(registry: ctx.Registry, program: program, lower: r => LowerNested(stmt: r.Body));
     }
 
     /// <summary>Lowers a statement in a nested position (a body or a branch), wrapping a spliced result.</summary>

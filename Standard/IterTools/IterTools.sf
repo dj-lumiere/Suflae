@@ -1,0 +1,47 @@
+module IterTools
+
+import Numerics
+
+# Suflae's surface of the iterable terminals and adapters that count: counts are `Integer`, and the
+# collections they build are Suflae's own. A Suflae program calls these in place of the RazorForge routines of
+# the same names.
+
+### Collects the values into a list, in order.
+@readonly
+routine Iterable[T].List() -> List[T]
+    var result = List[T]()
+    each item in me
+        result.add_last(value: item)
+    return result
+
+### Collects the values into a set. A repeated value is kept once.
+@readonly
+routine Iterable[T].Set() -> Set[T]
+needs T obeys Hashable, Equatable
+    var result = Set[T]()
+    each item in me
+        discard result.add(value: item)
+    return result
+
+### Returns how many values there are.
+@readonly
+routine Iterable[T].get_count() -> Integer
+    return Integer(from: me.get_count())
+
+### Returns how many values satisfy `predicate`.
+### :param predicate: The test applied to each value.
+@readonly
+routine Iterable[T].get_count(predicate: Routine[(T,), Bool]) -> Integer
+    return Integer(from: me.get_count(predicate: predicate))
+
+### Returns the values after the first `count`.
+### :param count: How many values to leave out.
+@readonly
+routine Iterable[T].skip(count: Integer) -> SkipIterable[T, Me]
+    return me.skip(count: position_of(value: count))
+
+### Returns the first `count` values.
+### :param count: How many values to keep.
+@readonly
+routine Iterable[T].take(count: Integer) -> TakeIterable[T, Me]
+    return me.take(count: position_of(value: count))

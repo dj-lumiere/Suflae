@@ -496,14 +496,19 @@ internal sealed class EntityLoweringPass
             : m with { Object = obj };
     }
 
-    private IndexExpression LowerIndexExpression(IndexExpression ix)
+    // An index that makes a bare entity (`nums[1 til 3]`, a slice: a new list) is an rvalue like a call: it is
+    // promoted to a handle, or a bare list pointer would be bound where a `Roamed` handle is expected.
+    private Expression LowerIndexExpression(IndexExpression ix)
     {
         Expression o = LowerExpression(expr: ix.Object);
         Expression ii = LowerExpression(expr: ix.Index);
-        return !ReferenceEquals(objA: o, objB: ix.Object) ||
-               !ReferenceEquals(objA: ii, objB: ix.Index)
+        IndexExpression lowered = !ReferenceEquals(objA: o, objB: ix.Object) ||
+                                  !ReferenceEquals(objA: ii, objB: ix.Index)
             ? ix with { Object = o, Index = ii }
             : ix;
+        return ix.ResolvedType is EntityTypeSymbol made
+            ? WrapInRoam(inner: lowered, entity: made)
+            : lowered;
     }
 
     private BinaryExpression LowerBinaryExpression(BinaryExpression bin)
@@ -614,8 +619,12 @@ internal sealed class EntityLoweringPass
         }
 
         // A construction `E(...)` stores its args into fields; a borrowed Roamed arg going into a
-        // Roamed field must retain (else the field + the source local both release → double free).
-        if (call.ResolvedType is EntityTypeSymbol)
+        // Roamed field must retain (else the field + the source local both release → double free). Only the
+        // memberwise construction stores fields: a member call that returns an entity (`s.union(other: t)`)
+        // and a written creator (`List(from: s)`) take their arguments as parameters.
+        bool constructs = call.ResolvedType is EntityTypeSymbol && call.Callee is not MemberExpression &&
+                          call.ResolvedRoutine is null or { IsSynthesized: true };
+        if (constructs)
         {
             for (int k = 0; k < args.Count; k++)
             {
@@ -633,10 +642,10 @@ internal sealed class EntityLoweringPass
         // `.raw_inner()`. SF routine/memberRoutine parameters are NOT Roamed-substituted, so their slot
         // is a bare `E` and must receive the real entity pointer — passing the RoamController
         // handle makes the callee read the controller as the entity (`x.field` → crash). Borrow
-        // semantics: no retain, the caller keeps ownership. Skips construction (call.ResolvedType
-        // is EntityTypeSymbol), whose args are field stores needing a retained Roamed (handled
-        // above). Mirrors the memberRoutine-receiver `raw_inner` interim below.
-        if (call.ResolvedType is not EntityTypeSymbol && lowered.ResolvedRoutine is { } argRoutine)
+        // semantics: no retain, the caller keeps ownership. Skips construction, whose args are field
+        // stores needing a retained Roamed (handled above). Mirrors the memberRoutine-receiver `raw_inner`
+        // interim below.
+        if (!constructs && lowered.ResolvedRoutine is { } argRoutine)
         {
             lowered = ProjectRoamedArgsIntoBareParams(call: lowered, routine: argRoutine);
         }
@@ -725,13 +734,21 @@ internal sealed class EntityLoweringPass
             }
         }
 
-        if (gmce.ResolvedType is EntityTypeSymbol)
+        // Only the memberwise construction stores fields; a written creator (`List[Integer](from: s)`) takes
+        // its arguments as parameters, projected like any call's.
+        if (gmce.ResolvedType is EntityTypeSymbol && gmce.ResolvedRoutine is null or { IsSynthesized: true })
         {
             for (int k = 0; k < gArgs.Count; k++)
             {
                 gArgs[index: k] = RetainConstructionArg(arg: gArgs[index: k]);
             }
 
+            gChanged = true;
+        }
+        else if (gmce.ResolvedRoutine is { } gRoutine &&
+                 ProjectRoamedArgs(arguments: gArgs, routine: gRoutine) is { } projectedArgs)
+        {
+            gArgs = projectedArgs;
             gChanged = true;
         }
 
@@ -749,15 +766,24 @@ internal sealed class EntityLoweringPass
     private static CallExpression ProjectRoamedArgsIntoBareParams(CallExpression call,
         RoutineInfo routine)
     {
+        return ProjectRoamedArgs(arguments: call.Arguments, routine: routine) is { } projected
+            ? call with { Arguments = projected }
+            : call;
+    }
+
+    // The arguments with each Roamed one that lands in a bare-entity parameter projected, or null when none
+    // does.
+    private static List<Expression>? ProjectRoamedArgs(List<Expression> arguments, RoutineInfo routine)
+    {
         List<ParamInfo> nonMe = BuildNonMeParams(routine: routine);
 
         bool changed = false;
-        var newArgs = new List<Expression>(capacity: call.Arguments.Count);
+        var newArgs = new List<Expression>(capacity: arguments.Count);
         int posIdx = 0;
-        foreach (Expression a in call.Arguments)
+        foreach (Expression a in arguments)
         {
             ParamInfo? param = ResolveArgParam(a: a, nonMe: nonMe, posIdx: ref posIdx);
-            if (param?.Type is EntityTypeSymbol entity)
+            if (BareEntityOf(type: param?.Type) is { } entity)
             {
                 Expression projected = ProjectRawInner(arg: a, targetEntity: entity);
                 newArgs.Add(item: projected);
@@ -773,8 +799,22 @@ internal sealed class EntityLoweringPass
         }
 
         return changed
-            ? call with { Arguments = newArgs }
-            : call;
+            ? newArgs
+            : null;
+    }
+
+    // The bare entity a parameter takes: its own type, or the entity an `Accessing`/`Controlling` token over one
+    // stands for (`eq(you: Accessing[List[T]])` reads the other list itself, not its handle).
+    private static EntityTypeSymbol? BareEntityOf(TypeSymbol? type)
+    {
+        return type switch
+        {
+            EntityTypeSymbol entity => entity,
+            ProtocolTypeSymbol { TypeArguments: [EntityTypeSymbol tokenEntity] } token
+                when (token.GenericDefinition ?? token).BareName is RuntimeContract.Accessing
+                    or RuntimeContract.Controlling => tokenEntity,
+            _ => null
+        };
     }
 
     // Builds the list of non-`me` parameters from a routine (the subset that call arguments map to).

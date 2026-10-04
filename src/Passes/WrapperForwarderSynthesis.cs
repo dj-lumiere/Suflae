@@ -74,11 +74,26 @@ internal static class WrapperForwarderSynthesis
         return type != null && InternalBorrowTokens.Contains(item: BareTypeName(name: type.Name));
     }
 
-    /// <summary>A dedup/overload key for a member routine: name + param type names + failability.</summary>
+    /// <summary>The fixed-width integer types, which Suflae's own surface replaces with <c>Integer</c>.</summary>
+    private static readonly HashSet<string> FixedWidthIntegers = new(collection:
+        ["U8", "U16", "U32", "U64", "U128", "U256", "S8", "S16", "S32", "S64", "S128", "S256"],
+        comparer: StringComparer.Ordinal);
+
+    /// <summary>Whether <paramref name="type"/> is a fixed-width integer or has one among its type arguments
+    /// (<c>Range[U64]</c>).</summary>
+    private static bool MentionsFixedWidthInteger(TypeExpression? type)
+    {
+        return type != null && (FixedWidthIntegers.Contains(item: BareTypeName(name: type.Name)) ||
+                                type.GenericArguments?.Any(predicate: MentionsFixedWidthInteger) == true);
+    }
+
+    /// <summary>A dedup key for a member routine: its name and parameter names. Types are left out on purpose: a
+    /// wrapper method replaces the inner one called the same way even when its types differ (Suflae's
+    /// <c>getitem(index: Integer)</c> replaces RazorForge's <c>getitem(index: U64)</c>).</summary>
     private static string ForwarderSignatureKey(RoutineDeclaration r)
     {
         return
-            $"{r.MemberRoutineName}({string.Join(separator: ",", values: r.Parameters.Where(predicate: p => p.Name != "me").Select(selector: p => p.Type?.Name ?? "?"))})#{r.IsFailable}";
+            $"{r.MemberRoutineName}({string.Join(separator: ",", values: r.Parameters.Where(predicate: p => p.Name != "me").Select(selector: p => p.Name))})";
     }
 
     /// <summary>
@@ -299,6 +314,15 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
+        // Suflae counts and indexes with `Integer`, so a wrapper never shows a fixed-width integer: a method
+        // taking or returning one is either written again by hand with `Integer` (`count`, `getitem`) or left
+        // out (the raw and sorting helpers).
+        if (inner.Parameters.Any(predicate: p => p.Name != "me" && MentionsFixedWidthInteger(type: p.Type)) ||
+            MentionsFixedWidthInteger(type: inner.ReturnType))
+        {
+            return false;
+        }
+
         // Internal borrow-token surface: a method taking a mutable/lifecycle access token
         // (`Controlling`/`Receiving`/`Watching`/`Enterable`) over an internal node type is an
         // implementation helper (`insert_non_full(node: Controlling[BTreeListNode[T]], ..)`), never
@@ -318,6 +342,21 @@ internal static class WrapperForwarderSynthesis
         }
 
         return true;
+    }
+
+    /// <summary>A copy of <paramref name="type"/> written at <paramref name="location"/>, its type arguments
+    /// too: a name prefers the types of the realm of the file it is written in.</summary>
+    private static TypeExpression? WrittenAt(TypeExpression? type, SourceLocation location)
+    {
+        return type == null
+            ? null
+            : type with
+            {
+                Location = location,
+                GenericArguments = type.GenericArguments?
+                                       .Select(selector: a => WrittenAt(type: a, location: location)!)
+                                       .ToList()
+            };
     }
 
     /// <summary>Builds one <c>routine X[..].m(args) -> ret: return me.inner.m(args)</c> forwarder.
@@ -376,19 +415,25 @@ internal static class WrapperForwarderSynthesis
 
         // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RF::Core.Y`; surface it as
         // the SF wrapper via the memberwise `X[..](inner: <call>)` constructor (mirrors the hand-written
-        // ctor). The construction callee is a TypeExpression naming the SF wrapper with the return type's
-        // own generic arguments; it resolves to the SF realm under the wrapper file's ResolutionRealm.
+        // ctor), at the return type's own generic arguments. The wrapper's name resolves to the Suflae type
+        // because the forwarder carries the wrapper file's location.
         if (reWrap && inner.ReturnType is { } wrapRet)
         {
             // The target wrapper is named by the RETURN type (self `copy`→X, or a sibling `keys`→List),
             // instantiated at the return type's own generic arguments.
-            var ctorType = new TypeExpression(Name: BareTypeName(name: wrapRet.Name),
-                GenericArguments: wrapRet.GenericArguments,
-                Location: loc);
-            call = new CallExpression(Callee: ctorType,
-                Arguments:
-                [new NamedArgumentExpression(Name: "inner", Value: call, Location: loc)],
-                Location: loc);
+            // Built the way the parser builds `X[..](inner: …)` and `X(inner: …)`.
+            string wrapName = BareTypeName(name: wrapRet.Name);
+            var wrapIdentifier = new IdentifierExpression(Name: wrapName, Location: loc);
+            List<Expression> innerArg =
+                [new NamedArgumentExpression(Name: "inner", Value: call, Location: loc)];
+            call = wrapRet.GenericArguments is { Count: > 0 } wrapArgs
+                ? new GenericMemberRoutineCallExpression(Object: wrapIdentifier,
+                    MemberRoutineName: wrapName,
+                    TypeArguments: wrapArgs,
+                    Arguments: innerArg,
+                    IsMemoryOperation: false,
+                    Location: loc)
+                : new CallExpression(Callee: wrapIdentifier, Arguments: innerArg, Location: loc);
         }
 
         List<Statement> stmts = inner.ReturnType is not null
@@ -402,7 +447,10 @@ internal static class WrapperForwarderSynthesis
 
         return new RoutineDeclaration(Name: inner.MemberRoutineName!,
             Parameters: valueParams,
-            ReturnType: inner.ReturnType,
+            // A re-wrapped result is the Suflae type: its name is read where the wrapper is written.
+            ReturnType: reWrap
+                ? WrittenAt(type: inner.ReturnType, location: loc)
+                : inner.ReturnType,
             Body: body,
             Visibility: VisibilityModifier.Open,
             Annotations: inner.Annotations?.ToList() ?? [],

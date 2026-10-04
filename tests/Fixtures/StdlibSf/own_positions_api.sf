@@ -1,0 +1,23 @@
+module Tests/StdlibSf/OwnPositionsApi
+
+import IO/Console
+import IterTools
+
+# Positions count with Integer in Suflae: end-relative `^n`, slices, Text search, and the RazorForge
+# list crossing.
+routine find!(items: List[Text], name: Text) -> Integer
+    each i in 0 til items.count()
+        if items[i] == name
+            return i
+    absent
+
+routine start()
+    var xs = ["a", "b", "c"]
+    show(f"find={find(items: xs, name: "c")} last={xs[^1]} second_last={xs[^2]} tail={xs[1 til ^0].count()}")
+    show(f"text_last={"hello"[^1]} text_find={"hello".find(other: "l")}")
+    var rf = xs.to_razorforge()
+    var back = List(from: rf)
+    var unique = List(from: xs.Set())
+    show(f"rf={rf.count()} back={back.count() + 1} unique={unique.count()}")
+    show("DONE")
+    return

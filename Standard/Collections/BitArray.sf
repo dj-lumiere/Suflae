@@ -1,0 +1,339 @@
+module Collections
+
+import Numerics
+import BuilderQuery
+### A fixed-size, inline sequence of `N` boolean flags packed into bytes.
+###
+### `BitArray[N]` stores exactly `N` bits compactly — each bit occupies only
+### one bit of storage rather than a full byte. Like {Array[T, N]}, it is a
+### record type: copying a `BitArray` copies all `N` bits and the size is fixed
+### at build time.
+###
+### Because modification returns a new copy (via `with_set` and `with_flipped`)
+### rather than mutating in place, `BitArray` is well-suited for immutable flag
+### sets or small bit masks that are passed around by value.
+###
+### **When to use**
+### - The bit count is known at build time.
+### - You want value semantics (copy = full duplication of all bits).
+### - You need a compact, cache-friendly fixed-size flag field.
+### - Use {BitList} when the number of bits is only known at runtime or bits are appended dynamically.
+### - Use {Array[Bool, N]} when you need per-element mutability and don't mind the extra memory.
+###
+### **Complexity**
+### | Operation | Time |
+### |---|---|
+### | `getitem!` | O(1) |
+### | `with_set` / `with_flipped` | O(1) — returns a new copy |
+### | `count_ones` / `count_zeros` | O(N) |
+### | `any` / `all` / `none` | O(N) |
+### | `contains` | O(N) |
+###
+### :typeparam N: The buildtime bit count, supplied as a `U64` literal.
+### :see: {BitList} for a heap-backed growable bit sequence.
+### :see: {Array[T, N]} for a fixed-size inline array of typed elements.
+@llvm("[{(N+7)//8} x i8]")
+record BitArray[N]
+relates BitArrayEmittable[N] as Iter
+obeys Comparable, Iterable[Bool], MutableIndexable[Bool]
+needs U64 N
+    pass
+
+# ============================================================================
+# Iteration Support
+# ============================================================================
+
+### Walks the bits of a fixed-size `BitArray[N]` from index 0 to N - 1.
+### Because `BitArray` is a record type, the iterator holds its own copy of the packed bits.
+### :typeparam N: The buildtime bit count.
+entity BitArrayEmittable[N]
+obeys Emittable[Bool]
+needs U64 N
+    ### Stores the bit array being iterated.
+    bits: BitArray[N]
+    ### Stores the next logical bit index to read.
+    index: U64
+
+### Reads the byte at `index` from a `BitArray[N]`'s packed storage.
+### :param array: The bit array to read from.
+### :param index: The zero-based byte position.
+### :returns: The byte stored at `index`.
+@llvm_ir("{result} = alloca [{(N+7)//8} x i8]\nstore [{(N+7)//8} x i8] {array}, ptr {prev}\n{result} = getelementptr [{(N+7)//8} x i8], ptr {prev}, i32 0, i64 {index}\n{result} = load i8, ptr {prev}")
+routine LLVM::byte_at_bits[N](array: BitArray[N], index: U64) -> U8
+needs U64 N
+
+### Writes `value` into the byte at `index` of a `BitArray[N]`'s packed storage.
+### :param array: The bit array to update.
+### :param index: The zero-based byte position.
+### :param value: The byte to store.
+### :returns: A copy of `array` with the byte at `index` replaced by `value`.
+@llvm_ir("{result} = alloca [{(N+7)//8} x i8]\nstore [{(N+7)//8} x i8] {array}, ptr {prev}\n{result} = getelementptr [{(N+7)//8} x i8], ptr {prev}, i32 0, i64 {index}\nstore i8 {value}, ptr {prev}\n{result} = load [{(N+7)//8} x i8], ptr {first}")
+routine LLVM::set_byte_at_bits[N](array: BitArray[N], index: U64, value: U8) -> BitArray[N]
+needs U64 N
+
+# ============================================================================
+# Query Operations
+# ============================================================================
+
+@readonly
+secret routine BitArray[N].count_raw() -> U64
+    return N
+
+### Returns the fixed number of bits in this array.
+### This is always equal to the buildtime parameter `N`.
+### :returns: The bit count `N`.
+@readonly
+routine BitArray[N].count() -> Integer
+    return Integer(from: me.count_raw())
+
+### Returns true when the buildtime bit count is zero.
+### :returns: `true` if `N == 0`.
+@readonly
+routine BitArray[N].is_empty() -> Bool
+    return N == 0u64
+
+# ============================================================================
+# Indexing (read-only, value semantics)
+# ============================================================================
+
+@readonly
+secret routine BitArray[N].getitem_raw!(index: U64) -> Bool
+    if index >= N
+        throw IndexOutOfBoundsError(index: index, count: N)
+    # Access bit at index within packed bytes
+    var byte_idx = index // 8u64
+    var bit_off = U8(index % 8u64)
+    var byte_val = 0u8
+    # Read the packed byte in place through the storage pointer — no whole-array copy.
+    danger
+        byte_val = LLVM::load_element_ref[BitArray[N], U8](me.hijack(), byte_idx)
+    return (byte_val & (1u8 << bit_off)) != 0u8
+
+### Returns the bit stored at `index`.
+### :param index: The zero-based bit position to read.
+### :returns: `true` if the bit at `index` is set; `false` if it is clear.
+### :throws: {IndexOutOfBoundsError} if `index >= N`.
+@readonly
+routine BitArray[N].getitem!(index: Integer) -> Bool
+    return me.getitem_raw(index: position_of(value: index))
+
+secret routine BitArray[N].setitem_raw!(index: U64, value: Bool)
+    if index >= N
+        throw IndexOutOfBoundsError(index: index, count: N)
+    var byte_idx = LLVM::unsigned_div(index, 8u64)
+    var bit_off = U8(LLVM::unsigned_rem(index, 8u64))
+    # `me` is by reference (struct-record `setitem!`): read-modify-write the single packed byte in
+    # place through `me.hijack()` so the bit change reaches the caller's storage — no whole-array copy.
+    danger
+        var byte_val = LLVM::load_element_ref[BitArray[N], U8](me.hijack(), byte_idx)
+        if value
+            LLVM::store_element_ref[BitArray[N], U8](
+                me.hijack(),
+                byte_idx,
+                byte_val | (1u8 << bit_off),
+            )
+        else
+            LLVM::store_element_ref[BitArray[N], U8](
+                me.hijack(),
+                byte_idx,
+                byte_val & ~(1u8 << bit_off),
+            )
+    return
+
+### Writes `value` into the bit at `index`, mutating this `BitArray` in place.
+### :param index: The zero-based bit position to update.
+### :param value: The new bit value.
+### :throws: {IndexOutOfBoundsError} if `index >= N`.
+routine BitArray[N].setitem!(index: Integer, value: Bool)
+    me.setitem_raw(index: position_of(value: index), value: value)
+    return
+
+# ============================================================================
+# Functional Modification (returns new copy)
+# ============================================================================
+
+@readonly
+secret routine BitArray[N].with_set_raw(index: U64, value: Bool) -> BitArray[N]
+    # Returns a new BitArray with the bit at index changed
+    if index >= N
+        return me
+    var result = me
+    # Modify the bit in the copy
+    var byte_idx = LLVM::unsigned_div(index, 8u64)
+    var bit_off = U8(LLVM::unsigned_rem(index, 8u64))
+    var byte_val = LLVM::byte_at_bits[N](result, byte_idx)
+    if value
+        result = LLVM::set_byte_at_bits[N](result, byte_idx, byte_val | (1u8 << bit_off))
+    else
+        result = LLVM::set_byte_at_bits[N](result, byte_idx, byte_val & ~(1u8 << bit_off))
+    return result
+
+### Returns a new `BitArray` identical to this one but with the bit at `index` set to `value`.
+### The original value is unchanged because `BitArray` has value semantics.
+### If `index >= N`, the original array is returned unmodified.
+### :param index: The zero-based bit position to change.
+### :param value: The new bit value.
+### :returns: A copy of this array with the specified bit updated.
+@readonly
+routine BitArray[N].with_set(index: Integer, value: Bool) -> BitArray[N]
+    return me.with_set_raw(index: position_of(value: index), value: value)
+
+@readonly
+secret routine BitArray[N].with_flipped_raw(index: U64) -> BitArray[N]
+    # Returns a new BitArray with the bit at index toggled
+    if index >= N
+        return me
+    var current = me.getitem_raw(index: index)
+    return me.with_set_raw(index: index, value: not current)
+
+### Returns a new `BitArray` identical to this one but with the bit at `index` toggled.
+### If `index >= N`, the original array is returned unmodified.
+### :param index: The zero-based bit position to flip.
+### :returns: A copy of this array with the specified bit inverted.
+@readonly
+routine BitArray[N].with_flipped(index: Integer) -> BitArray[N]
+    return me.with_flipped_raw(index: position_of(value: index))
+
+# ============================================================================
+# Bit Queries
+# ============================================================================
+
+@readonly
+secret routine BitArray[N].count_ones_raw() -> U64
+    var count = 0u64
+    var i = 0u64
+    while i < N
+        if me.getitem_raw(index: i)
+            count = count +% 1u64
+        i = i +% 1u64
+    return count
+
+### Returns the number of bits currently set to `true`.
+### :returns: The count of one-bits in this array.
+@readonly
+routine BitArray[N].count_ones() -> Integer
+    return Integer(from: me.count_ones_raw())
+
+@readonly
+secret routine BitArray[N].count_zeros_raw() -> U64
+    return N -% me.count_ones_raw()
+
+### Returns the number of bits currently set to `false`.
+### :returns: `N` minus the number of one-bits.
+@readonly
+routine BitArray[N].count_zeros() -> Integer
+    return Integer(from: me.count_zeros_raw())
+
+### Returns true when at least one stored bit is `true`.
+### :returns: `true` if any bit is set; `false` if all bits are clear.
+@readonly
+routine BitArray[N].any() -> Bool
+    var i = 0u64
+    while i < N
+        if me.getitem_raw(index: i)
+            return true
+        i = i +% 1u64
+    return false
+
+### Returns true when every stored bit is `true`.
+### Empty arrays (`N == 0`) vacuously return `true`.
+### :returns: `true` if all bits are set; `false` if any bit is clear.
+@readonly
+routine BitArray[N].all() -> Bool
+    var i = 0u64
+    while i < N
+        if not me.getitem_raw(index: i)
+            return false
+        i = i +% 1u64
+    return true
+
+### Returns true when no stored bit is `true`.
+### :returns: `true` if all bits are clear; `false` if any bit is set.
+@readonly
+routine BitArray[N].none() -> Bool
+    return not me.any()
+
+### Returns true if any stored bit equals `value`.
+### When `value` is `true`, equivalent to `any()`; when `false`, equivalent to `not all()`.
+### :param value: The bit value to search for.
+### :returns: `true` if at least one stored bit matches `value`.
+@readonly
+routine BitArray[N].contains(value: Bool) -> Bool
+    if value
+        return me.any()
+    return not me.all()
+
+# ============================================================================
+# Display
+# ============================================================================
+
+@readonly
+@override
+routine BitArray[N].represent() -> Text
+    var result = "BitArray(["
+    var i = 0u64
+    while i < N
+        if i > 0u64
+            result = result + ", "
+        result = result + nested_repr(me.getitem_raw(index: i))
+        i = i +% 1u64
+    result = result + "])"
+    return result
+
+@readonly
+@override
+routine BitArray[N].diagnose() -> Text
+    var result = me.full_type_name() + "(["
+    var i = 0u64
+    while i < N
+        if i > 0u64
+            result = result + ", "
+        result = result + nested_repr(me.getitem_raw(index: i))
+        i = i +% 1u64
+    result = result + "])"
+    return result
+
+@readonly
+routine BitArray[N].iter() -> BitArrayEmittable[N]
+    return BitArrayEmittable[N](bits: me, index: 0u64)
+
+### Returns the next bit from the iterator in ascending index order.
+### :returns: The bit at the current index.
+### :absent: All `N` bits have been yielded.
+routine BitArrayEmittable[N].emit!() -> Bool
+    if me.index >= N
+        absent
+    var value = me.bits.getitem_raw(index: me.index)
+    me.index = me.index + 1u64
+    return value
+
+# ============================================================================
+# Equality and Comparison
+# ============================================================================
+
+### Returns true when both bit arrays contain equal bits at every position.
+### :param you: The other bit array to compare against.
+### :returns: `true` if every corresponding pair of bits is equal.
+### :note: Bit-by-bit comparison is required because the trailing bits of the
+###        last byte are unspecified — a raw `memcmp` would compare padding.
+@readonly
+routine BitArray[N].eq(you: BitArray[N]) -> Bool
+    each i in 0u64 til N
+        if me.getitem_raw(index: i) != you.getitem_raw(index: i)
+            return false
+    return true
+
+### Lexicographic comparison of two bit arrays of equal length.
+### Compares bit by bit from index 0; `false` sorts before `true`.
+### :param you: The other bit array to compare against.
+### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
+@readonly
+routine BitArray[N].cmp(you: BitArray[N]) -> ComparisonSign
+    each i in 0u64 til N
+        var a = me.getitem_raw(index: i)
+        var b = you.getitem_raw(index: i)
+        if a != b
+            if a
+                return ME_LARGE
+            return ME_SMALL
+    return SAME

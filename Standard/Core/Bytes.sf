@@ -1,0 +1,120 @@
+module Core
+
+import Numerics
+
+# Suflae's surface of `Bytes`, `Character` and `Byte`: the same values as RazorForge's, counted and indexed with
+# `Integer`, and split into Suflae lists. A Suflae program calls these in place of the RazorForge routines of the
+# same names.
+
+### Creates empty bytes.
+routine Bytes() -> Bytes
+    return Bytes()
+
+### Creates bytes of the bytes of `from_list`, in order.
+### :param from_list: The bytes.
+routine Bytes(from_list: List[Byte]) -> Bytes
+    return Bytes(from_list: from_list.to_razorforge())
+
+### Creates bytes of one byte.
+### :param from_byte: The byte.
+routine Bytes(from_byte: Byte) -> Bytes
+    return Bytes(from_byte: from_byte)
+
+### Returns the number of bytes.
+@readonly
+routine Bytes.count() -> Integer
+    return Integer(from: me.count())
+
+### Returns how many times `byte` appears.
+### :param byte: The byte to count.
+@readonly
+routine Bytes.count_of(byte: Byte) -> Integer
+    return Integer(from: me.count_of(byte: byte))
+
+### Returns the byte at `index` (`bytes[i]`).
+### :param index: The position, from 0.
+@readonly
+routine Bytes.getitem!(index: Integer) -> Byte
+    return me.getitem(index: position_of(value: index))
+
+### Returns the bytes at the positions in `range` (`bytes[a til b]`). Positions past the end are skipped.
+### :param range: The positions, from 0.
+@readonly
+routine Bytes.getitem(range: Range[Integer]) -> Bytes
+    return me.getitem(range: positions_of(range: range))
+
+### Returns the position of the first `byte`.
+### :param byte: The byte to look for.
+### :absent: There is no such byte.
+@readonly
+routine Bytes.find!(byte: Byte) -> Integer
+    return Integer(from: me.find(byte: byte))
+
+### Returns the position where the first `other` starts.
+### :param other: The bytes to look for.
+### :absent: The bytes do not contain `other`.
+@readonly
+routine Bytes.find!(other: Bytes) -> Integer
+    return Integer(from: me.find(other: other))
+
+### Returns the parts between the `separator` bytes.
+### :param separator: The byte between parts.
+@readonly
+routine Bytes.split(separator: Byte) -> List[Bytes]
+    return List[Bytes](from: me.split(separator: separator))
+
+### Returns the parts between the `separator` runs.
+### :param separator: The bytes between parts.
+@readonly
+routine Bytes.split(separator: Bytes) -> List[Bytes]
+    return List[Bytes](from: me.split(separator: separator))
+
+### Returns the bytes written `times` times in a row.
+### :param times: How many copies.
+@readonly
+routine Bytes.repeat(times: Integer) -> Bytes
+    return me.repeat(times: position_of(value: times))
+
+### Returns the text's UTF-16 code units.
+@readonly
+routine Text.encode_as_utf16() -> List[U16]
+    return List[U16](from: me.encode_as_utf16())
+
+### Returns the character's Unicode code point.
+@readonly
+routine Character.codepoint() -> Integer
+    return Integer(from: me.codepoint())
+
+### Returns the value of a decimal digit character (`'7'` is 7), or -1 for any other character.
+@readonly
+routine Character.digit_value() -> Integer
+    return Integer(from: me.digit_value())
+
+### Returns the character `delta` code points away (`'a'.offset(delta: 2)` is `'c'`). The result is not checked
+### to be a valid Unicode scalar.
+### :param delta: How far to move. A negative one moves back.
+@readonly
+routine Character.offset!(delta: Integer) -> Character
+    return me.offset(delta: S64(from: delta))
+
+### Returns the character's value as one byte, for a character that fits in one.
+@readonly
+routine Character.byte_value() -> Integer
+    return Integer(from: me.byte_value())
+
+### Returns the byte's value as a code point.
+@readonly
+routine Byte.codepoint() -> Integer
+    return Integer(from: me.codepoint())
+
+### Returns the value of an ASCII decimal digit byte.
+### :throws: {InvalidDigitError} if the byte is not a digit.
+@readonly
+routine Byte.digit_value!() -> Integer
+    return Integer(from: me.digit_value())
+
+### Returns the value of an ASCII hexadecimal digit byte.
+### :throws: {InvalidHexDigitError} if the byte is not a hexadecimal digit.
+@readonly
+routine Byte.hex_value!() -> Integer
+    return Integer(from: me.hex_value())

@@ -1,0 +1,10 @@
+count=2 n=12 xs[i]=5 first=3
+total=54 xs=[1, 3, 50] removed=1 xs=[3, 50]
+ys=[7, 8, 9] has8=true eq=true sorted=[1, 2, 3] slice=[8, 9]
+filled=["ab", "ab"] capacity_ok=true
+d={"a": 1, "b": 2, "c": 3} count=3 d[a]=1 sum=6 keys=["a", "b", "c"] keys_count=3
+after remove={"b": 2, "c": 3} count=2 has_a=false
+s={1, 2, 3} count=3 has2=true
+union={1, 2, 3, 4} inter={2, 3} diff={1}
+subset=false list=[1, 2, 3]
+DONE

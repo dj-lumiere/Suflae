@@ -1,0 +1,1007 @@
+module Core
+
+import Numerics
+
+# Suflae's surface of the fixed-width numbers: the values stay fixed-width, but the counts, positions,
+# shift amounts, radixes and places they take or give are `Integer`. A Suflae program calls these in
+# place of the RazorForge routines called the same way.
+
+### Returns the count of set bits (popcount) in this value's 8-bit representation.
+### :returns: The number of `1` bits; between 0 and 8.
+routine S8.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 8-bit representation.
+### :returns: `8` minus the popcount; between 0 and 8.
+routine S8.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `8` if the value is zero.
+routine S8.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `8` if the value is zero.
+routine S8.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `8` if the value is `−1` (all bits set).
+routine S8.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `8` if the value is `−1` (all bits set).
+routine S8.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns the sign of this value as −1, 0, or 1.
+### :returns: `1` if `me > 0`, `−1` if `me < 0`, `0` if `me == 0`.
+routine S8.signum() -> Integer
+    return Integer(from: me.signum())
+
+### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S8.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S8.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 8 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine S8.ashl(bits: Integer) -> S8
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
+### (arithmetic shift right). Shifting by 8 or more gives -1 for a negative value, else 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine S8.ashr(bits: Integer) -> S8
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
+### sign (logical shift right). Shifting by 8 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine S8.lshr(bits: Integer) -> S8
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine S8.rotate_left(bits: Integer) -> S8
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine S8.rotate_right(bits: Integer) -> S8
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine S8.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 16-bit representation.
+### :returns: The number of `1` bits; between 0 and 16.
+routine S16.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 16-bit representation.
+### :returns: `16` minus the popcount; between 0 and 16.
+routine S16.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `16` if the value is zero.
+routine S16.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `16` if the value is zero.
+routine S16.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `16` if the value is `−1` (all bits set).
+routine S16.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `16` if the value is `−1` (all bits set).
+routine S16.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns the sign of this value as −1, 0, or 1.
+### :returns: `1` if `me > 0`, `−1` if `me < 0`, `0` if `me == 0`.
+routine S16.signum() -> Integer
+    return Integer(from: me.signum())
+
+### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S16.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S16.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 16 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine S16.ashl(bits: Integer) -> S16
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
+### (arithmetic shift right). Shifting by 16 or more gives -1 for a negative value, else 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine S16.ashr(bits: Integer) -> S16
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
+### sign (logical shift right). Shifting by 16 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine S16.lshr(bits: Integer) -> S16
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine S16.rotate_left(bits: Integer) -> S16
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine S16.rotate_right(bits: Integer) -> S16
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine S16.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 32-bit representation.
+### :returns: The number of `1` bits; between 0 and 32.
+routine S32.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 32-bit representation.
+### :returns: `32` minus the popcount; between 0 and 32.
+routine S32.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `32` if the value is zero.
+routine S32.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `32` if the value is zero.
+routine S32.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `32` if the value is `−1` (all bits set).
+routine S32.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `32` if the value is `−1` (all bits set).
+routine S32.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns the sign of this value as −1, 0, or 1.
+### :returns: `1` if `me > 0`, `−1` if `me < 0`, `0` if `me == 0`.
+routine S32.signum() -> Integer
+    return Integer(from: me.signum())
+
+### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S32.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S32.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 32 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine S32.ashl(bits: Integer) -> S32
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
+### (arithmetic shift right). Shifting by 32 or more gives -1 for a negative value, else 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine S32.ashr(bits: Integer) -> S32
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
+### sign (logical shift right). Shifting by 32 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine S32.lshr(bits: Integer) -> S32
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine S32.rotate_left(bits: Integer) -> S32
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine S32.rotate_right(bits: Integer) -> S32
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine S32.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the number of bits set to one (popcount).
+### :returns: The count of set bits in the 64-bit representation.
+routine S64.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the number of bits set to zero.
+### :returns: `64` minus the popcount.
+routine S64.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of consecutive zero bits before the highest set bit.
+### :returns: The leading zero count; `64` if the value is zero.
+routine S64.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of consecutive zero bits starting from the least significant bit.
+### :returns: The trailing zero count; `64` if the value is zero.
+routine S64.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of consecutive one bits before the highest clear bit.
+### :returns: The leading one count.
+routine S64.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of consecutive one bits starting from the least significant bit.
+### :returns: The trailing one count.
+routine S64.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns the sign of this value as −1, 0, or 1.
+### :returns: `1` if positive, `−1` if negative, `0` if zero.
+routine S64.signum() -> Integer
+    return Integer(from: me.signum())
+
+### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S64.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S64.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 64 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine S64.ashl(bits: Integer) -> S64
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
+### (arithmetic shift right). Shifting by 64 or more gives -1 for a negative value, else 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine S64.ashr(bits: Integer) -> S64
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
+### sign (logical shift right). Shifting by 64 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine S64.lshr(bits: Integer) -> S64
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine S64.rotate_left(bits: Integer) -> S64
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine S64.rotate_right(bits: Integer) -> S64
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine S64.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 128-bit representation.
+### :returns: The number of `1` bits; between 0 and 128.
+routine S128.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 128-bit representation.
+### :returns: `128` minus the popcount; between 0 and 128.
+routine S128.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `128` if the value is zero.
+routine S128.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `128` if the value is zero.
+routine S128.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `128` if the value is `−1` (all bits set).
+routine S128.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `128` if the value is `−1` (all bits set).
+routine S128.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns the sign of this value as −1, 0, or 1.
+### :returns: `1` if `me > 0`, `−1` if `me < 0`, `0` if `me == 0`.
+routine S128.signum() -> Integer
+    return Integer(from: me.signum())
+
+### Returns ⌊log₂ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S128.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me <= 0`.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me <= 0`.
+routine S128.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 128 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine S128.ashl(bits: Integer) -> S128
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
+### (arithmetic shift right). Shifting by 128 or more gives -1 for a negative value, else 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine S128.ashr(bits: Integer) -> S128
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
+### sign (logical shift right). Shifting by 128 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine S128.lshr(bits: Integer) -> S128
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine S128.rotate_left(bits: Integer) -> S128
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine S128.rotate_right(bits: Integer) -> S128
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine S128.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 8-bit representation.
+### :returns: The number of `1` bits; between 0 and 8.
+routine U8.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 8-bit representation.
+### :returns: `8` minus the popcount; between 0 and 8.
+routine U8.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `8` if the value is zero.
+routine U8.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `8` if the value is zero.
+routine U8.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `8` if the value is `255`.
+routine U8.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `8` if the value is `255`.
+routine U8.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U8.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U8.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 8 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine U8.ashl(bits: Integer) -> U8
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 8 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine U8.ashr(bits: Integer) -> U8
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 8 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine U8.lshr(bits: Integer) -> U8
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine U8.rotate_left(bits: Integer) -> U8
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine U8.rotate_right(bits: Integer) -> U8
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine U8.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 16-bit representation.
+### :returns: The number of `1` bits; between 0 and 16.
+routine U16.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 16-bit representation.
+### :returns: `16` minus the popcount; between 0 and 16.
+routine U16.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `16` if the value is zero.
+routine U16.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `16` if the value is zero.
+routine U16.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `16` if the value is `65535`.
+routine U16.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `16` if the value is `65535`.
+routine U16.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U16.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U16.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 16 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine U16.ashl(bits: Integer) -> U16
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 16 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine U16.ashr(bits: Integer) -> U16
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 16 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine U16.lshr(bits: Integer) -> U16
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine U16.rotate_left(bits: Integer) -> U16
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine U16.rotate_right(bits: Integer) -> U16
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine U16.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 32-bit representation.
+### :returns: The number of `1` bits; between 0 and 32.
+routine U32.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 32-bit representation.
+### :returns: `32` minus the popcount; between 0 and 32.
+routine U32.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `32` if the value is zero.
+routine U32.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `32` if the value is zero.
+routine U32.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `32` if the value is `4294967295`.
+routine U32.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `32` if the value is `4294967295`.
+routine U32.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U32.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U32.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 32 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine U32.ashl(bits: Integer) -> U32
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 32 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine U32.ashr(bits: Integer) -> U32
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 32 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine U32.lshr(bits: Integer) -> U32
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine U32.rotate_left(bits: Integer) -> U32
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine U32.rotate_right(bits: Integer) -> U32
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine U32.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the number of bits set to one (popcount).
+### :returns: The count of set bits in the 64-bit representation.
+routine U64.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the number of bits set to zero.
+### :returns: `64` minus the popcount.
+routine U64.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of consecutive zero bits before the highest set bit.
+### :returns: The leading zero count; `64` if the value is zero.
+routine U64.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of consecutive zero bits starting from the least significant bit.
+### :returns: The trailing zero count; `64` if the value is zero.
+routine U64.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of consecutive one bits before the highest clear bit.
+### :returns: The leading one count.
+routine U64.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of consecutive one bits starting from the least significant bit.
+### :returns: The trailing one count.
+routine U64.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U64.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U64.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 64 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine U64.ashl(bits: Integer) -> U64
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 64 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine U64.ashr(bits: Integer) -> U64
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 64 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine U64.lshr(bits: Integer) -> U64
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+### :param bits: The number of bit positions to rotate.
+### :returns: The rotated value.
+routine U64.rotate_left(bits: Integer) -> U64
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+### :param bits: The number of bit positions to rotate.
+### :returns: The rotated value.
+routine U64.rotate_right(bits: Integer) -> U64
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine U64.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Returns the count of set bits (popcount) in this value's 128-bit representation.
+### :returns: The number of `1` bits; between 0 and 128.
+routine U128.count_ones() -> Integer
+    return Integer(from: me.count_ones())
+
+### Returns the count of clear bits in this value's 128-bit representation.
+### :returns: `128` minus the popcount; between 0 and 128.
+routine U128.count_zeros() -> Integer
+    return Integer(from: me.count_zeros())
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `128` if the value is zero.
+routine U128.leading_zeros() -> Integer
+    return Integer(from: me.leading_zeros())
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `128` if the value is zero.
+routine U128.trailing_zeros() -> Integer
+    return Integer(from: me.trailing_zeros())
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `128` if the value is `U128_MAX`.
+routine U128.leading_ones() -> Integer
+    return Integer(from: me.leading_ones())
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `128` if the value is `U128_MAX`.
+routine U128.trailing_ones() -> Integer
+    return Integer(from: me.trailing_ones())
+
+### Returns ⌊log₂ me⌋. Throws if `me` is zero (the logarithm of zero is undefined).
+### :returns: The floor of the base-2 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U128.ilog2!() -> Integer
+    return Integer(from: me.ilog2())
+
+### Returns ⌊log₁₀ me⌋. Throws if `me` is zero.
+### :returns: The floor of the base-10 logarithm.
+### :throws: {NumericDomainError} if `me == 0`.
+routine U128.ilog10!() -> Integer
+    return Integer(from: me.ilog10())
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 128 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+routine U128.ashl(bits: Integer) -> U128
+    return me.ashl(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 128 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+routine U128.ashr(bits: Integer) -> U128
+    return me.ashr(bits: U32(from: U64(from: bits)))
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 128 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+routine U128.lshr(bits: Integer) -> U128
+    return me.lshr(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated left by `bits` positions.
+routine U128.rotate_left(bits: Integer) -> U128
+    return me.rotate_left(bits: U32(from: U64(from: bits)))
+
+### Returns this value rotated right by `bits` positions.
+routine U128.rotate_right(bits: Integer) -> U128
+    return me.rotate_right(bits: U32(from: U64(from: bits)))
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@readonly
+routine U128.to_text(radix: Integer) -> Text
+    return me.to_text(radix: S32(from: S64(from: radix)))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+@readonly
+routine B16.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Renders this value to `sig_digits` significant decimal digits with C `%g`
+### layout (pure-RF exact-rational conversion; widens to B64 exactly first).
+### :param sig_digits: The number of significant decimal digits (>= 1).
+### :returns: The resulting `Text` value.
+routine B16.to_text(sig_digits: Integer) -> Text
+    return me.to_text(sig_digits: U64(from: sig_digits))
+
+### me * 2^n (C scalbn).
+routine B16.scalbn(n: Integer) -> B16
+    return me.scalbn(n: S64(from: n))
+
+### Alias of scalbn (C ldexp).
+routine B16.ldexp(n: Integer) -> B16
+    return me.ldexp(n: S64(from: n))
+
+### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+routine B16.scaleb!(n: Integer) -> B16
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+@readonly
+routine B32.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Renders this value to `sig_digits` significant decimal digits with C `%g`
+### layout (pure-RF exact-rational conversion; widens to B64 exactly first).
+### :param sig_digits: The number of significant decimal digits (>= 1).
+### :returns: The resulting `Text` value.
+routine B32.to_text(sig_digits: Integer) -> Text
+    return me.to_text(sig_digits: U64(from: sig_digits))
+
+### me * 2^n (C scalbn).
+routine B32.scalbn(n: Integer) -> B32
+    return me.scalbn(n: S64(from: n))
+
+### Alias of scalbn (C ldexp).
+routine B32.ldexp(n: Integer) -> B32
+    return me.ldexp(n: S64(from: n))
+
+### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+routine B32.scaleb!(n: Integer) -> B32
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+@readonly
+routine B64.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Renders this value to `sig_digits` significant decimal digits with C `%g`
+### layout (pure-RF exact-rational conversion).
+### :param sig_digits: The number of significant decimal digits (>= 1).
+### :returns: The resulting `Text` value.
+routine B64.to_text(sig_digits: Integer) -> Text
+    return me.to_text(sig_digits: U64(from: sig_digits))
+
+### me * 2^n (C scalbn).
+routine B64.scalbn(n: Integer) -> B64
+    return me.scalbn(n: S64(from: n))
+
+### Alias of scalbn (C ldexp).
+routine B64.ldexp(n: Integer) -> B64
+    return me.ldexp(n: S64(from: n))
+
+### IEEE 754 scaleB: `me * 2^n`, computed without intermediate rounding. Checked: crashes if a
+### finite `me` overflows to ±infinity (use `scaleb_unchecked` for raw IEEE propagation).
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+routine B64.scaleb!(n: Integer) -> B64
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+@readonly
+routine B128.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Multiplies by `2^n` exactly when representable (C `scalbn` / `ldexp`).
+### :param n: The power-of-two exponent adjustment.
+### :returns: `me * 2^n`, with overflow to infinity and underflow to subnormal/zero.
+routine B128.scalbn(n: Integer) -> B128
+    return me.scalbn(n: S64(from: n))
+
+### Alias of `scalbn` (C `ldexp`).
+### :param n: The power-of-two exponent adjustment.
+### :returns: `me * 2^n`.
+routine B128.ldexp(n: Integer) -> B128
+    return me.ldexp(n: S64(from: n))
+
+### IEEE 754 scaleB: `me * 2^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+routine B128.scaleb!(n: Integer) -> B128
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+routine D32.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me` scaled by `10^n`.
+routine D32.scaleb!(n: Integer) -> D32
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+routine D64.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me` scaled by `10^n`.
+routine D64.scaleb!(n: Integer) -> D64
+    return me.scaleb(n: S64(from: n))
+
+### Renders this value with exactly `places` digits after the point, rounded half to even from its
+### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
+### part is always written out in full, never in exponent form.
+### :param places: The number of digits after the point (0 for none).
+### :returns: The rendered `Text`.
+routine D128.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me` scaled by `10^n`.
+routine D128.scaleb!(n: Integer) -> D128
+    return me.scaleb(n: S64(from: n))
+
+### Formats this value as `a+bi` / `a-bi` with exactly `places` digits after the point in each part
+### (see `B32.fixed`).
+### :param places: The number of digits after the point.
+### :returns: The resulting `Text` value.
+routine C64.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Formats this value as `a+bi` / `a-bi` with exactly `places` digits after the point in each part
+### (see `B64.fixed`).
+### :param places: The number of digits after the point.
+### :returns: The resulting `Text` value.
+routine C128.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))
+
+### Formats this value as `a+bi` / `a-bi` with exactly `places` digits after the point in each part
+### (see `B128.fixed`).
+### :param places: The number of digits after the point.
+### :returns: The resulting `Text` value.
+routine C256.fixed(places: Integer) -> Text
+    return me.fixed(places: U64(from: places))

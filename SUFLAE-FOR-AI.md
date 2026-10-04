@@ -148,6 +148,10 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 | Other                   | `Bool`, `Duration`, `ByteSize`, `Moment`/`LocalMoment`, tuples `(A, B)`    |
 
 - Every type in the table except `Real`/`Complex` is usable with no import.
+- **Counts, positions, widths and amounts are always `Integer`**, whatever the value's type: a fixed-width
+  number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
+  `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.ashr(bits: 1)`), radixes
+  (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Integer`.
 - **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
   safe) with 34 significant digits; a result needing more digits (`1 / 3`) is rounded to 34, and a result
   beyond about `1e6144` crashes. It displays canonically: `2.50` shows as `2.5`.
@@ -437,7 +441,7 @@ routine parse!(n: Integer) -> Integer
         throw NopeError(what: f"{n} is negative")
     return n * 10
 
-routine find!(items: List[Text], name: Text) -> U64
+routine find!(items: List[Text], name: Text) -> Integer
     each i in 0 til items.count()
         if items[i] == name
             return i
@@ -581,6 +585,9 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
 - f-string specs are only `=`, `?` and `=?`. Everything else is a member routine called inside the braces:
   integers have `hex()`, `bin()`, `oct()`, `to_text(radix:)`; `Decimal` and floats have `fixed(places)`;
   `Text` has `pad_start(width)`, `pad_end(width)`, `center(width)`, `zero_pad(width)`.
+- `Text` counts and positions with `Integer`: `count()`, `count_of(...)`, `s[i]`, `find(other:)` /
+  `find_last(other:)` (failable: `try s.find(other: "x")`), `repeat(times:)`, and the widths of
+  `pad_start`/`pad_end`/`center`/`zero_pad`. `split(separator:)`, `lines()` and `words()` give a `List[Text]`.
 - `Text` is a value. Useful members: `count()`, `is_empty()`, `starts_with(prefix:)`,
   `ends_with(suffix:)`, `split(...)`, `words()`, `replace(old:, new:)`, `to_uppercase()`,
   `to_lowercase()`, `encode_as_utf8()`, and `+` to join. Substring test: `s have "ell"`. Slices take ranges:
@@ -613,7 +620,13 @@ each entry in ages
   `BitList`, `Array[T, N]`) are constructor-only and come from `import Collections`.
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
-- Indices and counts are `U64` (`xs.count()`); bare literals adapt (`xs[0]`).
+- Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
+  `xs.enumerate()` (pairs `(Integer, T)`). A negative index crashes with `NegativeIndexError`; count from the
+  end with `^` (`xs[^1]`).
+- The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
+  `SortedDict`, `CircularList`, `PriorityQueue`, `BitList`, `BitArray`. `Array[T, N]` is RazorForge's
+  fixed-size record, counted and indexed with `Integer` too. RazorForge's `SplitList` / `SplitArray`
+  (structure-of-arrays layouts) are not available in Suflae.
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
   `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
   same way.
@@ -898,6 +911,9 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
   keep it), as `Consulting[T]` / `Amending[T]` (to read / write it during the call), or keep it in a member
   variable of a Suflae entity.
 - `RF::Name` and `SF::Name` name a type in a specific language when both have one with that name.
+- **Collections do not cross as-is.** Suflae's `List` is not RazorForge's (`RF::List`, counted with `U64`).
+  Convert at the boundary: `List(from: rf_list)` makes a Suflae list from a RazorForge one, and
+  `xs.to_razorforge()` makes a RazorForge list from a Suflae one.
 
 ## 24. Status (do not generate as if shipped)
 
