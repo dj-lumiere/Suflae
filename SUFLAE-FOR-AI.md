@@ -246,6 +246,12 @@ routine start()
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
   Division by zero crashes (`DivisionByZeroError`), on `Real` and `Complex` too. On the floats, `Decimal`,
   `Real` and `Complex`, `0 / 0` crashes with `NumericDomainError` instead.
+- `Real` (from `import Numerics`) is finite-only like `Decimal`: nothing hands back an infinity or NaN,
+  the operation crashes instead (recover with `try`/`grab`). `log(0)` and `atanh(±1)` crash with
+  `DivisionByZeroError`, `sqrt`/`log` of a negative, `asin`/`acos` outside [-1, 1], `acosh` below 1 and
+  a negative base to a non-integer power with `NumericDomainError`, and `exp`, `sinh`, `cosh`, `**` or
+  any result too large for `Real` with `NumericOverflowError`. `Real(text: "nan")` / `"inf"` is an
+  `InvalidValueError`, and a `Real` made from an infinite or NaN `B64` crashes too.
 - Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. `==` compares values (it calls
   `eq`); `===` / `!==` ask whether two entities are the same object (§10).
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
