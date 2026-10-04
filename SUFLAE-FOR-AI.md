@@ -130,6 +130,14 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 - Generic constraints use **`needs`** (`needs T obeys Ordered`), never `where`.
 - Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
+- Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
+  (`List[T]`, `Set[T]`, `Agent[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
+  `select[TResult]`, `zip[TFirst, TSecond, ...]`), never another single letter (`K`, `V`, `U`, ...). A const generic
+  is `SCREAMING_SNAKE_CASE` with a meaning (`needs U64 CAPACITY`, `COUNT`, `BITS`), never `N`. The `T` prefix shows
+  at a use site (`var k: TKey`, a hover `get(key: TKey) -> TValue?`) that a name is a type parameter and not a real
+  type, and SCREAMING marks a buildtime constant like a `preset`, so case alone tells type, type parameter, buildtime
+  constant and runtime value apart. A receiver pattern's own parameter shadows the owner's parameter of the same name
+  (`routine List[Agent[T]].gather() -> List[T]`: that `T` is the pattern's).
 - Builder-written per-type routines (the constructor, `represent`, `diagnose`, `eq`, `cmp`, `hash`, …) are
   **wired routines**. They carry no sigil; you may write your own to replace one.
 - Say "build error" and "builder", not "compile error" and "compiler".
@@ -314,7 +322,8 @@ var label = when
     else => "small"
 ```
 
-- In an expression `when`, an arm with several statements ends with `becomes value`.
+- An expression `when` takes one expression per arm after `=>`. Several statements in an arm are a build error
+  (SF-S307): compute the value first, or write a `when` statement that sets a variable.
 - `if x is T name` tests and binds in one step; the binding exists only inside that branch.
 - `when` must cover every case of a `choice`, a `variant`, or a carrier's success arm; `else` covers the
   rest.
@@ -418,6 +427,8 @@ variant Number
 
 - **choice**: one of a fixed set, compared with `==` (`c == Color.RED`, `when c` with `== Color.RED =>`
   arms). Cases may carry values (`OK: 200`). Equality, order and hashing come with every choice.
+  `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
+  `Integer`); flags have the same two for their members.
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
   `have` / `lack` / `==` (`perms have Permission.WRITE`).
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
@@ -541,9 +552,9 @@ needs T obeys Ordered
             best = x
     return best
 
-record Pair[A, B]
-    first: A
-    second: B
+record Pair[TFirst, TSecond]
+    first: TFirst
+    second: TSecond
 
 protocol Greetable
     routine Me.greet() -> Text
@@ -617,14 +628,16 @@ each entry in ages
 
 - `List`, `Dict` and `Set` are always available; `[]`, `{k: v}` and `{a, b}` are their literals. The
   specialized containers (`SortedDict`, `SortedList`, `SortedSet`, `CircularList`, `PriorityQueue`,
-  `BitList`, `Array[T, N]`) are constructor-only and come from `import Collections`.
+  `BitList`, `Array[T, COUNT]`) are constructor-only and come from `import Collections`.
+- `List(from: value)` reads a list back from the `SerialValue` that `xs.serialize()` gives; it is failable
+  (`try List[Integer](from: v)`).
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
   `xs.enumerate()` (pairs `(Integer, T)`). A negative index crashes with `NegativeIndexError`; count from the
   end with `^` (`xs[^1]`).
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
-  `SortedDict`, `CircularList`, `PriorityQueue`, `BitList`, `BitArray`. `Array[T, N]` is RazorForge's
+  `SortedDict`, `CircularList`, `PriorityQueue`, `BitList`, `BitArray`. `Array[T, COUNT]` is RazorForge's
   fixed-size record, counted and indexed with `Integer` too. RazorForge's `SplitList` / `SplitArray`
   (structure-of-arrays layouts) are not available in Suflae.
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
@@ -877,7 +890,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `disobeys` `needs` `onlyif` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `unless` `when` `is` `isnot` `loop` `while` `each`
-  `break` `continue` `return` `throw` `pierce` `absent` `becomes`
+  `break` `continue` `return` `throw` `pierce` `absent`
 - **Recovery**: `try` `grab` `lookup`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`

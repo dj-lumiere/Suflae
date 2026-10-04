@@ -123,6 +123,25 @@ public partial class SuflaeLexer
 
     #region Constructor and Properties
 
+    /// <summary>Whether <paramref name="fileName"/> is inside the standard library directory.</summary>
+    private static bool IsStandardLibraryFile(string fileName)
+    {
+        try
+        {
+            string root = Path.GetFullPath(path: Builder.Declaration.StdlibLoader.GetDefaultStdlibPath());
+            return Path.GetFullPath(path: fileName)
+                       .StartsWith(value: root, comparisonType: StringComparison.OrdinalIgnoreCase);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SuflaeLexer"/> class.
     /// </summary>
@@ -193,8 +212,6 @@ public partial class SuflaeLexer
             [key: "try"] = TokenType.Try,
             [key: "grab"] = TokenType.Grab,
             [key: "lookup"] = TokenType.Lookup,
-            [key: "becomes"] = TokenType.Becomes,
-
             // Module system
             [key: "import"] = TokenType.Import,
             [key: "module"] = TokenType.Module,
@@ -250,6 +267,13 @@ public partial class SuflaeLexer
             // types just as well.
             [key: "everywhere"] = TokenType.Everywhere
         };
+
+        // The standard library's own Suflae files are builder-internal code, analyzed as RazorForge: they write
+        // the buildtime unrolling (`expand`) their derives need. A Suflae program never sees the keyword.
+        if (IsStandardLibraryFile(fileName: fileName))
+        {
+            _keywords[key: "expand"] = TokenType.Expand;
+        }
 
         // Numeric suffix map - shared between both languages
         _numericSuffixToTokenType = new Dictionary<string, TokenType>

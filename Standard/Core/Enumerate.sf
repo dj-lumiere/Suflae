@@ -4,39 +4,39 @@ import Numerics
 
 ### The values of an iterable, each paired with its position: `each (i, x) in xs.enumerate()`.
 ### :typeparam T: The value type.
-### :typeparam S: The iterable.
-entity EnumerateIterable[T, S]
-relates EnumerateEmittable[T, S/Iter] as Iter
+### :typeparam TSource: The iterable.
+entity EnumerateIterable[T, TSource]
+relates EnumerateEmittable[T, TSource/Iter] as Iter
 obeys Iterable[Tuple[Integer, T]]
-needs S obeys Iterable[T]
+needs TSource obeys Iterable[T]
     ### The iterable (borrowed, not owned).
-    secret source: Hijacked[S]
+    secret source: Hijacked[TSource]
     ### The position of the first value.
     secret start_index: Integer
 
 ### Walks an `EnumerateIterable`.
 ### :typeparam T: The value type.
-### :typeparam SE: The iterator of the source.
-entity EnumerateEmittable[T, SE]
+### :typeparam TSourceIter: The iterator of the source.
+entity EnumerateEmittable[T, TSourceIter]
 obeys Emittable[Tuple[Integer, T]]
-needs SE obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
     ### The iterator over the source (owned).
-    secret source: SE
+    secret source: TSourceIter
     ### The position of the next value.
     secret index: Integer
 
 ### Returns a walk over the pairs.
 @readonly
-routine EnumerateIterable[T, S].iter() -> EnumerateEmittable[T, S/Iter]
+routine EnumerateIterable[T, TSource].iter() -> EnumerateEmittable[T, TSource/Iter]
     danger
-        return EnumerateEmittable[T, S/Iter](
+        return EnumerateEmittable[T, TSource/Iter](
             source: me.source.as_entity().iter(),
             index: me.start_index,
         )
 
 ### Returns the next pair.
 ### :absent: The source has no more values.
-routine EnumerateEmittable[T, SE].emit!() -> Tuple[Integer, T]
+routine EnumerateEmittable[T, TSourceIter].emit!() -> Tuple[Integer, T]
     var position = me.index
     me.index = me.index + Integer(from: 1u64)
     # The value goes into the pair straight from the source, so the pair is its only holder.

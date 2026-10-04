@@ -1,0 +1,32 @@
+module ObjectHacker
+
+import Numerics
+
+# Suflae's surface of ObjectHacker: what an object is made of comes back in Suflae's own list, and a member
+# variable's position is an `Integer`.
+
+### A member variable as `memvars` reports it.
+record MemberVariableInfo
+    ### The member variable's name.
+    name: Text
+    ### The name of the member variable's type.
+    type_name: Text
+    ### Whether the member variable is `secret`.
+    is_secret: Bool
+    ### The member variable's position in its type's declaration, from 0.
+    order: Integer
+
+### What target is made of: every member variable, `secret` ones included, in declaration order.
+### :param of: Any value or entity.
+### :returns: One entry per member variable.
+routine memvars(of: T) -> List[MemberVariableInfo]
+needs AnyType T
+    var found = List[MemberVariableInfo]()
+    each info in memvars(of: of)
+        found.add_last(value: MemberVariableInfo(
+            name: info.name,
+            type_name: info.type_name,
+            is_secret: info.is_secret,
+            order: Integer(from: info.order),
+        ))
+    return found

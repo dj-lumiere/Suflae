@@ -1,0 +1,43 @@
+module Tests/StdlibSf/OwnChoiceAgentsApi
+
+import IO/Console
+
+# A Suflae choice or flags hands its cases back in Suflae's own list, counted with Integer, and a Suflae
+# list of Agents runs them together.
+choice Color
+    RED
+    GREEN
+    BLUE
+
+flags Perm
+    READ
+    WRITE
+
+suspended routine fetch(id: Integer) -> Integer
+    waitfor(5ms)
+    return id * 10
+
+suspended routine slow(id: Integer) -> Integer
+    each i in 0 til 100
+        if cancellation_requested()
+            return -1
+        waitfor(5ms)
+    return id
+
+routine names(colors: List[Color]) -> Text
+    var out = ""
+    each c in colors
+        out = out + f"{c} "
+    return out
+
+routine start()
+    show(f"colors={names(colors: Color.all_cases())}count={Color.count() * 10}")
+    show(f"perms={Perm.all_cases().count()} count={Perm.count()}")
+    var jobs = [fetch(id: 1), fetch(id: 2), fetch(id: 3)]
+    show(f"gather={jobs.gather()}")
+    var racers = [fetch(id: 4), fetch(id: 5)]
+    show(f"race={racers.race() > 0}")
+    var stoppers = [slow(id: 6), slow(id: 7)]
+    show(f"cancel={stoppers.cancel_all()}")
+    show("DONE")
+    return

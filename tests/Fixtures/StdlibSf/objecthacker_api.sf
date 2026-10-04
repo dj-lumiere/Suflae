@@ -13,6 +13,13 @@ record Point
     x: S64
     y: S64
 
+routine count_secret(infos: List[MemberVariableInfo]) -> Integer
+    var n = 0
+    each info in infos
+        if info.is_secret
+            n = n + 1
+    return n
+
 routine start()
     var hero = Hero(name: "Ada", hp: 10, seed: 7)
     var alias = hero
@@ -20,6 +27,7 @@ routine start()
     show(f"type: {type_name(of: hero)}")
     each info in memvars(of: hero)
         show(f"memvar {info.order}: {info.name}: {info.type_name}, secret: {info.is_secret}")
+    show(f"memvars: {count_secret(infos: memvars(of: hero))} secret, last at {memvars(of: hero)[^1].order + 1}")
 
     show(f"peek: {peek(target: hero)}")
     show(f"peek hp: {peek(target: hero, memvar: "hp")}")

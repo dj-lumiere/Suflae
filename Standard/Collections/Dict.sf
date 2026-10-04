@@ -13,14 +13,14 @@ secret preset ENTRY_LIVE: U8 = 1_u8
 
 ### A hash-flooding-resistant insertion-ordered key-value dictionary.
 ###
-### `Dict[K, V]` works like {Dict[K, V]} (insertion-ordered iteration, O(1) average
+### `Dict[TKey, TValue]` works like {Dict[TKey, TValue]} (insertion-ordered iteration, O(1) average
 ### operations) but uses SipHash-2-4 keyed with a per-instance secret to make the probe
 ### sequence unpredictable to external attackers. Iteration order follows insertion order;
 ### the secure key only affects the probe-array layout, not the entries array.
 ###
 ### **When to use**
 ### - You are storing data derived from untrusted input (e.g. HTTP headers, user IDs, file names).
-### - You need the same insert/lookup/remove interface as {Dict[K, V]} with a security guarantee.
+### - You need the same insert/lookup/remove interface as {Dict[TKey, TValue]} with a security guarantee.
 ###
 ### **Complexity**
 ### | Operation | Average | Worst case |
@@ -30,18 +30,18 @@ secret preset ENTRY_LIVE: U8 = 1_u8
 ### | `contains` / `get_or_default` | O(1) | O(n) |
 ### | Iteration | O(n + tombstones) | O(n + tombstones) |
 ###
-### :typeparam K: The key type. Must obey {Hashable} and {Equatable}.
-### :typeparam V: The value type associated with each key.
+### :typeparam TKey: The key type. Must obey {Hashable} and {Equatable}.
+### :typeparam TValue: The value type associated with each key.
 ### :see: {Set[T]} for the set counterpart.
-entity Dict[K, V]
-relates DictEmittable[K, V] as Iter, K as Key, V as Value
-obeys Iterable[DictEntry[K, V]], KeyFindable, Container,
-    Copyable onlyif (K obeys Assignable, V obeys Assignable), DictLiteral[K, V]
-needs K obeys Hashable, Equatable
+entity Dict[TKey, TValue]
+relates DictEmittable[TKey, TValue] as Iter, TKey as Key, TValue as Value
+obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, Container,
+    Copyable onlyif (TKey obeys Assignable, TValue obeys Assignable), DictLiteral[TKey, TValue]
+needs TKey obeys Hashable, Equatable
     secret ctrl: Hijacked[U8]
     secret indices: Hijacked[U64]
-    secret keys: Hijacked[K]
-    secret vals: Hijacked[V]
+    secret keys: Hijacked[TKey]
+    secret vals: Hijacked[TValue]
     secret entry_live: Hijacked[U8]
     secret count: U64
     secret deleted: U64
@@ -51,11 +51,11 @@ needs K obeys Hashable, Equatable
     secret k0: U64
     secret k1: U64
 
-### Emittable that walks the dense entries array of a {Dict[K, V]} in insertion order.
-entity DictEmittable[K, V]
-obeys Emittable[DictEntry[K, V]]
-    secret keys: Hijacked[K]
-    secret vals: Hijacked[V]
+### Emittable that walks the dense entries array of a {Dict[TKey, TValue]} in insertion order.
+entity DictEmittable[TKey, TValue]
+obeys Emittable[DictEntry[TKey, TValue]]
+    secret keys: Hijacked[TKey]
+    secret vals: Hijacked[TValue]
     secret entry_live: Hijacked[U8]
     secret entries_used: U64
     secret pos: U64
@@ -66,12 +66,12 @@ obeys Emittable[DictEntry[K, V]]
 
 ### Creates a dict containing the given key-value `pairs`. Variadic constructor behind the `{k: v, …}`
 ### dict-literal syntax (the `DictLiteral` opt-in): the builder packs the pairs into a fixed
-### `Array[DictEntry[K, V], N]` and monomorphizes one body per pair count. A later duplicate key overwrites.
-### :param pairs: The key-value pairs as `DictEntry[K, V]` values.
+### `Array[DictEntry[TKey, TValue], N]` and monomorphizes one body per pair count. A later duplicate key overwrites.
+### :param pairs: The key-value pairs as `DictEntry[TKey, TValue]` values.
 ### :returns: A dict of the given pairs.
-common routine Dict[K, V].from_literal(pairs...: DictEntry[K, V]) -> Dict[K, V]
-needs K obeys Hashable, Equatable
-    var result = Dict[K, V]()
+common routine Dict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> Dict[TKey, TValue]
+needs TKey obeys Hashable, Equatable
+    var result = Dict[TKey, TValue]()
     var i = 0u64
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
@@ -80,17 +80,17 @@ needs K obeys Hashable, Equatable
         i = i +% 1u64
     return result
 
-routine Dict[K, V]() -> Dict[K, V]
-    return Dict[K, V](key: SecureHashKey.random())
+routine Dict[TKey, TValue]() -> Dict[TKey, TValue]
+    return Dict[TKey, TValue](key: SecureHashKey.random())
 
-routine Dict[K, V](key: SecureHashKey) -> Dict[K, V]
+routine Dict[TKey, TValue](key: SecureHashKey) -> Dict[TKey, TValue]
     var cap = DICT_INITIAL_CAPACITY
     var ecap = DICT_INITIAL_ENTRIES
-    var dict = Dict[K, V](
+    var dict = Dict[TKey, TValue](
         ctrl: hijacked_none[U8](),
         indices: hijacked_none[U64](),
-        keys: hijacked_none[K](),
-        vals: hijacked_none[V](),
+        keys: hijacked_none[TKey](),
+        vals: hijacked_none[TValue](),
         entry_live: hijacked_none[U8](),
         count: 0u64,
         deleted: 0u64,
@@ -108,12 +108,12 @@ routine Dict[K, V](key: SecureHashKey) -> Dict[K, V]
             size: ByteSize(bytes: cap),
         )
         dict.indices = Hijacked[U64](rf_allocate_dynamic_uninit(U64.data_size() * cap))
-        dict.keys = hijacked_from[K](rf_allocate_dynamic_uninit(K.data_size() * ecap))
-        dict.vals = hijacked_from[V](rf_allocate_dynamic_uninit(V.data_size() * ecap))
+        dict.keys = hijacked_from[TKey](rf_allocate_dynamic_uninit(TKey.data_size() * ecap))
+        dict.vals = hijacked_from[TValue](rf_allocate_dynamic_uninit(TValue.data_size() * ecap))
         dict.entry_live = Hijacked[U8](rf_allocate_dynamic_uninit(ByteSize(bytes: ecap)))
     return dict
 
-routine Dict[K, V](key: SecureHashKey, capacity: Integer) -> Dict[K, V]
+routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, TValue]
     var wanted = U64(from: capacity)
     var cap = DICT_INITIAL_CAPACITY
     while cap < wanted
@@ -121,11 +121,11 @@ routine Dict[K, V](key: SecureHashKey, capacity: Integer) -> Dict[K, V]
     var ecap = DICT_INITIAL_ENTRIES
     while ecap < wanted
         ecap = ecap *% 2u64
-    var dict = Dict[K, V](
+    var dict = Dict[TKey, TValue](
         ctrl: hijacked_none[U8](),
         indices: hijacked_none[U64](),
-        keys: hijacked_none[K](),
-        vals: hijacked_none[V](),
+        keys: hijacked_none[TKey](),
+        vals: hijacked_none[TValue](),
         entry_live: hijacked_none[U8](),
         count: 0u64,
         deleted: 0u64,
@@ -143,26 +143,26 @@ routine Dict[K, V](key: SecureHashKey, capacity: Integer) -> Dict[K, V]
             size: ByteSize(bytes: cap),
         )
         dict.indices = Hijacked[U64](rf_allocate_dynamic_uninit(U64.data_size() * cap))
-        dict.keys = hijacked_from[K](rf_allocate_dynamic_uninit(K.data_size() * ecap))
-        dict.vals = hijacked_from[V](rf_allocate_dynamic_uninit(V.data_size() * ecap))
+        dict.keys = hijacked_from[TKey](rf_allocate_dynamic_uninit(TKey.data_size() * ecap))
+        dict.vals = hijacked_from[TValue](rf_allocate_dynamic_uninit(TValue.data_size() * ecap))
         dict.entry_live = Hijacked[U8](rf_allocate_dynamic_uninit(ByteSize(bytes: ecap)))
     return dict
 
 ### Frees the heap buffers owned by this dictionary. The element/key/value contents are
 ### not recursed into — only the backing arrays are released.
 @override
-dangerous routine Dict[K, V].destroy()
+dangerous routine Dict[TKey, TValue].destroy()
     # Tear down each live key and value before freeing the buffers (mirrors the live-entry scan
     # in DictEmittable.emit!). No-op for value types; frees owned entity keys/values.
     var p = 0u64
     while p < me.entries_used
         if me.entry_live.offset(ByteSize(bytes: p)).peek() == ENTRY_LIVE
             me.keys
-                .offset(K.data_size() * p)
+                .offset(TKey.data_size() * p)
                 .peek()
                 .destroy()
             me.vals
-                .offset(V.data_size() * p)
+                .offset(TValue.data_size() * p)
                 .peek()
                 .destroy()
         p = p + 1u64
@@ -179,7 +179,7 @@ dangerous routine Dict[K, V].destroy()
 ### skipping dead entries via the `entry_live` bitmap. A `Roamed` key/value reports its controller; a
 ### value key/value is a no-op. Overrides the universal member-walk (raw buffers cannot self-trace).
 @override
-dangerous routine Dict[K, V].roam_trace()
+dangerous routine Dict[TKey, TValue].roam_trace()
     me.keys.cyclic_trace_sparse_buffer(live: me.entry_live, used: me.entries_used)
     me.vals.cyclic_trace_sparse_buffer(live: me.entry_live, used: me.entries_used)
     return
@@ -187,7 +187,7 @@ dangerous routine Dict[K, V].roam_trace()
 ### Cycle-collector FREE: free every owned buffer and this dict's own box, but NOT the keys/values (the
 ### collector frees the whole white cycle directly).
 @override
-dangerous routine Dict[K, V].roam_free()
+dangerous routine Dict[TKey, TValue].roam_free()
     me.ctrl.invalidate()
     me.indices.invalidate()
     me.keys.invalidate()
@@ -201,35 +201,35 @@ dangerous routine Dict[K, V].roam_free()
 # ============================================================================
 
 @readonly
-secret routine Dict[K, V].h2(hash: U64) -> U8
+secret routine Dict[TKey, TValue].h2(hash: U64) -> U8
     return U8(hash & U64(CTRL_H2_MASK))
 
 @readonly
-secret routine Dict[K, V].h1(hash: U64) -> U64
+secret routine Dict[TKey, TValue].h1(hash: U64) -> U64
     return hash >> 7u32
 
 @readonly
-secret routine Dict[K, V].read_index(slot: U64) -> U64
+secret routine Dict[TKey, TValue].read_index(slot: U64) -> U64
     danger
         return me.indices.offset(U64.data_size() * slot).peek()
 
 @readonly
-secret routine Dict[K, V].read_key_at(ei: U64) -> K
+secret routine Dict[TKey, TValue].read_key_at(ei: U64) -> TKey
     danger
-        return me.keys.offset(K.data_size() * ei).peek()
+        return me.keys.offset(TKey.data_size() * ei).peek()
 
 @readonly
-secret routine Dict[K, V].read_val_at(ei: U64) -> V
+secret routine Dict[TKey, TValue].read_val_at(ei: U64) -> TValue
     danger
-        return me.vals.offset(V.data_size() * ei).peek()
+        return me.vals.offset(TValue.data_size() * ei).peek()
 
-secret routine Dict[K, V].write_val_at(ei: U64, val: V)
+secret routine Dict[TKey, TValue].write_val_at(ei: U64, val: TValue)
     danger
-        me.vals.offset(V.data_size() * ei).poke(val)
+        me.vals.offset(TValue.data_size() * ei).poke(val)
     return
 
 @readonly
-secret routine Dict[K, V].find_slot(key: K) -> U64
+secret routine Dict[TKey, TValue].find_slot(key: TKey) -> U64
     var h = key.hash(k0: me.k0, k1: me.k1)
     var target = me.h2(h)
     var mask = me.capacity -% 1u64
@@ -241,12 +241,12 @@ secret routine Dict[K, V].find_slot(key: K) -> U64
                 return me.capacity
             if c == target
                 var ei = me.indices.offset(U64.data_size() * i).peek()
-                if me.keys.offset(K.data_size() * ei).peek() == key
+                if me.keys.offset(TKey.data_size() * ei).peek() == key
                     return i
             i = i +% 1u64 & mask
     return me.capacity
 
-secret routine Dict[K, V].insert_index_raw(h: U64, entry_index: U64)
+secret routine Dict[TKey, TValue].insert_index_raw(h: U64, entry_index: U64)
     var h2_val = me.h2(h)
     var mask = me.capacity -% 1u64
     var i = me.h1(h) & mask
@@ -266,7 +266,7 @@ secret routine Dict[K, V].insert_index_raw(h: U64, entry_index: U64)
     return
 
 @readonly
-secret routine Dict[K, V].should_rehash() -> Bool
+secret routine Dict[TKey, TValue].should_rehash() -> Bool
     if (me.count +% me.deleted) *% 8u64 >= me.capacity *% 7u64
         return true
     if me.entries_used >= me.entries_cap
@@ -274,7 +274,7 @@ secret routine Dict[K, V].should_rehash() -> Bool
     return false
 
 @reshaping
-secret routine Dict[K, V].rehash()
+secret routine Dict[TKey, TValue].rehash()
     var old_cap = me.capacity
     var old_ecap = me.entries_cap
     var old_ctrl = me.ctrl
@@ -301,8 +301,8 @@ secret routine Dict[K, V].rehash()
             size: ByteSize(bytes: new_cap),
         )
         me.indices = Hijacked[U64](rf_allocate_dynamic_uninit(U64.data_size() * new_cap))
-        me.keys = hijacked_from[K](rf_allocate_dynamic_uninit(K.data_size() * new_ecap))
-        me.vals = hijacked_from[V](rf_allocate_dynamic_uninit(V.data_size() * new_ecap))
+        me.keys = hijacked_from[TKey](rf_allocate_dynamic_uninit(TKey.data_size() * new_ecap))
+        me.vals = hijacked_from[TValue](rf_allocate_dynamic_uninit(TValue.data_size() * new_ecap))
         me.entry_live = Hijacked[U8](rf_allocate_dynamic_uninit(ByteSize(bytes: new_ecap)))
     me.capacity = new_cap
     me.entries_cap = new_ecap
@@ -315,11 +315,11 @@ secret routine Dict[K, V].rehash()
         danger
             var live = old_entry_live.offset(ByteSize(bytes: i)).peek()
             if live == ENTRY_LIVE
-                var k = old_keys.offset(K.data_size() * i).peek()
-                var v = old_vals.offset(V.data_size() * i).peek()
+                var k = old_keys.offset(TKey.data_size() * i).peek()
+                var v = old_vals.offset(TValue.data_size() * i).peek()
                 var new_ei = me.entries_used
-                me.keys.offset(K.data_size() * new_ei).poke(k)
-                me.vals.offset(V.data_size() * new_ei).poke(v)
+                me.keys.offset(TKey.data_size() * new_ei).poke(k)
+                me.vals.offset(TValue.data_size() * new_ei).poke(v)
                 me.entry_live.offset(ByteSize(bytes: new_ei)).poke(ENTRY_LIVE)
                 me.entries_used = me.entries_used +% 1u64
                 me.insert_index_raw(h: k.hash(k0: me.k0, k1: me.k1), entry_index: new_ei)
@@ -332,9 +332,9 @@ secret routine Dict[K, V].rehash()
         if not old_indices.is_none()
             rf_invalidate(LLVM::pointer_to_int[U64, Address](old_indices))
         if not old_keys.is_none()
-            rf_invalidate(LLVM::pointer_to_int[K, Address](old_keys))
+            rf_invalidate(LLVM::pointer_to_int[TKey, Address](old_keys))
         if not old_vals.is_none()
-            rf_invalidate(LLVM::pointer_to_int[V, Address](old_vals))
+            rf_invalidate(LLVM::pointer_to_int[TValue, Address](old_vals))
         if not old_entry_live.is_none()
             rf_invalidate(LLVM::pointer_to_int[U8, Address](old_entry_live))
     return
@@ -344,14 +344,14 @@ secret routine Dict[K, V].rehash()
 # ============================================================================
 
 @readonly
-routine Dict[K, V].count() -> Integer
+routine Dict[TKey, TValue].count() -> Integer
     return Integer(from: me.count)
 
 @readonly
-routine Dict[K, V].is_empty() -> Bool
+routine Dict[TKey, TValue].is_empty() -> Bool
     return me.count == 0u64
 
-routine Dict[K, V].clear()
+routine Dict[TKey, TValue].clear()
     danger
         rf_set_bytes_at(
             dest: LLVM::pointer_to_int[U8, Address](me.ctrl),
@@ -364,10 +364,10 @@ routine Dict[K, V].clear()
     return
 
 @readonly
-routine Dict[K, V].contains(key: K) -> Bool
+routine Dict[TKey, TValue].contains(key: TKey) -> Bool
     return me.find_slot(key) < me.capacity
 
-routine Dict[K, V].add(key: K, value: V) -> Bool
+routine Dict[TKey, TValue].add(key: TKey, value: TValue) -> Bool
     if me.should_rehash()
         me.rehash()
     var slot = me.find_slot(key)
@@ -377,8 +377,8 @@ routine Dict[K, V].add(key: K, value: V) -> Bool
         return false
     var ei = me.entries_used
     danger
-        me.keys.offset(K.data_size() * ei).poke(key)
-        me.vals.offset(V.data_size() * ei).poke(value)
+        me.keys.offset(TKey.data_size() * ei).poke(key)
+        me.vals.offset(TValue.data_size() * ei).poke(value)
         me.entry_live.offset(ByteSize(bytes: ei)).poke(ENTRY_LIVE)
     me.entries_used = me.entries_used +% 1u64
     me.insert_index_raw(h: key.hash(k0: me.k0, k1: me.k1), entry_index: ei)
@@ -394,9 +394,9 @@ routine Dict[K, V].add(key: K, value: V) -> Bool
 ### `rehash` reallocates the values buffer. Read/modify it BEFORE any further `add`/`slot`-insert.
 ### :param key: The key to find or insert.
 ### :param seed: The value stored (and returned) when `key` is absent.
-### :returns: A {Hijacked[V]} addressing the value cell for `key`.
+### :returns: A {Hijacked[TValue]} addressing the value cell for `key`.
 @inline
-routine Dict[K, V].slot(key: K, seed: V) -> Hijacked[V]
+routine Dict[TKey, TValue].slot(key: TKey, seed: TValue) -> Hijacked[TValue]
     if me.should_rehash()
         me.rehash()
     var s = me.find_slot(key)
@@ -406,16 +406,16 @@ routine Dict[K, V].slot(key: K, seed: V) -> Hijacked[V]
     else
         ei = me.entries_used
         danger
-            me.keys.offset(K.data_size() * ei).poke(key)
-            me.vals.offset(V.data_size() * ei).poke(seed)
+            me.keys.offset(TKey.data_size() * ei).poke(key)
+            me.vals.offset(TValue.data_size() * ei).poke(seed)
             me.entry_live.offset(ByteSize(bytes: ei)).poke(ENTRY_LIVE)
         me.entries_used = me.entries_used +% 1u64
         me.insert_index_raw(h: key.hash(k0: me.k0, k1: me.k1), entry_index: ei)
         me.count = me.count +% 1u64
     danger
-        return me.vals.offset(V.data_size() * ei)
+        return me.vals.offset(TValue.data_size() * ei)
 
-routine Dict[K, V].remove(key: K) -> Bool
+routine Dict[TKey, TValue].remove(key: TKey) -> Bool
     var slot = me.find_slot(key)
     if slot >= me.capacity
         return false
@@ -428,7 +428,7 @@ routine Dict[K, V].remove(key: K) -> Bool
     return true
 
 @readonly
-routine Dict[K, V].get_or_default(key: K, default_value: V) -> V
+routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> TValue
     var slot = me.find_slot(key)
     if slot >= me.capacity
         return default_value
@@ -439,8 +439,8 @@ routine Dict[K, V].get_or_default(key: K, default_value: V) -> V
 # ============================================================================
 
 @readonly
-routine Dict[K, V].getitem!(key: Accessing[K]) -> V
-needs V obeys Assignable
+routine Dict[TKey, TValue].getitem!(key: Accessing[TKey]) -> TValue
+needs TValue obeys Assignable
     var slot = me.find_slot(key)
     if slot >= me.capacity
         absent
@@ -448,7 +448,7 @@ needs V obeys Assignable
 
 ### `getitem!` for a single-owner entity: the container keeps its value, so
 ### the caller gets an independent duplicate, which needs the entity to declare it can be copied.
-routine Dict[K, V].setitem!(key: Accessing[K], value: V)
+routine Dict[TKey, TValue].setitem!(key: Accessing[TKey], value: TValue)
     if me lack key
         absent
     var slot = me.find_slot(key)
@@ -462,43 +462,43 @@ routine Dict[K, V].setitem!(key: Accessing[K], value: V)
 # ============================================================================
 
 ### Returns all live keys in insertion order.
-### :returns: A {List[K]} of every key; order matches the sequence in which the keys were first added.
+### :returns: A {List[TKey]} of every key; order matches the sequence in which the keys were first added.
 @readonly
-routine Dict[K, V].keys() -> List[K]
-    var result = List[K](capacity: Integer(from: me.count))
+routine Dict[TKey, TValue].keys() -> List[TKey]
+    var result = List[TKey](capacity: Integer(from: me.count))
     var i = 0u64
     while i < me.entries_used
         danger
             if me.entry_live.offset(ByteSize(bytes: i)).peek() == ENTRY_LIVE
-                result.add_last(me.keys.offset(K.data_size() * i).peek())
+                result.add_last(me.keys.offset(TKey.data_size() * i).peek())
         i = i +% 1u64
     return result
 
 ### Returns all live values in insertion order.
-### :returns: A {List[V]} of every value; order matches the corresponding `keys()` call.
+### :returns: A {List[TValue]} of every value; order matches the corresponding `keys()` call.
 @readonly
-routine Dict[K, V].values() -> List[V]
-    var result = List[V](capacity: Integer(from: me.count))
+routine Dict[TKey, TValue].values() -> List[TValue]
+    var result = List[TValue](capacity: Integer(from: me.count))
     var i = 0u64
     while i < me.entries_used
         danger
             if me.entry_live.offset(ByteSize(bytes: i)).peek() == ENTRY_LIVE
-                result.add_last(me.vals.offset(V.data_size() * i).peek())
+                result.add_last(me.vals.offset(TValue.data_size() * i).peek())
         i = i +% 1u64
     return result
 
 ### Returns all live entries in insertion order.
-### :returns: A {List[DictEntry[K, V]]} of every key-value pair; order matches the sequence in which the keys were first added.
+### :returns: A {List[DictEntry[TKey, TValue]]} of every key-value pair; order matches the sequence in which the keys were first added.
 @readonly
-routine Dict[K, V].entries() -> List[DictEntry[K, V]]
-    var result = List[DictEntry[K, V]](capacity: Integer(from: me.count))
+routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
+    var result = List[DictEntry[TKey, TValue]](capacity: Integer(from: me.count))
     var i = 0u64
     while i < me.entries_used
         danger
             if me.entry_live.offset(ByteSize(bytes: i)).peek() == ENTRY_LIVE
-                var k = me.keys.offset(K.data_size() * i).peek()
-                var v = me.vals.offset(V.data_size() * i).peek()
-                result.add_last(DictEntry[K, V](key: k, value: v))
+                var k = me.keys.offset(TKey.data_size() * i).peek()
+                var v = me.vals.offset(TValue.data_size() * i).peek()
+                result.add_last(DictEntry[TKey, TValue](key: k, value: v))
         i = i +% 1u64
     return result
 
@@ -507,9 +507,9 @@ routine Dict[K, V].entries() -> List[DictEntry[K, V]]
 # ============================================================================
 
 @readonly
-routine Dict[K, V].iter() -> DictEmittable[K, V]
+routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
     danger
-        return DictEmittable[K, V](
+        return DictEmittable[TKey, TValue](
             keys: me.keys,
             vals: me.vals,
             entry_live: me.entry_live,
@@ -517,15 +517,15 @@ routine Dict[K, V].iter() -> DictEmittable[K, V]
             pos: 0u64,
         )
 
-routine DictEmittable[K, V].emit!() -> DictEntry[K, V]
+routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
     danger
         while me.pos < me.entries_used
             var p = me.pos
             me.pos = me.pos + 1u64
             if me.entry_live.offset(ByteSize(bytes: p)).peek() == ENTRY_LIVE
-                var k = me.keys.offset(K.data_size() * p).peek()
-                var v = me.vals.offset(V.data_size() * p).peek()
-                return DictEntry[K, V](key: k, value: v)
+                var k = me.keys.offset(TKey.data_size() * p).peek()
+                var v = me.vals.offset(TValue.data_size() * p).peek()
+                return DictEntry[TKey, TValue](key: k, value: v)
     absent
 
 # ============================================================================
@@ -535,12 +535,12 @@ routine DictEmittable[K, V].emit!() -> DictEntry[K, V]
 ### Returns a deep, independent copy of this dictionary. Every key and value is copied through
 ### `copy`, so the result shares no heap storage with the original (managed leaves like `Text`
 ### bump their refcount; aggregate values are duplicated recursively). This is the deep-copy point
-### the builder inserts when a `Dict[K, V]` is an owned arm of a value being copied.
-### :returns: A new `Dict[K, V]` owning independent copies of every entry.
-routine Dict[K, V].duplicate() -> Dict[K, V]
-needs K obeys Assignable
-needs V obeys Assignable
-    var result = Dict[K, V]()
+### the builder inserts when a `Dict[TKey, TValue]` is an owned arm of a value being copied.
+### :returns: A new `Dict[TKey, TValue]` owning independent copies of every entry.
+routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
+needs TKey obeys Assignable
+needs TValue obeys Assignable
+    var result = Dict[TKey, TValue]()
     each entry in me
         discard result.add(key: entry.key, value: entry.value)
     return result
@@ -551,7 +551,7 @@ needs V obeys Assignable
 
 @readonly
 @override
-routine Dict[K, V].represent() -> Text
+routine Dict[TKey, TValue].represent() -> Text
     if me.is_empty()
         return "{:}"
     var result = "{"
@@ -566,7 +566,7 @@ routine Dict[K, V].represent() -> Text
 
 @readonly
 @override
-routine Dict[K, V].diagnose() -> Text
+routine Dict[TKey, TValue].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count().represent() + ", {"
     var first = true
     each entry in me
@@ -582,21 +582,21 @@ routine Dict[K, V].diagnose() -> Text
 # ============================================================================
 
 @readonly
-routine Dict[K, V].eq(you: Accessing[Dict[K, V]]) -> Bool
-needs V obeys Equatable
+routine Dict[TKey, TValue].eq(you: Accessing[Dict[TKey, TValue]]) -> Bool
+needs TValue obeys Equatable
     if me.count != you.count
         return false
     var i = 0u64
     while i < me.entries_used
         danger
             if me.entry_live.offset(ByteSize(bytes: i)).peek() == ENTRY_LIVE
-                var k = me.keys.offset(K.data_size() * i).peek()
-                var v = me.vals.offset(V.data_size() * i).peek()
+                var k = me.keys.offset(TKey.data_size() * i).peek()
+                var v = me.vals.offset(TValue.data_size() * i).peek()
                 var slot = you.find_slot(k)
                 if slot >= you.capacity
                     return false
                 var other_ei = you.indices.offset(U64.data_size() * slot).peek()
-                var other_v = you.vals.offset(V.data_size() * other_ei).peek()
+                var other_v = you.vals.offset(TValue.data_size() * other_ei).peek()
                 if v != other_v
                     return false
         i = i +% 1u64
@@ -606,7 +606,7 @@ needs V obeys Equatable
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
 @readonly
 @override
-routine Dict[K, V].serialize() -> SerialValue
+routine Dict[TKey, TValue].serialize() -> SerialValue
     var __sv = RF::Core.Dict[Text, SerialValue]()
     each __e in me
         discard __sv.add(key: __e.key.represent(), value: __e.value.serialize())

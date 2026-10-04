@@ -1,0 +1,96 @@
+module Tests/StdlibSf/WeirdExprsApi
+
+import IO/Console
+import IterTools
+
+# Suflae's twin of RazorForge's weird_exprs_api: expressions that are legal but stack features the way a real
+# program does. Each line is a combination that broke once, kept here so it stays fixed.
+
+choice Light
+    RED
+    AMBER
+    GREEN
+
+record Box[T]
+    item: T
+
+routine wrap[T](x: T) -> Box[T]
+    return Box[T](item: x)
+
+routine look!(n: Integer) -> Integer
+    if n < 0
+        throw InvalidValueError(input: "negative", target: "Integer")
+    if n == 0
+        absent
+    return n
+
+routine three() -> List[Integer]
+    return [1, 2, 3]
+
+routine names(lights: List[Light]) -> Text
+    var out = ""
+    each light in lights
+        out = out + f"{light} "
+    return out
+
+routine arm_fstring(m: Integer?, other: Integer?) -> Text
+    when m
+        is None => return f"none {other is None}"
+        else v => return f"{v} {other is None} {(v + 1) * 2}"
+
+suspended routine fetch(id: Integer) -> Integer
+    waitfor(5ms)
+    return id * 10
+
+routine start()
+    # A call on a shared list inside an f-string hole runs once.
+    var xs = [3, 1, 2]
+    show(f"sorted_in_hole: {xs.sorted()} {xs.sorted().count()}")
+
+    # A loop over a list nothing names, built by a call or a method.
+    var total = 0
+    each x in three()
+        total = total + x
+    var words = 0
+    each w in "a b c".words()
+        words = words + 1
+    show(f"each_over_call: {total} {words}")
+
+    # `??` takes the fallback for every arm that is not the value.
+    var a = grab Integer(text: "x") ?? 7
+    var b = lookup look(n: -1) ?? 1
+    var c = lookup look(n: 0) ?? 2
+    var d = lookup look(n: 5) ?? 3
+    show(f"fallback_everywhere: {a} {b} {c} {d}")
+
+    # A failable creator with type arguments, recovered.
+    var bad = try List[Integer](from: "x".serialize())
+    var good = try List[Integer](from: three().serialize())
+    show(f"generic_ctor_recovered: {bad is None} {good is None}")
+
+    # End-relative positions and slices on Integer indices.
+    show(f"slices_from_the_back: {xs[^1]} {xs[1 til ^0].count()} {xs[^2 til ^0][0]}")
+
+    # A `when` inside an `each` that leaves the loop from one arm.
+    var seen = 0
+    each x in three()
+        when x
+            == 3 => break
+            else => seen = seen + x
+    show(f"when_in_each: {seen}")
+
+    # A choice's cases handed to a routine that takes Suflae's own list.
+    show(f"all_cases: {names(lights: Light.all_cases())}{Light.count() * 10}")
+
+    # A type argument that mentions the parameter's own name.
+    var outer = wrap[Box[Integer]](x: wrap[Integer](x: 7))
+    show(f"box_of_box: {outer.item.item + 1}")
+
+    # Agents gathered from a literal held in a name, inside an f-string hole.
+    var jobs = [fetch(id: 1), fetch(id: 2)]
+    show(f"gather_in_hole: {jobs.gather()}")
+
+    # An f-string hole inside a `when` arm reads `is` as a test.
+    show(f"arm_fstring: {arm_fstring(m: 4, other: none)} / {arm_fstring(m: none, other: 1)}")
+    show("DONE")
+    return

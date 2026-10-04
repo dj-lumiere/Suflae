@@ -1,0 +1,6 @@
+colors=RED GREEN BLUE count=30
+perms=2 count=2
+gather=[10, 20, 30]
+race=true
+cancel=[-1, -1]
+DONE

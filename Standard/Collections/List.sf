@@ -100,6 +100,18 @@ needs T obeys Assignable
         i = i +% 1
     return result
 
+### Builds a list from its serialized element list.
+### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
+routine List[T]!(from: SerialValue) -> List[T]
+    var result = List[T]()
+    when from
+        is RF::Core.List[SerialValue] items =>
+            each item in items
+                result.add_last(value: serial_decode[T](value: item))
+        else =>
+            throw SerialShapeError(detail: "expected a list")
+    return result
+
 ### Builds the list a `[a, b, c]` literal writes.
 ### :param elements: The elements, in order.
 common routine List[T].from_literal(elements...: T) -> List[T]

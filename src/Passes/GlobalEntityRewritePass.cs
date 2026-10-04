@@ -145,7 +145,6 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
             DiscardStatement s => s with { Expression = RW(e: s.Expression) },
             AssignmentStatement s => s with { Target = RW(e: s.Target), Value = RW(e: s.Value) },
             ReturnStatement { Value: not null } s => s with { Value = RW(e: s.Value) },
-            BecomesStatement s => s with { Value = RW(e: s.Value) },
             VariantReturnStatement { Value: not null } s => s with { Value = RW(e: s.Value) },
             ThrowStatement s => s with { Error = RW(e: s.Error) },
             DestructuringStatement s => s with { Initializer = RW(e: s.Initializer) },

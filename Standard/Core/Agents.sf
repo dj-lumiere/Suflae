@@ -1,0 +1,46 @@
+module Core
+
+import Numerics
+
+# Structured concurrency over Suflae's own list of Agents: the same `race` / `gather` / `cancel_all` as
+# RazorForge's list has, handing results back in Suflae's own list.
+
+### Races the Agents, driving them concurrently until the first one finishes, and returns that winner's
+### value. The losers are released when the list goes away.
+### :throws: {TaskSpawnError} if the list is empty (there is nothing to race).
+### :returns: The value produced by the first Agent to finish.
+routine List[Agent[T]].race!() -> T
+    if me.is_empty()
+        throw TaskSpawnError()
+    return me.to_razorforge().race()
+
+### Drives the Agents concurrently and waits for all of them, returning their results in the list's order.
+### The total wait is the slowest Agent, not the sum. If an Agent throws, the throw comes out here.
+### :throws: {TaskSpawnError} if an Agent cannot be started.
+### :returns: The values produced by every Agent, in the order they appear in the list.
+routine List[Agent[T]].gather!() -> List[T]
+    danger
+        # Start every Agent first so they run together, then collect each.
+        each agent in me
+            if not agent.launch()
+                throw TaskSpawnError()
+        var results = List[T]()
+        each agent in me
+            results.add_last(value: agent.retrieve())
+        return results
+
+### Asks every Agent to stop, then waits for them to wind down, returning each one's final value in the
+### list's order. A cooperative Agent sees the request through `cancellation_requested()`.
+### :throws: {TaskSpawnError} if an Agent cannot be started.
+### :returns: Each Agent's final value, in the list's order.
+routine List[Agent[T]].cancel_all!() -> List[T]
+    danger
+        each agent in me
+            agent.request_cancel()
+        each agent in me
+            if not agent.launch()
+                throw TaskSpawnError()
+        var results = List[T]()
+        each agent in me
+            results.add_last(value: agent.retrieve())
+        return results

@@ -2,6 +2,7 @@ type: Hero
 memvar 0: name: Text, secret: false
 memvar 1: hp: S64, secret: false
 memvar 2: seed: S64, secret: true
+memvars: 1 secret, last at 3
 peek: SerialValue({"name": SerialValue(Ada), "hp": SerialValue(10)})
 peek hp: SerialValue(10)
 peek seed: SerialValue(7)

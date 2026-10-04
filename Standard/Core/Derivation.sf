@@ -1,0 +1,42 @@
+module Core
+
+import Numerics
+
+# Suflae's derives for its own choices and flags: the cases come in Suflae's own `List`, and the number of
+# cases is an `Integer`. A choice or flags declared in RazorForge keeps RazorForge's derives.
+
+### Every declared case, in declaration order.
+@overridable
+routine T.all_cases() -> List[Me]
+needs ChoiceType T
+    var result = List[Me]()
+    expand c in caseof(T)
+        result.add_last(value: LLVM::reinterpret_bits[S32, Me]($valueof(c)))
+    return result
+
+### Every declared member, in declaration order.
+@overridable
+routine T.all_cases() -> List[Me]
+needs FlagsType T
+    var result = List[Me]()
+    expand c in caseof(T)
+        result.add_last(value: LLVM::reinterpret_bits[U64, Me]($valueof(c)))
+    return result
+
+### The number of declared cases.
+@overridable
+routine T.count() -> Integer
+needs ChoiceType T
+    var n = 0u64
+    expand c in caseof(T)
+        n = n +% 1u64
+    return Integer(from: n)
+
+### The number of declared members.
+@overridable
+routine T.count() -> Integer
+needs FlagsType T
+    var n = 0u64
+    expand c in caseof(T)
+        n = n +% 1u64
+    return Integer(from: n)

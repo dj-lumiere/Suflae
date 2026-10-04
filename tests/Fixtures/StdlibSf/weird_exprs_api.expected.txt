@@ -1,0 +1,11 @@
+sorted_in_hole: [1, 2, 3] 3
+each_over_call: 6 3
+fallback_everywhere: 7 1 2 5
+generic_ctor_recovered: true false
+slices_from_the_back: 2 2 1
+when_in_each: 3
+all_cases: RED AMBER GREEN 30
+box_of_box: 8
+gather_in_hole: [10, 20]
+arm_fstring: 4 true 10 / none false
+DONE
