@@ -38,9 +38,9 @@ needs TKey obeys Hashable, Equatable
     ### Whether each entry place holds a live entry.
     secret live: Buffer[Bool]
     ### How many live entries there are.
-    secret count: Integer
+    secret count: U64
     ### How many entry places, from the front, have been used.
-    secret used: Integer
+    secret used: U64
     ### The first SipHash key word.
     secret k0: U64
     ### The second SipHash key word.
@@ -56,7 +56,7 @@ obeys Emittable[DictEntry[TKey, TValue]]
     ### The walk over the values.
     secret vals: BufferEmittable[TValue]
     ### How many entry places are left to walk.
-    secret left: Integer
+    secret left: U64
 
 # ============================================================================
 # Creators
@@ -90,12 +90,14 @@ routine Dict[TKey, TValue](key: SecureHashKey) -> Dict[TKey, TValue]
 ### :param key: The SipHash key.
 ### :param capacity: How many entries to make room for.
 routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, TValue]
-    var room = if capacity < 16 then 16 else capacity
+    var room: U64 = 16
+    if capacity > 16
+        room = U64(from: capacity)
     return Dict[TKey, TValue](
-        index: HashIndex(capacity: room),
-        keys: Buffer[TKey](capacity: room),
-        vals: Buffer[TValue](capacity: room),
-        live: Buffer[Bool](capacity: room),
+        index: new_hash_index(capacity: room),
+        keys: new_buffer[TKey](room: room),
+        vals: new_buffer[TValue](room: room),
+        live: new_buffer[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,
@@ -108,7 +110,7 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, 
 
 ### Returns the number of entries.
 routine Dict[TKey, TValue].count() -> Integer
-    return me.count
+    return Integer(from: me.count)
 
 ### Returns whether the dictionary has no entries.
 routine Dict[TKey, TValue].is_empty() -> Bool
@@ -116,14 +118,14 @@ routine Dict[TKey, TValue].is_empty() -> Bool
 
 ### Removes every entry and keeps the room.
 routine Dict[TKey, TValue].clear()
-    var i = 0
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
-            me.keys.erase(index: i)
-            me.vals.erase(index: i)
-            me.live[i] = false
+        if me.live.at(position: i)
+            me.keys.erase_at(position: i)
+            me.vals.erase_at(position: i)
+            me.live.put(position: i, value: false)
         i = i + 1
-    me.index.reset(capacity: me.keys.capacity())
+    me.index.reset(capacity: me.keys.room)
     me.count = 0
     me.used = 0
     return
@@ -131,7 +133,7 @@ routine Dict[TKey, TValue].clear()
 ### Returns whether `key` has an entry (`d have k`).
 ### :param key: The key to look for.
 routine Dict[TKey, TValue].contains(key: TKey) -> Bool
-    return me.find_slot(key: key) >= 0
+    return me.index.holds(slot: me.find_slot(key: key))
 
 ### Adds `key` with `value`, or replaces the value of an existing `key`.
 ### :param key: The key.
@@ -139,14 +141,14 @@ routine Dict[TKey, TValue].contains(key: TKey) -> Bool
 ### :returns: `true` when the key was new.
 routine Dict[TKey, TValue].add(key: TKey, value: TValue) -> Bool
     var slot = me.find_slot(key: key)
-    if slot >= 0
-        me.vals[me.index.entry(slot: slot)] = value
+    if me.index.holds(slot: slot)
+        me.vals.put(position: me.index.entry(slot: slot), value: value)
         return false
     me.make_room()
     var at = me.used
-    me.keys[at] = key
-    me.vals[at] = value
-    me.live[at] = true
+    me.keys.put(position: at, value: key)
+    me.vals.put(position: at, value: value)
+    me.live.put(position: at, value: true)
     me.used = at + 1
     me.index.place(hash: key.hash(k0: me.k0, k1: me.k1), entry: at)
     me.count = me.count + 1
@@ -157,13 +159,13 @@ routine Dict[TKey, TValue].add(key: TKey, value: TValue) -> Bool
 ### :returns: `true` when there was an entry.
 routine Dict[TKey, TValue].remove(key: TKey) -> Bool
     var slot = me.find_slot(key: key)
-    if slot < 0
+    if not me.index.holds(slot: slot)
         return false
     var at = me.index.entry(slot: slot)
     me.index.retire(slot: slot)
-    me.keys.erase(index: at)
-    me.vals.erase(index: at)
-    me.live[at] = false
+    me.keys.erase_at(position: at)
+    me.vals.erase_at(position: at)
+    me.live.put(position: at, value: false)
     me.count = me.count - 1
     return true
 
@@ -172,9 +174,9 @@ routine Dict[TKey, TValue].remove(key: TKey) -> Bool
 ### :param default_value: The value to return for a missing key.
 routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> TValue
     var slot = me.find_slot(key: key)
-    if slot < 0
+    if not me.index.holds(slot: slot)
         return default_value
-    return me.vals[me.index.entry(slot: slot)]
+    return me.vals.at(position: me.index.entry(slot: slot))
 
 # ============================================================================
 # Indexing
@@ -185,9 +187,9 @@ routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> T
 ### :absent: The key has no entry.
 routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
     var slot = me.find_slot(key: key)
-    if slot < 0
+    if not me.index.holds(slot: slot)
         absent
-    return me.vals[me.index.entry(slot: slot)]
+    return me.vals.at(position: me.index.entry(slot: slot))
 
 ### Replaces the value of an existing `key` (`d[k] = v`).
 ### :param key: The key.
@@ -195,9 +197,9 @@ routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
 ### :absent: The key has no entry.
 routine Dict[TKey, TValue].setitem!(key: TKey, value: TValue)
     var slot = me.find_slot(key: key)
-    if slot < 0
+    if not me.index.holds(slot: slot)
         absent
-    me.vals[me.index.entry(slot: slot)] = value
+    me.vals.put(position: me.index.entry(slot: slot), value: value)
     return
 
 # ============================================================================
@@ -206,31 +208,31 @@ routine Dict[TKey, TValue].setitem!(key: TKey, value: TValue)
 
 ### Returns all keys in insertion order.
 routine Dict[TKey, TValue].keys() -> List[TKey]
-    var result = List[TKey](capacity: me.count)
-    var i = 0
+    var result = List[TKey](capacity: Integer(from: me.count))
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
-            result.add_last(value: me.keys[i])
+        if me.live.at(position: i)
+            result.add_last(value: me.keys.at(position: i))
         i = i + 1
     return result
 
 ### Returns all values in insertion order, matching `keys()`.
 routine Dict[TKey, TValue].values() -> List[TValue]
-    var result = List[TValue](capacity: me.count)
-    var i = 0
+    var result = List[TValue](capacity: Integer(from: me.count))
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
-            result.add_last(value: me.vals[i])
+        if me.live.at(position: i)
+            result.add_last(value: me.vals.at(position: i))
         i = i + 1
     return result
 
 ### Returns all entries in insertion order.
 routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
-    var result = List[DictEntry[TKey, TValue]](capacity: me.count)
-    var i = 0
+    var result = List[DictEntry[TKey, TValue]](capacity: Integer(from: me.count))
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
-            result.add_last(value: DictEntry[TKey, TValue](key: me.keys[i], value: me.vals[i]))
+        if me.live.at(position: i)
+            result.add_last(value: DictEntry[TKey, TValue](key: me.keys.at(position: i), value: me.vals.at(position: i)))
         i = i + 1
     return result
 
@@ -241,9 +243,9 @@ routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
 ### Returns a walk over the entries in insertion order.
 routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
     return DictEmittable[TKey, TValue](
-        live: me.live.walk(first: 0, count: me.used),
-        keys: me.keys.walk(first: 0, count: me.used),
-        vals: me.vals.walk(first: 0, count: me.used),
+        live: me.live.walking(first: 0, count: me.used),
+        keys: me.keys.walking(first: 0, count: me.used),
+        vals: me.vals.walking(first: 0, count: me.used),
         left: me.used,
     )
 
@@ -265,7 +267,7 @@ routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
 ### Returns an independent copy of this dictionary: its own entries, each key and value copied (a record is
 ### copied, an entity is shared).
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
-    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count)
+    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: Integer(from: me.count))
     each entry in me
         discard result.add(key: entry.key, value: entry.value)
     return result
@@ -296,9 +298,9 @@ needs TValue obeys Equatable
         return false
     each entry in me
         var slot = you.find_slot(key: entry.key)
-        if slot < 0
+        if not you.index.holds(slot: slot)
             return false
-        if you.vals[you.index.entry(slot: slot)] != entry.value
+        if you.vals.at(position: you.index.entry(slot: slot)) != entry.value
             return false
     return true
 
@@ -314,45 +316,46 @@ routine Dict[TKey, TValue].serialize() -> SerialValue
 # Inside the dictionary
 # ============================================================================
 
-### The probe slot whose entry has `key`, or -1 when there is none.
-secret routine Dict[TKey, TValue].find_slot(key: TKey) -> Integer
+### The probe slot whose entry has `key`, or the never-used slot the probe stopped at when there is none (see
+### `HashIndex.holds`).
+secret routine Dict[TKey, TValue].find_slot(key: TKey) -> U64
     var hash = key.hash(k0: me.k0, k1: me.k1)
     var tag = me.index.tag_of(hash: hash)
     var slot = me.index.home(hash: hash)
     loop
         var found = me.index.tag(slot: slot)
         if found == 0u8
-            return -1
-        if found == tag and me.keys[me.index.entry(slot: slot)] == key
+            return slot
+        if found == tag and me.keys.at(position: me.index.entry(slot: slot)) == key
             return slot
         slot = me.index.next(slot: slot)
 
 ### Packs the entries and rebuilds the probe table when there is no room for one more entry.
 secret routine Dict[TKey, TValue].make_room()
-    if me.used < me.keys.capacity() and not me.index.crowded(count: me.count)
+    if me.used < me.keys.room and not me.index.crowded(count: me.count)
         return
     # Pack the live entries to the front, oldest first.
-    var packed = 0
-    var i = 0
+    var packed: U64 = 0
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
+        if me.live.at(position: i)
             if i != packed
-                me.keys.move(from: i, into: packed, count: 1)
-                me.vals.move(from: i, into: packed, count: 1)
-                me.live[packed] = true
-                me.live[i] = false
+                me.keys.carry(source: i, target: packed, count: 1)
+                me.vals.carry(source: i, target: packed, count: 1)
+                me.live.put(position: packed, value: true)
+                me.live.put(position: i, value: false)
             packed = packed + 1
         i = i + 1
     me.used = packed
-    var room = me.keys.capacity()
+    var room = me.keys.room
     if me.count * 2 >= room
-        me.keys.grow(capacity: room * 2)
-        me.vals.grow(capacity: room * 2)
-        me.live.grow(capacity: room * 2)
-    me.index.reset(capacity: me.keys.capacity())
+        me.keys.grow_to(room: room * 2)
+        me.vals.grow_to(room: room * 2)
+        me.live.grow_to(room: room * 2)
+    me.index.reset(capacity: me.keys.room)
     i = 0
     while i < me.count
-        me.index.place(hash: me.keys[i].hash(k0: me.k0, k1: me.k1), entry: i)
+        me.index.place(hash: me.keys.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)
         i = i + 1
     return
 

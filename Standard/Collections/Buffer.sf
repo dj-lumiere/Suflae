@@ -74,6 +74,10 @@ routine Buffer[T](capacity: Integer) -> Buffer[T]
     var room = U64(from: capacity)
     return Buffer[T](storage: new_buffer_storage[T](room: room), start: 0_u64, room: room)
 
+### A buffer of `room` places, all zero.
+secret routine new_buffer[T](room: U64) -> Buffer[T]
+    return Buffer[T](storage: new_buffer_storage[T](room: room), start: 0_u64, room: room)
+
 ### Creates a buffer of `count` places, each holding `fill`.
 ### :param count: The number of places.
 ### :param fill: The value every place starts as.
@@ -115,28 +119,18 @@ routine Buffer[T].getitem!(index: Integer) -> T
 ### :param index: The position to write.
 ### :param value: The new value.
 routine Buffer[T].setitem!(index: Integer, value: T)
-    var position = me.position(index: index)
-    danger
-        var slot = me.slot(position: position)
-        slot.peek().destroy()
-        slot.poke(value)
+    me.put(position: me.position(index: index), value: value)
     return
 
 ### Hands out what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Buffer[T].take!(index: Integer) -> T
-    var position = me.filled_position(index: index)
-    var value = me.read(position: position)
-    me.clear_places(from: position, count: 1_u64)
-    return value
+    return me.take_at(position: me.filled_position(index: index))
 
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Buffer[T].erase!(index: Integer)
-    var position = me.position(index: index)
-    danger
-        me.slot(position: position).peek().destroy()
-    me.clear_places(from: position, count: 1_u64)
+    me.erase_at(position: me.position(index: index))
     return
 
 ### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
@@ -150,8 +144,14 @@ routine Buffer[T].move!(from: Integer, into: Integer, count: Integer)
     var n = U64(from: count)
     if n == 0_u64
         return
-    var source = me.position(index: from)
-    var target = me.position(index: into)
+    me.carry(source: me.position(index: from), target: me.position(index: into), count: n)
+    return
+
+### Carries what `count` places from `source` hold into the places from `target`, as `move` does.
+secret routine Buffer[T].carry!(source: U64, target: U64, count: U64)
+    var n = count
+    if n == 0_u64
+        return
     if source + n > me.room
         throw IndexOutOfBoundsError(index: source + n, count: me.room)
     if target + n > me.room
@@ -214,9 +214,13 @@ routine Buffer[T].fill(value: T)
 ### zero. Views made before keep the old memory, which is left all zero. Only a whole buffer grows, not a view.
 ### :param capacity: How many places the new row has, at least `capacity()`.
 routine Buffer[T].grow!(capacity: Integer)
+    me.grow_to(room: U64(from: capacity))
+    return
+
+### Moves everything into a new row of `room` places, as `grow` does.
+secret routine Buffer[T].grow_to!(room: U64)
     if me.start != 0_u64 or me.room != me.storage.room
         throw BufferViewShapeError(operation: "grow")
-    var room = U64(from: capacity)
     if room < me.room
         throw IndexOutOfBoundsError(index: room, count: me.room)
     var moved = new_buffer_storage[T](room: room)
@@ -237,9 +241,14 @@ routine Buffer[T].grow!(capacity: Integer)
 routine Buffer[T].rotate_left!(count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
+    me.turn(count: U64(from: count))
+    return
+
+### Moves every place `count` positions toward the front, as `rotate_left` does.
+secret routine Buffer[T].turn(count: U64)
     if me.room == 0_u64
         return
-    var shift = LLVM::unsigned_rem(U64(from: count), me.room)
+    var shift = LLVM::unsigned_rem(count, me.room)
     if shift == 0_u64
         return
     var size = T.data_size()
@@ -606,6 +615,38 @@ secret routine Buffer[T].wrap(position: U64) -> U64
 secret routine Buffer[T].read(position: U64) -> T
     danger
         return me.slot(position: position).peek()
+
+### What a place already checked holds, as a value of its own. The collections built on a buffer read their elements
+### through this: they count with `U64` inside and check positions themselves.
+@inline
+secret routine Buffer[T].at(position: U64) -> T
+    return me.read(position: position).assign()
+
+### Replaces what a place already checked holds.
+@inline
+secret routine Buffer[T].put(position: U64, value: T)
+    danger
+        var slot = me.slot(position: position)
+        slot.peek().destroy()
+        slot.poke(value)
+    return
+
+### Hands out what a place already checked holds and leaves the place zero.
+secret routine Buffer[T].take_at(position: U64) -> T
+    var value = me.read(position: position)
+    me.clear_places(from: position, count: 1_u64)
+    return value
+
+### Tears down what a place already checked holds and leaves the place zero.
+secret routine Buffer[T].erase_at(position: U64)
+    danger
+        me.slot(position: position).peek().destroy()
+    me.clear_places(from: position, count: 1_u64)
+    return
+
+### A view of `room` places from `first`, both already checked: a buffer sharing this one's memory.
+secret routine Buffer[T].view(first: U64, room: U64) -> Buffer[T]
+    return Buffer[T](storage: me.storage, start: me.start + first, room: room)
 
 ### The memory of the place at a position of this buffer.
 @inline

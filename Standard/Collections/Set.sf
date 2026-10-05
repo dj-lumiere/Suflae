@@ -30,9 +30,9 @@ needs T obeys Hashable, Equatable
     ### Whether each entry place holds a live value.
     secret live: Buffer[Bool]
     ### How many live values there are.
-    secret count: Integer
+    secret count: U64
     ### How many entry places, from the front, have been used.
-    secret used: Integer
+    secret used: U64
     ### The first SipHash key word.
     secret k0: U64
     ### The second SipHash key word.
@@ -46,7 +46,7 @@ obeys Emittable[T]
     ### The walk over the values.
     secret values: BufferEmittable[T]
     ### How many entry places are left to walk.
-    secret left: Integer
+    secret left: U64
 
 # ============================================================================
 # Creators
@@ -78,11 +78,13 @@ routine Set[T](key: SecureHashKey) -> Set[T]
 ### :param key: The SipHash key.
 ### :param capacity: How many values to make room for.
 routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
-    var room = if capacity < 16 then 16 else capacity
+    var room: U64 = 16
+    if capacity > 16
+        room = U64(from: capacity)
     return Set[T](
-        index: HashIndex(capacity: room),
-        values: Buffer[T](capacity: room),
-        live: Buffer[Bool](capacity: room),
+        index: new_hash_index(capacity: room),
+        values: new_buffer[T](room: room),
+        live: new_buffer[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,
@@ -95,7 +97,7 @@ routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
 
 ### Returns the number of values.
 routine Set[T].count() -> Integer
-    return me.count
+    return Integer(from: me.count)
 
 ### Returns whether the set has no values.
 routine Set[T].is_empty() -> Bool
@@ -103,13 +105,13 @@ routine Set[T].is_empty() -> Bool
 
 ### Removes every value and keeps the room.
 routine Set[T].clear()
-    var i = 0
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
-            me.values.erase(index: i)
-            me.live[i] = false
+        if me.live.at(position: i)
+            me.values.erase_at(position: i)
+            me.live.put(position: i, value: false)
         i = i + 1
-    me.index.reset(capacity: me.values.capacity())
+    me.index.reset(capacity: me.values.room)
     me.count = 0
     me.used = 0
     return
@@ -117,18 +119,18 @@ routine Set[T].clear()
 ### Returns whether `value` is in the set (`s have v`).
 ### :param value: The value to look for.
 routine Set[T].contains(value: T) -> Bool
-    return me.find_slot(value: value) >= 0
+    return me.index.holds(slot: me.find_slot(value: value))
 
 ### Adds `value` unless it is already in the set.
 ### :param value: The value to add.
 ### :returns: `true` when the value was new.
 routine Set[T].add(value: T) -> Bool
-    if me.find_slot(value: value) >= 0
+    if me.index.holds(slot: me.find_slot(value: value))
         return false
     me.make_room()
     var at = me.used
-    me.values[at] = value
-    me.live[at] = true
+    me.values.put(position: at, value: value)
+    me.live.put(position: at, value: true)
     me.used = at + 1
     me.index.place(hash: value.hash(k0: me.k0, k1: me.k1), entry: at)
     me.count = me.count + 1
@@ -139,12 +141,12 @@ routine Set[T].add(value: T) -> Bool
 ### :returns: `true` when the value was in the set.
 routine Set[T].remove(value: T) -> Bool
     var slot = me.find_slot(value: value)
-    if slot < 0
+    if not me.index.holds(slot: slot)
         return false
     var at = me.index.entry(slot: slot)
     me.index.retire(slot: slot)
-    me.values.erase(index: at)
-    me.live[at] = false
+    me.values.erase_at(position: at)
+    me.live.put(position: at, value: false)
     me.count = me.count - 1
     return true
 
@@ -155,8 +157,8 @@ routine Set[T].remove(value: T) -> Bool
 ### Returns a walk over the values in insertion order.
 routine Set[T].iter() -> SetEmittable[T]
     return SetEmittable[T](
-        live: me.live.walk(first: 0, count: me.used),
-        values: me.values.walk(first: 0, count: me.used),
+        live: me.live.walking(first: 0, count: me.used),
+        values: me.values.walking(first: 0, count: me.used),
         left: me.used,
     )
 
@@ -175,7 +177,7 @@ routine SetEmittable[T].emit!() -> T
 # ============================================================================
 
 routine Set[T].union(other: Set[T]) -> Set[T]
-    var result = Set[T](key: SecureHashKey.random(), capacity: me.count + other.count)
+    var result = Set[T](key: SecureHashKey.random(), capacity: Integer(from: me.count + other.count))
     each val in me
         discard result.add(value: val)
     each val in other
@@ -277,42 +279,43 @@ routine Set[T].serialize() -> SerialValue
 # Inside the set
 # ============================================================================
 
-### The probe slot whose entry is `value`, or -1 when there is none.
-secret routine Set[T].find_slot(value: T) -> Integer
+### The probe slot whose entry is `value`, or the never-used slot the probe stopped at when there is none (see
+### `HashIndex.holds`).
+secret routine Set[T].find_slot(value: T) -> U64
     var hash = value.hash(k0: me.k0, k1: me.k1)
     var tag = me.index.tag_of(hash: hash)
     var slot = me.index.home(hash: hash)
     loop
         var found = me.index.tag(slot: slot)
         if found == 0u8
-            return -1
-        if found == tag and me.values[me.index.entry(slot: slot)] == value
+            return slot
+        if found == tag and me.values.at(position: me.index.entry(slot: slot)) == value
             return slot
         slot = me.index.next(slot: slot)
 
 ### Packs the values and rebuilds the probe table when there is no room for one more value.
 secret routine Set[T].make_room()
-    if me.used < me.values.capacity() and not me.index.crowded(count: me.count)
+    if me.used < me.values.room and not me.index.crowded(count: me.count)
         return
-    var packed = 0
-    var i = 0
+    var packed: U64 = 0
+    var i: U64 = 0
     while i < me.used
-        if me.live[i]
+        if me.live.at(position: i)
             if i != packed
-                me.values.move(from: i, into: packed, count: 1)
-                me.live[packed] = true
-                me.live[i] = false
+                me.values.carry(source: i, target: packed, count: 1)
+                me.live.put(position: packed, value: true)
+                me.live.put(position: i, value: false)
             packed = packed + 1
         i = i + 1
     me.used = packed
-    var room = me.values.capacity()
+    var room = me.values.room
     if me.count * 2 >= room
-        me.values.grow(capacity: room * 2)
-        me.live.grow(capacity: room * 2)
-    me.index.reset(capacity: me.values.capacity())
+        me.values.grow_to(room: room * 2)
+        me.live.grow_to(room: room * 2)
+    me.index.reset(capacity: me.values.room)
     i = 0
     while i < me.count
-        me.index.place(hash: me.values[i].hash(k0: me.k0, k1: me.k1), entry: i)
+        me.index.place(hash: me.values.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)
         i = i + 1
     return
 

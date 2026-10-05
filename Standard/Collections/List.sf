@@ -37,9 +37,9 @@ obeys Iterable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
     secret items: Buffer[T]
     ### The place the first element sits in.
-    secret head: Integer
+    secret head: U64
     ### How many elements there are.
-    secret count: Integer
+    secret count: U64
 
 # ============================================================================
 # Creators
@@ -58,7 +58,7 @@ routine List[T](capacity: Integer) -> List[T]
 ### :param count: The number of elements.
 ### :param fill_value: The value every element starts as.
 routine List[T](count: Integer, fill_value: T) -> List[T]
-    return List[T](items: Buffer[T](count: count, fill: fill_value), head: 0, count: count)
+    return List[T](items: Buffer[T](count: count, fill: fill_value), head: 0, count: U64(from: count))
 
 ### Makes a Suflae list of the elements of a list from RazorForge code (a RazorForge library routine's result).
 ### :param from: The RazorForge list.
@@ -70,7 +70,7 @@ routine List[T](from: RF::Core.List[T]) -> List[T]
 
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
 routine List[T].to_razorforge() -> RF::Core.List[T]
-    var result = RF::Core.List[T](capacity: U64(from: me.count))
+    var result = RF::Core.List[T](capacity: me.count)
     each element in me
         result.add_last(value: element)
     return result
@@ -105,11 +105,11 @@ common routine List[T].from_literal(elements...: T) -> List[T]
 
 ### Returns the number of elements.
 routine List[T].count() -> Integer
-    return me.count
+    return Integer(from: me.count)
 
 ### Returns the number of elements the list holds without growing.
 routine List[T].capacity() -> Integer
-    return me.items.capacity()
+    return Integer(from: me.items.room)
 
 ### Returns whether the list has no elements.
 routine List[T].is_empty() -> Bool
@@ -123,7 +123,7 @@ routine List[T].is_empty() -> Bool
 ### :param value: The value to add.
 routine List[T].add_last(value: T)
     me.make_room(extra: 1)
-    me.items[me.place(index: me.count)] = value
+    me.items.put(position: me.place(index: me.count), value: value)
     me.count = me.count + 1
     return
 
@@ -131,8 +131,8 @@ routine List[T].add_last(value: T)
 ### :param value: The value to add.
 routine List[T].add_first(value: T)
     me.make_room(extra: 1)
-    me.head = if me.head == 0 then me.items.capacity() - 1 else me.head - 1
-    me.items[me.head] = value
+    me.head = if me.head == 0 then me.items.room - 1 else me.head - 1
+    me.items.put(position: me.head, value: value)
     me.count = me.count + 1
     return
 
@@ -148,16 +148,14 @@ routine List[T].add_range(you: Iterable[T])
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
 routine List[T].add_range!(source: List[T], from: Integer, count: Integer)
-    if from.is_negative()
-        throw NegativeIndexError(index: from)
-    if count.is_negative()
-        throw NegativeIndexError(index: count)
-    if from + count > source.count
-        throw IndexOutOfBoundsError(index: U64(from: from + count), count: U64(from: source.count))
-    me.make_room(extra: count)
-    var i = 0
-    while i < count
-        me.add_last(value: source.items[source.place(index: from + i)])
+    var first = position_of(value: from)
+    var n = position_of(value: count)
+    if first + n > source.count
+        throw IndexOutOfBoundsError(index: first + n, count: source.count)
+    me.make_room(extra: n)
+    var i: U64 = 0
+    while i < n
+        me.add_last(value: source.items.at(position: source.place(index: first + i)))
         i = i + 1
     return
 
@@ -165,14 +163,13 @@ routine List[T].add_range!(source: List[T], from: Integer, count: Integer)
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
 routine List[T].add_at!(index: Integer, value: T)
-    if index.is_negative()
-        throw NegativeIndexError(index: index)
-    if index > me.count
-        throw IndexOutOfBoundsError(index: U64(from: index), count: U64(from: me.count))
+    var at = position_of(value: index)
+    if at > me.count
+        throw IndexOutOfBoundsError(index: at, count: me.count)
     me.make_room(extra: 1)
     me.straighten()
-    me.items.move(from: index, into: index + 1, count: me.count - index)
-    me.items[index] = value
+    me.items.carry(source: at, target: at + 1, count: me.count - at)
+    me.items.put(position: at, value: value)
     me.count = me.count + 1
     return
 
@@ -181,7 +178,7 @@ routine List[T].add_at!(index: Integer, value: T)
 routine List[T].remove_last!() -> T
     if me.count == 0
         absent
-    var value = me.items.take(index: me.place(index: me.count - 1))
+    var value = me.items.take_at(position: me.place(index: me.count - 1))
     me.forget(count: 1)
     return value
 
@@ -190,55 +187,46 @@ routine List[T].remove_last!() -> T
 routine List[T].remove_first!() -> T
     if me.count == 0
         absent
-    var value = me.items.take(index: me.head)
+    var value = me.items.take_at(position: me.head)
     me.advance_head()
     return value
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
 routine List[T].remove_at!(index: Integer) -> T
-    me.check(index: index)
+    var at = me.check(index: index)
     me.straighten()
-    var value = me.items.take(index: index)
-    me.items.move(from: index + 1, into: index, count: me.count - index - 1)
+    var value = me.items.take_at(position: at)
+    me.items.carry(source: at + 1, target: at, count: me.count - at - 1)
     me.forget(count: 1)
     return value
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
 routine List[T].truncate!(new_count: Integer)
-    if new_count.is_negative()
-        throw NegativeIndexError(index: new_count)
-    if new_count > me.count
-        throw IndexOutOfBoundsError(index: U64(from: new_count), count: U64(from: me.count))
-    var i = new_count
-    while i < me.count
-        me.items.erase(index: me.place(index: i))
-        i = i + 1
-    me.forget(count: me.count - new_count)
+    var kept = position_of(value: new_count)
+    if kept > me.count
+        throw IndexOutOfBoundsError(index: kept, count: me.count)
+    me.cut(kept: kept)
     return
 
 ### Removes every element and keeps the buffer.
 routine List[T].clear()
-    me.truncate(new_count: 0)
+    me.cut(kept: 0)
     return
 
 ### Discards the oldest elements so at most the latest `n` remain, keeping the buffer: the fixed-space step of a
 ### rolling "keep the latest N" history. When `n` is at least the count, nothing changes.
 ### :param n: The maximum number of most-recent elements to keep.
 routine List[T].keep_last!(n: Integer)
-    if n.is_negative()
-        throw NegativeIndexError(index: n)
-    while me.count > n
-        me.items.erase(index: me.head)
-        me.advance_head()
+    me.drop_oldest(kept: position_of(value: n))
     return
 
 ### Discards the newest elements so at most the first `n` remain, keeping the buffer. When `n` is at least the
 ### count, nothing changes.
 ### :param n: The maximum number of oldest elements to keep.
 routine List[T].keep_first(n: Integer)
-    if n < me.count
+    if n < Integer(from: me.count)
         me.truncate(new_count: n)
     return
 
@@ -247,12 +235,11 @@ routine List[T].keep_first(n: Integer)
 ### :param value: The value to add.
 ### :param keeping: The maximum number of most-recent elements to keep afterward.
 routine List[T].add_last_keeping!(value: T, keeping: Integer)
-    if keeping.is_negative()
-        throw NegativeIndexError(index: keeping)
-    if keeping == 0
-        me.clear()
+    var kept = position_of(value: keeping)
+    if kept == 0
+        me.cut(kept: 0)
         return
-    me.keep_last(n: keeping - 1)
+    me.drop_oldest(kept: kept - 1)
     me.add_last(value: value)
     return
 
@@ -261,21 +248,21 @@ routine List[T].add_last_keeping!(value: T, keeping: Integer)
 ### :param value: The value to add.
 ### :param keeping: The maximum number of elements to keep afterward.
 routine List[T].add_first_keeping!(value: T, keeping: Integer)
-    if keeping.is_negative()
-        throw NegativeIndexError(index: keeping)
-    if keeping == 0
-        me.clear()
+    var kept = position_of(value: keeping)
+    if kept == 0
+        me.cut(kept: 0)
         return
-    me.keep_first(n: keeping - 1)
+    if kept - 1 < me.count
+        me.cut(kept: kept - 1)
     me.add_first(value: value)
     return
 
 ### Makes room for at least `new_capacity` elements without growing again.
 ### :param new_capacity: The number of elements to make room for.
 routine List[T].reserve(new_capacity: Integer)
-    if new_capacity > me.items.capacity()
+    if new_capacity > Integer(from: me.items.room)
         me.straighten()
-        me.items.grow(capacity: new_capacity)
+        me.items.grow_to(room: U64(from: new_capacity))
     return
 
 # ============================================================================
@@ -287,14 +274,14 @@ routine List[T].reserve(new_capacity: Integer)
 routine List[T].first!() -> T
     if me.count == 0
         absent
-    return me.items[me.head]
+    return me.items.at(position: me.head)
 
 ### Returns the last element.
 ### :absent: The list is empty.
 routine List[T].last!() -> T
     if me.count == 0
         absent
-    return me.items[me.place(index: me.count - 1)]
+    return me.items.at(position: me.place(index: me.count - 1))
 
 ### Returns the first element, or `default_value` if the list is empty.
 ### :param default_value: The value to return when there is no element.
@@ -313,15 +300,13 @@ routine List[T].last_or_default(default_value: T) -> T
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
 routine List[T].getitem!(index: Integer) -> T
-    me.check(index: index)
-    return me.items[me.place(index: index)]
+    return me.items.at(position: me.place(index: me.check(index: index)))
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
 routine List[T].setitem!(index: Integer, value: T)
-    me.check(index: index)
-    me.items[me.place(index: index)] = value
+    me.items.put(position: me.place(index: me.check(index: index)), value: value)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
@@ -329,9 +314,10 @@ routine List[T].setitem!(index: Integer, value: T)
 ### :param range: The positions to copy.
 routine List[T].getitem(range: Range[Integer]) -> List[T]
     var result = List[T]()
+    var count = Integer(from: me.count)
     each i in range
-        if not i.is_negative() and i < me.count
-            result.add_last(value: me.items[me.place(index: i)])
+        if not i.is_negative() and i < count
+            result.add_last(value: me.items.at(position: me.place(index: U64(from: i))))
     return result
 
 # ============================================================================
@@ -341,29 +327,16 @@ routine List[T].getitem(range: Range[Integer]) -> List[T]
 ### Moves the first `n` elements to the back, keeping their order.
 ### :param n: How many positions to rotate by.
 routine List[T].rotate_left!(n: Integer)
-    if n.is_negative()
-        throw NegativeIndexError(index: n)
-    if me.count == 0
-        return
-    var shift = n % me.count
-    if me.count == me.items.capacity()
-        me.head = me.place(index: shift)
-        return
-    var i = 0
-    while i < shift
-        me.items.move(from: me.head, into: me.place(index: me.count), count: 1)
-        me.head = me.place(index: 1)
-        i = i + 1
+    me.turn(count: position_of(value: n))
     return
 
 ### Moves the last `n` elements to the front, keeping their order.
 ### :param n: How many positions to rotate by.
 routine List[T].rotate_right!(n: Integer)
-    if n.is_negative()
-        throw NegativeIndexError(index: n)
+    var shift = position_of(value: n)
     if me.count == 0
         return
-    me.rotate_left(n: me.count - n % me.count)
+    me.turn(count: me.count - shift % me.count)
     return
 
 # ============================================================================
@@ -372,7 +345,7 @@ routine List[T].rotate_right!(n: Integer)
 
 ### Returns a walk over the elements, front to back.
 routine List[T].iter() -> BufferEmittable[T]
-    return me.items.walk(first: me.head, count: me.count)
+    return me.items.walking(first: me.head, count: me.count)
 
 ### Returns whether both lists hold equal elements in the same order.
 ### :param you: The other list.
@@ -380,9 +353,9 @@ routine List[T].eq(you: List[T]) -> Bool
 needs T obeys Equatable
     if me.count != you.count
         return false
-    var i = 0
+    var i: U64 = 0
     while i < me.count
-        if me.items[me.place(index: i)] != you.items[you.place(index: i)]
+        if me.items.at(position: me.place(index: i)) != you.items.at(position: you.place(index: i))
             return false
         i = i + 1
     return true
@@ -408,7 +381,7 @@ routine List[T].diagnose() -> Text
 
 ### Returns a new list holding copies of the elements.
 routine List[T].duplicate() -> List[T]
-    var result = List[T](capacity: me.count)
+    var result = List[T](capacity: Integer(from: me.count))
     each element in me
         result.add_last(value: element)
     return result
@@ -429,14 +402,14 @@ routine List[T].serialize() -> SerialValue
 routine List[T].sort()
 needs T obeys Comparable
     me.straighten()
-    me.items[0 til me.count].sort()
+    me.items.view(first: 0, room: me.count).sort()
     return
 
 ### Sorts the elements so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
 routine List[T].sort_by(compare: Routine[(T, T), Bool])
     me.straighten()
-    me.items[0 til me.count].sort_by(compare: compare)
+    me.items.view(first: 0, room: me.count).sort_by(compare: compare)
     return
 
 ### Returns a new list of the elements in ascending order.
@@ -456,7 +429,7 @@ routine List[T].sorted_by(compare: Routine[(T, T), Bool]) -> List[T]
 ### Reverses the order of the elements.
 routine List[T].reverse_in_place()
     me.straighten()
-    me.items[0 til me.count].reverse()
+    me.items.view(first: 0, room: me.count).reverse()
     return
 
 # ============================================================================
@@ -465,21 +438,51 @@ routine List[T].reverse_in_place()
 
 ### The buffer place of the element at `index`, counted from the first one.
 @inline
-secret routine List[T].place(index: Integer) -> Integer
+secret routine List[T].place(index: U64) -> U64
     var place = me.head + index
-    var room = me.items.capacity()
+    var room = me.items.room
     return if place >= room then place - room else place
 
-### Crashes unless `index` is the position of an element.
-secret routine List[T].check!(index: Integer)
-    if index.is_negative()
-        throw NegativeIndexError(index: index)
-    if index >= me.count
-        throw IndexOutOfBoundsError(index: U64(from: index), count: U64(from: me.count))
+### The position `index` names, crashing unless it is the position of an element.
+secret routine List[T].check!(index: Integer) -> U64
+    var at = position_of(value: index)
+    if at >= me.count
+        throw IndexOutOfBoundsError(index: at, count: me.count)
+    return at
+
+### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count).
+secret routine List[T].cut(kept: U64)
+    var i = kept
+    while i < me.count
+        me.items.erase_at(position: me.place(index: i))
+        i = i + 1
+    me.forget(count: me.count - kept)
+    return
+
+### Tears down the oldest elements until at most `kept` remain.
+secret routine List[T].drop_oldest(kept: U64)
+    while me.count > kept
+        me.items.erase_at(position: me.head)
+        me.advance_head()
+    return
+
+### Moves the first `count` elements to the back, keeping their order.
+secret routine List[T].turn(count: U64)
+    if me.count == 0
+        return
+    var shift = count % me.count
+    if me.count == me.items.room
+        me.head = me.place(index: shift)
+        return
+    var i: U64 = 0
+    while i < shift
+        me.items.carry(source: me.head, target: me.place(index: me.count), count: 1)
+        me.head = me.place(index: 1)
+        i = i + 1
     return
 
 ### Forgets the last `count` elements (already handed out or torn down).
-secret routine List[T].forget(count: Integer)
+secret routine List[T].forget(count: U64)
     me.count = me.count - count
     if me.count == 0
         me.head = 0
@@ -495,22 +498,22 @@ secret routine List[T].advance_head()
 secret routine List[T].straighten()
     if me.head == 0
         return
-    me.items.rotate_left(count: me.head)
+    me.items.turn(count: me.head)
     me.head = 0
     return
 
 ### Moves into a bigger buffer when fewer than `extra` places are free: twice the room, at least four, or as much
 ### as needed.
-secret routine List[T].make_room(extra: Integer)
+secret routine List[T].make_room(extra: U64)
     var needed = me.count + extra
-    var room = me.items.capacity()
+    var room = me.items.room
     if needed <= room
         return
-    var grown = if room < 4 then 4 else room * 2
+    var grown: U64 = if room < 4 then 4 else room * 2
     if grown < needed
         grown = needed
     me.straighten()
-    me.items.grow(capacity: grown)
+    me.items.grow_to(room: grown)
     return
 
 ### The elements as text: `[1, 2, 3]`.

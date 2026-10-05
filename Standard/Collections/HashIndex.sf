@@ -13,72 +13,77 @@ entity HashIndex
     ### The tag of every slot.
     secret tags: Buffer[U8]
     ### The entry position of every used slot.
-    secret entries: Buffer[Integer]
+    secret entries: Buffer[U64]
     ### How many slots hold a removed entry's tag.
-    secret removed: Integer
+    secret removed: U64
 
 ### Creates an empty table with enough slots for `capacity` entries.
 ### :param capacity: How many entries the table should hold before growing.
-routine HashIndex(capacity: Integer) -> HashIndex
+secret routine new_hash_index(capacity: U64) -> HashIndex
     var slots = hash_index_slots(wanted: capacity)
-    return HashIndex(tags: Buffer[U8](capacity: slots), entries: Buffer[Integer](capacity: slots), removed: 0)
+    return HashIndex(tags: new_buffer[U8](room: slots), entries: new_buffer[U64](room: slots), removed: 0)
 
 ### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
-secret routine hash_index_slots(wanted: Integer) -> Integer
-    var slots = 16
+secret routine hash_index_slots(wanted: U64) -> U64
+    var slots: U64 = 16
     while wanted * 8 >= slots * 7
         slots = slots * 2
     return slots
 
 ### The slot a hash starts probing at.
-secret routine HashIndex.home(hash: U64) -> Integer
-    return Integer(from: hash >> 7u32) & (me.tags.capacity() - 1)
+secret routine HashIndex.home(hash: U64) -> U64
+    return (hash >> 7u32) & (me.tags.room - 1)
 
 ### The tag a used slot of this hash carries.
 secret routine HashIndex.tag_of(hash: U64) -> U8
     return U8(hash & 127u64) +% 2u8
 
 ### The tag of `slot`: 0 never used, 1 removed, else used.
-secret routine HashIndex.tag(slot: Integer) -> U8
-    return me.tags[slot]
+secret routine HashIndex.tag(slot: U64) -> U8
+    return me.tags.at(position: slot)
+
+### Whether `slot`, where a probe stopped, holds the entry looked for: a probe that finds nothing stops at a slot
+### never used.
+secret routine HashIndex.holds(slot: U64) -> Bool
+    return me.tags.at(position: slot) != 0u8
 
 ### The entry position `slot` holds.
-secret routine HashIndex.entry(slot: Integer) -> Integer
-    return me.entries[slot]
+secret routine HashIndex.entry(slot: U64) -> U64
+    return me.entries.at(position: slot)
 
 ### The slot probed after `slot`.
-secret routine HashIndex.next(slot: Integer) -> Integer
-    return (slot + 1) & (me.tags.capacity() - 1)
+secret routine HashIndex.next(slot: U64) -> U64
+    return (slot + 1) & (me.tags.room - 1)
 
 ### Records that the entry at `entry` has hash `hash`, in the first free slot of its probe.
-secret routine HashIndex.place(hash: U64, entry: Integer)
+secret routine HashIndex.place(hash: U64, entry: U64)
     var slot = me.home(hash: hash)
     loop
-        var tag = me.tags[slot]
+        var tag = me.tags.at(position: slot)
         if tag <= 1u8
             if tag == 1u8
                 me.removed = me.removed - 1
-            me.tags[slot] = me.tag_of(hash: hash)
-            me.entries[slot] = entry
+            me.tags.put(position: slot, value: me.tag_of(hash: hash))
+            me.entries.put(position: slot, value: entry)
             return
         slot = me.next(slot: slot)
 
 ### Marks `slot` as holding a removed entry, so probes keep going past it.
-secret routine HashIndex.retire(slot: Integer)
-    me.tags[slot] = 1u8
+secret routine HashIndex.retire(slot: U64)
+    me.tags.put(position: slot, value: 1u8)
     me.removed = me.removed + 1
     return
 
 ### Whether a table holding `count` entries is too full to take another.
-secret routine HashIndex.crowded(count: Integer) -> Bool
-    return (count + me.removed + 1) * 8 >= me.tags.capacity() * 7
+secret routine HashIndex.crowded(count: U64) -> Bool
+    return (count + me.removed + 1) * 8 >= me.tags.room * 7
 
 ### Empties the table, giving it enough slots for `capacity` entries.
-secret routine HashIndex.reset(capacity: Integer)
+secret routine HashIndex.reset(capacity: U64)
     var slots = hash_index_slots(wanted: capacity)
-    if slots > me.tags.capacity()
-        me.tags.grow(capacity: slots)
-        me.entries.grow(capacity: slots)
+    if slots > me.tags.room
+        me.tags.grow_to(room: slots)
+        me.entries.grow_to(room: slots)
     me.tags.fill(value: 0u8)
     me.removed = 0
     return
