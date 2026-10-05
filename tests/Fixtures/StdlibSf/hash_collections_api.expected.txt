@@ -1,0 +1,11 @@
+dict: {"ann": 31, "bob": 26, "cid": 40} count=3 have ann: true
+after remove: {"bob": 26, "cid": 40} keys=["bob", "cid"] values=[26, 40]
+missing: true default: -1
+squares: count=133 sum=2427778 199=39601 have 10: false
+copy equal: true
+cleared: {:} empty=true
+set: {2, 3, 4} count=3 have 4: true have 1: false
+union={2, 3, 4, 5} inter={3, 4} diff={2}
+distinct: 37 empty set: {}
+released: true left: 2
+DONE

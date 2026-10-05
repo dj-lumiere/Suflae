@@ -1,0 +1,84 @@
+module Core
+
+import Numerics
+
+### The probe table under Suflae's `Dict` and `Set`: open addressing over a power-of-two number of slots, each slot
+### holding a tag and the position of its entry in the collection's own entry buffers. The collection keeps its
+### entries in insertion order and asks the table which entry a hash may be.
+###
+### A tag is 0 for a slot never used (so a fresh, zeroed table is empty), 1 for a slot whose entry was removed, and
+### 2 to 129 for a used slot: the low 7 bits of its hash plus 2, which rules most other entries out without
+### comparing keys.
+entity HashIndex
+    ### The tag of every slot.
+    secret tags: Buffer[U8]
+    ### The entry position of every used slot.
+    secret entries: Buffer[Integer]
+    ### How many slots hold a removed entry's tag.
+    secret removed: Integer
+
+### Creates an empty table with enough slots for `capacity` entries.
+### :param capacity: How many entries the table should hold before growing.
+routine HashIndex(capacity: Integer) -> HashIndex
+    var slots = hash_index_slots(wanted: capacity)
+    return HashIndex(tags: Buffer[U8](capacity: slots), entries: Buffer[Integer](capacity: slots), removed: 0)
+
+### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
+secret routine hash_index_slots(wanted: Integer) -> Integer
+    var slots = 16
+    while wanted * 8 >= slots * 7
+        slots = slots * 2
+    return slots
+
+### The slot a hash starts probing at.
+secret routine HashIndex.home(hash: U64) -> Integer
+    return Integer(from: hash >> 7u32) & (me.tags.capacity() - 1)
+
+### The tag a used slot of this hash carries.
+secret routine HashIndex.tag_of(hash: U64) -> U8
+    return U8(hash & 127u64) +% 2u8
+
+### The tag of `slot`: 0 never used, 1 removed, else used.
+secret routine HashIndex.tag(slot: Integer) -> U8
+    return me.tags[slot]
+
+### The entry position `slot` holds.
+secret routine HashIndex.entry(slot: Integer) -> Integer
+    return me.entries[slot]
+
+### The slot probed after `slot`.
+secret routine HashIndex.next(slot: Integer) -> Integer
+    return (slot + 1) & (me.tags.capacity() - 1)
+
+### Records that the entry at `entry` has hash `hash`, in the first free slot of its probe.
+secret routine HashIndex.place(hash: U64, entry: Integer)
+    var slot = me.home(hash: hash)
+    loop
+        var tag = me.tags[slot]
+        if tag <= 1u8
+            if tag == 1u8
+                me.removed = me.removed - 1
+            me.tags[slot] = me.tag_of(hash: hash)
+            me.entries[slot] = entry
+            return
+        slot = me.next(slot: slot)
+
+### Marks `slot` as holding a removed entry, so probes keep going past it.
+secret routine HashIndex.retire(slot: Integer)
+    me.tags[slot] = 1u8
+    me.removed = me.removed + 1
+    return
+
+### Whether a table holding `count` entries is too full to take another.
+secret routine HashIndex.crowded(count: Integer) -> Bool
+    return (count + me.removed + 1) * 8 >= me.tags.capacity() * 7
+
+### Empties the table, giving it enough slots for `capacity` entries.
+secret routine HashIndex.reset(capacity: Integer)
+    var slots = hash_index_slots(wanted: capacity)
+    if slots > me.tags.capacity()
+        me.tags.grow(capacity: slots)
+        me.entries.grow(capacity: slots)
+    me.tags.fill(value: 0u8)
+    me.removed = 0
+    return

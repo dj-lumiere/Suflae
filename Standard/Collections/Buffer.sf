@@ -535,6 +535,12 @@ routine BufferEmittable[T].emit!() -> T
         me.index = me.index +% 1
         return result
 
+### Moves the walk past its next place without reading it. Does nothing once the walk is over.
+routine BufferEmittable[T].skip()
+    if me.index < me.count
+        me.index = me.index +% 1
+    return
+
 ### Returns whether some place holds a value equal to `value` (`buf have v`).
 ### :param value: The value to look for.
 routine Buffer[T].contains(value: Accessing[T]) -> Bool

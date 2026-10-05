@@ -1,0 +1,55 @@
+module Tests/StdlibSf/PriorityQueueApi
+
+import IO/Console
+import Collections
+import ObjectHacker
+
+# Suflae's PriorityQueue keeps priorities and elements in two Buffers laid out as one min-heap.
+
+entity Job
+    name: Text
+
+routine start()
+    var pq = PriorityQueue[Integer, Text]()
+    pq.add(element: "write", priority: 3)
+    pq.add(element: "plan", priority: 1)
+    pq.add(element: "test", priority: 4)
+    pq.add(element: "build", priority: 2)
+    pq.add(element: "ship", priority: 5)
+    show(f"count={pq.count()} peek={pq.peek()} priority={pq.peek_priority()} have test: {pq.contains(element: "test")}")
+    show(f"first={pq.remove()} then={pq.remove()} left={pq.count()}")
+    var total = 0
+    each entry in pq
+        total = total + entry.priority
+    show(f"priority sum: {total}")
+    show(f"drained: {pq.drain()} empty={pq.is_empty()}")
+    var empty_remove = try pq.remove()
+    show(f"remove from empty: {empty_remove is None}")
+
+    var nums = PriorityQueue[Integer, Integer](capacity: 2)
+    var i = 0
+    while i < 30
+        nums.add(element: i, priority: (i * 7) % 30)
+        i = i + 1
+    var ordered = true
+    var last = -1
+    while not nums.is_empty()
+        var p = nums.peek_priority()
+        if p < last
+            ordered = false
+        last = p
+        discard nums.remove()
+    show(f"removal order sorted: {ordered}")
+
+    var job = Job(name: "deploy")
+    var seen = watch(target: job)
+    var jobs = PriorityQueue[Integer, Job]()
+    jobs.add(element: job, priority: 2)
+    jobs.add(element: job, priority: 1)
+    show(f"front job: {jobs.peek().name}")
+    discard jobs.remove()
+    jobs.clear()
+    job = Job(name: "other")
+    show(f"released: {not seen.is_alive()}")
+    show("DONE")
+    return

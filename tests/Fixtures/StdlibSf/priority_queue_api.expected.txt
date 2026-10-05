@@ -1,0 +1,9 @@
+count=5 peek=plan priority=1 have test: true
+first=plan then=build left=3
+priority sum: 12
+drained: ["write", "test", "ship"] empty=true
+remove from empty: true
+removal order sorted: true
+front job: deploy
+released: true
+DONE

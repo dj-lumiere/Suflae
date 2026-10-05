@@ -1,0 +1,63 @@
+module Tests/StdlibSf/HashCollectionsApi
+
+import IO/Console
+import ObjectHacker
+
+# Suflae's Dict and Set keep their entries in Buffers in insertion order, over one HashIndex probe table.
+
+entity Box
+    id: Integer
+
+routine start()
+    var ages = {"ann": 31, "bob": 25}
+    discard ages.add(key: "cid", value: 40)
+    ages["bob"] = 26
+    show(f"dict: {ages} count={ages.count()} have ann: {ages have "ann"}")
+    discard ages.remove(key: "ann")
+    show(f"after remove: {ages} keys={ages.keys()} values={ages.values()}")
+    var missing = try ages["ann"]
+    show(f"missing: {missing is None} default: {ages.get_or_default(key: "ann", default_value: -1)}")
+
+    # Many adds and removes: the entries are packed and the table rebuilt along the way.
+    var squares = Dict[Integer, Integer]()
+    var i = 0
+    while i < 200
+        discard squares.add(key: i, value: i * i)
+        if i % 3 == 0
+            discard squares.remove(key: i // 2)
+        i = i + 1
+    var sum = 0
+    each entry in squares
+        sum = sum + entry.value
+    show(f"squares: count={squares.count()} sum={sum} 199={squares[199]} have 10: {squares have 10}")
+    show(f"copy equal: {squares.duplicate() == squares}")
+    squares.clear()
+    show(f"cleared: {squares} empty={squares.is_empty()}")
+
+    var seen = {1, 2, 3}
+    discard seen.add(value: 2)
+    discard seen.add(value: 4)
+    discard seen.remove(value: 1)
+    show(f"set: {seen} count={seen.count()} have 4: {seen have 4} have 1: {seen have 1}")
+    var other = {3, 4, 5}
+    show(f"union={seen.union(other)} inter={seen.intersection(other)} diff={seen.difference(other)}")
+    var many = Set[Integer]()
+    i = 0
+    while i < 100
+        discard many.add(value: i % 37)
+        i = i + 1
+    show(f"distinct: {many.count()} empty set: {Set[Integer]()}")
+
+    var box = Box(id: 1)
+    var watched = watch(target: box)
+    var by_name = Dict[Text, Box]()
+    discard by_name.add(key: "a", value: box)
+    discard by_name.add(key: "b", value: box)
+    by_name["a"] = Box(id: 2)
+    discard by_name.remove(key: "b")
+    var boxes = Set[Integer]()
+    discard boxes.add(value: 1)
+    box = Box(id: 0)
+    show(f"released: {not watched.is_alive()} left: {by_name["a"].id}")
+    show("DONE")
+    return
