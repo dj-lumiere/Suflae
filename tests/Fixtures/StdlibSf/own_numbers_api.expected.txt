@@ -7,5 +7,6 @@ bits=8 hex=ff
 powi=15.625 fixed=2.50
 sqrt=1.4142135624 pi=3.14159
 far+1=none
+hypot far,1 is far: true
 csqrt=2.000 + 1.000i
 DONE
