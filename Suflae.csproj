@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <Version>0.1.0</Version>
+    <Version>0.5.0</Version>
     <AssemblyName>Suflae</AssemblyName>
     <RootNamespace>Suflae</RootNamespace>
     <PackAsTool>true</PackAsTool>
