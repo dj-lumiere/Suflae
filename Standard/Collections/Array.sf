@@ -1,5 +1,6 @@
 module Core
 
+import BuilderQuery
 import Numerics
 
 # Suflae's surface of the fixed-size `Array[T, COUNT]`: the same record as RazorForge's, counted and indexed with
@@ -14,20 +15,62 @@ routine Array[T, COUNT].count() -> Integer
 ### :param index: The position to read, from 0.
 routine Array[T, COUNT].getitem!(index: Integer) -> T
 needs T obeys Assignable
-    var position = position_of(value: index)
-    if position >= COUNT
-        throw IndexOutOfBoundsError(index: position, count: COUNT)
-    return me.get_raw(index: position).assign()
+    return me.read(position: me.filled_position(index: index)).assign()
 
-### Replaces the element at `index` (`a[i] = v`).
+### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
 ### :param index: The position to write, from 0.
 ### :param value: The new element.
 routine Array[T, COUNT].setitem!(index: Integer, value: T)
-    var position = position_of(value: index)
-    if position >= COUNT
-        throw IndexOutOfBoundsError(index: position, count: COUNT)
+    var position = me.position(index: index)
     danger
-        LLVM::store_element_ref[Array[T, COUNT], T](me.hijack(), position, value)
+        var slot = me.slot(position: position)
+        slot.peek().destroy()
+        slot.poke(value)
+    return
+
+### Tears down what the place at `index` holds and leaves the place zero.
+### :param index: The position to empty.
+routine Array[T, COUNT].erase!(index: Integer)
+    var position = me.position(index: index)
+    danger
+        me.slot(position: position).peek().destroy()
+    me.clear_places(from: position, count: 1_u64)
+    return
+
+### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
+### destination places held before is torn down, and the source places nothing was carried into become zero.
+### :param from: The first place to carry from.
+### :param into: The first place to carry into.
+### :param count: How many places to carry.
+routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    var n = U64(from: count)
+    if n == 0_u64
+        return
+    var source = me.position(index: from)
+    var target = me.position(index: into)
+    if source + n > COUNT
+        throw IndexOutOfBoundsError(index: source + n, count: COUNT)
+    if target + n > COUNT
+        throw IndexOutOfBoundsError(index: target + n, count: COUNT)
+    var i = target
+    while i < target + n
+        if i < source or i >= source + n
+            danger
+                me.slot(position: i).peek().destroy()
+        i = i +% 1
+    danger
+        rf_copy_bytes_at(
+            dest: me.slot(position: target).get_address(),
+            src: me.slot(position: source).get_address(),
+            size: T.data_size() * n,
+        )
+    i = source
+    while i < source + n
+        if i < target or i >= target + n
+            me.clear_places(from: i, count: 1_u64)
+        i = i +% 1
     return
 
 ### Returns a list of the elements at the positions in `range` (`a[x til y]`). Positions outside the array are
@@ -54,3 +97,43 @@ needs T obeys Equatable
             return Integer(from: i)
         i = i +% 1u64
     absent
+
+# ============================================================================
+# Inside the array
+# ============================================================================
+
+### The position of `index`, checked against the places.
+secret routine Array[T, COUNT].position!(index: Integer) -> U64
+    if index.is_negative()
+        throw NegativeIndexError(index: index)
+    var position = U64(from: index)
+    if position >= COUNT
+        throw IndexOutOfBoundsError(index: position, count: COUNT)
+    return position
+
+### The position of `index`, checked against the places and, in an array of entities, against a place that holds
+### no entity yet (a zero place, which a read would hand out as no entity at all).
+secret routine Array[T, COUNT].filled_position!(index: Integer) -> U64
+    var position = me.position(index: index)
+    if T.type_kind() == TypeKind.ENTITY
+        danger
+            if me.slot(position: position).peek_as[Address]() == 0_addr
+                throw EmptyPlaceError(index: index)
+    return position
+
+### What a place already checked holds, as it sits in memory (no holder of its own).
+@inline
+secret routine Array[T, COUNT].read(position: U64) -> T
+    danger
+        return me.slot(position: position).peek()
+
+### The memory of the place at a position of this array.
+@inline
+secret routine Array[T, COUNT].slot(position: U64) -> Hijacked[T]
+    return me.hijack().recast_as[T]().offset(T.data_size() * position)
+
+### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
+secret routine Array[T, COUNT].clear_places(from: U64, count: U64)
+    danger
+        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0_u8, size: T.data_size() * count)
+    return

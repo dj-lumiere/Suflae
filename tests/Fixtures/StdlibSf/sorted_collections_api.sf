@@ -1,0 +1,92 @@
+module Tests/StdlibSf/SortedCollectionsApi
+
+import IO/Console
+import ObjectHacker
+import Collections
+
+# Suflae's SortedList, SortedSet and SortedDict share one B-tree whose nodes are entities holding their entries in
+# fixed arrays. Enough entries go in and out here to split, merge and shift nodes at several levels.
+
+entity Box
+    id: Integer
+
+routine start()
+    var numbers = SortedList[Integer]()
+    var i = 0
+    while i < 3000
+        numbers.add(value: (i * 7919) % 1000)
+        i = i + 1
+    show(f"list: count={numbers.count()} min={numbers.min()} max={numbers.max()} fives={numbers.count_of(value: 5)}")
+    show(f"rank 0={numbers.get_by_rank(rank: 0)} rank 2999={numbers.get_by_rank(rank: 2999)} range={numbers.range(min_val: 10, max_val: 11)}")
+    var sorted = true
+    var previous = -1
+    each n in numbers
+        if n < previous
+            sorted = false
+        previous = n
+    show(f"in order: {sorted}")
+    i = 0
+    while i < 1000
+        discard numbers.remove_all(value: i)
+        if i % 2 == 0
+            numbers.add(value: i)
+        i = i + 1
+    show(f"after removes: count={numbers.count()} first={numbers.first()} last={numbers.last()} has 3: {numbers have 3}")
+
+    var squares = SortedSet[Integer]()
+    i = 0
+    while i < 2000
+        discard squares.add(value: (i * i) % 1543)
+        i = i + 1
+    var size = squares.count()
+    i = 0
+    while i < 1543
+        if i % 3 != 0
+            discard squares.remove(value: i)
+        i = i + 1
+    show(f"set: distinct={size} left={squares.count()} min={squares.min()} max={squares.max()}")
+    var a = SortedSet[Integer]()
+    var b = SortedSet[Integer]()
+    discard a.add(value: 3)
+    discard a.add(value: 1)
+    discard b.add(value: 1)
+    discard b.add(value: 3)
+    show(f"small sets: {a} {SortedSet[Integer]()} equal={a == b}")
+
+    var names = SortedDict[Text, Integer]()
+    i = 0
+    while i < 500
+        discard names.add(key: f"k{i}", value: i)
+        i = i + 1
+    names["k42"] = -42
+    discard names.add(key: "k7", value: 700)
+    i = 0
+    while i < 500
+        if i % 5 != 0
+            discard names.remove(key: f"k{i}")
+        i = i + 1
+    var total = 0
+    each entry in names
+        total = total + entry.value
+    var gone = try names["k1"]
+    show(f"dict: count={names.count()} first={names.first().key} last={names.last().key} total={total} k1 gone: {gone is None}")
+    show(f"rank 1={names.get_by_rank(i: 1)} get_or={names.get_or(key: "zz", default: 9)}")
+
+    var box = Box(id: 1)
+    var watched = watch(target: box)
+    var boxes = SortedDict[Integer, Box]()
+    i = 0
+    while i < 300
+        discard boxes.add(key: i, value: box)
+        i = i + 1
+    i = 0
+    while i < 300
+        discard boxes.remove(key: i)
+        i = i + 2
+    discard boxes.add(key: 1, value: Box(id: 2))
+    show(f"boxes: count={boxes.count()} key 1 id={boxes[1].id} key 3 id={boxes[3].id}")
+    box = Box(id: 0)
+    boxes = SortedDict[Integer, Box]()
+    show(f"released: {not watched.is_alive()}")
+    show("DONE")
+    return

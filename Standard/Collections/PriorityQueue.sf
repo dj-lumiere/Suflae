@@ -195,7 +195,7 @@ routine PriorityQueue[TPriority, TElement].peek_entry!() -> PQEntry[TPriority, T
 ### Only pairs up to the length of the shorter list are inserted; any extra values are ignored.
 ### :param elements: The elements to add.
 ### :param priorities: The priorities to assign at matching positions.
-routine PriorityQueue[TPriority, TElement].add_all(elements: Accessing[List[TElement]], priorities: Accessing[List[TPriority]])
+routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], priorities: List[TPriority])
     var i = 0
     var limit = if elements.count() < priorities.count() then elements.count() else priorities.count()
     while i < limit

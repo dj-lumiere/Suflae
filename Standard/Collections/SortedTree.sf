@@ -1,0 +1,466 @@
+module Collections
+
+import Numerics
+
+# The B-tree under Suflae's SortedList, SortedSet and SortedDict. A node is an entity holding its entries and its
+# branches in fixed arrays, so one node is one allocation. A place no entry or branch uses is zero (empty), and an
+# entry or branch moves between nodes by being written into an empty place of one and erased from the other.
+
+### The most entries one node holds.
+secret preset SORTED_MOST: U64 = 63u64
+### The fewest entries a node other than the root holds.
+secret preset SORTED_LEAST: U64 = 31u64
+
+### One node of a {SortedTree[K, V]}: up to 63 entries in key order and, unless it is a leaf, one more branch than
+### entries. Every key under branch `i` sorts no later than entry `i`, and every key under branch `i + 1` no earlier.
+### :typeparam K: The key type.
+### :typeparam V: The value type.
+secret entity SortedNode[K, V]
+needs K obeys Comparable
+    ### The keys of the entries, in order.
+    keys: Array[K, 63]
+    ### The values of the entries.
+    values: Array[V, 63]
+    ### The nodes under this one.
+    branches: Array[SortedNode[K, V], 64]
+    ### How many entries the node holds.
+    count: U64
+    ### How many branches the node has.
+    fan: U64
+    ### How many entries the node and every node under it hold.
+    size: U64
+    ### Whether the node has no branches.
+    leaf: Bool
+
+### A B-tree of entries kept in key order, each entry a key and a value. Equal keys may sit side by side: the tree
+### keeps them in the order they were added. Every node knows how many entries are under it, so the entry at a
+### rank is found in O(log n).
+### :typeparam K: The key type.
+### :typeparam V: The value type.
+secret entity SortedTree[K, V]
+needs K obeys Comparable
+    ### The top node, a leaf with no entries when the tree is empty.
+    root: SortedNode[K, V]
+
+# ============================================================================
+# Creators
+# ============================================================================
+
+### Creates a node with no entries.
+### :param leaf: Whether the node has no branches.
+routine SortedNode[K, V](leaf: Bool) -> SortedNode[K, V]
+    return SortedNode[K, V](
+        keys: Array[K, 63](),
+        values: Array[V, 63](),
+        branches: Array[SortedNode[K, V], 64](),
+        count: 0u64,
+        fan: 0u64,
+        size: 0u64,
+        leaf: leaf,
+    )
+
+### Creates an empty tree.
+routine SortedTree[K, V]() -> SortedTree[K, V]
+    return SortedTree[K, V](root: SortedNode[K, V](leaf: true))
+
+# ============================================================================
+# Inside a node
+# ============================================================================
+
+### The first entry whose key does not sort before `key`.
+secret routine SortedNode[K, V].lower(key: K) -> U64
+    var low = 0u64
+    var high = me.count
+    while low < high
+        var middle = (low + high) // 2u64
+        if me.keys.get_raw(index: middle) < key
+            low = middle + 1u64
+        else
+            high = middle
+    return low
+
+### The first entry whose key sorts after `key`.
+secret routine SortedNode[K, V].upper(key: K) -> U64
+    var low = 0u64
+    var high = me.count
+    while low < high
+        var middle = (low + high) // 2u64
+        if key < me.keys.get_raw(index: middle)
+            high = middle
+        else
+            low = middle + 1u64
+    return low
+
+### Whether entry `at` exists and has the key `key`.
+secret routine SortedNode[K, V].holds(at: U64, key: K) -> Bool
+    return at < me.count and me.keys.get_raw(index: at) == key
+
+### How many entries branch `at` holds itself.
+secret routine SortedNode[K, V].branch_count(at: U64) -> U64
+    return me.branches[at].count
+
+### How many entries are under branch `at`.
+secret routine SortedNode[K, V].branch_size(at: U64) -> U64
+    return me.branches[at].size
+
+### Opens a gap at entry `at` and puts `key` and `value` in it.
+secret routine SortedNode[K, V].insert_entry(at: U64, key: K, value: V)
+    if at < me.count
+        var first = Integer(from: at)
+        var moved = Integer(from: me.count - at)
+        me.keys.move(from: first, into: first + 1, count: moved)
+        me.values.move(from: first, into: first + 1, count: moved)
+    me.keys[at] = key
+    me.values[at] = value
+    me.count = me.count + 1u64
+    return
+
+### Replaces entry `at` with `key` and `value`.
+secret routine SortedNode[K, V].replace_entry(at: U64, key: K, value: V)
+    me.keys.erase(index: Integer(from: at))
+    me.values.erase(index: Integer(from: at))
+    me.keys[at] = key
+    me.values[at] = value
+    return
+
+### Removes entry `at` and closes the gap.
+secret routine SortedNode[K, V].remove_entry(at: U64)
+    var first = Integer(from: at)
+    me.keys.erase(index: first)
+    me.values.erase(index: first)
+    if at + 1u64 < me.count
+        var moved = Integer(from: me.count - at - 1u64)
+        me.keys.move(from: first + 1, into: first, count: moved)
+        me.values.move(from: first + 1, into: first, count: moved)
+    me.count = me.count - 1u64
+    return
+
+### Opens a gap at branch `at` and puts `branch` in it.
+secret routine SortedNode[K, V].insert_branch(at: U64, branch: SortedNode[K, V])
+    if at < me.fan
+        var first = Integer(from: at)
+        me.branches.move(from: first, into: first + 1, count: Integer(from: me.fan - at))
+    me.branches[at] = branch
+    me.fan = me.fan + 1u64
+    return
+
+### Removes branch `at` and closes the gap.
+secret routine SortedNode[K, V].remove_branch(at: U64)
+    var first = Integer(from: at)
+    me.branches.erase(index: first)
+    if at + 1u64 < me.fan
+        me.branches.move(from: first + 1, into: first, count: Integer(from: me.fan - at - 1u64))
+    me.fan = me.fan - 1u64
+    return
+
+### Moves the entries of `source` from entry `first` on to the end of this node.
+secret routine SortedNode[K, V].take_entries(source: SortedNode[K, V], first: U64)
+    var i = first
+    while i < source.count
+        me.keys[me.count] = source.keys[i]
+        me.values[me.count] = source.values[i]
+        source.keys.erase(index: Integer(from: i))
+        source.values.erase(index: Integer(from: i))
+        me.count = me.count + 1u64
+        i = i + 1u64
+    source.count = first
+    return
+
+### Moves the branches of `source` from branch `first` on to the end of this node.
+secret routine SortedNode[K, V].take_branches(source: SortedNode[K, V], first: U64)
+    var i = first
+    while i < source.fan
+        me.branches[me.fan] = source.branches[i]
+        source.branches.erase(index: Integer(from: i))
+        me.fan = me.fan + 1u64
+        i = i + 1u64
+    source.fan = first
+    return
+
+### Counts again how many entries are under this node, from its own entries and its branches' sizes.
+secret routine SortedNode[K, V].recount()
+    var total = me.count
+    var i = 0u64
+    while i < me.fan
+        total = total + me.branch_size(at: i)
+        i = i + 1u64
+    me.size = total
+    return
+
+# ============================================================================
+# Size
+# ============================================================================
+
+### How many entries the tree holds.
+secret routine SortedTree[K, V].count() -> U64
+    return me.root.size
+
+### Removes every entry.
+secret routine SortedTree[K, V].clear()
+    me.root = SortedNode[K, V](leaf: true)
+    return
+
+# ============================================================================
+# Finding
+# ============================================================================
+
+### Whether an entry with the key `key` is in the tree.
+secret routine SortedTree[K, V].has(key: K) -> Bool
+    return me.has_in(node: me.root, key: key)
+
+secret routine SortedTree[K, V].has_in(node: SortedNode[K, V], key: K) -> Bool
+    var i = node.lower(key: key)
+    if node.holds(at: i, key: key)
+        return true
+    if node.leaf
+        return false
+    return me.has_in(node: node.branches[i], key: key)
+
+### How many entries have a key that sorts before `key`, or with `after`, how many do not sort after it.
+### :param key: The key to place.
+### :param after: Whether entries with the key `key` count too.
+secret routine SortedTree[K, V].rank(key: K, after: Bool) -> U64
+    return me.rank_in(node: me.root, key: key, after: after)
+
+secret routine SortedTree[K, V].rank_in(node: SortedNode[K, V], key: K, after: Bool) -> U64
+    var i = if after then node.upper(key: key) else node.lower(key: key)
+    if node.leaf
+        return i
+    var total = i
+    var b = 0u64
+    while b < i
+        total = total + node.branch_size(at: b)
+        b = b + 1u64
+    return total + me.rank_in(node: node.branches[i], key: key, after: after)
+
+### The key of the entry at `rank` (counted from 0 in key order). The rank must be below `count()`.
+secret routine SortedTree[K, V].key_at(rank: U64) -> K
+    return me.key_at_in(node: me.root, rank: rank)
+
+secret routine SortedTree[K, V].key_at_in(node: SortedNode[K, V], rank: U64) -> K
+    if node.leaf
+        return node.keys[rank]
+    var left = rank
+    var i = 0u64
+    while i < node.count
+        var below = node.branch_size(at: i)
+        if left < below
+            return me.key_at_in(node: node.branches[i], rank: left)
+        left = left - below
+        if left == 0u64
+            return node.keys[i]
+        left = left - 1u64
+        i = i + 1u64
+    return me.key_at_in(node: node.branches[node.count], rank: left)
+
+### The value of the entry at `rank` (counted from 0 in key order). The rank must be below `count()`.
+secret routine SortedTree[K, V].value_at(rank: U64) -> V
+    return me.value_at_in(node: me.root, rank: rank)
+
+secret routine SortedTree[K, V].value_at_in(node: SortedNode[K, V], rank: U64) -> V
+    if node.leaf
+        return node.values[rank]
+    var left = rank
+    var i = 0u64
+    while i < node.count
+        var below = node.branch_size(at: i)
+        if left < below
+            return me.value_at_in(node: node.branches[i], rank: left)
+        left = left - below
+        if left == 0u64
+            return node.values[i]
+        left = left - 1u64
+        i = i + 1u64
+    return me.value_at_in(node: node.branches[node.count], rank: left)
+
+### The value of the first entry with the key `key`, which must be in the tree.
+secret routine SortedTree[K, V].value_of(key: K) -> V
+    return me.value_of_in(node: me.root, key: key)
+
+secret routine SortedTree[K, V].value_of_in(node: SortedNode[K, V], key: K) -> V
+    var i = node.lower(key: key)
+    if node.holds(at: i, key: key)
+        return node.values[i]
+    return me.value_of_in(node: node.branches[i], key: key)
+
+### Gives the first entry with the key `key`, which must be in the tree, the value `value`.
+secret routine SortedTree[K, V].replace(key: K, value: V)
+    me.replace_in(node: me.root, key: key, value: value)
+    return
+
+secret routine SortedTree[K, V].replace_in(node: SortedNode[K, V], key: K, value: V)
+    var i = node.lower(key: key)
+    if node.holds(at: i, key: key)
+        node.values.erase(index: Integer(from: i))
+        node.values[i] = value
+        return
+    me.replace_in(node: node.branches[i], key: key, value: value)
+    return
+
+# ============================================================================
+# Adding
+# ============================================================================
+
+### Adds an entry, after every entry with the same key.
+secret routine SortedTree[K, V].insert(key: K, value: V)
+    if me.root.count == SORTED_MOST
+        var grown = SortedNode[K, V](leaf: false)
+        grown.insert_branch(at: 0u64, branch: me.root)
+        me.root = grown
+        me.split(parent: me.root, at: 0u64)
+        me.root.recount()
+    me.insert_in(node: me.root, key: key, value: value)
+    return
+
+### Adds an entry under `node`, which is not full.
+secret routine SortedTree[K, V].insert_in(node: SortedNode[K, V], key: K, value: V)
+    var i = node.upper(key: key)
+    node.size = node.size + 1u64
+    if node.leaf
+        node.insert_entry(at: i, key: key, value: value)
+        return
+    if node.branch_count(at: i) == SORTED_MOST
+        me.split(parent: node, at: i)
+        if node.keys.get_raw(index: i) <= key
+            i = i + 1u64
+    me.insert_in(node: node.branches[i], key: key, value: value)
+    return
+
+### Splits the full branch `at` of `parent` in two around its middle entry, which moves up into `parent`.
+secret routine SortedTree[K, V].split(parent: SortedNode[K, V], at: U64)
+    var child = parent.branches[at]
+    var right = SortedNode[K, V](leaf: child.leaf)
+    right.take_entries(source: child, first: 32u64)
+    if not child.leaf
+        right.take_branches(source: child, first: 32u64)
+    parent.insert_entry(at: at, key: child.keys[31u64], value: child.values[31u64])
+    child.remove_entry(at: 31u64)
+    child.recount()
+    right.recount()
+    parent.insert_branch(at: at + 1u64, branch: right)
+    return
+
+# ============================================================================
+# Removing
+# ============================================================================
+
+### Removes the first entry with the key `key`.
+### :returns: `true` when there was one.
+secret routine SortedTree[K, V].remove(key: K) -> Bool
+    var removed = me.remove_in(node: me.root, key: key)
+    if me.root.count == 0u64 and not me.root.leaf
+        me.root = me.root.branches[0u64]
+    return removed
+
+### Removes an entry with the key `key` from under `node`, which holds more than the fewest entries (or is the
+### root).
+secret routine SortedTree[K, V].remove_in(node: SortedNode[K, V], key: K) -> Bool
+    var i = node.lower(key: key)
+    var here = node.holds(at: i, key: key)
+    if node.leaf
+        if not here
+            return false
+        node.remove_entry(at: i)
+        node.size = node.size - 1u64
+        return true
+    if here
+        if node.branch_count(at: i) > SORTED_LEAST
+            me.pull_last(node: node.branches[i], into: node, at: i)
+            node.size = node.size - 1u64
+            return true
+        if node.branch_count(at: i + 1u64) > SORTED_LEAST
+            me.pull_first(node: node.branches[i + 1u64], into: node, at: i)
+            node.size = node.size - 1u64
+            return true
+        me.merge(node: node, at: i)
+    else
+        i = me.fix(node: node, at: i)
+    var removed = me.remove_in(node: node.branches[i], key: key)
+    if removed
+        node.size = node.size - 1u64
+    return removed
+
+### Takes the last entry from under `node`, which holds more than the fewest entries, and puts it in place of
+### entry `at` of `into`.
+secret routine SortedTree[K, V].pull_last(node: SortedNode[K, V], into: SortedNode[K, V], at: U64)
+    node.size = node.size - 1u64
+    if node.leaf
+        var last = node.count - 1u64
+        into.replace_entry(at: at, key: node.keys[last], value: node.values[last])
+        node.remove_entry(at: last)
+        return
+    var b = me.fix(node: node, at: node.fan - 1u64)
+    me.pull_last(node: node.branches[b], into: into, at: at)
+    return
+
+### Takes the first entry from under `node`, which holds more than the fewest entries, and puts it in place of
+### entry `at` of `into`.
+secret routine SortedTree[K, V].pull_first(node: SortedNode[K, V], into: SortedNode[K, V], at: U64)
+    node.size = node.size - 1u64
+    if node.leaf
+        into.replace_entry(at: at, key: node.keys[0u64], value: node.values[0u64])
+        node.remove_entry(at: 0u64)
+        return
+    var b = me.fix(node: node, at: 0u64)
+    me.pull_first(node: node.branches[b], into: into, at: at)
+    return
+
+### Makes sure branch `at` of `node` holds more than the fewest entries, by moving one entry over from a branch
+### next to it or by merging it with one.
+### :returns: Where that branch is now.
+secret routine SortedTree[K, V].fix(node: SortedNode[K, V], at: U64) -> U64
+    if node.branch_count(at: at) > SORTED_LEAST
+        return at
+    if at > 0u64 and node.branch_count(at: at - 1u64) > SORTED_LEAST
+        me.shift_right(node: node, at: at)
+        return at
+    if at + 1u64 < node.fan and node.branch_count(at: at + 1u64) > SORTED_LEAST
+        me.shift_left(node: node, at: at)
+        return at
+    if at > 0u64
+        me.merge(node: node, at: at - 1u64)
+        return at - 1u64
+    me.merge(node: node, at: at)
+    return at
+
+### Moves the last entry of branch `at - 1` up into `node` and the entry between them down into branch `at`.
+secret routine SortedTree[K, V].shift_right(node: SortedNode[K, V], at: U64)
+    var left = node.branches[at - 1u64]
+    var child = node.branches[at]
+    child.insert_entry(at: 0u64, key: node.keys[at - 1u64], value: node.values[at - 1u64])
+    var last = left.count - 1u64
+    node.replace_entry(at: at - 1u64, key: left.keys[last], value: left.values[last])
+    left.remove_entry(at: last)
+    if not child.leaf
+        child.insert_branch(at: 0u64, branch: left.branches[left.fan - 1u64])
+        left.remove_branch(at: left.fan - 1u64)
+    left.recount()
+    child.recount()
+    return
+
+### Moves the first entry of branch `at + 1` up into `node` and the entry between them down into branch `at`.
+secret routine SortedTree[K, V].shift_left(node: SortedNode[K, V], at: U64)
+    var right = node.branches[at + 1u64]
+    var child = node.branches[at]
+    child.insert_entry(at: child.count, key: node.keys[at], value: node.values[at])
+    node.replace_entry(at: at, key: right.keys[0u64], value: right.values[0u64])
+    right.remove_entry(at: 0u64)
+    if not child.leaf
+        child.insert_branch(at: child.fan, branch: right.branches[0u64])
+        right.remove_branch(at: 0u64)
+    right.recount()
+    child.recount()
+    return
+
+### Merges branch `at + 1` of `node` into branch `at`, with entry `at` of `node` moving down between them.
+secret routine SortedTree[K, V].merge(node: SortedNode[K, V], at: U64)
+    var left = node.branches[at]
+    var right = node.branches[at + 1u64]
+    left.insert_entry(at: left.count, key: node.keys[at], value: node.values[at])
+    left.take_entries(source: right, first: 0u64)
+    if not left.leaf
+        left.take_branches(source: right, first: 0u64)
+    left.size = left.size + right.size + 1u64
+    node.remove_entry(at: at)
+    node.remove_branch(at: at + 1u64)
+    return

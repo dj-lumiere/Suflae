@@ -38,6 +38,51 @@ internal sealed class EntityLoweringPass
     // owned local returned by move is NOT in this set, so it is correctly left alone.
     private readonly HashSet<string> _borrowNames = new();
 
+    // Per-routine scope: the locals a constructor returns by name (`var r = E(...)` ... `return r`).
+    private readonly HashSet<string> _returnedCreateLocals = new();
+
+    /// <summary>Records every local a <c>return name</c> statement under <paramref name="node"/> hands back.</summary>
+    private void CollectReturnedNames(object node)
+    {
+        switch (node)
+        {
+            case ReturnStatement { Value: IdentifierExpression id }:
+                _returnedCreateLocals.Add(item: id.Name);
+                return;
+            case BlockStatement block:
+                foreach (Statement s in block.Statements)
+                {
+                    CollectReturnedNames(node: s);
+                }
+
+                return;
+            case IfStatement ifs:
+                CollectReturnedNames(node: ifs.ThenStatement);
+                if (ifs.ElseStatement != null)
+                {
+                    CollectReturnedNames(node: ifs.ElseStatement);
+                }
+
+                return;
+            case LoopStatement loop:
+                CollectReturnedNames(node: loop.Body);
+                return;
+            case WhileStatement w:
+                CollectReturnedNames(node: w.Body);
+                return;
+            case DangerStatement d:
+                CollectReturnedNames(node: d.Body);
+                return;
+            case WhenStatement whenStatement:
+                foreach (WhenClause clause in whenStatement.Clauses)
+                {
+                    CollectReturnedNames(node: clause.Body);
+                }
+
+                return;
+        }
+    }
+
     // True while lowering a `create` constructor body. A constructor returns the BARE entity by
     // convention (the caller roams it — see the class doc's carve-out + stdlib), so its return
     // construction must NOT be roamed here, or the value is roamed twice (once inside `create`, once at
@@ -136,7 +181,7 @@ internal sealed class EntityLoweringPass
         }
     }
 
-    private RoutineDeclaration LowerRoutine(RoutineDeclaration r)
+    internal RoutineDeclaration LowerRoutine(RoutineDeclaration r)
     {
         AssertNoBareEntityInSignature(r: r);
         _roamedLocals.Clear();
@@ -144,8 +189,15 @@ internal sealed class EntityLoweringPass
         _borrowNames.Add(item: "me");
         // A constructor is the `routine T(...) -> T` form (named after the type it builds). It returns
         // the bare entity by convention; the caller roams. (The routine is mangled to `T.create` at
-        // codegen, but its declaration name is the type name here.)
-        _inCreateRoutine = r.ReturnType is { Name: var rn } && r.Name == rn;
+        // codegen, but its declaration name is the type name here.) A member routine that happens to be
+        // named after the type it returns (`Iterable[T].List()`) is no constructor.
+        _inCreateRoutine = r.ResolvedInfo is { Kind: RoutineKind.Creator, IsRecoveryVariant: false } ||
+                           r.ResolvedInfo == null && r.ReturnType is { Name: var rn } && r.Name == rn;
+        _returnedCreateLocals.Clear();
+        if (_inCreateRoutine && r.Body != null)
+        {
+            CollectReturnedNames(node: r.Body);
+        }
         foreach (Parameter p in r.Parameters.Where(predicate: p =>
                      p.Type?.ResolvedType is RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed }))
         {
@@ -272,7 +324,17 @@ internal sealed class EntityLoweringPass
     private Statement LowerDeclarationStatement(Statement stmt, DeclarationStatement ds,
         VariableDeclaration vd)
     {
-        Expression init = MaybeRoamCopy(expr: LowerExpression(expr: vd.Initializer!));
+        Expression lowered = LowerExpression(expr: vd.Initializer!);
+        // A constructor's local that it returns holds the bare entity its construction makes: the
+        // constructor returns the bare entity and the caller roams it, so a roamed local returned here
+        // would be roamed twice.
+        if (_returnedCreateLocals.Contains(item: vd.Name) &&
+            TryUnwrapRoamConstruction(expr: lowered, inner: out Expression? bare) && bare != null)
+        {
+            return ds with { Declaration = vd with { Initializer = bare } };
+        }
+
+        Expression init = MaybeRoamCopy(expr: lowered);
         // Track the local as Roamed[E] when its initializer resolved to a Roamed wrapper, so
         // later references (aliasing / access) retype consistently. `var` locals infer their
         // type from the initializer at codegen, so no declared-type rewrite is needed here.
@@ -410,8 +472,10 @@ internal sealed class EntityLoweringPass
         return expr switch
         {
             // A creator that yields a bare SF entity -> `.roam()` : Roamed[E].
+            // Its member values are lowered first: `Outer(inner: Inner(...))` makes the inner entity's
+            // handle for the field, and a handle read from elsewhere gets its own holder there.
             CreatorExpression creator when creator.ResolvedType is EntityTypeSymbol ce => WrapInRoam(
-                inner: creator,
+                inner: LowerCreatorMembers(creator: creator),
                 entity: ce),
             // A collection literal (`[1,2,3]` / `{…}`) is an entity rvalue just like a constructor call —
             // it resolves to a bare `Core.List`/`Set`/`Dict` entity, so an SF entity slot must `.roam()` it
@@ -420,13 +484,13 @@ internal sealed class EntityLoweringPass
             // `create + add_last` temp; the `.roam()` wraps that temp reference.
             // Its elements are lowered first: `[Plain(x: 1)]` constructs each entity into its own handle,
             // or the list would hold bare entity pointers where it expects Roamed handles.
-            ListLiteralExpression list when expr.ResolvedType is EntityTypeSymbol le => WrapInRoam(
+            ListLiteralExpression list when expr.ResolvedType is EntityTypeSymbol le => WrapLiteralInRoam(
                 inner: list with { Elements = list.Elements.Select(selector: LowerExpression).ToList() },
                 entity: le),
-            SetLiteralExpression set when expr.ResolvedType is EntityTypeSymbol se => WrapInRoam(
+            SetLiteralExpression set when expr.ResolvedType is EntityTypeSymbol se => WrapLiteralInRoam(
                 inner: set with { Elements = set.Elements.Select(selector: LowerExpression).ToList() },
                 entity: se),
-            DictLiteralExpression dict when expr.ResolvedType is EntityTypeSymbol de => WrapInRoam(
+            DictLiteralExpression dict when expr.ResolvedType is EntityTypeSymbol de => WrapLiteralInRoam(
                 inner: dict with
                 {
                     Pairs = dict.Pairs
@@ -458,6 +522,14 @@ internal sealed class EntityLoweringPass
             // A call — INCLUDING a constructor call `E(...)`, which is a CallExpression (not a
             // CreatorExpression) at this phase — that produces a bare SF entity: recurse into its
             // parts, then `.roam()` the whole value.
+            // A handle this pass already made (`Roamed(from: E(...))`) stays as it is, so lowering a routine
+            // again changes nothing.
+            CallExpression made when TryUnwrapRoamConstruction(expr: made, inner: out _) => made,
+            // So does a look through a handle at its entity (`h.control()`, `h.raw_inner()`): the entity it
+            // yields is the handle's, not a new one.
+            CallExpression look when look.Callee is MemberExpression { MemberName: var verb } &&
+                                     (RuntimeContract.ViewVerbs.Contains(item: verb) ||
+                                      verb == RuntimeContract.RoamedMemberRoutine.RawInner) => look,
             CallExpression call => LowerCallExpression(call: call),
             // A generic-instance construction like `List[Node]()` stays a GenericMemberRoutineCallExpression
             // through codegen (the explicit `[T]` args keep it out of CallExpression form), so it must
@@ -479,6 +551,22 @@ internal sealed class EntityLoweringPass
                 : recovery with { Inner = LowerExpression(expr: recovery.Inner) },
             _ => expr
         };
+    }
+
+    private CreatorExpression LowerCreatorMembers(CreatorExpression creator)
+    {
+        bool changed = false;
+        var members = new List<(string Name, Expression Value)>(capacity: creator.MemberVariables.Count);
+        foreach ((string name, Expression value) in creator.MemberVariables)
+        {
+            Expression lowered = RetainConstructionArg(arg: LowerExpression(expr: value));
+            changed |= !ReferenceEquals(objA: lowered, objB: value);
+            members.Add(item: (name, lowered));
+        }
+
+        return changed
+            ? creator with { MemberVariables = members }
+            : creator;
     }
 
     private static IdentifierExpression RetypeIdentifier(IdentifierExpression id,
@@ -506,7 +594,7 @@ internal sealed class EntityLoweringPass
                                   !ReferenceEquals(objA: ii, objB: ix.Index)
             ? ix with { Object = o, Index = ii }
             : ix;
-        return ix.ResolvedType is EntityTypeSymbol made
+        return ix.ResolvedType is EntityTypeSymbol made && !IsRazorForgeEntity(entity: made)
             ? WrapInRoam(inner: lowered, entity: made)
             : lowered;
     }
@@ -691,7 +779,12 @@ internal sealed class EntityLoweringPass
     // parameterized SF constructor whose `create` body returns the bare entity.
     private CallExpression WrapCallResultInRoam(CallExpression call, CallExpression lowered)
     {
-        if (call.ResolvedType is EntityTypeSymbol callEntity && !IsRfRealmRef(callee: call.Callee))
+        // The routine the call is bound to says what comes back: a concrete routine that returns no entity hands
+        // back no entity to wrap, whatever type a by-name lookup left on the call.
+        bool returnsNoEntity = call.ResolvedRoutine is { IsCreator: false, ReturnType: { } returned } &&
+                               returned is not (EntityTypeSymbol or GenericParameterTypeSymbol);
+        if (call.ResolvedType is EntityTypeSymbol callEntity && !returnsNoEntity &&
+            !IsRfRealmRef(callee: call.Callee) && !IsRazorForgeEntity(entity: callEntity))
         {
             return WrapInRoam(inner: lowered, entity: callEntity);
         }
@@ -755,9 +848,24 @@ internal sealed class EntityLoweringPass
         GenericMemberRoutineCallExpression loweredG = gChanged
             ? gmce with { Arguments = gArgs }
             : gmce;
-        return gmce.ResolvedType is EntityTypeSymbol gEntity && !IsRfRealmRef(callee: gmce.Object)
-            ? WrapInRoam(inner: loweredG, entity: gEntity)
-            : loweredG;
+        if (gmce.ResolvedType is EntityTypeSymbol gEntity && !IsRfRealmRef(callee: gmce.Object) &&
+            !IsRazorForgeEntity(entity: gEntity))
+        {
+            return WrapInRoam(inner: loweredG, entity: gEntity);
+        }
+
+        // A written creator called with explicit type arguments (`Buffer[T](capacity: n)`) is typed by its
+        // declared `Roamed[E]` return, but its body hands back the bare entity: wrap it once here, as the
+        // CallExpression form does (WrapCallResultInRoam).
+        if (gmce.ResolvedRoutine is { IsCreator: true } &&
+            RoamedInnerEntity(t: gmce.ResolvedType) is { } createEntity &&
+            !IsRfRealmRef(callee: gmce.Object))
+        {
+            loweredG.ResolvedType = createEntity;
+            return WrapInRoam(inner: loweredG, entity: createEntity);
+        }
+
+        return loweredG;
     }
 
     // Rewrite each argument that lands in a BARE-entity parameter of `routine` from a Roamed handle to
@@ -926,6 +1034,13 @@ internal sealed class EntityLoweringPass
     // construct `E(...).roam()`, a call) are already owned and are left alone.
     private static Expression MaybeRoamCopy(Expression expr)
     {
+        // The local a reassignment spilled its new value to already owns it and hands it over.
+        if (expr is IdentifierExpression spill &&
+            spill.Name.StartsWith(value: RuntimeContract.ReassignSpillPrefix, comparisonType: StringComparison.Ordinal))
+        {
+            return expr;
+        }
+
         // The `.share()` copy verb retains the shared controller.
         if (expr is IdentifierExpression or MemberExpression && IsRoamedType(t: expr.ResolvedType))
         {
@@ -951,9 +1066,21 @@ internal sealed class EntityLoweringPass
     // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RF"`
     // gate on the type-annotation side; the realm survives on the construction callee's identifier
     // (Parser.Expressions parses `RF::Core.List` into `IdentifierExpression { Realm = "RF" }`).
+    // A RazorForge entity (`RF::Core.List`) keeps its single owner in Suflae code for now, however it was
+    // reached: by an `RF::` name or as what a routine hands back.
+    private static bool IsRazorForgeEntity(EntityTypeSymbol entity)
+    {
+        string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
+        return Builder.Frontends.Languages.HasSourceExtension(fileName: declaredIn) &&
+               Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge;
+    }
+
     private static bool IsRfRealmRef(Expression callee)
     {
-        return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared };
+        return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared } ||
+               // A routine called on a RazorForge entity held as such (`RF::Core.List`) hands back that
+               // world's value too.
+               callee is MemberExpression { Object.ResolvedType: EntityTypeSymbol { Realm: TypeModel.Realms.Shared } };
     }
 
     // Recognizes the `Roamed(from: X)` wrapper construction that <see cref="WrapInRoam"/> builds and
@@ -973,6 +1100,21 @@ internal sealed class EntityLoweringPass
 
         inner = null;
         return false;
+    }
+
+    // A collection literal is built by its type's `from_literal`. A library written in this language makes the
+    // handle there itself (the routine returns `Roamed[E]`), so the literal is only retyped to it. Otherwise
+    // the literal is a bare entity and is wrapped like any construction.
+    private Expression WrapLiteralInRoam(Expression inner, EntityTypeSymbol entity)
+    {
+        if (_registry.LookupMemberRoutine(type: entity, memberRoutineName: "from_literal")?.ReturnType is
+            RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed } handle)
+        {
+            inner.ResolvedType = handle;
+            return inner;
+        }
+
+        return WrapInRoam(inner: inner, entity: entity);
     }
 
     private CallExpression WrapInRoam(Expression inner, EntityTypeSymbol entity)

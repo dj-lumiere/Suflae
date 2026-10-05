@@ -74,6 +74,7 @@ public sealed class SuflaeRules : LanguageRules
     public override bool ChecksAccessTokens => false;
     public override bool ChecksReadonly => false;
     public override bool ChecksShapeAtRunTime => true;
+    public override bool ZeroIsEmptyPlace => true;
 
     /// <summary>A Suflae user writes and reads <c>Account</c>, never the <c>Roamed[Account]</c> handle the
     /// builder carries an entity in.</summary>
@@ -176,6 +177,11 @@ public sealed class SuflaeRules : LanguageRules
     public override void LowerEntities(Program program, TypeRegistry registry)
     {
         new EntityLoweringPass(registry: registry).Run(program: program);
+    }
+
+    public override RoutineDeclaration LowerEntitiesInRoutine(RoutineDeclaration routine, TypeRegistry registry)
+    {
+        return new EntityLoweringPass(registry: registry).LowerRoutine(r: routine);
     }
 
     public override void LowerFirst(PostprocessingContext ctx, Program program)

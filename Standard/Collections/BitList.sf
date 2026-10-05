@@ -385,7 +385,7 @@ routine BitList.none() -> Bool
 ### have no counterpart to intersect with.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose bits are `me.getitem_raw(index: i) and other.getitem_raw(index: i)`.
-routine BitList.bitand(other: Accessing[BitList]) -> BitList
+routine BitList.bitand(other: BitList) -> BitList
     # Bitwise AND - returns new BitList with shorter length
     var min_count = if me.count < other.count then me.count else other.count
     var result = BitList(min_count)
@@ -401,7 +401,7 @@ routine BitList.bitand(other: Accessing[BitList]) -> BitList
 ### Missing bits past the end of the shorter input are treated as `false`.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose length matches the longer input.
-routine BitList.bitor(other: Accessing[BitList]) -> BitList
+routine BitList.bitor(other: BitList) -> BitList
     # Bitwise OR - returns new BitList with longer length
     var max_count = if me.count > other.count then me.count else other.count
     var result = BitList(max_count)
@@ -418,7 +418,7 @@ routine BitList.bitor(other: Accessing[BitList]) -> BitList
 ### Missing bits past the end of the shorter input are treated as `false`.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose bits are set where exactly one input bit is set.
-routine BitList.bitxor(other: Accessing[BitList]) -> BitList
+routine BitList.bitxor(other: BitList) -> BitList
     # Bitwise XOR - returns new BitList with longer length
     var max_count = if me.count > other.count then me.count else other.count
     var result = BitList(max_count)
@@ -511,7 +511,7 @@ routine BitList.reverse() -> BitList
 ### Returns true if both bit lists have equal length and identical bit contents.
 ### :param other: The other bit list to compare against.
 ### :returns: `true` if both have the same count and all corresponding bits match.
-routine BitList.eq(other: Accessing[BitList]) -> Bool
+routine BitList.eq(other: BitList) -> Bool
     if me.count != other.count
         return false
     var i = 0u64

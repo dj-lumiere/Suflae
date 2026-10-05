@@ -183,7 +183,7 @@ routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> T
 ### Returns the value of `key` (`d[k]`).
 ### :param key: The key to look up.
 ### :absent: The key has no entry.
-routine Dict[TKey, TValue].getitem!(key: Accessing[TKey]) -> TValue
+routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
     var slot = me.find_slot(key: key)
     if slot < 0
         absent
@@ -193,7 +193,7 @@ routine Dict[TKey, TValue].getitem!(key: Accessing[TKey]) -> TValue
 ### :param key: The key.
 ### :param value: The new value.
 ### :absent: The key has no entry.
-routine Dict[TKey, TValue].setitem!(key: Accessing[TKey], value: TValue)
+routine Dict[TKey, TValue].setitem!(key: TKey, value: TValue)
     var slot = me.find_slot(key: key)
     if slot < 0
         absent
@@ -290,7 +290,7 @@ routine Dict[TKey, TValue].diagnose() -> Text
 
 ### Returns whether both dictionaries have the same keys with equal values.
 ### :param you: The other dictionary.
-routine Dict[TKey, TValue].eq(you: Accessing[Dict[TKey, TValue]]) -> Bool
+routine Dict[TKey, TValue].eq(you: Dict[TKey, TValue]) -> Bool
 needs TValue obeys Equatable
     if me.count != you.count
         return false

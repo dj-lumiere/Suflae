@@ -2,45 +2,148 @@ module Core
 
 import Numerics
 
-# Structured concurrency over Suflae's own list of Agents: the same `race` / `gather` / `cancel_all` as
-# RazorForge's list has, handing results back in Suflae's own list.
+# Suflae's own Agent: work a `suspended` or `threaded` routine call has bound to its arguments, shared like any
+# Suflae entity. It drives the work through RazorForge's agent, held inside, so every holder of the Agent sees the
+# same work: run once, consumed once. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
+# `cancel_all`) works on that list directly.
+
+### Work a `suspended` or `threaded` routine call has bound to its arguments. Nothing runs until a verb runs it:
+### `retrieve` runs it and waits for its value, `execute` runs it in the background.
+### :typeparam T: The value the routine returns.
+entity Agent[T]
+    ### The RazorForge agent that drives the work.
+    secret work: RF::Core.Agent[T]
+
+# ============================================================================
+# Builder plumbing
+# ============================================================================
+
+### Builds the Agent of a `suspended` call: the coroutine that will run `entry(recipe)`, not started.
+routine agent_suspended[T](entry: CPtr, recipe: Address) -> Agent[T]
+    danger
+        return Agent[T](work: agent_suspended[T](entry: entry, recipe: recipe))
+
+### Builds the Agent of a `threaded` call: the work a thread will run, not started.
+routine agent_threaded[T](entry: CPtr, recipe: Address) -> Agent[T]
+    danger
+        return Agent[T](work: agent_threaded[T](entry: entry, recipe: recipe))
+
+# ============================================================================
+# Running one Agent
+# ============================================================================
+
+### Runs the work and waits for its value. Inside a coroutine it parks, so other coroutines keep running.
+### :throws: {TaskSpawnError} if the work could not be started.
+### :throws: {TaskTimeoutError} if a deadline was set with `waitfor` and passed first.
+### :returns: The value the routine returned.
+routine Agent[T].retrieve!() -> T
+    return me.work.retrieve()
+
+### Runs the work in the background and returns at once. The value is thrown away, the work still finishes.
+### :throws: {TaskSpawnError} if the work could not be started.
+routine Agent[T].execute!()
+    me.work.execute()
+    return
+
+### The same work with a deadline: its `retrieve` waits at most `deadline` and crashes with
+### {TaskTimeoutError} past it (`agent.waitfor(5s).retrieve()`).
+### :param deadline: The longest `retrieve` waits.
+### :returns: An Agent over the same work, carrying the deadline.
+routine Agent[T].waitfor(deadline: Duration) -> Agent[T]
+    return Agent[T](work: me.work.waitfor(deadline: deadline))
+
+### Whether the work has finished, or was never started and cannot start.
+routine Agent[T].is_done() -> Bool
+    return me.work.is_done()
+
+### Whether the work was started and has not finished yet.
+routine Agent[T].is_running() -> Bool
+    return me.work.is_running()
+
+### Starts the work if it has not started yet.
+### :returns: `false` if it could not start.
+secret routine Agent[T].launch() -> Bool
+    danger
+        return me.work.launch()
+
+### Asks the work to stop. A coroutine sees it at its next `waitfor`, any work through `cancellation_requested()`.
+secret routine Agent[T].request_cancel()
+    danger
+        me.work.request_cancel()
+    return
+
+### Enters the work in a race.
+secret routine Agent[T].join_race(race: CPtr)
+    danger
+        if me.work.is_coro()
+            C::rf_race_add_coro(race: race, coro: me.work.coro_handle())
+        else
+            C::rf_race_add_task(race: race, task: me.work.task_handle())
+    return
+
+### The value the finished work produced.
+secret routine Agent[T].result() -> T
+    danger
+        var payload = C::rf_task_result_payload(task: me.work.task_handle())
+        var value = Hijacked[T](from: payload).peek()
+        rf_invalidate(ptr: payload)
+        return value
+
+### Frees the work once nothing will read it again.
+secret routine Agent[T].reap()
+    danger
+        me.work.reap()
+    return
+
+# ============================================================================
+# Running a list of Agents
+# ============================================================================
 
 ### Races the Agents, driving them concurrently until the first one finishes, and returns that winner's
-### value. The losers are released when the list goes away.
-### :throws: {TaskSpawnError} if the list is empty (there is nothing to race).
+### value. Every Agent of the list is freed afterwards, the losers too.
+### :throws: {TaskSpawnError} if the list is empty (there is nothing to race) or an Agent cannot be started.
 ### :returns: The value produced by the first Agent to finish.
 routine List[Agent[T]].race!() -> T
     if me.is_empty()
         throw TaskSpawnError()
-    return me.to_razorforge().race()
+    danger
+        var race = C::rf_race_begin()
+        each agent in me
+            if not agent.launch()
+                throw TaskSpawnError()
+            agent.join_race(race: race)
+        var winner = Integer(from: C::rf_race_wait(race: race))
+        C::rf_race_end(race: race)
+        var value = me[winner].result()
+        each agent in me
+            agent.reap()
+        return value
 
 ### Drives the Agents concurrently and waits for all of them, returning their results in the list's order.
 ### The total wait is the slowest Agent, not the sum. If an Agent throws, the throw comes out here.
 ### :throws: {TaskSpawnError} if an Agent cannot be started.
 ### :returns: The values produced by every Agent, in the order they appear in the list.
 routine List[Agent[T]].gather!() -> List[T]
-    danger
-        # Start every Agent first so they run together, then collect each.
-        each agent in me
-            if not agent.launch()
-                throw TaskSpawnError()
-        var results = List[T]()
-        each agent in me
-            results.add_last(value: agent.retrieve())
-        return results
+    # Start every Agent first so they run together, then collect each.
+    each agent in me
+        if not agent.launch()
+            throw TaskSpawnError()
+    var results = List[T]()
+    each agent in me
+        results.add_last(value: agent.retrieve())
+    return results
 
 ### Asks every Agent to stop, then waits for them to wind down, returning each one's final value in the
 ### list's order. A cooperative Agent sees the request through `cancellation_requested()`.
 ### :throws: {TaskSpawnError} if an Agent cannot be started.
 ### :returns: Each Agent's final value, in the list's order.
 routine List[Agent[T]].cancel_all!() -> List[T]
-    danger
-        each agent in me
-            agent.request_cancel()
-        each agent in me
-            if not agent.launch()
-                throw TaskSpawnError()
-        var results = List[T]()
-        each agent in me
-            results.add_last(value: agent.retrieve())
-        return results
+    each agent in me
+        agent.request_cancel()
+    each agent in me
+        if not agent.launch()
+            throw TaskSpawnError()
+    var results = List[T]()
+    each agent in me
+        results.add_last(value: agent.retrieve())
+    return results

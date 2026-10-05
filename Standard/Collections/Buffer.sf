@@ -33,7 +33,7 @@ entity Buffer[T]
 relates BufferEmittable[T] as Iter
 obeys Iterable[T], Container
     ### The memory the places live in, a handle shared with every view and walk of it.
-    secret storage: Roamed[BufferStorage[T]]
+    secret storage: BufferStorage[T]
     ### The memory's place this buffer starts at (0 for a whole buffer).
     secret start: U64
     ### How many places this buffer spans.
@@ -52,7 +52,7 @@ entity BufferStorage[T]
 entity BufferEmittable[T]
 obeys Emittable[T]
     ### The memory being walked, kept alive by the walk.
-    secret storage: Roamed[BufferStorage[T]]
+    secret storage: BufferStorage[T]
     ### The memory's place the walked buffer starts at.
     secret base: U64
     ### How many places the walked buffer spans.
@@ -87,12 +87,12 @@ routine Buffer[T](count: Integer, fill: T) -> Buffer[T]
     return result
 
 ### Memory with `room` places, all zero.
-secret routine new_buffer_storage[T](room: U64) -> Roamed[BufferStorage[T]]
+secret routine new_buffer_storage[T](room: U64) -> BufferStorage[T]
     var data = hijacked_none[T]()
     if room > 0_u64
         danger
             data = hijacked_from[T](rf_allocate_dynamic(T.data_size() * room))
-    return Roamed[BufferStorage[T]](from: BufferStorage[T](data: data, room: room))
+    return BufferStorage[T](data: data, room: room)
 
 # ============================================================================
 # Size
@@ -214,7 +214,7 @@ routine Buffer[T].fill(value: T)
 ### zero. Views made before keep the old memory, which is left all zero. Only a whole buffer grows, not a view.
 ### :param capacity: How many places the new row has, at least `capacity()`.
 routine Buffer[T].grow!(capacity: Integer)
-    if me.start != 0_u64 or me.room != me.storage.control().room
+    if me.start != 0_u64 or me.room != me.storage.room
         throw BufferViewShapeError(operation: "grow")
     var room = U64(from: capacity)
     if room < me.room
@@ -223,7 +223,7 @@ routine Buffer[T].grow!(capacity: Integer)
     if me.room > 0_u64
         danger
             rf_copy_bytes_at(
-                dest: moved.control().data.get_address(),
+                dest: moved.data.get_address(),
                 src: me.slot(position: 0_u64).get_address(),
                 size: T.data_size() * me.room,
             )
@@ -531,7 +531,7 @@ routine BufferEmittable[T].emit!() -> T
     if place >= me.room
         place = place - me.room
     danger
-        var result = me.storage.control().data.offset(T.data_size() * (me.base + place)).peek()
+        var result = me.storage.data.offset(T.data_size() * (me.base + place)).peek()
         me.index = me.index +% 1
         return result
 
@@ -543,7 +543,7 @@ routine BufferEmittable[T].skip()
 
 ### Returns whether some place holds a value equal to `value` (`buf have v`).
 ### :param value: The value to look for.
-routine Buffer[T].contains(value: Accessing[T]) -> Bool
+routine Buffer[T].contains(value: T) -> Bool
 needs T obeys Equatable
     var i: U64 = 0
     while i < me.room
@@ -610,7 +610,7 @@ secret routine Buffer[T].read(position: U64) -> T
 ### The memory of the place at a position of this buffer.
 @inline
 secret routine Buffer[T].slot(position: U64) -> Hijacked[T]
-    return me.storage.control().data.offset(T.data_size() * (me.start + position))
+    return me.storage.data.offset(T.data_size() * (me.start + position))
 
 ### Moves the bits of `count` places from `source` to `target` (the ranges may overlap). The places left behind still
 ### hold the same bits: the caller overwrites or clears them.

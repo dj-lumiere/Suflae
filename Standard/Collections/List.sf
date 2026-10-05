@@ -138,7 +138,7 @@ routine List[T].add_first(value: T)
 
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
-routine List[T].add_range(you: Accessing[Iterable[T]])
+routine List[T].add_range(you: Iterable[T])
     each value in you
         me.add_last(value: value)
     return
@@ -147,7 +147,7 @@ routine List[T].add_range(you: Accessing[Iterable[T]])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-routine List[T].add_range!(source: Accessing[List[T]], from: Integer, count: Integer)
+routine List[T].add_range!(source: List[T], from: Integer, count: Integer)
     if from.is_negative()
         throw NegativeIndexError(index: from)
     if count.is_negative()
@@ -376,7 +376,7 @@ routine List[T].iter() -> BufferEmittable[T]
 
 ### Returns whether both lists hold equal elements in the same order.
 ### :param you: The other list.
-routine List[T].eq(you: Accessing[List[T]]) -> Bool
+routine List[T].eq(you: List[T]) -> Bool
 needs T obeys Equatable
     if me.count != you.count
         return false
@@ -389,7 +389,7 @@ needs T obeys Equatable
 
 ### Returns whether some element equals `value` (`xs have v`).
 ### :param value: The value to look for.
-routine List[T].contains(value: Accessing[T]) -> Bool
+routine List[T].contains(value: T) -> Bool
 needs T obeys Equatable
     each element in me
         if element == value
