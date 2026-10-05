@@ -30,16 +30,18 @@ public class DocFindingsTests
     }
 
     /// <summary>A memberwise construction whose values the member variables cannot hold is reported (no creator
-    /// of <c>Complex</c> takes two <c>Integer</c>s).</summary>
+    /// of <c>Label</c> takes two <c>Integer</c>s).</summary>
     [Fact]
     public void Analyze_MemberwiseConstructionWithWrongValueType_ReportsMismatch()
     {
         string source = """
-                        import Numerics
+                        record Label
+                            head: Text
+                            tail: Text
 
                         routine start()
-                            var c = Complex(real: 3, imag: 4)
-                            show(c)
+                            var c = Label(head: 3, tail: 4)
+                            show(c.head)
                             return
                         """;
 

@@ -38,9 +38,9 @@ public sealed class SuflaeRules : LanguageRules
     /// <c>Numerics</c> brings in only <c>Integer</c>: Suflae's bare numeric vocabulary is
     /// <c>Integer</c>/<c>Decimal</c> (an unsuffixed <c>6</c> is an <c>Integer</c>, which lives in
     /// <c>Numerics</c>, not Core; <c>Decimal</c> is in Core), the fixed-width scalars come with the Core
-    /// prelude, and the arbitrary-precision <c>Real</c>/<c>Complex</c> still need an explicit
-    /// <c>import Numerics</c>. Console and file I/O are always available, so <c>show(...)</c> needs no
-    /// import.
+    /// prelude, and the rest of <c>Numerics</c> (the <c>Integer</c>-argument forms of the integer
+    /// routines) still needs an explicit <c>import Numerics</c>. Console and file I/O are always available,
+    /// so <c>show(...)</c> needs no import.
     /// </summary>
     public override IReadOnlyList<(string Module, IReadOnlyList<string>? Symbols)> PreludeImports { get; } =
         [("Numerics", ["Integer"]), ("IO/Console", null), ("IO/File", null)];

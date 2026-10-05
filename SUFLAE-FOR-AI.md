@@ -114,7 +114,7 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 `preset` or `global`) of module `Foo`. Always available without an import: `Core` (the basic types,
 `List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, channels), `Integer`, console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics` (`Real`, `Complex`), `IO/FileSystem`
+`PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`, `IO/FileSystem`
 (path strings), `Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
 already in the prelude (many fixtures write `import IO/Console`) is harmless.
 
@@ -151,11 +151,11 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 | Binary floats           | `B16 B32 B64 B128` (`BF16` is a storage-only format)                       |
 | Decimal floats          | `D32 D64 D128`                                                             |
 | Complex / quaternion    | `C64 C128 C256`, `Q128 Q256`                                               |
-| Arbitrary, by import    | `Real` (binary), `Complex` — need `import Numerics`                        |
 | Text and bytes          | `Text` (Unicode), `Character`, `Bytes`, `Byte`                             |
 | Other                   | `Bool`, `Duration`, `ByteSize`, `Moment`/`LocalMoment`, tuples `(A, B)`    |
 
-- Every type in the table except `Real`/`Complex` is usable with no import.
+- Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
+  `B128` and `C256` are the widest, and exact arithmetic is `Integer` and the decimals.
 - **Counts, positions, widths and amounts are always `Integer`**, whatever the value's type: a fixed-width
   number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
   `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.ashr(bits: 1)`), radixes
@@ -244,16 +244,8 @@ routine start()
   integers, `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
   `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
-  Division by zero crashes (`DivisionByZeroError`), on `Real` and `Complex` too. On the floats, `Decimal`,
-  `Real` and `Complex`, `0 / 0` crashes with `NumericDomainError` instead.
-- `Real` (from `import Numerics`) is finite-only like `Decimal`: nothing hands back an infinity or NaN,
-  the operation crashes instead (recover with `try`/`grab`). `log(0)` and `atanh(±1)` crash with
-  `DivisionByZeroError`, `sqrt`/`log` of a negative, `asin`/`acos` outside [-1, 1], `acosh` below 1 and
-  a negative base to a non-integer power with `NumericDomainError`, and `exp`, `sinh`, `cosh`, `**` or
-  any result too large for `Real` with `NumericOverflowError`. `+ - *` are exact, and one whose exact result
-  would need more than 2^32 bits (adding numbers whose exponents are very far apart) crashes with
-  `NumericOverflowError` too, before allocating anything. `Real(text: "nan")` / `"inf"` is an
-  `InvalidValueError`, and a `Real` made from an infinite or NaN `B64` crashes too.
+  Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
+  and the complex types, `0 / 0` crashes with `NumericDomainError` instead.
 - Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. Every operand of a chain is
   evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`
   is false), and only the comparisons stop at the first false link, so a failure in any operand is a failure

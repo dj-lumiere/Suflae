@@ -21,13 +21,5 @@ routine start()
     show(f"bits={big.bit_length() + 0} hex={big.to_text(radix: 16)}")
     var x = 2.5
     show(f"powi={x.powi(n: 3)} fixed={x.fixed(places: 2)}")
-    var r = Real(from: 2)
-    show(f"sqrt={r.sqrt(precision: 20).fixed(places: 10)} pi={Real.pi(precision: 20).fixed(places: 5)}")
-    var far = Real(from: 2) ** Real(from: 1099511627776)
-    show(f"far+1={try far + Real(from: 1)}")
-    show(f"hypot far,1 is far: {hypot(x: far, y: Real(from: 1)) == far}")
-    show(f"far={far}")
-    var c = Complex(real: Real(from: 3), imag: Real(from: 4))
-    show(f"csqrt={c.sqrt().fixed(places: 3)}")
     show("DONE")
     return
