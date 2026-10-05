@@ -18,6 +18,7 @@
         <lang.syntaxHighlighterFactory language="suflae" implementationClass="com.suflae.rider.SuflaeSyntaxHighlighterFactory"/>
         <fileIconProvider implementation="com.suflae.rider.SuflaeIconProvider"/>
         <platform.lsp.integrationProvider implementation="com.suflae.rider.SuflaeLanguageServer"/>
+        <actionConfigurationCustomizer order="last" implementation="com.suflae.rider.SuflaeCleanupActions"/>
         <colorSettingsPage implementation="com.suflae.rider.SuflaeColorSettingsPage"/>
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/SuflaeDarcula.xml"/>
         <additionalTextAttributes scheme="Default" file="colorSchemes/SuflaeDefault.xml"/>

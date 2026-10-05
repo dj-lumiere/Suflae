@@ -57,17 +57,17 @@ internal object SuflaeSemanticTokens : LspSemanticTokensSupport() {
 /** Settings | Editor | Color Scheme | Suflae. */
 class SuflaeColorSettingsPage : ColorSettingsPage {
     private val descriptors = arrayOf(
-        AttributesDescriptor("Types//Record, choice, flags, crashable", SuflaeColors.RECORD),
-        AttributesDescriptor("Types//Entity", SuflaeColors.ENTITY),
-        AttributesDescriptor("Types//Protocol", SuflaeColors.PROTOCOL),
-        AttributesDescriptor("Types//Generic parameter", SuflaeColors.GENERIC_PARAMETER),
-        AttributesDescriptor("Routine", SuflaeColors.ROUTINE),
-        AttributesDescriptor("Module", SuflaeColors.MODULE),
-        AttributesDescriptor("Global and preset", SuflaeColors.PRESET),
-        AttributesDescriptor("Operator", SuflaeColors.OPERATOR),
-        AttributesDescriptor("Doc comment//Field (:param, :returns)", SuflaeColors.DOC_TAG),
-        AttributesDescriptor("Doc comment//Field name, reference", SuflaeColors.DOC_VALUE),
-        AttributesDescriptor("Annotation", SuflaeColors.ANNOTATION),
+        AttributesDescriptor(SuflaeBundle.message("color.types.record"), SuflaeColors.RECORD),
+        AttributesDescriptor(SuflaeBundle.message("color.types.entity"), SuflaeColors.ENTITY),
+        AttributesDescriptor(SuflaeBundle.message("color.types.protocol"), SuflaeColors.PROTOCOL),
+        AttributesDescriptor(SuflaeBundle.message("color.types.generic"), SuflaeColors.GENERIC_PARAMETER),
+        AttributesDescriptor(SuflaeBundle.message("color.routine"), SuflaeColors.ROUTINE),
+        AttributesDescriptor(SuflaeBundle.message("color.module"), SuflaeColors.MODULE),
+        AttributesDescriptor(SuflaeBundle.message("color.preset"), SuflaeColors.PRESET),
+        AttributesDescriptor(SuflaeBundle.message("color.operator"), SuflaeColors.OPERATOR),
+        AttributesDescriptor(SuflaeBundle.message("color.doc.tag"), SuflaeColors.DOC_TAG),
+        AttributesDescriptor(SuflaeBundle.message("color.doc.value"), SuflaeColors.DOC_VALUE),
+        AttributesDescriptor(SuflaeBundle.message("color.annotation"), SuflaeColors.ANNOTATION),
     )
 
     private val tags = mapOf(

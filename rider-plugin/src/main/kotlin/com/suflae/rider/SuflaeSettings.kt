@@ -38,14 +38,11 @@ internal class SuflaeConfigurable : BoundConfigurable("Suflae") {
     private val settings = SuflaeSettings.getInstance()
 
     override fun createPanel(): DialogPanel = panel {
-        row("Language server:") {
-            textFieldWithBrowseButton(FileChooserDescriptorFactory.singleFile().withTitle("Suflae Language Server"))
+        row(SuflaeBundle.message("settings.label")) {
+            textFieldWithBrowseButton(FileChooserDescriptorFactory.singleFile().withTitle(SuflaeBundle.message("settings.title")))
                 .bindText(settings::serverPath)
                 .align(AlignX.FILL)
-                .comment(
-                    "Suflae.dll (run with dotnet) or a Suflae executable. Empty uses the dev build, " +
-                        "&lt;project&gt;/Suflae/bin/Debug/net10.0/Suflae.dll."
-                )
+                .comment(SuflaeBundle.message("settings.comment"))
         }
     }
 
