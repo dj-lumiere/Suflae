@@ -3,10 +3,10 @@ module Tests/StdlibSf/OwnCollectionsMoreApi
 import IO/Console
 import Collections
 
-# Suflae's own CircularList, BitList, BitArray, PriorityQueue and sorted collections count and index with
-# Integer, like List, Dict and Set.
+# Suflae's own BitList, BitArray, PriorityQueue and sorted collections count and index with Integer, like List,
+# Dict and Set. A List is also a deque: it adds and removes at both ends and rotates.
 routine start()
-    var q = CircularList[Integer]()
+    var q = List[Integer]()
     q.add_last(value: 1)
     q.add_last(value: 2)
     q.add_first(value: 0)

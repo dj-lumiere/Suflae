@@ -1,0 +1,12 @@
+module Core
+
+### Raised when a view of part of a buffer is asked to grow. Only a whole buffer moves into a bigger row: a view shows
+### a fixed window of places.
+crashable BufferViewShapeError
+    ### What was tried.
+    operation: Text
+
+### Returns the message the crash shows.
+@override
+routine BufferViewShapeError.crash_message() -> Text
+    return f"'{me.operation}' cannot run on a view of part of a buffer: only a whole buffer grows"

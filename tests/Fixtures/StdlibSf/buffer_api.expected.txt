@@ -1,24 +1,23 @@
-made: Buffer([7, 7, 7, 7, 7]) count=5 capacity=5 empty=false
+made: Buffer([7, 7, 7, 7, 7]) capacity=5
+zero places: Buffer(["", "", ""]) first is empty: true
 written: 1 9
 view: Buffer([20, 7, 7]) buffer: Buffer([1, 20, 7, 7, 9])
 kept view: Buffer([0, 40, 0])
 after loop: Buffer([9, 20, 7, 7, 9])
 have 20: true have 3: false
-texts: Buffer(["a", "bc", "a"])
+took: bc left: Buffer(["a", "", "a"])
+erased: Buffer(["", "", "a"])
 shared: 5 5
 out of range: true
 negative: true
-room: Buffer(["x", "y", "z"]) count=3 capacity=3 full=true
-add to full: true
-grown: Buffer(["x", "y", "z", "w"]) capacity=5
-removed: x w left Buffer(["y", "z"])
-truncated: Buffer(["y"])
-cleared: Buffer([]) empty=true
-add through a view: true
+moved: Buffer(["", "", "a", "b", "c"])
+rotated: Buffer(["a", "b", "c", "", ""])
+grown: Buffer(["a", "b", "c", "", "", "", ""]) capacity=7
+grow a view: true
 sorted: 0 1 20 39
 sorted down: 39 0
-reversed and swapped: 39 0
-sorted texts: Buffer(["a", "c", "m"])
+part reversed and swapped: 0 39 30
+sorted part: Buffer(["m", "a", "c", "m"])
 read through a field: 1
 cycle alive: true
 collected: 4 alive: false

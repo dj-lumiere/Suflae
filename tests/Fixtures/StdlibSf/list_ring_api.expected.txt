@@ -1,0 +1,17 @@
+both ends: [0, 1, 2, 3] count=4 capacity=4
+removed: 0 3 left [1, 2]
+wrapped: [1, 2, 4, 5] xs[3]=5
+inserted: [1, 9, 2, 4, 5] capacity=8
+removed at 2: 2 left [1, 9, 4, 5]
+rotated left: [9, 4, 5, -1, 1]
+rotated right: [5, -1, 1, 9, 4]
+sorted: [-1, 1, 4, 5, 9] first=-1 last=9
+reversed: [9, 5, 4, 1, -1]
+history: ["c", "d", "e"] capacity=3
+kept first: ["c", "d"]
+cleared: [] empty=true
+queue: [3, 4, 5, 6, 7, 8, 9] total=42 have 7: true
+copy equal: true slice: [4, 5]
+released: true
+empty remove: true
+DONE

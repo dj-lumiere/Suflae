@@ -1,0 +1,75 @@
+module Tests/StdlibSf/ListRingApi
+
+import IO/Console
+import ObjectHacker
+
+# Suflae's List keeps its elements in a ring: it is a stack, a queue and a deque, rotates, and keeps a fixed-size
+# latest-N history.
+
+entity Box
+    id: Integer
+
+routine start()
+    var xs = List[Integer](capacity: 4)
+    xs.add_last(value: 2)
+    xs.add_last(value: 3)
+    xs.add_first(value: 1)
+    xs.add_first(value: 0)
+    show(f"both ends: {xs} count={xs.count()} capacity={xs.capacity()}")
+    show(f"removed: {xs.remove_first()} {xs.remove_last()} left {xs}")
+    xs.add_last(value: 4)
+    xs.add_last(value: 5)
+    show(f"wrapped: {xs} xs[3]={xs[3]}")
+    xs.add_at(index: 1, value: 9)
+    show(f"inserted: {xs} capacity={xs.capacity()}")
+    show(f"removed at 2: {xs.remove_at(index: 2)} left {xs}")
+    xs.add_first(value: -1)
+    xs.rotate_left(n: 2)
+    show(f"rotated left: {xs}")
+    xs.rotate_right(n: 3)
+    show(f"rotated right: {xs}")
+    xs.sort()
+    show(f"sorted: {xs} first={xs.first()} last={xs.last()}")
+    xs.reverse_in_place()
+    show(f"reversed: {xs}")
+
+    var history = List[Text](capacity: 3)
+    each word in ["a", "b", "c", "d", "e"]
+        history.add_last_keeping(value: word, keeping: 3)
+    show(f"history: {history} capacity={history.capacity()}")
+    history.keep_first(n: 2)
+    show(f"kept first: {history}")
+    history.clear()
+    show(f"cleared: {history} empty={history.is_empty()}")
+
+    var queue = List[Integer]()
+    var i = 0
+    while i < 10
+        queue.add_last(value: i)
+        if i % 3 == 2
+            discard queue.remove_first()
+        i = i + 1
+    var total = 0
+    each n in queue
+        total = total + n
+    show(f"queue: {queue} total={total} have 7: {queue have 7}")
+    show(f"copy equal: {queue.duplicate() == queue} slice: {queue[1 til 3]}")
+
+    var box = Box(id: 1)
+    var seen = watch(target: box)
+    var boxes = List[Box]()
+    boxes.add_last(value: box)
+    boxes.add_first(value: box)
+    boxes.add_at(index: 1, value: box)
+    boxes.rotate_left(n: 1)
+    discard boxes.remove_first()
+    boxes.truncate(new_count: 1)
+    box = Box(id: 0)
+    boxes = List[Box]()
+    show(f"released: {not seen.is_alive()}")
+
+    var empty = List[Integer]()
+    var nothing = try empty.remove_first()
+    show(f"empty remove: {nothing is None}")
+    show("DONE")
+    return

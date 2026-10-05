@@ -3,8 +3,7 @@ module Tests/StdlibSf/BufferApi
 import IO/Console
 import ObjectHacker
 
-# Suflae's Buffer: room fixed when it is made, the front part holding elements, and ranges that are views sharing
-# the same memory.
+# Suflae's Buffer: a fixed row of places that start as zero, and ranges that are views sharing the same memory.
 
 entity Counter
     hits: Integer
@@ -24,7 +23,9 @@ routine keep_view() -> Buffer[Integer]
 
 routine start()
     var buf = Buffer[Integer](count: 5, fill: 7)
-    show(f"made: {buf} count={buf.count()} capacity={buf.capacity()} empty={buf.is_empty()}")
+    show(f"made: {buf} capacity={buf.capacity()}")
+    var empty = Buffer[Text](capacity: 3)
+    show(f"zero places: {empty} first is empty: {empty[0] == ""}")
 
     buf[0] = 1
     buf[4] = 9
@@ -40,12 +41,13 @@ routine start()
     each x in buf
         buf[0] = x
     show(f"after loop: {buf}")
-
     show(f"have 20: {buf have 20} have 3: {buf have 3}")
 
     var words = Buffer[Text](count: 3, fill: "a")
     words[1] = "b" + "c"
-    show(f"texts: {words}")
+    show(f"took: {words.take(index: 1)} left: {words}")
+    words.erase(index: 0)
+    show(f"erased: {words}")
 
     var shared = Counter(hits: 0)
     var counters = Buffer[Counter](count: 2, fill: shared)
@@ -57,48 +59,39 @@ routine start()
     var negative = try buf[-1]
     show(f"negative: {negative is None}")
 
-    # Room and the filled front.
-    var room = Buffer[Text](capacity: 3)
-    room.add_last(value: "x")
-    room.add_last(value: "z")
-    room.insert(index: 1, value: "y")
-    show(f"room: {room} count={room.count()} capacity={room.capacity()} full={room.is_full()}")
-    var full = try room.add_last(value: "w")
-    show(f"add to full: {not full}")
-    room.grow(capacity: 5)
-    room.add_last(value: "w")
-    show(f"grown: {room} capacity={room.capacity()}")
-    show(f"removed: {room.remove_at(index: 0)} {room.remove_last()} left {room}")
-    room.truncate(count: 1)
-    show(f"truncated: {room}")
-    room.clear()
-    show(f"cleared: {room} empty={room.is_empty()}")
-
-    var view = buf[0 til 2]
-    var reshaped = try view.add_last(value: 1)
-    show(f"add through a view: {not reshaped}")
+    var row = Buffer[Text](capacity: 5)
+    row[0] = "a"
+    row[1] = "b"
+    row[2] = "c"
+    row.move(from: 0, into: 2, count: 3)
+    show(f"moved: {row}")
+    row.rotate_left(count: 2)
+    show(f"rotated: {row}")
+    row.grow(capacity: 7)
+    show(f"grown: {row} capacity={row.capacity()}")
+    var grow_view = try part.grow(capacity: 10)
+    show(f"grow a view: {not grow_view}")
 
     var nums = Buffer[Integer](capacity: 40)
     var k = 0
     while k < 40
-        nums.add_last(value: (k * 17) % 40)
+        nums[k] = (k * 17) % 40
         k = k + 1
     nums.sort()
     show(f"sorted: {nums[0]} {nums[1]} {nums[20]} {nums[39]}")
     nums.sort_by(compare: (a, b) => a > b)
     show(f"sorted down: {nums[0]} {nums[39]}")
-    nums.reverse()
+    nums[0 til 10].reverse()
     nums.swap(first: 0, second: 39)
-    show(f"reversed and swapped: {nums[0]} {nums[39]}")
+    show(f"part reversed and swapped: {nums[0]} {nums[9]} {nums[39]}")
 
-    var names = Buffer[Text](count: 1, fill: "m")
-    names.grow(capacity: 4)
-    names.add_last(value: "c")
-    names.add_last(value: "a")
-    names.sort()
-    show(f"sorted texts: {names}")
+    var names = Buffer[Text](count: 4, fill: "m")
+    names[1] = "c"
+    names[2] = "a"
+    names[1 til 3].sort()
+    show(f"sorted part: {names}")
 
-    # Elements go away with the buffer, and a cycle through a buffer is reaped.
+    # What the places hold goes away with the buffer, and a cycle through a buffer is reaped.
     var box = Box(holder: none, id: 1)
     var seen = watch(target: box)
     var holder = Holder(kids: Buffer[Box](count: 2, fill: box))
@@ -112,11 +105,12 @@ routine start()
 
     var lone = Box(holder: none, id: 2)
     var lone_seen = watch(target: lone)
-    var boxes = Buffer[Box](capacity: 2)
-    boxes.add_last(value: lone)
-    boxes.insert(index: 0, value: lone)
+    var boxes = Buffer[Box](capacity: 3)
+    boxes[0] = lone
+    boxes[2] = lone
+    boxes.move(from: 2, into: 1, count: 1)
     lone = Box(holder: none, id: 0)
-    discard boxes.remove_last()
+    discard boxes.take(index: 0)
     boxes = Buffer[Box](capacity: 0)
     show(f"released: {not lone_seen.is_alive()}")
     show("DONE")
