@@ -1,0 +1,157 @@
+module Tests/StdlibSf/DocFindingsApi
+
+import IO/Console
+import Collections
+
+# Forms the Suflae documentation uses, each of which once passed `check` and then failed in the emitter or at
+# link time.
+
+entity Node
+    value: Integer
+    next: Node?
+
+record Circle
+    center: Integer
+    radius: Integer
+
+record Square
+    side: Integer
+
+variant Shape
+    Circle
+    Square
+
+choice Color
+    RED
+    GREEN
+    BLUE
+
+record User
+    name: Text
+    age: Integer = 30
+
+protocol Sized
+    routine Me.size() -> Integer
+
+record Box
+obeys Sized
+    n: Integer
+
+crashable BadNumberError
+    text: Text
+
+routine BadNumberError.crash_message() -> Text
+    return f"not a number: {me.text}"
+
+protocol Parsable
+    routine Me!(text: Text)
+
+record Digit
+obeys Parsable
+    value: Integer
+
+# A protocol's creator requirement is met by a creator of the type with the same parameters.
+routine Digit!(text: Text) -> Digit
+    if text == "" or text.count() > 1
+        throw BadNumberError(text: text)
+    return Digit(value: Integer(text: text))
+
+routine Box.size() -> Integer
+    return me.n
+
+# A routine written on a protocol: every type obeying it gets it.
+routine Sized.doubled() -> Integer
+    return me.size() * 2
+
+# A routine written on Suflae's own List.
+routine List[T].second() -> T
+    return me[1]
+
+routine find!(n: Integer) -> Integer
+    if n < 0
+        absent
+    return n
+
+# A conditional expression as a variable's initializer inside a generic routine.
+routine pick[T](a: T, b: T, first: Bool) -> T
+    var chosen = if first then a else b
+    return chosen
+
+# A `when` over a choice with an `==` arm for every case covers it: no `else` is needed.
+routine color_name(c: Color) -> Text
+    when c
+        == Color.RED => return "red"
+        == Color.GREEN => return "green"
+        == Color.BLUE => return "blue"
+
+# A vararg parameter followed by a parameter that has a default.
+routine joined(nums...: Integer, separator: Text = ", ") -> Text
+    var out = ""
+    each n in nums
+        if out != ""
+            out = out + separator
+        out = out + f"{n}"
+    return out
+
+routine describe(s: Shape) -> Text
+    when s
+        is Circle (center, radius) => return f"circle at {center}, radius {radius}"
+        is Square sq => return f"square of side {sq.side}"
+
+routine start()
+    # A `when` without a subject, as an expression, comparing an Integer with literals.
+    var n = 12
+    var label = when
+        n > 10 => "big"
+        n > 3 => "medium"
+        else => "small"
+    show(label)
+
+    # A typed `E?` local walking a chain of entities.
+    var n2 = Node(value: 2, next: none)
+    var n1 = Node(value: 1, next: n2)
+    var cur: Node? = n1
+    var total = 0
+    while cur isnot None
+        total += cur.value
+        cur = cur.next
+    show(total)
+
+    # An Integer converted to a Decimal.
+    var seven = 7
+    var exact = Decimal(seven)
+    show(exact / 2.0)
+
+    # A member variable left out takes its default.
+    var ada = User(name: "Ada")
+    show(f"{ada.name} {ada.age}")
+
+    # Destructuring arms on a variant.
+    show(describe(s: Circle(center: 1, radius: 5)))
+    show(describe(s: Square(side: 4)))
+
+    # `?? stop()` and `?? breach()` when the value is there.
+    var found = try find(n: 3) ?? stop()
+    var again = try find(n: 4) ?? breach()
+    show(found + again)
+
+    show(pick(a: 1, b: 2, first: false))
+    show(Box(n: 4).doubled())
+    show([4, 5, 6].second())
+
+    # A bare literal right of `**` takes the left side's type.
+    var x = 1.5_b64
+    show(x ** 2.0)
+    var three = 3
+    show(three ** 3)
+
+    show(color_name(c: Color.BLUE))
+    show(Digit(text: "7").value)
+    show("-" * 4)
+    show(joined(1, 2, 3))
+    show(joined(4))
+
+    # `verify` crashes only when its condition is false.
+    verify(expr: total == 3)
+    show("verified")
+    return
