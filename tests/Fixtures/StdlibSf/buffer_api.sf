@@ -1,0 +1,51 @@
+module Tests/StdlibSf/BufferApi
+
+import IO/Console
+
+# Suflae's Buffer: a run of elements fixed in length, whose ranges are views sharing the same storage.
+
+entity Counter
+    hits: Integer
+
+routine keep_view() -> Buffer[Integer]
+    var whole = Buffer[Integer](count: 6, fill: 0)
+    whole[4] = 40
+    # The view outlives the name `whole`: it keeps the storage alive.
+    return whole[3 til 6]
+
+routine start()
+    var buf = Buffer[Integer](count: 5, fill: 7)
+    show(f"made: {buf} count={buf.count()} empty={buf.is_empty()}")
+
+    buf[0] = 1
+    buf[4] = 9
+    show(f"written: {buf[0]} {buf[4]}")
+
+    var part = buf[1 til 4]
+    part[0] = 20
+    show(f"view: {part} buffer: {buf}")
+
+    var kept = keep_view()
+    show(f"kept view: {kept}")
+
+    each x in buf
+        buf[0] = x
+    show(f"after loop: {buf}")
+
+    show(f"have 20: {buf have 20} have 3: {buf have 3}")
+
+    var words = Buffer[Text](count: 3, fill: "a")
+    words[1] = "b" + "c"
+    show(f"texts: {words}")
+
+    var shared = Counter(hits: 0)
+    var counters = Buffer[Counter](count: 2, fill: shared)
+    counters[1].hits = 5
+    show(f"shared: {shared.hits} {counters[0].hits}")
+
+    var missing = try buf[10]
+    show(f"out of range: {missing is None}")
+    var negative = try buf[-1]
+    show(f"negative: {negative is None}")
+    show("DONE")
+    return

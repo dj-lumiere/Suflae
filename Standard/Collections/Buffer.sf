@@ -1,0 +1,248 @@
+module Core
+
+import BuilderQuery
+import Numerics
+
+### A run of elements whose length is fixed when it is made, counted and indexed with `Integer`.
+###
+### Every element exists from the start (`Buffer[T](count: n, fill: v)`), and the length never changes, so the
+### storage never moves. That makes a range of it, `buf[a til b]`, a view that shares the same storage with no
+### copy: writing through the view changes the buffer, and a view can be kept as long as you like, since it keeps
+### the storage alive. The storage goes away when the last buffer or view that uses it does, or when the cycle
+### collector finds it unreachable.
+###
+### Reading an element hands back a value of its own (a record is copied, an entity is shared). Changing an
+### element in place is fine while an `each` loop walks the buffer: the length cannot change.
+###
+### Positions count from 0. A negative position crashes with `NegativeIndexError`, one at or past the end with
+### `IndexOutOfBoundsError`. To grow or shrink, make a new buffer and copy into it, or use a `List`.
+###
+### **Complexity**
+### | Operation | Time |
+### |---|---|
+### | `buf[i]` / `buf[i] = v` | O(1) |
+### | `buf[a til b]` (a view) | O(1) |
+### | `have` | O(n) |
+### | Iteration | O(n) |
+###
+### :typeparam T: The element type stored in the buffer.
+entity Buffer[T]
+relates BufferEmittable[T] as Iter
+obeys Iterable[T], Container
+    ### The storage the elements live in, a handle shared with every view and walk of it.
+    secret storage: Roamed[BufferStorage[T]]
+    ### Where this buffer's first element sits in the storage.
+    secret start: U64
+    ### The number of elements.
+    secret count: U64
+
+### The memory under one buffer and all of its views: every element, initialized, laid out in a row.
+### :typeparam T: The element type stored.
+entity BufferStorage[T]
+    ### The elements.
+    secret data: Hijacked[T]
+    ### The number of elements.
+    secret count: U64
+
+### Walks the elements of a `Buffer[T]` from front to back.
+### :typeparam T: The element type produced.
+entity BufferEmittable[T]
+obeys Emittable[T]
+    ### The storage being walked, kept alive by the walk.
+    secret storage: Roamed[BufferStorage[T]]
+    ### The next storage position to read.
+    secret index: U64
+    ### The storage position the walk stops at.
+    secret end: U64
+
+# ============================================================================
+# Creators
+# ============================================================================
+
+### Creates a buffer of `count` elements, each starting as `fill`.
+### :param count: The number of elements.
+### :param fill: The value every element starts as.
+routine Buffer[T](count: Integer, fill: T) -> Buffer[T]
+    var n = U64(from: count)
+    var data = hijacked_none[T]()
+    if n > 0_u64
+        danger
+            data = hijacked_from[T](rf_allocate_dynamic_uninit(T.data_size() * n))
+        var i: U64 = 0
+        while i < n
+            danger
+                data.offset(T.data_size() * i).poke(fill)
+            i = i +% 1
+    return Buffer[T](
+        storage: Roamed[BufferStorage[T]](from: BufferStorage[T](data: data, count: n)),
+        start: 0_u64,
+        count: n,
+    )
+
+# ============================================================================
+# Size
+# ============================================================================
+
+### Returns the number of elements.
+routine Buffer[T].count() -> Integer
+    return Integer(from: me.count)
+
+### Returns whether the buffer has no elements.
+routine Buffer[T].is_empty() -> Bool
+    return me.count == 0_u64
+
+# ============================================================================
+# Reading and writing
+# ============================================================================
+
+### Returns the element at `index` (`buf[i]`).
+### :param index: The position to read.
+routine Buffer[T].getitem!(index: Integer) -> T
+needs T obeys Assignable
+    return me.get_raw(position: me.position(index: index)).assign()
+
+### Replaces the element at `index` (`buf[i] = v`).
+### :param index: The position to write.
+### :param value: The new element.
+routine Buffer[T].setitem!(index: Integer, value: T)
+    var position = me.position(index: index)
+    danger
+        var slot = me.slot(position: position)
+        slot.peek().destroy()
+        slot.poke(value)
+    return
+
+### Returns a view of the elements at the positions in `range` (`buf[a til b]`): a buffer that shares this one's
+### storage, so writing through it changes this buffer. The range must run forward one position at a time and
+### stay inside the buffer.
+### :param range: The positions to view.
+routine Buffer[T].getitem!(range: Range[Integer]) -> Buffer[T]
+    if range.step != 1
+        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
+    if range.start.is_negative()
+        throw NegativeIndexError(index: range.start)
+    var first = U64(from: range.start)
+    var last = if range.inclusive then U64(from: range.end) + 1_u64 else U64(from: range.end)
+    if last < first
+        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
+    if last > me.count
+        throw IndexOutOfBoundsError(index: last, count: me.count)
+    return Buffer[T](storage: me.storage, start: me.start + first, count: last - first)
+
+### Sets every element to `value`.
+### :param value: The value every element becomes.
+routine Buffer[T].fill(value: T)
+    var i: U64 = 0
+    while i < me.count
+        danger
+            var slot = me.slot(position: i)
+            slot.peek().destroy()
+            slot.poke(value)
+        i = i +% 1
+    return
+
+# ============================================================================
+# Iteration, comparison and display
+# ============================================================================
+
+### Returns a walk over the elements, front to back.
+routine Buffer[T].iter() -> BufferEmittable[T]
+    return BufferEmittable[T](storage: me.storage, index: me.start, end: me.start + me.count)
+
+### Returns the next element of the walk.
+### :absent: The walk is over.
+routine BufferEmittable[T].emit!() -> T
+    if me.index >= me.end
+        absent
+    danger
+        var result = me.storage.control().data.offset(T.data_size() * me.index).peek()
+        me.index = me.index +% 1
+        return result
+
+### Returns whether some element equals `value` (`buf have v`).
+### :param value: The value to look for.
+routine Buffer[T].contains(value: Accessing[T]) -> Bool
+needs T obeys Equatable
+    var i: U64 = 0
+    while i < me.count
+        if me.get_raw(position: i) == value
+            return true
+        i = i +% 1
+    return false
+
+### Returns the buffer as text: `Buffer([1, 2, 3])`.
+@override
+routine Buffer[T].represent() -> Text
+    var result = "Buffer(["
+    var i: U64 = 0
+    while i < me.count
+        if i > 0_u64
+            result = result + ", "
+        result = result + nested_repr(me.get_raw(position: i))
+        i = i +% 1
+    return result + "])"
+
+### Returns the buffer as text for debugging, with its length: `Buffer[Integer](count: 3, [1, 2, 3])`.
+@override
+routine Buffer[T].diagnose() -> Text
+    var result = me.type_name() + "(count: " + me.count.represent() + ", ["
+    var i: U64 = 0
+    while i < me.count
+        if i > 0_u64
+            result = result + ", "
+        result = result + nested_repr(me.get_raw(position: i))
+        i = i +% 1
+    return result + "])"
+
+# ============================================================================
+# Inside the buffer
+# ============================================================================
+
+### The position of `index` in this buffer, checked against its length.
+secret routine Buffer[T].position!(index: Integer) -> U64
+    if index.is_negative()
+        throw NegativeIndexError(index: index)
+    var position = U64(from: index)
+    if position >= me.count
+        throw IndexOutOfBoundsError(index: position, count: me.count)
+    return position
+
+### The element at a position of this buffer already checked, as it sits in the storage.
+@inline
+secret routine Buffer[T].get_raw(position: U64) -> T
+    danger
+        return me.slot(position: position).peek()
+
+### The memory of the element at a position of this buffer already checked.
+@inline
+secret routine Buffer[T].slot(position: U64) -> Hijacked[T]
+    return me.storage.control().data.offset(T.data_size() * (me.start + position))
+
+# ============================================================================
+# Lifetime
+# ============================================================================
+
+### Destroys each element, then frees the memory.
+@override
+dangerous routine BufferStorage[T].destroy()
+    var i: U64 = 0
+    while i < me.count
+        me.data.offset(T.data_size() * i).peek().destroy()
+        i = i +% 1
+    me.data.invalidate()
+    me.hijack().invalidate()
+    return
+
+### Cycle-collector trace: reports every element to the collector.
+@override
+dangerous routine BufferStorage[T].roam_trace()
+    me.data.cyclic_trace_buffer(count: me.count)
+    return
+
+### Cycle-collector free: frees the memory and the storage's own box, not the elements (the collector frees the
+### whole cycle itself).
+@override
+dangerous routine BufferStorage[T].roam_free()
+    me.data.invalidate()
+    me.hijack().invalidate()
+    return
