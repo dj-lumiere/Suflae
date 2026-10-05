@@ -250,7 +250,9 @@ routine start()
   the operation crashes instead (recover with `try`/`grab`). `log(0)` and `atanh(±1)` crash with
   `DivisionByZeroError`, `sqrt`/`log` of a negative, `asin`/`acos` outside [-1, 1], `acosh` below 1 and
   a negative base to a non-integer power with `NumericDomainError`, and `exp`, `sinh`, `cosh`, `**` or
-  any result too large for `Real` with `NumericOverflowError`. `Real(text: "nan")` / `"inf"` is an
+  any result too large for `Real` with `NumericOverflowError`. `+ - *` are exact, and one whose exact result
+  would need more than 2^32 bits (adding numbers whose exponents are very far apart) crashes with
+  `NumericOverflowError` too, before allocating anything. `Real(text: "nan")` / `"inf"` is an
   `InvalidValueError`, and a `Real` made from an infinite or NaN `B64` crashes too.
 - Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. Every operand of a chain is
   evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`

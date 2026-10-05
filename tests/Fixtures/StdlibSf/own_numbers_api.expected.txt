@@ -6,5 +6,6 @@ big=255 plain=12 shl=4080 pow=65025 sign=-1
 bits=8 hex=ff
 powi=15.625 fixed=2.50
 sqrt=1.4142135624 pi=3.14159
+far+1=none
 csqrt=2.000 + 1.000i
 DONE
