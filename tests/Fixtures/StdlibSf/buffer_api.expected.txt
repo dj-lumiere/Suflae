@@ -8,6 +8,7 @@ have 20: true have 3: false
 took: bc left: Buffer(["a", "", "a"])
 erased: Buffer(["", "", "a"])
 shared: 5 5
+empty entity place: true
 out of range: true
 negative: true
 moved: Buffer(["", "", "a", "b", "c"])

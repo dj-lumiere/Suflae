@@ -127,7 +127,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   **`protocol`**, adopted with **`obeys`**.
 - field → **member variable**, a bare `name: Type` line in the type body (no `var`). Visibility is written
   only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private).
-- Generic constraints use **`needs`** (`needs T obeys Ordered`), never `where`.
+- Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
 - Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
 - Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
@@ -581,7 +581,7 @@ and the last call wins. A crash keeps 82 whatever was set.
 
 ```suflae
 routine largest[T](items: List[T]) -> T
-needs T obeys Ordered
+needs T obeys Comparable
     var best = items[0]
     each x in items
         if x > best
@@ -608,10 +608,10 @@ needs T obeys Greetable
 ```
 
 - Type parameters go in `[...]` after the name; constraints go on a `needs` line under the signature
-  (several are comma-separated), or inline: `routine f[T obeys Ordered](...)`.
+  (several are comma-separated), or inline: `routine f[T obeys Comparable](...)`.
 - `obeys` lines sit under the type's header. A protocol lists the routines a conforming type must have,
   with `Me` for the conforming type.
-- Common protocols: `Equatable`, `Ordered`, `Comparable`, `Hashable`, `Iterable[T]`, `Copyable`.
+- Common protocols: `Equatable`, `Comparable`, `Hashable`, `Iterable[T]`, `Copyable`.
 - Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
 
 ## 13. Text and formatting

@@ -1,0 +1,14 @@
+module Core
+
+import Numerics
+
+### Raised when a place of a buffer of entities is read before anything was written there: the place holds no
+### entity yet.
+crashable EmptyPlaceError
+    ### The position that was read.
+    index: Integer
+
+### Returns the message the crash shows.
+@override
+routine EmptyPlaceError.crash_message() -> Text
+    return f"Place {me.index} of the buffer holds no entity yet: write it before reading it"

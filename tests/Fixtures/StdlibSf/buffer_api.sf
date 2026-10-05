@@ -54,6 +54,10 @@ routine start()
     counters[1].hits = 5
     show(f"shared: {shared.hits} {counters[0].hits}")
 
+    var unfilled = Buffer[Counter](capacity: 2)
+    var empty_entity = try unfilled[0]
+    show(f"empty entity place: {empty_entity is None}")
+
     var missing = try buf[10]
     show(f"out of range: {missing is None}")
     var negative = try buf[-1]

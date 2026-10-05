@@ -15,7 +15,8 @@ import Numerics
 ### goes away when the last buffer or view that uses it does, or when the cycle collector finds it unreachable.
 ###
 ### Reading a place hands back a value of its own (a record is copied, an entity is shared). Positions count from 0.
-### A negative position crashes with `NegativeIndexError`, one at or past `capacity()` with `IndexOutOfBoundsError`.
+### A negative position crashes with `NegativeIndexError`, one at or past `capacity()` with `IndexOutOfBoundsError`,
+### and reading a place of a buffer of entities that holds no entity yet with `EmptyPlaceError`.
 ###
 ### **Complexity**
 ### | Operation | Time |
@@ -108,7 +109,7 @@ routine Buffer[T].capacity() -> Integer
 ### Returns what the place at `index` holds (`buf[i]`).
 ### :param index: The position to read.
 routine Buffer[T].getitem!(index: Integer) -> T
-    return me.read(position: me.position(index: index)).assign()
+    return me.read(position: me.filled_position(index: index)).assign()
 
 ### Replaces what the place at `index` holds (`buf[i] = v`).
 ### :param index: The position to write.
@@ -124,7 +125,7 @@ routine Buffer[T].setitem!(index: Integer, value: T)
 ### Hands out what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Buffer[T].take!(index: Integer) -> T
-    var position = me.position(index: index)
+    var position = me.filled_position(index: index)
     var value = me.read(position: position)
     me.clear_places(from: position, count: 1_u64)
     return value
@@ -501,10 +502,24 @@ needs T obeys Comparable
 
 ### Returns a walk over every place, front to back.
 routine Buffer[T].iter() -> BufferEmittable[T]
-    return me.walk(first: 0_u64, count: me.room)
+    return me.walking(first: 0_u64, count: me.room)
 
-### A walk over `count` places from `first`, wrapping past the end of the buffer to its start.
-secret routine Buffer[T].walk(first: U64, count: U64) -> BufferEmittable[T]
+### Returns a walk over `count` places from `first`, wrapping past the end of the buffer to its start: the elements
+### of a collection that keeps them as a ring.
+### :param first: The place the walk starts at.
+### :param count: How many places the walk reads, at most `capacity()`.
+routine Buffer[T].walk!(first: Integer, count: Integer) -> BufferEmittable[T]
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    var n = U64(from: count)
+    if n == 0_u64
+        return me.walking(first: 0_u64, count: 0_u64)
+    if n > me.room
+        throw IndexOutOfBoundsError(index: n, count: me.room)
+    return me.walking(first: me.position(index: first), count: n)
+
+### A walk over `count` places from `first`, both already checked.
+secret routine Buffer[T].walking(first: U64, count: U64) -> BufferEmittable[T]
     return BufferEmittable[T](storage: me.storage, base: me.start, room: me.room, first: first, index: 0_u64, count: count)
 
 ### Returns what the next place holds.
@@ -565,6 +580,16 @@ secret routine Buffer[T].position!(index: Integer) -> U64
         throw IndexOutOfBoundsError(index: position, count: me.room)
     return position
 
+### The position of `index`, checked against the places and, in a buffer of entities, against a place that holds
+### no entity yet (a zero place, which a read would hand out as no entity at all).
+secret routine Buffer[T].filled_position!(index: Integer) -> U64
+    var position = me.position(index: index)
+    if T.type_kind() == TypeKind.ENTITY
+        danger
+            if me.slot(position: position).peek_as[Address]() == 0_addr
+                throw EmptyPlaceError(index: index)
+    return position
+
 ### A position brought back into the buffer: one at or past the end wraps to the start.
 @inline
 secret routine Buffer[T].wrap(position: U64) -> U64
@@ -580,32 +605,6 @@ secret routine Buffer[T].read(position: U64) -> T
 @inline
 secret routine Buffer[T].slot(position: U64) -> Hijacked[T]
     return me.storage.control().data.offset(T.data_size() * (me.start + position))
-
-### How many places this buffer spans.
-@inline
-secret routine Buffer[T].places() -> U64
-    return me.room
-
-### Replaces what a place already checked holds.
-secret routine Buffer[T].put(position: U64, value: T)
-    danger
-        var slot = me.slot(position: position)
-        slot.peek().destroy()
-        slot.poke(value)
-    return
-
-### Hands out what a place already checked holds and leaves the place zero.
-secret routine Buffer[T].take_place(position: U64) -> T
-    var value = me.read(position: position)
-    me.clear_places(from: position, count: 1_u64)
-    return value
-
-### Tears down what a place already checked holds and leaves the place zero.
-secret routine Buffer[T].erase_place(position: U64)
-    danger
-        me.slot(position: position).peek().destroy()
-    me.clear_places(from: position, count: 1_u64)
-    return
 
 ### Moves the bits of `count` places from `source` to `target` (the ranges may overlap). The places left behind still
 ### hold the same bits: the caller overwrites or clears them.
