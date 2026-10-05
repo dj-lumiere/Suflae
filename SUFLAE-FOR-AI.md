@@ -256,7 +256,8 @@ routine start()
   sign fill for `>>`).
 - Containment: `coll have x`, `coll lack x`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
   `1 to 10 by 2` (step); `10 to 1` counts down (the direction comes from the endpoints, `by` is always
-  positive). `0 to 10 have 10` is `true`.
+  positive: a literal step that is zero or negative is SF-S516, and a step held in a variable crashes with
+  `RangeStepNotPositiveError` when the range is iterated if it is not positive). `0 to 10 have 10` is `true`.
 - Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
 
 ## 8. Control flow
