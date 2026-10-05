@@ -65,25 +65,21 @@ obeys Emittable[T]
 
 ### Returns the number of keys currently stored in this node.
 ### :returns: The key count.
-@readonly
 routine BTreeListNode[T].keys_count() -> U64
     return me.key_count
 
 ### Returns the number of child pointers currently stored in this node.
 ### :returns: The child count.
-@readonly
 routine BTreeListNode[T].children_count() -> U64
     return me.child_count
 
 ### Returns a raw pointer to the start of the keys buffer.
 ### :returns: A {Hijacked[T]} pointing to the first key slot.
-@readonly
 routine BTreeListNode[T].keys_base() -> Hijacked[T]
     return me.hijack().recast_as[T]()
 
 ### Returns a raw pointer to the start of the children buffer, offset past the keys region.
 ### :returns: A {Hijacked[BTreeListNode[T]]} pointing to the first child slot.
-@readonly
 routine BTreeListNode[T].children_base() -> Hijacked[Hijacked[BTreeListNode[T]]]
     return me
         .hijack()
@@ -94,7 +90,6 @@ routine BTreeListNode[T].children_base() -> Hijacked[Hijacked[BTreeListNode[T]]]
 ### Returns the key at slot `i`.
 ### :param i: Zero-based key index.
 ### :returns: The key value at position `i`.
-@readonly
 routine BTreeListNode[T].keys_get(i: U64) -> T
     danger
         return me
@@ -116,7 +111,6 @@ routine BTreeListNode[T].keys_set(i: U64, value: T)
 ### Returns the child node at slot `i`.
 ### :param i: Zero-based child index.
 ### :returns: The child node at position `i`.
-@readonly
 routine BTreeListNode[T].children_get(i: U64) -> Hijacked[BTreeListNode[T]]
     danger
         return me
@@ -367,19 +361,16 @@ needs T obeys Comparable
 # Core
 # ============================================================================
 
-@readonly
 secret routine SortedList[T].count_raw() -> U64
     return me.count
 
 ### Returns the total number of elements in this list, counting duplicates separately.
 ### :returns: The element count.
-@readonly
 routine SortedList[T].count() -> Integer
     return Integer(from: me.count_raw())
 
 ### Returns true if this list contains no elements.
 ### :returns: `true` when `count()` is zero.
-@readonly
 routine SortedList[T].is_empty() -> Bool
     return me.count == 0u64
 
@@ -427,7 +418,6 @@ dangerous routine SortedList[T].roam_free()
 ### Returns true if `value` appears at least once in this list.
 ### :param value: The value to search for.
 ### :returns: `true` if the value is present.
-@readonly
 routine SortedList[T].contains(value: T) -> Bool
     if me.root is None
         return false
@@ -439,7 +429,6 @@ routine SortedList[T].contains(value: T) -> Bool
 ### :param node: The subtree root to search.
 ### :param value: The value to find.
 ### :returns: `true` if found anywhere in the subtree.
-@readonly
 @inline
 routine SortedList[T].search_node(node: Accessing[BTreeListNode[T]], value: T) -> Bool
     danger
@@ -450,7 +439,6 @@ routine SortedList[T].search_node(node: Accessing[BTreeListNode[T]], value: T) -
             return false
         return me.search_node(node: node.children_get(i).as_entity(), value: value)
 
-@readonly
 secret routine SortedList[T].count_of_raw(value: T) -> U64
     if me.root is None
         return 0u64
@@ -461,7 +449,6 @@ secret routine SortedList[T].count_of_raw(value: T) -> U64
 ### Returns the number of times `value` appears in this list.
 ### :param value: The value to count.
 ### :returns: The occurrence count; zero if the value is not present.
-@readonly
 routine SortedList[T].count_of(value: T) -> Integer
     return Integer(from: me.count_of_raw(value: value))
 
@@ -469,7 +456,6 @@ routine SortedList[T].count_of(value: T) -> Integer
 ### :param node: The subtree root to search.
 ### :param value: The value to count.
 ### :returns: Number of occurrences found in the subtree.
-@readonly
 secret routine SortedList[T].count_in_node(node: Accessing[BTreeListNode[T]], value: T) -> U64
     danger
         var count = 0u64
@@ -494,7 +480,6 @@ secret routine SortedList[T].count_in_node(node: Accessing[BTreeListNode[T]], va
 ### :param node: The node whose keys are searched.
 ### :param value: The target value.
 ### :returns: Smallest index `i` where `node.keys[i] >= value`, or `keys_count()` if all keys are smaller.
-@readonly
 @inline
 secret routine SortedList[T].lower_bound(node: Accessing[BTreeListNode[T]], value: T) -> U64
     var lo = 0u64
@@ -511,7 +496,6 @@ secret routine SortedList[T].lower_bound(node: Accessing[BTreeListNode[T]], valu
 ### :param node: The node whose keys are searched.
 ### :param value: The target value.
 ### :returns: Smallest index `i` where `node.keys[i] > value`, or `keys_count()` if all keys are `<= value`.
-@readonly
 @inline
 secret routine SortedList[T].upper_bound(node: Accessing[BTreeListNode[T]], value: T) -> U64
     var lo = 0u64
@@ -861,7 +845,6 @@ routine SortedList[T].remove_all(value: T) -> Integer
 # Rank-based access (replaces [] indexing — cost is O(log n))
 # ============================================================================
 
-@readonly
 secret routine SortedList[T].get_by_rank_raw!(rank: U64) -> T
     if rank >= me.count
         throw IndexOutOfBoundsError(index: rank, count: me.count)
@@ -874,7 +857,6 @@ secret routine SortedList[T].get_by_rank_raw!(rank: U64) -> T
 ### :param rank: Zero-based position in sorted order.
 ### :returns: The element at that rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-@readonly
 routine SortedList[T].get_by_rank!(rank: Integer) -> T
     return me.get_by_rank_raw(rank: position_of(value: rank))
 
@@ -882,7 +864,6 @@ routine SortedList[T].get_by_rank!(rank: Integer) -> T
 ### :param node: The subtree root to search.
 ### :param rank: Zero-based position in the in-order traversal of this subtree.
 ### :returns: The element at that rank.
-@readonly
 secret routine SortedList[T].get_at_subtree_rank(node: Accessing[BTreeListNode[T]], rank: U64) -> T
     danger
         if node.is_leaf
@@ -914,7 +895,6 @@ secret routine SortedList[T].get_at_subtree_rank(node: Accessing[BTreeListNode[T
 ### :param min_val: Inclusive lower bound.
 ### :param max_val: Inclusive upper bound.
 ### :returns: A {List[T]} of all matching elements in sorted order.
-@readonly
 routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
     var result = List[T]()
     if me.root is None
@@ -930,7 +910,6 @@ routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
 ### :param min_val: Inclusive lower bound.
 ### :param max_val: Inclusive upper bound.
 ### :param result: The list to append matching elements into.
-@readonly
 routine SortedList[T].range_collect(node: Accessing[BTreeListNode[T]], min_val: T, max_val: T, result: Controlling[List[T]])
     danger
         var i = 0u64
@@ -962,7 +941,6 @@ routine SortedList[T].range_collect(node: Accessing[BTreeListNode[T]], min_val: 
 ### Returns the smallest element in the list.
 ### :returns: The minimum element.
 ### :absent: The list is empty.
-@readonly
 routine SortedList[T].min!() -> T
     if me.is_empty()
         absent
@@ -975,7 +953,6 @@ routine SortedList[T].min!() -> T
 ### Returns the largest element in the list.
 ### :returns: The maximum element.
 ### :absent: The list is empty.
-@readonly
 routine SortedList[T].max!() -> T
     if me.is_empty()
         absent
@@ -988,14 +965,12 @@ routine SortedList[T].max!() -> T
 ### Returns the smallest element. Alias for {SortedList[T].min()}.
 ### :returns: The first (minimum) element.
 ### :absent: The list is empty.
-@readonly
 routine SortedList[T].first!() -> T
     return me.min()
 
 ### Returns the largest element. Alias for {SortedList[T].max()}.
 ### :returns: The last (maximum) element.
 ### :absent: The list is empty.
-@readonly
 routine SortedList[T].last!() -> T
     return me.max()
 
@@ -1003,7 +978,6 @@ routine SortedList[T].last!() -> T
 # Iteration
 # ============================================================================
 
-@readonly
 routine SortedList[T].iter() -> SortedListEmittable[T]
     danger
         return SortedListEmittable[T](list: me.hijack(), index: 0u64)
@@ -1024,7 +998,6 @@ routine List[T](from: SortedList[T]) -> List[T]
 ### Appends all keys from `node`'s subtree into `result` via in-order traversal.
 ### :param node: The subtree root to traverse.
 ### :param result: The list to append elements into.
-@readonly
 routine SortedList[T].collect_inorder(node: Accessing[BTreeListNode[T]], result: Controlling[List[T]])
     danger
         var i = 0u64
@@ -1052,7 +1025,6 @@ routine SortedListEmittable[T].emit!() -> T
 # Display / Equality
 # ============================================================================
 
-@readonly
 @override
 routine SortedList[T].represent() -> Text
     var result = me.type_name() + "(["
@@ -1065,7 +1037,6 @@ routine SortedList[T].represent() -> Text
     result = result + "])"
     return result
 
-@readonly
 @override
 routine SortedList[T].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count_raw().represent() + ", ["
@@ -1081,7 +1052,6 @@ routine SortedList[T].diagnose() -> Text
 ### Returns true if both lists contain exactly the same elements in the same order.
 ### :param you: The list to compare against.
 ### :returns: `true` if element-wise equal.
-@readonly
 routine SortedList[T].eq(you: Accessing[SortedList[T]]) -> Bool
     if me.count != you.count
         return false
@@ -1094,7 +1064,6 @@ routine SortedList[T].eq(you: Accessing[SortedList[T]]) -> Bool
 
 ### Serializes this collection to a `SerialValue.List`, serializing each element.
 ### :returns: The `SerialValue.List` of each element's serialized form.
-@readonly
 @override
 routine SortedList[T].serialize() -> SerialValue
     var __sv = List[SerialValue]()

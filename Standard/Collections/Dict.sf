@@ -200,25 +200,20 @@ dangerous routine Dict[TKey, TValue].roam_free()
 # Internal Helpers
 # ============================================================================
 
-@readonly
 secret routine Dict[TKey, TValue].h2(hash: U64) -> U8
     return U8(hash & U64(CTRL_H2_MASK))
 
-@readonly
 secret routine Dict[TKey, TValue].h1(hash: U64) -> U64
     return hash >> 7u32
 
-@readonly
 secret routine Dict[TKey, TValue].read_index(slot: U64) -> U64
     danger
         return me.indices.offset(U64.data_size() * slot).peek()
 
-@readonly
 secret routine Dict[TKey, TValue].read_key_at(ei: U64) -> TKey
     danger
         return me.keys.offset(TKey.data_size() * ei).peek()
 
-@readonly
 secret routine Dict[TKey, TValue].read_val_at(ei: U64) -> TValue
     danger
         return me.vals.offset(TValue.data_size() * ei).peek()
@@ -228,7 +223,6 @@ secret routine Dict[TKey, TValue].write_val_at(ei: U64, val: TValue)
         me.vals.offset(TValue.data_size() * ei).poke(val)
     return
 
-@readonly
 secret routine Dict[TKey, TValue].find_slot(key: TKey) -> U64
     var h = key.hash(k0: me.k0, k1: me.k1)
     var target = me.h2(h)
@@ -265,7 +259,6 @@ secret routine Dict[TKey, TValue].insert_index_raw(h: U64, entry_index: U64)
             i = i +% 1u64 & mask
     return
 
-@readonly
 secret routine Dict[TKey, TValue].should_rehash() -> Bool
     if (me.count +% me.deleted) *% 8u64 >= me.capacity *% 7u64
         return true
@@ -273,7 +266,6 @@ secret routine Dict[TKey, TValue].should_rehash() -> Bool
         return true
     return false
 
-@reshaping
 secret routine Dict[TKey, TValue].rehash()
     var old_cap = me.capacity
     var old_ecap = me.entries_cap
@@ -343,11 +335,9 @@ secret routine Dict[TKey, TValue].rehash()
 # Core Operations
 # ============================================================================
 
-@readonly
 routine Dict[TKey, TValue].count() -> Integer
     return Integer(from: me.count)
 
-@readonly
 routine Dict[TKey, TValue].is_empty() -> Bool
     return me.count == 0u64
 
@@ -363,7 +353,6 @@ routine Dict[TKey, TValue].clear()
     me.entries_used = 0u64
     return
 
-@readonly
 routine Dict[TKey, TValue].contains(key: TKey) -> Bool
     return me.find_slot(key) < me.capacity
 
@@ -427,7 +416,6 @@ routine Dict[TKey, TValue].remove(key: TKey) -> Bool
     me.deleted = me.deleted +% 1u64
     return true
 
-@readonly
 routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> TValue
     var slot = me.find_slot(key)
     if slot >= me.capacity
@@ -438,7 +426,6 @@ routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> T
 # Indexing
 # ============================================================================
 
-@readonly
 routine Dict[TKey, TValue].getitem!(key: Accessing[TKey]) -> TValue
 needs TValue obeys Assignable
     var slot = me.find_slot(key)
@@ -463,7 +450,6 @@ routine Dict[TKey, TValue].setitem!(key: Accessing[TKey], value: TValue)
 
 ### Returns all live keys in insertion order.
 ### :returns: A {List[TKey]} of every key; order matches the sequence in which the keys were first added.
-@readonly
 routine Dict[TKey, TValue].keys() -> List[TKey]
     var result = List[TKey](capacity: Integer(from: me.count))
     var i = 0u64
@@ -476,7 +462,6 @@ routine Dict[TKey, TValue].keys() -> List[TKey]
 
 ### Returns all live values in insertion order.
 ### :returns: A {List[TValue]} of every value; order matches the corresponding `keys()` call.
-@readonly
 routine Dict[TKey, TValue].values() -> List[TValue]
     var result = List[TValue](capacity: Integer(from: me.count))
     var i = 0u64
@@ -489,7 +474,6 @@ routine Dict[TKey, TValue].values() -> List[TValue]
 
 ### Returns all live entries in insertion order.
 ### :returns: A {List[DictEntry[TKey, TValue]]} of every key-value pair; order matches the sequence in which the keys were first added.
-@readonly
 routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
     var result = List[DictEntry[TKey, TValue]](capacity: Integer(from: me.count))
     var i = 0u64
@@ -506,7 +490,6 @@ routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
 # Iteration
 # ============================================================================
 
-@readonly
 routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
     danger
         return DictEmittable[TKey, TValue](
@@ -549,7 +532,6 @@ needs TValue obeys Assignable
 # Display
 # ============================================================================
 
-@readonly
 @override
 routine Dict[TKey, TValue].represent() -> Text
     if me.is_empty()
@@ -564,7 +546,6 @@ routine Dict[TKey, TValue].represent() -> Text
     result = result + "}"
     return result
 
-@readonly
 @override
 routine Dict[TKey, TValue].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count().represent() + ", {"
@@ -581,7 +562,6 @@ routine Dict[TKey, TValue].diagnose() -> Text
 # Comparison
 # ============================================================================
 
-@readonly
 routine Dict[TKey, TValue].eq(you: Accessing[Dict[TKey, TValue]]) -> Bool
 needs TValue obeys Equatable
     if me.count != you.count
@@ -604,7 +584,6 @@ needs TValue obeys Equatable
 
 ### Serializes this dictionary to a `SerialValue.Dict`; keys render via `represent`, values serialize.
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
-@readonly
 @override
 routine Dict[TKey, TValue].serialize() -> SerialValue
     var __sv = RF::Core.Dict[Text, SerialValue]()

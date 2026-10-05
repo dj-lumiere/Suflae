@@ -142,20 +142,16 @@ routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
 # Internal Helpers
 # ============================================================================
 
-@readonly
 secret routine Set[T].h2(hash: U64) -> U8
     return U8(hash & U64(CTRL_H2_MASK))
 
-@readonly
 secret routine Set[T].h1(hash: U64) -> U64
     return hash >> 7u32
 
-@readonly
 secret routine Set[T].read_index(slot: U64) -> U64
     danger
         return me.indices.offset(U64.data_size() * slot).peek()
 
-@readonly
 secret routine Set[T].find_slot(value: T) -> U64
     var h = value.hash(k0: me.k0, k1: me.k1)
     var target = me.h2(h)
@@ -192,7 +188,6 @@ secret routine Set[T].insert_index_raw(h: U64, entry_index: U64)
             i = i +% 1u64 & mask
     return
 
-@readonly
 secret routine Set[T].should_rehash() -> Bool
     if (me.count +% me.deleted) *% 8u64 >= me.capacity *% 7u64
         return true
@@ -200,7 +195,6 @@ secret routine Set[T].should_rehash() -> Bool
         return true
     return false
 
-@reshaping
 secret routine Set[T].rehash()
     var old_cap = me.capacity
     var old_ecap = me.entries_cap
@@ -264,11 +258,9 @@ secret routine Set[T].rehash()
 # Core Operations
 # ============================================================================
 
-@readonly
 routine Set[T].count() -> Integer
     return Integer(from: me.count)
 
-@readonly
 routine Set[T].is_empty() -> Bool
     return me.count == 0u64
 
@@ -284,7 +276,6 @@ routine Set[T].clear()
     me.entries_used = 0u64
     return
 
-@readonly
 routine Set[T].contains(value: T) -> Bool
     return me.find_slot(value) < me.capacity
 
@@ -318,7 +309,6 @@ routine Set[T].remove(value: T) -> Bool
 # Iteration
 # ============================================================================
 
-@readonly
 routine Set[T].iter() -> SetEmittable[T]
     danger
         return SetEmittable[T](
@@ -341,7 +331,6 @@ routine SetEmittable[T].emit!() -> T
 # Set Operations
 # ============================================================================
 
-@readonly
 routine Set[T].union(other: Accessing[Set[T]]) -> Set[T]
     var result = Set[T](key: SecureHashKey.random(), capacity: Integer(from: me.count +% other.count))
     each val in me
@@ -350,7 +339,6 @@ routine Set[T].union(other: Accessing[Set[T]]) -> Set[T]
         discard result.add(val)
     return result
 
-@readonly
 routine Set[T].intersection(other: Accessing[Set[T]]) -> Set[T]
     var result = Set[T]()
     each val in me
@@ -358,7 +346,6 @@ routine Set[T].intersection(other: Accessing[Set[T]]) -> Set[T]
             discard result.add(val)
     return result
 
-@readonly
 routine Set[T].difference(other: Accessing[Set[T]]) -> Set[T]
     var result = Set[T]()
     each val in me
@@ -366,7 +353,6 @@ routine Set[T].difference(other: Accessing[Set[T]]) -> Set[T]
             discard result.add(val)
     return result
 
-@readonly
 routine Set[T].symmetric_difference(other: Accessing[Set[T]]) -> Set[T]
     var result = Set[T]()
     each val in me
@@ -377,7 +363,6 @@ routine Set[T].symmetric_difference(other: Accessing[Set[T]]) -> Set[T]
             discard result.add(val)
     return result
 
-@readonly
 routine Set[T].is_subset(other: Accessing[Set[T]]) -> Bool
     if me.count > other.count
         return false
@@ -386,11 +371,9 @@ routine Set[T].is_subset(other: Accessing[Set[T]]) -> Bool
             return false
     return true
 
-@readonly
 routine Set[T].is_superset(other: Accessing[Set[T]]) -> Bool
     return other.is_subset(me)
 
-@readonly
 routine Set[T].is_disjoint(other: Accessing[Set[T]]) -> Bool
     each val in me
         if other have val
@@ -414,7 +397,6 @@ routine List[T](from: Set[T]) -> List[T]
 # Display
 # ============================================================================
 
-@readonly
 @override
 routine Set[T].represent() -> Text
     if me.is_empty()
@@ -429,7 +411,6 @@ routine Set[T].represent() -> Text
     result = result + "}"
     return result
 
-@readonly
 @override
 routine Set[T].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count().represent() + ", {"
@@ -446,7 +427,6 @@ routine Set[T].diagnose() -> Text
 # Comparison
 # ============================================================================
 
-@readonly
 routine Set[T].eq(other: Accessing[Set[T]]) -> Bool
     if me.count != other.count
         return false
@@ -497,7 +477,6 @@ dangerous routine Set[T].roam_free()
 
 ### Serializes this collection to a `SerialValue.List`, serializing each element.
 ### :returns: The `SerialValue.List` of each element's serialized form.
-@readonly
 @override
 routine Set[T].serialize() -> SerialValue
     var __sv = RF::Core.List[SerialValue]()

@@ -75,20 +75,17 @@ needs U64 BITS
 # Query Operations
 # ============================================================================
 
-@readonly
 secret routine BitArray[BITS].count_raw() -> U64
     return BITS
 
 ### Returns the fixed number of bits in this array.
 ### This is always equal to the buildtime parameter `BITS`.
 ### :returns: The bit count `BITS`.
-@readonly
 routine BitArray[BITS].count() -> Integer
     return Integer(from: me.count_raw())
 
 ### Returns true when the buildtime bit count is zero.
 ### :returns: `true` if `BITS == 0`.
-@readonly
 routine BitArray[BITS].is_empty() -> Bool
     return BITS == 0u64
 
@@ -96,7 +93,6 @@ routine BitArray[BITS].is_empty() -> Bool
 # Indexing (read-only, value semantics)
 # ============================================================================
 
-@readonly
 secret routine BitArray[BITS].getitem_raw!(index: U64) -> Bool
     if index >= BITS
         throw IndexOutOfBoundsError(index: index, count: BITS)
@@ -113,7 +109,6 @@ secret routine BitArray[BITS].getitem_raw!(index: U64) -> Bool
 ### :param index: The zero-based bit position to read.
 ### :returns: `true` if the bit at `index` is set; `false` if it is clear.
 ### :throws: {IndexOutOfBoundsError} if `index >= BITS`.
-@readonly
 routine BitArray[BITS].getitem!(index: Integer) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
@@ -152,7 +147,6 @@ routine BitArray[BITS].setitem!(index: Integer, value: Bool)
 # Functional Modification (returns new copy)
 # ============================================================================
 
-@readonly
 secret routine BitArray[BITS].with_set_raw(index: U64, value: Bool) -> BitArray[BITS]
     # Returns a new BitArray with the bit at index changed
     if index >= BITS
@@ -174,11 +168,9 @@ secret routine BitArray[BITS].with_set_raw(index: U64, value: Bool) -> BitArray[
 ### :param index: The zero-based bit position to change.
 ### :param value: The new bit value.
 ### :returns: A copy of this array with the specified bit updated.
-@readonly
 routine BitArray[BITS].with_set(index: Integer, value: Bool) -> BitArray[BITS]
     return me.with_set_raw(index: position_of(value: index), value: value)
 
-@readonly
 secret routine BitArray[BITS].with_flipped_raw(index: U64) -> BitArray[BITS]
     # Returns a new BitArray with the bit at index toggled
     if index >= BITS
@@ -190,7 +182,6 @@ secret routine BitArray[BITS].with_flipped_raw(index: U64) -> BitArray[BITS]
 ### If `index >= BITS`, the original array is returned unmodified.
 ### :param index: The zero-based bit position to flip.
 ### :returns: A copy of this array with the specified bit inverted.
-@readonly
 routine BitArray[BITS].with_flipped(index: Integer) -> BitArray[BITS]
     return me.with_flipped_raw(index: position_of(value: index))
 
@@ -198,7 +189,6 @@ routine BitArray[BITS].with_flipped(index: Integer) -> BitArray[BITS]
 # Bit Queries
 # ============================================================================
 
-@readonly
 secret routine BitArray[BITS].count_ones_raw() -> U64
     var count = 0u64
     var i = 0u64
@@ -210,23 +200,19 @@ secret routine BitArray[BITS].count_ones_raw() -> U64
 
 ### Returns the number of bits currently set to `true`.
 ### :returns: The count of one-bits in this array.
-@readonly
 routine BitArray[BITS].count_ones() -> Integer
     return Integer(from: me.count_ones_raw())
 
-@readonly
 secret routine BitArray[BITS].count_zeros_raw() -> U64
     return BITS -% me.count_ones_raw()
 
 ### Returns the number of bits currently set to `false`.
 ### :returns: `BITS` minus the number of one-bits.
-@readonly
 routine BitArray[BITS].count_zeros() -> Integer
     return Integer(from: me.count_zeros_raw())
 
 ### Returns true when at least one stored bit is `true`.
 ### :returns: `true` if any bit is set; `false` if all bits are clear.
-@readonly
 routine BitArray[BITS].any() -> Bool
     var i = 0u64
     while i < BITS
@@ -238,7 +224,6 @@ routine BitArray[BITS].any() -> Bool
 ### Returns true when every stored bit is `true`.
 ### Empty arrays (`BITS == 0`) vacuously return `true`.
 ### :returns: `true` if all bits are set; `false` if any bit is clear.
-@readonly
 routine BitArray[BITS].all() -> Bool
     var i = 0u64
     while i < BITS
@@ -249,7 +234,6 @@ routine BitArray[BITS].all() -> Bool
 
 ### Returns true when no stored bit is `true`.
 ### :returns: `true` if all bits are clear; `false` if any bit is set.
-@readonly
 routine BitArray[BITS].none() -> Bool
     return not me.any()
 
@@ -257,7 +241,6 @@ routine BitArray[BITS].none() -> Bool
 ### When `value` is `true`, equivalent to `any()`; when `false`, equivalent to `not all()`.
 ### :param value: The bit value to search for.
 ### :returns: `true` if at least one stored bit matches `value`.
-@readonly
 routine BitArray[BITS].contains(value: Bool) -> Bool
     if value
         return me.any()
@@ -267,7 +250,6 @@ routine BitArray[BITS].contains(value: Bool) -> Bool
 # Display
 # ============================================================================
 
-@readonly
 @override
 routine BitArray[BITS].represent() -> Text
     var result = "BitArray(["
@@ -280,7 +262,6 @@ routine BitArray[BITS].represent() -> Text
     result = result + "])"
     return result
 
-@readonly
 @override
 routine BitArray[BITS].diagnose() -> Text
     var result = me.full_type_name() + "(["
@@ -293,7 +274,6 @@ routine BitArray[BITS].diagnose() -> Text
     result = result + "])"
     return result
 
-@readonly
 routine BitArray[BITS].iter() -> BitArrayEmittable[BITS]
     return BitArrayEmittable[BITS](bits: me, index: 0u64)
 
@@ -316,7 +296,6 @@ routine BitArrayEmittable[BITS].emit!() -> Bool
 ### :returns: `true` if every corresponding pair of bits is equal.
 ### :note: Bit-by-bit comparison is required because the trailing bits of the
 ###        last byte are unspecified — a raw `memcmp` would compare padding.
-@readonly
 routine BitArray[BITS].eq(you: BitArray[BITS]) -> Bool
     each i in 0u64 til BITS
         if me.getitem_raw(index: i) != you.getitem_raw(index: i)
@@ -327,7 +306,6 @@ routine BitArray[BITS].eq(you: BitArray[BITS]) -> Bool
 ### Compares bit by bit from index 0; `false` sorts before `true`.
 ### :param you: The other bit array to compare against.
 ### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
-@readonly
 routine BitArray[BITS].cmp(you: BitArray[BITS]) -> ComparisonSign
     each i in 0u64 til BITS
         var a = me.getitem_raw(index: i)

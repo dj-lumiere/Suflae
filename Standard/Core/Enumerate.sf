@@ -26,7 +26,6 @@ needs TSourceIter obeys Emittable[T]
     secret index: Integer
 
 ### Returns a walk over the pairs.
-@readonly
 routine EnumerateIterable[T, TSource].iter() -> EnumerateEmittable[T, TSource/Iter]
     danger
         return EnumerateEmittable[T, TSource/Iter](
@@ -36,21 +35,19 @@ routine EnumerateIterable[T, TSource].iter() -> EnumerateEmittable[T, TSource/It
 
 ### Returns the next pair.
 ### :absent: The source has no more values.
-routine EnumerateEmittable[T, TSourceIter].emit!() -> Tuple[Integer, T]
+routine EnumerateEmittable[T, TSourceIter].emit!() -> Tuple[Integer, TSourceIter/Item]
     var position = me.index
     me.index = me.index + Integer(from: 1u64)
     # The value goes into the pair straight from the source, so the pair is its only holder.
     return (position, me.source.emit())
 
 ### Returns the values paired with their positions, from 0.
-@readonly
 routine Iterable[T].enumerate() -> EnumerateIterable[T, Me]
     danger
         return EnumerateIterable[T, Me](source: me.hijack(), start_index: Integer(from: 0u64))
 
 ### Returns the values paired with their positions, from `start`.
 ### :param start: The position of the first value.
-@readonly
 routine Iterable[T].enumerate(start: Integer) -> EnumerateIterable[T, Me]
     danger
         return EnumerateIterable[T, Me](source: me.hijack(), start_index: start)

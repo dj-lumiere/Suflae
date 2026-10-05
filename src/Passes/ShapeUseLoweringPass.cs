@@ -391,7 +391,8 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         AstWalker.WalkExpressions(root: root,
             visit: e =>
             {
-                if (e is CallExpression { ResolvedRoutine.IsReshaping: true, Callee: MemberExpression { Object: var target } } &&
+                if (e is CallExpression { ResolvedRoutine: { } callee, Callee: MemberExpression { Object: var target } } &&
+                    ChangesShape(routine: callee) &&
                     Unprojected(expr: target) is var handle && !ReferenceEquals(objA: handle, objB: target) &&
                     IsNamedPath(expr: handle) && HasShapeUse(container: handle))
                 {
@@ -399,6 +400,93 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                 }
             });
         return ShapeUseCalls(containers: handles, verb: RuntimeContract.ShapeUse.RequireFree);
+    }
+
+    /// <summary>The library routines already judged by <see cref="ChangesShape"/>, by declaration site. A routine
+    /// being judged counts as not changing the shape while its own body is walked, so recursion ends.</summary>
+    private readonly Dictionary<(string File, int Line), bool> _changesShape = [];
+
+    private Dictionary<(string File, int Line), RoutineDeclaration>? _libraryRoutines;
+
+    /// <summary>
+    /// Whether a call of <paramref name="routine"/> can change the shape of its receiver: a RazorForge
+    /// <c>@reshaping</c> routine, or a library routine whose body writes a member variable of <c>me</c> (a
+    /// container's count, capacity or buffer), directly or through another routine it calls on <c>me</c>. Writing
+    /// an element's value goes into the container's buffer and leaves its member variables alone. A routine of the
+    /// program itself guards its own writes (its <c>me</c> is the handle, see RoamedLockBracketLoweringPass).
+    /// </summary>
+    private bool ChangesShape(RoutineInfo routine)
+    {
+        if (routine.IsReshaping)
+        {
+            return true;
+        }
+
+        if ((routine.GenericDefinition ?? routine).Location is not { } site ||
+            LibraryRoutine(file: site.FileName, line: site.Line) is not { } declaration)
+        {
+            return false;
+        }
+
+        (string, int) key = (site.FileName, site.Line);
+        if (_changesShape.TryGetValue(key: key, value: out bool known))
+        {
+            return known;
+        }
+
+        _changesShape[key: key] = false;
+        bool changes = false;
+        AstWalker.Walk(root: declaration.Body,
+            visit: node =>
+            {
+                changes |= node switch
+                {
+                    AssignmentStatement { Target: var target } => IsOwnMemberVariable(expr: target),
+                    BinaryExpression { Operator: BinaryOperator.Assign, Left: var left } => IsOwnMemberVariable(expr: left),
+                    CallExpression { Callee: MemberExpression { Object: IdentifierExpression { Name: "me" }, MemberName: var name } } =>
+                        routine.OwnerType is { } owner && OwnRoutinesNamed(owner: owner, name: name).Any(predicate: ChangesShape),
+                    _ => false
+                };
+            });
+        _changesShape[key: key] = changes;
+        return changes;
+    }
+
+    /// <summary>Whether <paramref name="expr"/> names a member variable of <c>me</c> (<c>me.count</c>).</summary>
+    private static bool IsOwnMemberVariable(Expression expr)
+    {
+        return expr is MemberExpression { Object: IdentifierExpression { Name: "me" } };
+    }
+
+    /// <summary>Every routine named <paramref name="name"/> on <paramref name="owner"/>.</summary>
+    private IEnumerable<RoutineInfo> OwnRoutinesNamed(TypeSymbol owner, string name)
+    {
+        var overloads = new List<RoutineInfo>();
+        ctx.Registry.CollectMemberRoutineCandidates(type: owner, memberRoutineName: name, candidates: overloads);
+        return overloads;
+    }
+
+    /// <summary>The library routine declared at <paramref name="file"/>:<paramref name="line"/>, or null.</summary>
+    private RoutineDeclaration? LibraryRoutine(string file, int line)
+    {
+        if (_libraryRoutines == null)
+        {
+            _libraryRoutines = [];
+            foreach ((Program program, _, _) in ctx.Registry.StdlibPrograms)
+            {
+                AstWalker.Walk(root: program,
+                    visit: node =>
+                    {
+                        if (node is RoutineDeclaration { Body: not null } declaration)
+                        {
+                            _libraryRoutines.TryAdd(key: (declaration.Location.FileName, declaration.Location.Line),
+                                value: declaration);
+                        }
+                    });
+            }
+        }
+
+        return _libraryRoutines.GetValueOrDefault(key: (file, line));
     }
 
     private static bool IsRoamed(TypeSymbol type)

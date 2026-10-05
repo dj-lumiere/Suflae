@@ -8,18 +8,15 @@ import IO/FileSystem
 
 ### Returns the names of the directory's entries.
 ### :throws: {IOError} when the directory cannot be listed.
-@readonly
 routine Directory.list!() -> List[Text]
     return List[Text](from: me.list())
 
 ### Returns the directory's entries.
 ### :throws: {IOError} when the directory cannot be listed.
-@readonly
 routine Directory.entries!() -> List[DirEntry]
     return List[DirEntry](from: me.entries())
 
 ### Returns the paths of everything under the directory, at any depth. Symbolic links are not followed.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
-@readonly
 routine Directory.walk!() -> List[Text]
     return List[Text](from: me.walk())

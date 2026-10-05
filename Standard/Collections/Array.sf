@@ -6,14 +6,12 @@ import Numerics
 # `Integer`. A Suflae program calls these in place of the RazorForge routines of the same names.
 
 ### Returns the number of elements, `COUNT`.
-@readonly
 routine Array[T, COUNT].count() -> Integer
     var n: U64 = COUNT
     return Integer(from: n)
 
 ### Returns the element at `index` (`a[i]`).
 ### :param index: The position to read, from 0.
-@readonly
 routine Array[T, COUNT].getitem!(index: Integer) -> T
 needs T obeys Assignable
     var position = position_of(value: index)
@@ -35,7 +33,6 @@ routine Array[T, COUNT].setitem!(index: Integer, value: T)
 ### Returns a list of the elements at the positions in `range` (`a[x til y]`). Positions outside the array are
 ### skipped.
 ### :param range: The positions to copy.
-@readonly
 routine Array[T, COUNT].getitem(range: Range[Integer]) -> List[T]
 needs T obeys Assignable
     var result = List[T]()
@@ -49,7 +46,6 @@ needs T obeys Assignable
 ### Returns the position of the first element equal to `value`.
 ### :param value: The value to look for.
 ### :absent: No element equals `value`.
-@readonly
 routine Array[T, COUNT].index_of!(value: T) -> Integer
 needs T obeys Equatable
     var i = 0u64

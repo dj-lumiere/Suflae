@@ -145,7 +145,6 @@ secret routine PriorityQueue[TPriority, TElement].set_priority_raw(index: U64, v
 ### Paired with `get_priority_raw` when swapping heap nodes during sift operations.
 ### :param index: The zero-based heap position to read.
 ### :returns: The element stored at that heap node.
-@readonly
 @inline
 secret routine PriorityQueue[TPriority, TElement].get_element_raw(index: U64) -> TElement
     danger
@@ -312,13 +311,11 @@ secret routine PriorityQueue[TPriority, TElement].sift_down(index: U64)
 # Core Operations
 # ============================================================================
 
-@readonly
 secret routine PriorityQueue[TPriority, TElement].count_raw() -> U64
     return me.count
 
 ### Returns the number of entries currently stored in the pool.
 ### :returns: The live entry count.
-@readonly
 routine PriorityQueue[TPriority, TElement].count() -> Integer
     return Integer(from: me.count_raw())
 
@@ -427,7 +424,6 @@ routine PriorityQueue[TPriority, TElement].drain() -> List[TElement]
 ### Performs a linear scan of the heap array in storage order (not priority order).
 ### :param element: The element value to search for.
 ### :returns: `true` if `element` is found in any heap entry; `false` otherwise.
-@readonly
 routine PriorityQueue[TPriority, TElement].contains(element: TElement) -> Bool
 needs TElement obeys Equatable
     var i = 0u64
@@ -450,7 +446,6 @@ routine List[PQEntry[TPriority, TElement]](source: PriorityQueue[TPriority, TEle
         i = i +% 1u64
     return result
 
-@readonly
 routine PriorityQueue[TPriority, TElement].iter() -> PriorityQueueEmittable[TPriority, TElement]
     danger
         return PriorityQueueEmittable[TPriority, TElement](
@@ -475,7 +470,6 @@ routine PriorityQueueEmittable[TPriority, TElement].emit!() -> PQEntry[TPriority
     me.index = me.index + 1u64
     return _result
 
-@readonly
 @override
 routine PriorityQueue[TPriority, TElement].represent() -> Text
     var result = me.type_name() + "(["
@@ -488,7 +482,6 @@ routine PriorityQueue[TPriority, TElement].represent() -> Text
     result = result + "])"
     return result
 
-@readonly
 @override
 routine PriorityQueue[TPriority, TElement].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count_raw().represent() + ", ["

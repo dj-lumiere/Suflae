@@ -86,7 +86,6 @@ routine S8.rotate_right(bits: Integer) -> S8
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine S8.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -170,7 +169,6 @@ routine S16.rotate_right(bits: Integer) -> S16
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine S16.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -254,7 +252,6 @@ routine S32.rotate_right(bits: Integer) -> S32
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine S32.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -338,7 +335,6 @@ routine S64.rotate_right(bits: Integer) -> S64
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine S64.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -422,7 +418,6 @@ routine S128.rotate_right(bits: Integer) -> S128
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine S128.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -501,7 +496,6 @@ routine U8.rotate_right(bits: Integer) -> U8
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine U8.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -580,7 +574,6 @@ routine U16.rotate_right(bits: Integer) -> U16
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine U16.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -659,7 +652,6 @@ routine U32.rotate_right(bits: Integer) -> U32
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine U32.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -742,7 +734,6 @@ routine U64.rotate_right(bits: Integer) -> U64
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine U64.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -821,7 +812,6 @@ routine U128.rotate_right(bits: Integer) -> U128
 ### when negative (`255.to_text(radix: 16)` is `ff`).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine U128.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -830,7 +820,6 @@ routine U128.to_text(radix: Integer) -> Text
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine B16.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
@@ -860,7 +849,6 @@ routine B16.scaleb!(n: Integer) -> B16
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine B32.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
@@ -890,7 +878,6 @@ routine B32.scaleb!(n: Integer) -> B32
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine B64.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
@@ -921,7 +908,6 @@ routine B64.scaleb!(n: Integer) -> B64
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine B128.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 

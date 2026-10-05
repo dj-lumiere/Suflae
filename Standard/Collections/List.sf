@@ -86,11 +86,10 @@ needs T obeys Assignable
     var result = List[T]()
     result.reserve_raw(new_capacity: from.count())
     each element in from
-        result.add_last(value: element.assign())
+        result.add_last(value: element)
     return result
 
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
-@readonly
 routine List[T].to_razorforge() -> RF::Core.List[T]
 needs T obeys Assignable
     var result = RF::Core.List[T](capacity: me.count)
@@ -129,17 +128,14 @@ common routine List[T].from_literal(elements...: T) -> List[T]
 # ============================================================================
 
 ### Returns the number of elements.
-@readonly
 routine List[T].count() -> Integer
     return Integer(from: me.count)
 
 ### Returns the number of elements the list holds without growing.
-@readonly
 routine List[T].capacity() -> Integer
     return Integer(from: me.capacity)
 
 ### Returns whether the list has no elements.
-@readonly
 routine List[T].is_empty() -> Bool
     return me.count == 0_u64
 
@@ -149,7 +145,6 @@ routine List[T].is_empty() -> Bool
 
 ### Adds `value` at the back. The buffer grows when it is full.
 ### :param value: The value to add.
-@reshaping
 routine List[T].add_last(value: T)
     if me.count >= me.capacity
         me.reserve_raw(
@@ -166,7 +161,6 @@ routine List[T].add_last(value: T)
 
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
-@reshaping
 routine List[T].add_range(you: Accessing[Iterable[T]])
     each value in you
         me.add_last(value: value)
@@ -176,7 +170,6 @@ routine List[T].add_range(you: Accessing[Iterable[T]])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-@reshaping
 routine List[T].add_range!(source: Accessing[List[T]], from: Integer, count: Integer)
 needs T obeys Assignable
     var start = source.position(index: from)
@@ -192,7 +185,6 @@ needs T obeys Assignable
 
 ### Removes and returns the last element.
 ### :absent: The list is empty.
-@reshaping
 routine List[T].remove_last!() -> T
     if me.count == 0_u64
         absent
@@ -201,7 +193,6 @@ routine List[T].remove_last!() -> T
 
 ### Adds `value` at the front, moving every element one place back.
 ### :param value: The value to add.
-@reshaping
 routine List[T].add_first(value: T)
     me.insert_raw(position: 0_u64, value: value)
     return
@@ -209,7 +200,6 @@ routine List[T].add_first(value: T)
 ### Inserts `value` at `index`, moving the elements from there one place back.
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
-@reshaping
 routine List[T].add_at!(index: Integer, value: T)
     if index.is_negative()
         throw NegativeIndexError(index: index)
@@ -221,7 +211,6 @@ routine List[T].add_at!(index: Integer, value: T)
 
 ### Removes and returns the first element, moving the others one place forward.
 ### :absent: The list is empty.
-@reshaping
 routine List[T].remove_first!() -> T
     if me.count == 0_u64
         absent
@@ -229,13 +218,11 @@ routine List[T].remove_first!() -> T
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
-@reshaping
 routine List[T].remove_at!(index: Integer) -> T
     return me.remove_raw(position: me.position(index: index))
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
-@reshaping
 routine List[T].truncate!(new_count: Integer)
     if new_count.is_negative()
         throw NegativeIndexError(index: new_count)
@@ -246,14 +233,12 @@ routine List[T].truncate!(new_count: Integer)
     return
 
 ### Removes every element and keeps the buffer.
-@reshaping
 routine List[T].clear()
     me.count = 0_u64
     return
 
 ### Makes room for at least `new_capacity` elements without growing again.
 ### :param new_capacity: The number of elements to make room for.
-@reshaping
 routine List[T].reserve(new_capacity: Integer)
     me.reserve_raw(new_capacity: U64(from: new_capacity))
     return
@@ -264,7 +249,6 @@ routine List[T].reserve(new_capacity: Integer)
 
 ### Returns the first element.
 ### :absent: The list is empty.
-@readonly
 routine List[T].first!() -> T
 needs T obeys Assignable
     if me.count == 0_u64
@@ -273,7 +257,6 @@ needs T obeys Assignable
 
 ### Returns the last element.
 ### :absent: The list is empty.
-@readonly
 routine List[T].last!() -> T
 needs T obeys Assignable
     if me.count == 0_u64
@@ -282,7 +265,6 @@ needs T obeys Assignable
 
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
-@readonly
 routine List[T].getitem!(index: Integer) -> T
 needs T obeys Assignable
     # A holder of its own: the list keeps its element, the caller gets one more (a share for a handle).
@@ -300,7 +282,6 @@ routine List[T].setitem!(index: Integer, value: T)
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
 ### list are skipped, and a descending range gives the elements in reverse.
 ### :param range: The positions to copy.
-@readonly
 routine List[T].getitem(range: Range[Integer]) -> List[T]
 needs T obeys Assignable
     var result = List[T]()
@@ -314,7 +295,6 @@ needs T obeys Assignable
 # ============================================================================
 
 ### Returns a walk over the elements, front to back.
-@readonly
 routine List[T].iter() -> ListEmittable[T]
     return ListEmittable[T](data: me.data, count: me.count, index: 0_u64)
 
@@ -330,7 +310,6 @@ routine ListEmittable[T].emit!() -> T
 
 ### Returns whether both lists hold equal elements in the same order.
 ### :param you: The other list.
-@readonly
 routine List[T].eq(you: Accessing[List[T]]) -> Bool
 needs T obeys Equatable
     if me.count != you.count
@@ -344,7 +323,6 @@ needs T obeys Equatable
 
 ### Returns whether some element equals `value` (`xs have v`).
 ### :param value: The value to look for.
-@readonly
 routine List[T].contains(value: Accessing[T]) -> Bool
 needs T obeys Equatable
     var i: U64 = 0
@@ -355,7 +333,6 @@ needs T obeys Equatable
     return false
 
 ### Returns the list as text: `[1, 2, 3]`.
-@readonly
 @override
 routine List[T].represent() -> Text
     var result = "["
@@ -368,7 +345,6 @@ routine List[T].represent() -> Text
     return result + "]"
 
 ### Returns the list's diagnostic text: its type, count and elements.
-@readonly
 @override
 routine List[T].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count().represent() + ", ["
@@ -392,7 +368,6 @@ needs T obeys Assignable
     return result
 
 ### Returns the list as a `SerialValue.List` of its serialized elements.
-@readonly
 @override
 routine List[T].serialize() -> SerialValue
     var result = RF::Core.List[SerialValue]()
@@ -419,7 +394,6 @@ routine List[T].sort_by(compare: Routine[(T, T), Bool])
     return
 
 ### Returns a new list of the elements in ascending order.
-@readonly
 routine List[T].sorted() -> List[T]
 needs T obeys Comparable
     var result = me.duplicate()
@@ -428,7 +402,6 @@ needs T obeys Comparable
 
 ### Returns a new list of the elements, ordered by `compare`.
 ### :param compare: Returns whether its first argument goes before its second.
-@readonly
 routine List[T].sorted_by(compare: Routine[(T, T), Bool]) -> List[T]
     var result = me.duplicate()
     result.sort_by(compare: compare)
@@ -462,7 +435,6 @@ secret routine List[T].position!(index: Integer) -> U64
     return position
 
 ### The element at a position already checked.
-@readonly
 @inline
 secret routine List[T].get_raw(index: U64) -> T
     danger

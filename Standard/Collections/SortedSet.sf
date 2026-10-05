@@ -76,13 +76,11 @@ obeys Emittable[T]
 
 ### Returns the number of live keys currently stored in this node.
 ### :returns: The active key count.
-@readonly
 routine BTreeSetNode[T].keys_count() -> U64
     return me.key_count
 
 ### Returns the number of live child pointers currently stored in this node.
 ### :returns: The active child count.
-@readonly
 routine BTreeSetNode[T].children_count() -> U64
     return me.child_count
 
@@ -90,12 +88,10 @@ routine BTreeSetNode[T].children_count() -> U64
 # keys_base() returns Hijacked[T] at &me.keys[0]; children_base() at &me.children[0].
 
 ### Returns a raw pointer to the start of this node's key buffer.
-@readonly
 routine BTreeSetNode[T].keys_base() -> Hijacked[T]
     return me.hijack().recast_as[T]()
 
 ### Returns a raw pointer to the start of this node's child-pointer buffer.
-@readonly
 routine BTreeSetNode[T].children_base() -> Hijacked[Hijacked[BTreeSetNode[T]]]
     return me
         .hijack()
@@ -106,7 +102,6 @@ routine BTreeSetNode[T].children_base() -> Hijacked[Hijacked[BTreeSetNode[T]]]
 ### Returns the key at position `i` without bounds checking.
 ### :param i: The zero-based position within the key buffer.
 ### :returns: The key stored at that position.
-@readonly
 routine BTreeSetNode[T].keys_get(i: U64) -> T
     danger
         return me
@@ -128,7 +123,6 @@ routine BTreeSetNode[T].keys_set(i: U64, value: T)
 ### Returns the child at position `i` without bounds checking.
 ### :param i: The zero-based position within the child buffer.
 ### :returns: The child node stored at that position.
-@readonly
 routine BTreeSetNode[T].children_get(i: U64) -> Hijacked[BTreeSetNode[T]]
     danger
         return me
@@ -411,19 +405,16 @@ needs T obeys Comparable
 # Core Operations
 # ============================================================================
 
-@readonly
 secret routine SortedSet[T].count_raw() -> U64
     return me.count
 
 ### Returns the number of unique values currently stored in the set.
 ### :returns: The live element count.
-@readonly
 routine SortedSet[T].count() -> Integer
     return Integer(from: me.count_raw())
 
 ### Returns true if the set contains no values.
 ### :returns: `true` when `count()` is zero.
-@readonly
 routine SortedSet[T].is_empty() -> Bool
     return me.count == 0u64
 
@@ -441,7 +432,6 @@ routine SortedSet[T].clear()
 ### Lookup follows the B-tree search path in O(log n) without allocation.
 ### :param value: The value to search for.
 ### :returns: `true` if `value` exists; `false` if it is absent.
-@readonly
 routine SortedSet[T].contains(value: T) -> Bool
     if me.root is None
         return false
@@ -455,7 +445,6 @@ routine SortedSet[T].contains(value: T) -> Bool
 ### :param node: The subtree root to search within.
 ### :param value: The value to search for.
 ### :returns: `true` if `value` is found anywhere in the subtree; `false` otherwise.
-@readonly
 @inline
 routine SortedSet[T].search_node(node: Accessing[BTreeSetNode[T]], value: T) -> Bool
     danger
@@ -484,7 +473,6 @@ routine SortedSet[T].search_node(node: Accessing[BTreeSetNode[T]], value: T) -> 
 ### :param node: The node whose sorted keys should be searched.
 ### :param value: The value to find the lower-bound position for.
 ### :returns: The first index where keys[index] >= value.
-@readonly
 @inline
 secret routine SortedSet[T].lower_bound(node: Accessing[BTreeSetNode[T]], value: T) -> U64
     var lo = 0u64
@@ -950,7 +938,6 @@ routine SortedSet[T].update_subtree_size(node: Controlling[BTreeSetNode[T]])
 # Indexing - O(log n) access by position
 # ============================================================================
 
-@readonly
 secret routine SortedSet[T].get_by_rank_raw!(rank: U64) -> T
     if rank >= me.count
         throw IndexOutOfBoundsError(index: rank, count: me.count)
@@ -964,7 +951,6 @@ secret routine SortedSet[T].get_by_rank_raw!(rank: U64) -> T
 ### :param rank: The zero-based sorted rank to read.
 ### :returns: The element at that sorted rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-@readonly
 routine SortedSet[T].get_by_rank!(rank: Integer) -> T
     return me.get_by_rank_raw(rank: position_of(value: rank))
 
@@ -973,7 +959,6 @@ routine SortedSet[T].get_by_rank!(rank: Integer) -> T
 ### :param node: The subtree root to search within.
 ### :param rank: The zero-based in-order rank to resolve.
 ### :returns: The element at that in-order rank within the subtree.
-@readonly
 secret routine SortedSet[T].get_at_subtree_rank(node: Accessing[BTreeSetNode[T]], rank: U64) -> T
     danger
         if node.is_leaf
@@ -1012,7 +997,6 @@ secret routine SortedSet[T].get_at_subtree_rank(node: Accessing[BTreeSetNode[T]]
 ### :param min_val: The inclusive lower bound.
 ### :param max_val: The inclusive upper bound.
 ### :returns: A `List[T]` containing all matching elements in ascending order.
-@readonly
 routine SortedSet[T].range(min_val: T, max_val: T) -> List[T]
     var result = List[T]()
     if me.root is None
@@ -1028,7 +1012,6 @@ routine SortedSet[T].range(min_val: T, max_val: T) -> List[T]
 ### :param min_val: The inclusive lower bound.
 ### :param max_val: The inclusive upper bound.
 ### :param result: The destination list for matching values.
-@readonly
 routine SortedSet[T].range_collect(node: Accessing[BTreeSetNode[T]], min_val: T, max_val: T, result: Controlling[List[T]])
     danger
         var i = 0u64
@@ -1064,7 +1047,6 @@ routine SortedSet[T].range_collect(node: Accessing[BTreeSetNode[T]], min_val: T,
 ### Returns the smallest value currently stored in the set.
 ### :returns: The minimum element.
 ### :absent: The set is empty.
-@readonly
 routine SortedSet[T].min!() -> T
     if me.is_empty()
         absent
@@ -1077,7 +1059,6 @@ routine SortedSet[T].min!() -> T
 ### Returns the largest value currently stored in the set.
 ### :returns: The maximum element.
 ### :absent: The set is empty.
-@readonly
 routine SortedSet[T].max!() -> T
     if me.is_empty()
         absent
@@ -1090,14 +1071,12 @@ routine SortedSet[T].max!() -> T
 ### Returns the first (smallest) element in the set; equivalent to `min()`.
 ### :returns: The minimum element.
 ### :absent: The set is empty.
-@readonly
 routine SortedSet[T].first!() -> T
     return me.min()
 
 ### Returns the last (largest) element in the set; equivalent to `max()`.
 ### :returns: The maximum element.
 ### :absent: The set is empty.
-@readonly
 routine SortedSet[T].last!() -> T
     return me.max()
 
@@ -1107,7 +1086,6 @@ routine SortedSet[T].last!() -> T
 
 ### Returns an iterator over the set in ascending sorted order.
 ### :returns: The resulting `SortedSetEmittable[T]` value.
-@readonly
 routine SortedSet[T].iter() -> SortedSetEmittable[T]
     danger
         return SortedSetEmittable[T](set: me.hijack(), index: 0u64)
@@ -1129,7 +1107,6 @@ routine List[T](from: SortedSet[T]) -> List[T]
 ### The resulting list segment preserves the set's global ascending order.
 ### :param node: The subtree root to visit.
 ### :param result: The destination list for collected values.
-@readonly
 routine SortedSet[T].collect_inorder(node: Accessing[BTreeSetNode[T]], result: Controlling[List[T]])
     danger
         var i = 0u64
@@ -1160,7 +1137,6 @@ routine SortedSetEmittable[T].emit!() -> T
 # Comparison
 # ============================================================================
 
-@readonly
 @override
 routine SortedSet[T].represent() -> Text
     var result = me.type_name() + "({"
@@ -1175,7 +1151,6 @@ routine SortedSet[T].represent() -> Text
 
 ### Returns a diagnostic form that includes the runtime type name and element count.
 ### :returns: The resulting `Text` value.
-@readonly
 @override
 routine SortedSet[T].diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count_raw().represent() + ", {"
@@ -1192,7 +1167,6 @@ routine SortedSet[T].diagnose() -> Text
 ### Because duplicates are disallowed and elements are ordered, this is element-wise equality.
 ### :param you: The other set to compare against.
 ### :returns: `true` if both sets have equal count and all corresponding elements are equal.
-@readonly
 routine SortedSet[T].eq(you: Accessing[SortedSet[T]]) -> Bool
     if me.count != you.count
         return false
@@ -1205,7 +1179,6 @@ routine SortedSet[T].eq(you: Accessing[SortedSet[T]]) -> Bool
 
 ### Serializes this collection to a `SerialValue.List`, serializing each element.
 ### :returns: The `SerialValue.List` of each element's serialized form.
-@readonly
 @override
 routine SortedSet[T].serialize() -> SerialValue
     var __sv = List[SerialValue]()

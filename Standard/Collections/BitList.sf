@@ -104,7 +104,6 @@ routine BitList(capacity: Integer) -> BitList
 ### Resolves a logical bit index to the containing machine word.
 ### :param bit_index: The zero-based bit position.
 ### :returns: The zero-based `U64` word index containing that bit.
-@readonly
 secret routine BitList.word_index(bit_index: U64) -> U64
     # Get the word index for a given bit index
     return bit_index >> 6u32
@@ -112,7 +111,6 @@ secret routine BitList.word_index(bit_index: U64) -> U64
 ### Resolves a logical bit index to its offset inside a machine word.
 ### :param bit_index: The zero-based bit position.
 ### :returns: A value in the range `0..63` describing the bit offset inside the word.
-@readonly
 secret routine BitList.bit_offset(bit_index: U64) -> U8
     # Get the bit position within the word (0-63)
     return U8(bit_index & 63u64)
@@ -122,7 +120,6 @@ secret routine BitList.bit_offset(bit_index: U64) -> U8
 ### index against `count`.
 ### :param index: The zero-based bit position to read.
 ### :returns: The bit value stored at `index`.
-@readonly
 secret routine BitList.get_bit_internal(index: U64) -> Bool
     # Internal: get bit without bounds checking
     var word_idx = index >> 6u32
@@ -153,31 +150,26 @@ secret routine BitList.set_bit_internal(index: U64, value: Bool)
 # Core Operations
 # ============================================================================
 
-@readonly
 secret routine BitList.count_raw() -> U64
     # Get current number of bits
     return me.count
 
 ### Returns the number of logical bits currently stored in the list.
 ### :returns: The live bit count.
-@readonly
 routine BitList.count() -> Integer
     return Integer(from: me.count_raw())
 
-@readonly
 secret routine BitList.capacity_raw() -> U64
     # Get current capacity in bits
     return me.capacity
 
 ### Returns the number of bits that can be stored before the next growth step.
 ### :returns: The current bit capacity (in bits, not words).
-@readonly
 routine BitList.capacity() -> Integer
     return Integer(from: me.capacity_raw())
 
 ### Returns true if the list currently stores no logical bits.
 ### :returns: `true` when `count()` is zero.
-@readonly
 routine BitList.is_empty() -> Bool
     return me.count == 0u64
 
@@ -222,7 +214,6 @@ routine BitList.remove_last!() -> Bool
     me.count = me.count - 1u64
     return me.get_bit_internal(me.count)
 
-@reshaping
 secret routine BitList.reserve_raw(new_capacity: U64)
     # Ensure capacity is at least new_capacity (in bits)
     if new_capacity > me.capacity
@@ -246,7 +237,6 @@ secret routine BitList.reserve_raw(new_capacity: U64)
 
 ### Ensures that the packed storage can hold at least `new_capacity` logical bits.
 ### :param new_capacity: The minimum capacity to reserve.
-@reshaping
 routine BitList.reserve(new_capacity: Integer)
     me.reserve_raw(new_capacity: position_of(value: new_capacity))
     return
@@ -261,7 +251,6 @@ routine BitList.clear()
 # Indexing with Integral (forward index)
 # ============================================================================
 
-@readonly
 secret routine BitList.getitem_raw!(index: U64) -> Bool
     if index >= me.count
         throw IndexOutOfBoundsError(index: index, count: me.count)
@@ -271,7 +260,6 @@ secret routine BitList.getitem_raw!(index: U64) -> Bool
 ### :param index: The zero-based logical position to read.
 ### :returns: The resulting `Bool` value.
 ### :throws: May throw {IndexOutOfBoundsError}.
-@readonly
 routine BitList.getitem!(index: Integer) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
@@ -335,7 +323,6 @@ routine BitList.flip_all()
         i = i +% 1u64
     return
 
-@readonly
 secret routine BitList.count_ones_raw() -> U64
     # Count number of bits set to 1 (popcount)
     var count = 0u64
@@ -348,24 +335,20 @@ secret routine BitList.count_ones_raw() -> U64
 
 ### Counts how many stored bits are set to `true`.
 ### :returns: The number of one-bits in the logical sequence.
-@readonly
 routine BitList.count_ones() -> Integer
     return Integer(from: me.count_ones_raw())
 
-@readonly
 secret routine BitList.count_zeros_raw() -> U64
     # Count number of bits set to 0
     return me.count -% me.count_ones_raw()
 
 ### Counts how many stored bits are set to `false`.
 ### :returns: `count()` minus the number of one-bits.
-@readonly
 routine BitList.count_zeros() -> Integer
     return Integer(from: me.count_zeros_raw())
 
 ### Returns `true` when at least one stored bit is set.
 ### :returns: `true` if any bit is `true`; `false` if all bits are clear.
-@readonly
 routine BitList.any() -> Bool
     # Check if any bit is set to 1
     var i = 0u64
@@ -378,7 +361,6 @@ routine BitList.any() -> Bool
 ### Returns `true` when every stored bit is set.
 ### An empty list vacuously returns `true`.
 ### :returns: `true` if all bits are set; `false` if any bit is clear.
-@readonly
 routine BitList.all() -> Bool
     # Check if all bits are set to 1
     var i = 0u64
@@ -390,7 +372,6 @@ routine BitList.all() -> Bool
 
 ### Returns `true` when no stored bit is set.
 ### :returns: `true` if all bits are clear; `false` if any bit is set.
-@readonly
 routine BitList.none() -> Bool
     # Check if no bits are set to 1
     return not me.any()
@@ -404,7 +385,6 @@ routine BitList.none() -> Bool
 ### have no counterpart to intersect with.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose bits are `me.getitem_raw(index: i) and other.getitem_raw(index: i)`.
-@readonly
 routine BitList.bitand(other: Accessing[BitList]) -> BitList
     # Bitwise AND - returns new BitList with shorter length
     var min_count = if me.count < other.count then me.count else other.count
@@ -421,7 +401,6 @@ routine BitList.bitand(other: Accessing[BitList]) -> BitList
 ### Missing bits past the end of the shorter input are treated as `false`.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose length matches the longer input.
-@readonly
 routine BitList.bitor(other: Accessing[BitList]) -> BitList
     # Bitwise OR - returns new BitList with longer length
     var max_count = if me.count > other.count then me.count else other.count
@@ -439,7 +418,6 @@ routine BitList.bitor(other: Accessing[BitList]) -> BitList
 ### Missing bits past the end of the shorter input are treated as `false`.
 ### :param other: The bit list to combine with this one.
 ### :returns: A new `BitList` whose bits are set where exactly one input bit is set.
-@readonly
 routine BitList.bitxor(other: Accessing[BitList]) -> BitList
     # Bitwise XOR - returns new BitList with longer length
     var max_count = if me.count > other.count then me.count else other.count
@@ -456,7 +434,6 @@ routine BitList.bitxor(other: Accessing[BitList]) -> BitList
 
 ### Returns a new bit list with every stored bit inverted.
 ### :returns: A copy of this list with `true` and `false` swapped at each position.
-@readonly
 routine BitList.bitnot() -> BitList
     # Bitwise NOT - returns new BitList with flipped bits
     var result = BitList(me.count)
@@ -474,7 +451,6 @@ routine BitList.bitnot() -> BitList
 ### Returns an iterator over the logical bits stored in the list.
 ### Bits are yielded from index `0` to `count - 1`.
 ### :returns: The resulting `BitListEmittable` value.
-@readonly
 routine BitList.iter() -> BitListEmittable
     danger
         return BitListEmittable(data: me.data, count: me.count_raw(), index: 0u64)
@@ -502,7 +478,6 @@ routine BitListEmittable.emit!() -> Bool
 ### Returns the first stored bit without removing it.
 ### :returns: The bit at index `0`.
 ### :absent: Returns absent when the list is empty.
-@readonly
 routine BitList.first!() -> Bool
     # Get first bit (absent if empty)
     if me.is_empty()
@@ -512,7 +487,6 @@ routine BitList.first!() -> Bool
 ### Returns the last stored bit without removing it.
 ### :returns: The bit at index `count - 1`.
 ### :absent: Returns absent when the list is empty.
-@readonly
 routine BitList.last!() -> Bool
     # Get last bit (absent if empty)
     if me.is_empty()
@@ -521,7 +495,6 @@ routine BitList.last!() -> Bool
 
 ### Returns a copy with the value order reversed.
 ### :returns: The resulting `BitList` value.
-@readonly
 routine BitList.reverse() -> BitList
     # Return a reversed copy
     var result = BitList(me.count)
@@ -538,7 +511,6 @@ routine BitList.reverse() -> BitList
 ### Returns true if both bit lists have equal length and identical bit contents.
 ### :param other: The other bit list to compare against.
 ### :returns: `true` if both have the same count and all corresponding bits match.
-@readonly
 routine BitList.eq(other: Accessing[BitList]) -> Bool
     if me.count != other.count
         return false
@@ -557,7 +529,6 @@ routine BitList.eq(other: Accessing[BitList]) -> Bool
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U8` value.
 ### :absent: Returns absent when fewer than eight bits are stored.
-@readonly
 routine BitList.to_u8!() -> U8
     # Convert first 8 bits to U8 (absent if fewer than 8 bits)
     if me.count < 8u64
@@ -572,7 +543,6 @@ routine BitList.to_u8!() -> U8
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U16` value.
 ### :absent: Returns absent when fewer than sixteen bits are stored.
-@readonly
 routine BitList.to_u16!() -> U16
     # Convert first 16 bits to U16 (absent if fewer than 16 bits)
     if me.count < 16u64
@@ -587,7 +557,6 @@ routine BitList.to_u16!() -> U16
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U32` value.
 ### :absent: Returns absent when fewer than thirty-two bits are stored.
-@readonly
 routine BitList.to_u32!() -> U32
     # Convert first 32 bits to U32 (absent if fewer than 32 bits)
     if me.count < 32u64
@@ -602,7 +571,6 @@ routine BitList.to_u32!() -> U32
 ### Bit `0` becomes the least-significant output bit.
 ### :returns: The packed `U64` value.
 ### :absent: Returns absent when fewer than sixty-four bits are stored.
-@readonly
 routine BitList.to_u64!() -> U64
     # Convert first 64 bits to U64 (absent if fewer than 64 bits)
     if me.count < 64u64
@@ -651,7 +619,6 @@ common routine BitList.from_u32(value: U32) -> BitList
         i = i + 1u32
     return result
 
-@readonly
 @override
 routine BitList.represent() -> Text
     var result = me.type_name() + "(["
@@ -666,7 +633,6 @@ routine BitList.represent() -> Text
 
 ### Returns a diagnostic form that includes the bit count, one-bit count, and contents.
 ### :returns: The resulting `Text` value.
-@readonly
 @override
 routine BitList.diagnose() -> Text
     var result = me.full_type_name() + "(count: " + me.count_raw().represent() + ", ["

@@ -18,7 +18,6 @@ routine Integer!(text: Text, radix: Integer = 10) -> Integer
 ### Positive left shifts are equivalent to multiplication by powers of two.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
-@readonly
 routine Integer.shl(bits: Integer) -> Integer
     return me.shl(bits: S32(from: S64(from: bits)))
 
@@ -26,26 +25,22 @@ routine Integer.shl(bits: Integer) -> Integer
 ### two's-complement form (so `-5 >> 1` is `-3`). A negative count shifts left.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
-@readonly
 routine Integer.shr(bits: Integer) -> Integer
     return me.shr(bits: S32(from: S64(from: bits)))
 
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Integer` value.
-@readonly
 routine Integer.pow(exp: Integer) -> Integer
     return me.pow(exp: U32(from: U64(from: exp)))
 
 ### Returns the sign of this value as `-1`, `0`, or `1`.
 ### :returns: The resulting `Integer` value.
-@readonly
 routine Integer.signum() -> Integer
     return Integer(from: me.signum())
 
 ### Returns the number of bits in the magnitude of this value (0 for zero).
 ### :returns: The resulting `Integer` value.
-@readonly
 routine Integer.bit_length() -> Integer
     return Integer(from: me.bit_length())
 
@@ -53,7 +48,6 @@ routine Integer.bit_length() -> Integer
 ### letters up to base 36). An out-of-range radix renders an empty text.
 ### :param radix: The numeric base to use.
 ### :returns: The resulting `Text` value.
-@readonly
 routine Integer.represent_radix(radix: Integer) -> Text
     return me.represent_radix(radix: S32(from: S64(from: radix)))
 
@@ -61,7 +55,6 @@ routine Integer.represent_radix(radix: Integer) -> Text
 ### when negative. Crashes on any other radix (unlike `represent_radix`, which renders an empty text).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
-@readonly
 routine Integer.to_text(radix: Integer) -> Text
     return me.to_text(radix: S32(from: S64(from: radix)))
 
@@ -77,92 +70,74 @@ routine Real!(text: Text, radix: Integer = 10) -> Real
     return Real(text: text, radix: S32(from: S64(from: radix)))
 
 ### Square root to `precision` decimal digits.
-@readonly
 routine Real.sqrt(precision: Integer) -> Real
     return me.sqrt(precision: S32(from: S64(from: precision)))
 
 ### Natural exponential to `precision` decimal digits.
-@readonly
 routine Real.exp(precision: Integer) -> Real
     return me.exp(precision: S32(from: S64(from: precision)))
 
 ### Natural logarithm to `precision` decimal digits.
-@readonly
 routine Real.log(precision: Integer) -> Real
     return me.log(precision: S32(from: S64(from: precision)))
 
 ### Sine (radians) to `precision` decimal digits.
-@readonly
 routine Real.sin(precision: Integer) -> Real
     return me.sin(precision: S32(from: S64(from: precision)))
 
 ### Cosine (radians) to `precision` decimal digits.
-@readonly
 routine Real.cos(precision: Integer) -> Real
     return me.cos(precision: S32(from: S64(from: precision)))
 
 ### Tangent (radians) to `precision` decimal digits.
-@readonly
 routine Real.tan(precision: Integer) -> Real
     return me.tan(precision: S32(from: S64(from: precision)))
 
 ### Inverse sine (radians) to `precision` decimal digits.
-@readonly
 routine Real.asin(precision: Integer) -> Real
     return me.asin(precision: S32(from: S64(from: precision)))
 
 ### Inverse cosine (radians) to `precision` decimal digits.
-@readonly
 routine Real.acos(precision: Integer) -> Real
     return me.acos(precision: S32(from: S64(from: precision)))
 
 ### Inverse tangent (radians) to `precision` decimal digits.
-@readonly
 routine Real.atan(precision: Integer) -> Real
     return me.atan(precision: S32(from: S64(from: precision)))
 
 ### Hyperbolic sine to `precision` decimal digits.
-@readonly
 routine Real.sinh(precision: Integer) -> Real
     return me.sinh(precision: S32(from: S64(from: precision)))
 
 ### Hyperbolic cosine to `precision` decimal digits.
-@readonly
 routine Real.cosh(precision: Integer) -> Real
     return me.cosh(precision: S32(from: S64(from: precision)))
 
 ### Hyperbolic tangent to `precision` decimal digits.
-@readonly
 routine Real.tanh(precision: Integer) -> Real
     return me.tanh(precision: S32(from: S64(from: precision)))
 
 ### Inverse hyperbolic sine to `precision` decimal digits.
-@readonly
 routine Real.asinh(precision: Integer) -> Real
     return me.asinh(precision: S32(from: S64(from: precision)))
 
 ### Inverse hyperbolic cosine to `precision` decimal digits.
-@readonly
 routine Real.acosh(precision: Integer) -> Real
     return me.acosh(precision: S32(from: S64(from: precision)))
 
 ### Inverse hyperbolic tangent to `precision` decimal digits.
-@readonly
 routine Real.atanh(precision: Integer) -> Real
     return me.atanh(precision: S32(from: S64(from: precision)))
 
 ### Base-2 logarithm to `precision` decimal digits.
-@readonly
 routine Real.log2(precision: Integer) -> Real
     return me.log2(precision: S32(from: S64(from: precision)))
 
 ### Base-10 logarithm to `precision` decimal digits.
-@readonly
 routine Real.log10(precision: Integer) -> Real
     return me.log10(precision: S32(from: S64(from: precision)))
 
 ### Cube root to `precision` decimal digits.
-@readonly
 routine Real.cbrt(precision: Integer) -> Real
     return me.cbrt(precision: S32(from: S64(from: precision)))
 
@@ -179,7 +154,6 @@ common routine Real.pi(precision: Integer) -> Real
     return Real.pi(precision: S32(from: S64(from: precision)))
 
 ### Divides this value by `other`, rounding to `precision` decimal digits.
-@readonly
 routine Real.divide(you: Real, precision: Integer) -> Real
     return me.divide(you: you, precision: S32(from: S64(from: precision)))
 
@@ -188,7 +162,6 @@ routine Real.divide(you: Real, precision: Integer) -> Real
 ### :returns: The resulting `Real` value.
 ### :throws: {NumericDomainError} when the base is negative and the exponent is not an
 ###          integer — that power has no real result (it would be complex).
-@readonly
 routine Real.pow!(exp: Real) -> Real
     return me.pow(exp: exp)
 
@@ -197,7 +170,6 @@ routine Real.pow!(exp: Real) -> Real
 ### `fixed` round ties to even).
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine Real.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
@@ -207,140 +179,120 @@ routine Real.fixed(places: Integer) -> Text
 ### the resulting exact digit string — so the output is not perturbed by binary float artifacts.
 ### :param decimal_places: The number of fractional digits to render.
 ### :returns: The resulting `Text` value.
-@readonly
 routine Real.represent_with_places(decimal_places: Integer) -> Text
     return me.represent_with_places(decimal_places: S32(from: S64(from: decimal_places)))
 
 ### Returns the phase angle of this complex value in radians.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Real` value.
-@readonly
 routine Complex.arg(precision: Integer = 100) -> Real
     return me.arg(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal complex square root.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.sqrt(precision: Integer = 100) -> Complex
     return me.sqrt(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex exponential `e^z`.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.exp(precision: Integer = 100) -> Complex
     return me.exp(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal natural logarithm of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.log(precision: Integer = 100) -> Complex
     return me.log(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex sine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.sin(precision: Integer = 100) -> Complex
     return me.sin(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex cosine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.cos(precision: Integer = 100) -> Complex
     return me.cos(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex tangent of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.tan(precision: Integer = 100) -> Complex
     return me.tan(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse sine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.asin(precision: Integer = 100) -> Complex
     return me.asin(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse cosine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.acos(precision: Integer = 100) -> Complex
     return me.acos(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse tangent of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.atan(precision: Integer = 100) -> Complex
     return me.atan(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex hyperbolic sine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.sinh(precision: Integer = 100) -> Complex
     return me.sinh(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex hyperbolic cosine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.cosh(precision: Integer = 100) -> Complex
     return me.cosh(precision: S32(from: S64(from: precision)))
 
 ### Computes the complex hyperbolic tangent of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.tanh(precision: Integer = 100) -> Complex
     return me.tanh(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse hyperbolic sine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.asinh(precision: Integer = 100) -> Complex
     return me.asinh(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse hyperbolic cosine of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.acosh(precision: Integer = 100) -> Complex
     return me.acosh(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal inverse hyperbolic tangent of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.atanh(precision: Integer = 100) -> Complex
     return me.atanh(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal base-10 logarithm of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.log10(precision: Integer = 100) -> Complex
     return me.log10(precision: S32(from: S64(from: precision)))
 
 ### Computes the principal base-2 logarithm of this value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.log2(precision: Integer = 100) -> Complex
     return me.log2(precision: S32(from: S64(from: precision)))
 
 ### Returns the multiplicative inverse `1/me` (conjugate divided by the squared magnitude).
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.reciprocal(precision: Integer = 100) -> Complex
     return me.reciprocal(precision: S32(from: S64(from: precision)))
 
@@ -348,7 +300,6 @@ routine Complex.reciprocal(precision: Integer = 100) -> Complex
 ### `from_polar`.
 ### :param precision: The decimal precision to use for the angle.
 ### :returns: A tuple `(magnitude, argument)`.
-@readonly
 routine Complex.to_polar(precision: Integer = 100) -> (Real, Real)
     return me.to_polar(precision: S32(from: S64(from: precision)))
 
@@ -356,7 +307,6 @@ routine Complex.to_polar(precision: Integer = 100) -> (Real, Real)
 ### :param exp: The exponent value.
 ### :param precision: The decimal precision to use.
 ### :returns: The resulting `Complex` value.
-@readonly
 routine Complex.pow(exp: Complex, precision: Integer = 100) -> Complex
     return me.pow(exp: exp, precision: S32(from: S64(from: precision)))
 
@@ -364,20 +314,17 @@ routine Complex.pow(exp: Complex, precision: Integer = 100) -> Complex
 ### part (the same as `represent_with_places`; see `Real.fixed`).
 ### :param places: The number of digits after the point.
 ### :returns: The resulting `Text` value.
-@readonly
 routine Complex.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
 ### Formats this value as `a +/- bi` with the requested precision.
 ### :param decimal_places: The number of decimal places to render.
 ### :returns: The resulting `Text` value.
-@readonly
 routine Complex.represent_with_places(decimal_places: Integer) -> Text
     return me.represent_with_places(decimal_places: S32(from: S64(from: decimal_places)))
 
 ### Returns a diagnostic string with the requested precision.
 ### :param decimal_places: The number of decimal places to render.
 ### :returns: The resulting `Text` value.
-@readonly
 routine Complex.diagnose_with_places(decimal_places: Integer) -> Text
     return me.diagnose_with_places(decimal_places: S32(from: S64(from: decimal_places)))

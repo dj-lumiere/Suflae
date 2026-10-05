@@ -19,7 +19,6 @@ routine Decimal.powi(n: Integer) -> Decimal
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
-@readonly
 routine Decimal.fixed(places: Integer) -> Text
     return me.fixed(places: U64(from: places))
 
