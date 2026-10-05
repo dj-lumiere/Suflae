@@ -1,0 +1,25 @@
+module Core
+
+import Numerics
+
+### Raised when an element is added to a buffer that has no room left. A buffer's room is fixed when it is made:
+### grow it first, or use a `List`, which grows by itself.
+crashable BufferFullError
+    ### How many elements the buffer has room for.
+    capacity: Integer
+
+### Returns the message the crash shows.
+@override
+routine BufferFullError.crash_message() -> Text
+    return f"The buffer is full: it has room for {me.capacity} elements. Grow it first, or use a List"
+
+### Raised when elements are added to or removed from a view of part of a buffer. Only the whole buffer can do
+### that: a view shows a fixed window of positions.
+crashable BufferViewShapeError
+    ### What was tried.
+    operation: Text
+
+### Returns the message the crash shows.
+@override
+routine BufferViewShapeError.crash_message() -> Text
+    return f"'{me.operation}' cannot run on a view of part of a buffer: only the whole buffer adds or removes elements"

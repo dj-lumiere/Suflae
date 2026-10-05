@@ -1,4 +1,4 @@
-made: Buffer([7, 7, 7, 7, 7]) count=5 empty=false
+made: Buffer([7, 7, 7, 7, 7]) count=5 capacity=5 empty=false
 written: 1 9
 view: Buffer([20, 7, 7]) buffer: Buffer([1, 20, 7, 7, 9])
 kept view: Buffer([0, 40, 0])
@@ -8,4 +8,19 @@ texts: Buffer(["a", "bc", "a"])
 shared: 5 5
 out of range: true
 negative: true
+room: Buffer(["x", "y", "z"]) count=3 capacity=3 full=true
+add to full: true
+grown: Buffer(["x", "y", "z", "w"]) capacity=5
+removed: x w left Buffer(["y", "z"])
+truncated: Buffer(["y"])
+cleared: Buffer([]) empty=true
+add through a view: true
+sorted: 0 1 20 39
+sorted down: 39 0
+reversed and swapped: 39 0
+sorted texts: Buffer(["a", "c", "m"])
+read through a field: 1
+cycle alive: true
+collected: 4 alive: false
+released: true
 DONE

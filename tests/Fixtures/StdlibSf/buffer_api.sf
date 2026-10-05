@@ -1,21 +1,30 @@
 module Tests/StdlibSf/BufferApi
 
 import IO/Console
+import ObjectHacker
 
-# Suflae's Buffer: a run of elements fixed in length, whose ranges are views sharing the same storage.
+# Suflae's Buffer: room fixed when it is made, the front part holding elements, and ranges that are views sharing
+# the same memory.
 
 entity Counter
     hits: Integer
 
+entity Box
+    holder: Holder?
+    id: Integer
+
+entity Holder
+    kids: Buffer[Box]
+
 routine keep_view() -> Buffer[Integer]
     var whole = Buffer[Integer](count: 6, fill: 0)
     whole[4] = 40
-    # The view outlives the name `whole`: it keeps the storage alive.
+    # The view outlives the name `whole`: it keeps the memory alive.
     return whole[3 til 6]
 
 routine start()
     var buf = Buffer[Integer](count: 5, fill: 7)
-    show(f"made: {buf} count={buf.count()} empty={buf.is_empty()}")
+    show(f"made: {buf} count={buf.count()} capacity={buf.capacity()} empty={buf.is_empty()}")
 
     buf[0] = 1
     buf[4] = 9
@@ -47,5 +56,68 @@ routine start()
     show(f"out of range: {missing is None}")
     var negative = try buf[-1]
     show(f"negative: {negative is None}")
+
+    # Room and the filled front.
+    var room = Buffer[Text](capacity: 3)
+    room.add_last(value: "x")
+    room.add_last(value: "z")
+    room.insert(index: 1, value: "y")
+    show(f"room: {room} count={room.count()} capacity={room.capacity()} full={room.is_full()}")
+    var full = try room.add_last(value: "w")
+    show(f"add to full: {not full}")
+    room.grow(capacity: 5)
+    room.add_last(value: "w")
+    show(f"grown: {room} capacity={room.capacity()}")
+    show(f"removed: {room.remove_at(index: 0)} {room.remove_last()} left {room}")
+    room.truncate(count: 1)
+    show(f"truncated: {room}")
+    room.clear()
+    show(f"cleared: {room} empty={room.is_empty()}")
+
+    var view = buf[0 til 2]
+    var reshaped = try view.add_last(value: 1)
+    show(f"add through a view: {not reshaped}")
+
+    var nums = Buffer[Integer](capacity: 40)
+    var k = 0
+    while k < 40
+        nums.add_last(value: (k * 17) % 40)
+        k = k + 1
+    nums.sort()
+    show(f"sorted: {nums[0]} {nums[1]} {nums[20]} {nums[39]}")
+    nums.sort_by(compare: (a, b) => a > b)
+    show(f"sorted down: {nums[0]} {nums[39]}")
+    nums.reverse()
+    nums.swap(first: 0, second: 39)
+    show(f"reversed and swapped: {nums[0]} {nums[39]}")
+
+    var names = Buffer[Text](count: 1, fill: "m")
+    names.grow(capacity: 4)
+    names.add_last(value: "c")
+    names.add_last(value: "a")
+    names.sort()
+    show(f"sorted texts: {names}")
+
+    # Elements go away with the buffer, and a cycle through a buffer is reaped.
+    var box = Box(holder: none, id: 1)
+    var seen = watch(target: box)
+    var holder = Holder(kids: Buffer[Box](count: 2, fill: box))
+    show(f"read through a field: {holder.kids[1].id}")
+    holder.kids[0] = box
+    box.holder = holder
+    box = Box(holder: none, id: 0)
+    holder = Holder(kids: Buffer[Box](count: 1, fill: box))
+    show(f"cycle alive: {seen.is_alive()}")
+    show(f"collected: {cyclic_collect()} alive: {seen.is_alive()}")
+
+    var lone = Box(holder: none, id: 2)
+    var lone_seen = watch(target: lone)
+    var boxes = Buffer[Box](capacity: 2)
+    boxes.add_last(value: lone)
+    boxes.insert(index: 0, value: lone)
+    lone = Box(holder: none, id: 0)
+    discard boxes.remove_last()
+    boxes = Buffer[Box](capacity: 0)
+    show(f"released: {not lone_seen.is_alive()}")
     show("DONE")
     return

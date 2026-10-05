@@ -445,6 +445,15 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                     BinaryExpression { Operator: BinaryOperator.Assign, Left: var left } => IsOwnMemberVariable(expr: left),
                     CallExpression { Callee: MemberExpression { Object: IdentifierExpression { Name: "me" }, MemberName: var name } } =>
                         routine.OwnerType is { } owner && OwnRoutinesNamed(owner: owner, name: name).Any(predicate: ChangesShape),
+                    // A call on something `me` holds (`me.items.add_last(...)`, a list keeping its elements in a
+                    // buffer) changes this container's shape when it changes the shape of what it is called on.
+                    CallExpression { Callee: MemberExpression { Object: var held, MemberName: var heldName } } heldCall
+                        when IsHeldByMe(expr: held) =>
+                        heldCall.ResolvedRoutine is { } called
+                            ? ChangesShape(routine: called)
+                            : routine.OwnerType is { } holder &&
+                              HeldType(expr: held, owner: holder) is { } heldType &&
+                              OwnRoutinesNamed(owner: heldType, name: heldName).Any(predicate: ChangesShape),
                     _ => false
                 };
             });
@@ -456,6 +465,70 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     private static bool IsOwnMemberVariable(Expression expr)
     {
         return expr is MemberExpression { Object: IdentifierExpression { Name: "me" } };
+    }
+
+    /// <summary>
+    /// Whether <paramref name="expr"/> reaches something <c>me</c> holds, through member variables and calls
+    /// (<c>me.items</c>, <c>me.storage.control()</c>), but is not <c>me</c> itself.
+    /// </summary>
+    private static bool IsHeldByMe(Expression expr)
+    {
+        while (true)
+        {
+            switch (expr)
+            {
+                case MemberExpression { Object: IdentifierExpression { Name: "me" } }:
+                    return true;
+                case MemberExpression member:
+                    expr = member.Object;
+                    break;
+                case CallExpression { Callee: MemberExpression callee }:
+                    expr = callee.Object;
+                    break;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The type of something <c>me</c> holds, read from the declarations when the library body is not analyzed
+    /// yet: a member variable's declared type, a routine's return type, and the entity behind a handle's
+    /// <c>control()</c>/<c>access()</c>.
+    /// </summary>
+    private TypeSymbol? HeldType(Expression expr, TypeSymbol owner)
+    {
+        if (expr.ResolvedType is { } known)
+        {
+            return known;
+        }
+
+        switch (expr)
+        {
+            case IdentifierExpression { Name: "me" }:
+                return owner;
+            case MemberExpression member when HeldType(expr: member.Object, owner: owner) is { } holder:
+                List<MemberVariableInfo>? fields = holder switch
+                {
+                    EntityTypeSymbol entity => entity.MemberVariables,
+                    RecordTypeSymbol record => record.MemberVariables,
+                    _ => null
+                };
+                return fields?.FirstOrDefault(predicate: f => f.Name == member.MemberName)?.Type;
+            case CallExpression { Callee: MemberExpression callee }
+                when HeldType(expr: callee.Object, owner: owner) is { } receiver:
+                if (RuntimeContract.ViewVerbs.Contains(item: callee.MemberName) && IsRoamed(type: receiver) &&
+                    receiver.TypeArguments is [var inner])
+                {
+                    return inner;
+                }
+
+                return OwnRoutinesNamed(owner: receiver, name: callee.MemberName)
+                      .Select(selector: r => r.ReturnType)
+                      .FirstOrDefault(predicate: t => t is not null and not GenericParameterTypeSymbol);
+            default:
+                return null;
+        }
     }
 
     /// <summary>Every routine named <paramref name="name"/> on <paramref name="owner"/>.</summary>
