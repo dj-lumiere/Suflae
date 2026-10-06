@@ -1,0 +1,132 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The sending end of a channel. Clone it for multiple producers; the last one dropping (or an
+### explicit `close`) closes the channel.
+@rf("Sender")
+entity Sender[T]
+    pass
+
+### The single-consumer receiving end. Obeys `Iterable[T]`: `for x in hop` drains it until the
+### channel closes and the buffer empties. There is only ever one `Receiver` per channel (it is not
+### cloneable — use a `SharedReceiver` for multiple consumers).
+@rf("Receiver")
+entity Receiver[T]
+relates ChannelDrain[T] as Iter
+obeys Iterable[T]
+    pass
+
+### A multi-consumer receiving handle. Clone one per consumer for a worker pool; any free worker
+### takes the next item. Obeys `Iterable[T]` like `Receiver`.
+@rf("SharedReceiver")
+entity SharedReceiver[T]
+relates ChannelDrain[T] as Iter
+obeys Iterable[T]
+    pass
+
+### The iterator a receiving end hands to a `for` loop. It references the channel without owning it (the
+### owning `Receiver`/`SharedReceiver` holds the consumer reference); `emit!` receives one item, parking
+### while the buffer is empty, and returns `absent` once the channel is closed and drained — ending the loop.
+@rf("ChannelDrain")
+entity ChannelDrain[T]
+obeys Emittable[T]
+    pass
+
+### Creates a single-consumer channel and returns its `(Sender, Receiver)` pair. `capacity` is the
+### buffered depth: 0 = rendezvous (send waits for a taker), N = a bounded buffer (send blocks when
+### full = backpressure). Clone the `Sender` for multiple producers (fan-in).
+### :param capacity: The buffer depth (0 = rendezvous).
+### :returns: A `(Sender[T], Receiver[T])` tuple sharing one channel.
+@rf("make_channel")
+routine make_channel[T](capacity: U64) -> (Sender[T], Receiver[T])
+
+### Creates a multi-consumer channel and returns its `(Sender, SharedReceiver)` pair. Clone the
+### `SharedReceiver` (one per consumer) for a worker pool — any free worker takes the next item (consumer
+### fan-out, not broadcast). `capacity` as in `make_channel`.
+### :param capacity: The buffer depth (0 = rendezvous).
+### :returns: A `(Sender[T], SharedReceiver[T])` tuple sharing one channel.
+@rf("make_shared_channel")
+routine make_shared_channel[T](capacity: U64) -> (Sender[T], SharedReceiver[T])
+
+### Sends one item, moving its ownership into the channel. Blocks/parks while the buffer is full
+### (backpressure); for a rendezvous channel waits until a consumer takes it. FAILABLE: throws
+### {ChannelClosedError} if the channel is already closed or has no consumers left.
+### :param item: The value to send (ownership transfers in).
+@rf("Sender.send")
+routine Sender[T].send!(item: T)
+
+### Produces another sending handle on the same channel (fan-in: more producers).
+### :returns: A new `Sender[T]` on the same channel.
+@rf("Sender.duplicate")
+routine Sender[T].duplicate() -> Sender[T]
+
+### Closes the channel early (dropping the last Sender also closes it). Receivers drain the buffer
+### then finish. Not dangerous — closing is the normal end-of-stream signal; double-close is a no-op.
+@rf("Sender.close")
+routine Sender[T].close()
+
+### Whether the channel has been closed (a subsequent `send!` would throw). Racy: another agent could
+### close it the instant after you check, so prefer handling `send!`'s failure to gating on this.
+### :returns: `true` if the channel is closed.
+@rf("Sender.is_closed")
+routine Sender[T].is_closed() -> Bool
+
+### Returns an iterator that draws items from the channel (receive == iterate).
+### :returns: A `ChannelDrain[T]` over this channel.
+@rf("Receiver.iter")
+routine Receiver[T].iter() -> ChannelDrain[T]
+
+### The number of buffered items right now. A racy snapshot for diagnostics/heuristics — never a
+### synchronization decision (it can change the instant after you read it).
+### :returns: The current buffered item count.
+@rf("Receiver.count")
+routine Receiver[T].count() -> U64
+
+### Whether the buffer is currently empty. Racy snapshot (see `count`).
+### :returns: `true` if no items are buffered.
+@rf("Receiver.is_empty")
+routine Receiver[T].is_empty() -> Bool
+
+### Whether the channel has been closed (it may still hold buffered items to drain).
+### :returns: `true` if closed.
+@rf("Receiver.is_closed")
+routine Receiver[T].is_closed() -> Bool
+
+### The buffered capacity this channel was created with (0 = rendezvous).
+### :returns: The buffer capacity.
+@rf("Receiver.capacity")
+routine Receiver[T].capacity() -> U64
+
+### Produces another consumer handle on the same channel (one more line worker).
+### :returns: A new `SharedReceiver[T]` on the same channel.
+@rf("SharedReceiver.duplicate")
+routine SharedReceiver[T].duplicate() -> SharedReceiver[T]
+
+### Returns an iterator that draws items from the channel (receive == iterate).
+### :returns: A `ChannelDrain[T]` over this channel.
+@rf("SharedReceiver.iter")
+routine SharedReceiver[T].iter() -> ChannelDrain[T]
+
+### The number of buffered items right now (racy snapshot — diagnostics only, not synchronization).
+### :returns: The current buffered item count.
+@rf("SharedReceiver.count")
+routine SharedReceiver[T].count() -> U64
+
+### Whether the buffer is currently empty (racy snapshot). :returns: `true` if no items are buffered.
+@rf("SharedReceiver.is_empty")
+routine SharedReceiver[T].is_empty() -> Bool
+
+### Whether the channel has been closed (may still hold buffered items). :returns: `true` if closed.
+@rf("SharedReceiver.is_closed")
+routine SharedReceiver[T].is_closed() -> Bool
+
+### The buffered capacity this channel was created with (0 = rendezvous). :returns: The capacity.
+@rf("SharedReceiver.capacity")
+routine SharedReceiver[T].capacity() -> U64
+
+### Receives the next item, or `absent` when the channel is closed and the buffer is empty.
+### :returns: The next value, or `absent` at end-of-stream.
+@rf("ChannelDrain.emit")
+routine ChannelDrain[T].emit!() -> T

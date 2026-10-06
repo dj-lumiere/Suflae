@@ -1,0 +1,7 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+@rf("b64_pow2")
+routine b64_pow2(k: S64) -> B64

@@ -1,0 +1,74 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields elements present in both this iterable and another.
+### The second iterable is fully materialized into a set when iteration begins.
+### :typeparam T: The element type of both source sequences.
+### :typeparam TSource: The concrete primary source iterable type (borrowed).
+### :typeparam TOther: The concrete membership-test iterable type (borrowed).
+@rf("IntersectIterable")
+entity IntersectIterable[T, TSource, TOther]
+relates IntersectEmittable[T, TSource/Iter] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+needs TOther obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence and keeps only elements that appear in the membership set.
+### :typeparam T: The element type of the filtered sequence.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("IntersectEmittable")
+entity IntersectEmittable[T, TSourceIter]
+obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Represents a lazy adapter that suppresses elements present in another iterable.
+### The exclusion iterable is fully materialized into a set when iteration begins.
+### :typeparam T: The element type of both source sequences.
+### :typeparam TSource: The concrete primary source iterable type (borrowed).
+### :typeparam TOther: The concrete exclusion iterable type (borrowed).
+@rf("ExcludeIterable")
+entity ExcludeIterable[T, TSource, TOther]
+relates ExcludeEmittable[T, TSource/Iter] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+needs TOther obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence and suppresses elements found in the exclusion set.
+### :typeparam T: The element type of the filtered sequence.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("ExcludeEmittable")
+entity ExcludeEmittable[T, TSourceIter]
+obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Materializes `other` into a set and returns an iterator that filters `source` against it.
+### :returns: The resulting `IntersectEmittable[T, TSource/Iter]` value.
+@rf("IntersectIterable.iter")
+routine IntersectIterable[T, TSource, TOther].iter() -> IntersectEmittable[T, TSource/Iter]
+needs T obeys Hashable, Comparable
+
+### Returns the next source element that is also present in the membership set.
+### Source elements not found in the set are consumed and discarded.
+### :returns: The resulting `T` value.
+@rf("IntersectEmittable.emit")
+routine IntersectEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+needs T obeys Hashable, Comparable
+
+### Materializes `other` into a set and returns an iterator that removes matching elements.
+### :returns: The resulting `ExcludeEmittable[T, TSource/Iter]` value.
+@rf("ExcludeIterable.iter")
+routine ExcludeIterable[T, TSource, TOther].iter() -> ExcludeEmittable[T, TSource/Iter]
+needs T obeys Hashable, Comparable
+
+### Returns the next source element that is not present in the exclusion set.
+### Source elements found in the set are consumed and discarded.
+### :returns: The resulting `T` value.
+@rf("ExcludeEmittable.emit")
+routine ExcludeEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+needs T obeys Hashable, Comparable

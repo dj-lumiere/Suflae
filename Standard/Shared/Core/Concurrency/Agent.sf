@@ -1,0 +1,39 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Which substrate runs an `Agent[T]`. One concrete handle backs both so a heterogeneous set can be
+### raced from a single `List[Agent[T]]`.
+@rf("AgentKind")
+choice AgentKind
+    ### Backed by a stackful coroutine on this thread's implicit scheduler (a `suspended routine`).
+    CORO
+    ### Backed by an OS worker thread (a `threaded routine`).
+    THREAD
+
+### Waits for `duration` to elapse. UNCOLORED: inside a scheduler-driven coroutine it PARKS — the
+### scheduler runs other coroutines meanwhile and resumes this one when the timer fires — so it
+### costs no thread; on a plain thread it sleeps the thread. The same `waitfor(5s)` does the right
+### thing in either context, which is why it is preferable to a raw `sleep`.
+### :param duration: How long to wait.
+@rf("waitfor")
+routine waitfor(duration: Duration)
+
+### Cooperatively hands the current turn back to the scheduler, then immediately re-queues this
+### coroutine as READY — the scheduler runs the other ready coroutines once before resuming here on
+### the next tick. Unlike `waitfor`, it waits for NOTHING: it gives up the turn but stays runnable, so
+### resumption is unconditional (no timer, no event). Use it to interleave a long yield-free stretch
+### of CPU work with siblings; prefer `waitfor` or a channel op when there is an actual event to await.
+### UNCOLORED: outside a scheduler-driven coroutine (a plain thread) there is no turn to yield, so it
+### is a no-op.
+@rf("yield_now")
+routine yield_now()
+
+### Whether cooperative cancellation has been requested for the currently-running agent — a
+### `suspended` coroutine or a `threaded` worker. An agent body polls this and returns early to stop
+### cooperatively; this is the ONLY way to halt a CPU-bound worker thread (a thread cannot be killed).
+### A coroutine's `waitfor` also honors the request by returning early. Outside any agent it is always
+### false. :returns: true if cancellation was requested for this agent.
+@rf("cancellation_requested")
+routine cancellation_requested() -> Bool

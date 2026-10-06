@@ -1,0 +1,27 @@
+module ObjectHacker
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### What `watch(target:)` gives back: a way to ask whether an object is still there without keeping it alive.
+### Holding a `Watching` does not stop the object from being freed, and asking stays safe after it is gone.
+### :typeparam T: The type of the watched object.
+@rf("Watching")
+record Watching[T]
+    pass
+
+### Whether the watched object is still alive.
+### :returns: `true` until the object has been freed.
+@rf("Watching.is_alive")
+routine Watching[T].is_alive() -> Bool
+
+### Whether the watched object has been freed.
+### :returns: `true` once the object is gone.
+@rf("Watching.is_destroyed")
+routine Watching[T].is_destroyed() -> Bool
+
+### Frees, right now, the objects that are only kept alive by each other (two objects that hold each other and
+### nothing else holds).
+### :returns: How many objects were freed.
+@rf("cyclic_collect")
+routine cyclic_collect() -> U64

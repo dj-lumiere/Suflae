@@ -1,0 +1,29 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents one frame in a captured runtime routine trace.
+### The stored ids point into builder-generated lookup tables used for stack reporting.
+### This record is intentionally compact because traces are kept inline in runtime error state.
+@rf("RoutineRecord")
+record RoutineRecord
+    ### Stores the source file identifier.
+    file_id: U32
+    ### Stores the routine identifier.
+    routine_id: U32
+    ### Stores the module identifier.
+    module_id: U32
+    ### Stores the owning type identifier when applicable.
+    type_id: U64
+    ### Stores the one-based source line number.
+    line_no: U32
+    ### Stores the one-based source column number.
+    column_no: U32
+
+### Returns a SipHash-2-4 keyed hash of this routine record.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("RoutineRecord.hash")
+routine RoutineRecord.hash(k0: U64, k1: U64) -> U64

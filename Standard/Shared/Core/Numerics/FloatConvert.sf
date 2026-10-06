@@ -1,0 +1,144 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Returns 10^k as an Integer. `k` must be non-negative.
+@rf("pow10_int")
+routine pow10_int(k: S64) -> Integer
+
+### Returns round-half-to-even of n/d for non-negative n and positive d.
+@rf("div_round_half_even")
+routine div_round_half_even(n: Integer, d: Integer) -> Integer
+
+### True when num/den >= 2^k (k may be negative), an exact big-integer test.
+@rf("ratio_ge_pow2")
+routine ratio_ge_pow2(num: Integer, den: Integer, k: S64) -> Bool
+
+### Builds `n` copies of '0' as Text.
+@rf("zeros_text")
+routine zeros_text(n: U64) -> Text
+
+### Lays out the significant digits with C `%g` rules. `digits` is the sig-digit
+### string, `E` the exponent of the leading digit (value ≈ d0.d1… × 10^E).
+@rf("assemble_decimal")
+routine assemble_decimal(neg: Bool, digits: Text, ee: S64, sig: U64) -> Text
+
+### Renders a B64 to `sig` significant digits with `%g` layout. B16/B32 widen to
+### B64 EXACTLY before calling here, so this single core serves all three.
+### Specials: "NaN" / "inf" / "-inf"; zero renders as "0" / "-0".
+@rf("format_binary")
+routine format_binary(value: B64, sig: U64) -> Text
+
+### Renders the shortest decimal that reads back as the same float, in `%g` layout: scientific when
+### the leading digit's exponent is below -4 or at least `sci_from`, otherwise positional.
+### :param neg: Whether the sign bit is set.
+### :param m: The full significand (zero for a zero value).
+### :param e2: The binary exponent of the significand's last bit.
+### :param lower_closer: Whether the float below is half as far away as the float above.
+### :param sci_from: The leading-digit exponent from which scientific form is used.
+### :returns: The rendered `Text` ("0" / "-0" for zero).
+@rf("format_shortest")
+routine format_shortest(neg: Bool, m: Integer, e2: S64, lower_closer: Bool, sci_from: U64) -> Text
+
+### floor(q * log10(2)) for |q| <= 5456721.
+@rf("schubfach_flog10pow2")
+routine schubfach_flog10pow2(q: S64) -> S64
+
+### floor(q * log10(2) + log10(3/4)) for |q| <= 5456721.
+@rf("schubfach_flog10_three_quarters_pow2")
+routine schubfach_flog10_three_quarters_pow2(q: S64) -> S64
+
+### floor(e * log2(10)) for |e| <= 6432162.
+@rf("schubfach_flog2pow10")
+routine schubfach_flog2pow10(e: S64) -> S64
+
+### (g1 * 2^63 + g0) * cp / 2^127 rounded to odd: the integer part, with its lowest bit set when a
+### fraction was dropped.
+@rf("schubfach_rop")
+routine schubfach_rop(g1: U64, g0: U64, cp: U64) -> U64
+
+### The shortest decimal f * 10^e inside the rounding interval of the positive value c * 2^q (the closest
+### to the value among the shortest, ties to even), for a format whose normal significands start at c_min
+### and whose smallest exponent is q_min. An interval end counts as inside when c is even.
+@rf("schubfach_decimal")
+routine schubfach_decimal(q: S64, c: U64, c_min: U64, q_min: S64) -> (U64, S64)
+
+### The decimal f * 10^e (f > 0, below 10^38) in `%g` layout (as assemble_decimal lays it out) with scientific form
+### from a leading-digit exponent of sci_from, written straight into one character buffer. A nonempty wrap
+### (a type name) is written around it as `wrap(...)`, the diagnose form.
+@rf("shortest_decimal_text")
+routine shortest_decimal_text(neg: Bool, f: U128, e: S64, sci_from: U64, wrap: Text) -> Text
+
+### Renders the raw bits of a B16/B32/B64 as the shortest decimal that reads back as the same value.
+### The shortest digits depend on the SOURCE format's spacing, so the bits are decoded in that format
+### (never widened first).
+### :param raw: The IEEE 754 bit pattern in the low bits.
+### :param fmt: 0 = B64, 1 = B32, 2 = B16.
+### :returns: The rendered `Text`. Specials: "NaN" / "inf" / "-inf".
+@rf("format_binary_shortest")
+routine format_binary_shortest(raw: U64, fmt: S32) -> Text
+
+### format_binary_shortest written as `wrap(...)` when wrap is nonempty (a type name, for diagnose).
+@rf("format_binary_shortest_wrapped")
+routine format_binary_shortest_wrapped(raw: U64, fmt: S32, wrap: Text) -> Text
+
+### Renders a B128 as the shortest decimal that reads back as the same value (scientific from a
+### leading-digit exponent of 34, FLT128_DIG + 1). Specials: "NaN" / "inf" / "-inf".
+### :param value: The value to render.
+### :returns: The rendered `Text`.
+@rf("format_b128_shortest")
+routine format_b128_shortest(value: B128) -> Text
+
+### Renders `scaled` (the value times 10^places, already an integer) with `places` digits after the
+### point and a leading `-` when `neg`.
+@rf("fixed_from_scaled")
+routine fixed_from_scaled(neg: Bool, scaled: Integer, places: U64) -> Text
+
+### The exact non-negative value `num / den` rendered with `places` digits after the point, rounded
+### half to even.
+@rf("fixed_from_ratio")
+routine fixed_from_ratio(neg: Bool, num: Integer, den: Integer, places: U64) -> Text
+
+### The exact value m · 2^e2 (m non-negative) with `places` digits after the point.
+@rf("fixed_from_binary")
+routine fixed_from_binary(neg: Bool, m: Integer, e2: S64, places: U64) -> Text
+
+### Renders a B64 with exactly `places` digits after the point (B16/B32 widen to B64 exactly first).
+### Specials: "NaN" / "inf" / "-inf".
+@rf("format_binary_fixed")
+routine format_binary_fixed(value: B64, places: U64) -> Text
+
+### Renders the raw bits of a B128 with exactly `places` digits after the point.
+@rf("format_b128_fixed")
+routine format_b128_fixed(value: B128, places: U64) -> Text
+
+### Rounds the positive rational num_in/den_in to the nearest binary float of the
+### given format (ties to even) and returns the full IEEE 754 bit pattern in the low
+### bits of a `U64` (the caller truncates for B32/B16). Every `Integer` stays a local
+### here — no aggregate carries a managed value across the routine boundary.
+### `fmt` selects the format's field widths: 0 = B64, 1 = B32, 2 = B16.
+@rf("round_and_pack")
+routine round_and_pack(neg: Bool, num_in: Integer, den_in: Integer, fmt: S32) -> U64
+
+### Rounds significand × 10^dec_exp to the nearest B64.
+@rf("b64_from_ratio")
+routine b64_from_ratio(neg: Bool, digits: Text, dec_exp: S64) -> B64
+
+### Rounds significand × 10^dec_exp to the nearest B32 (single rounding).
+@rf("b32_from_ratio")
+routine b32_from_ratio(neg: Bool, digits: Text, dec_exp: S64) -> B32
+
+### Rounds significand × 10^dec_exp to the nearest B16 (single rounding).
+@rf("b16_from_ratio")
+routine b16_from_ratio(neg: Bool, digits: Text, dec_exp: S64) -> B16
+
+### Rounds significand × 10^dec_exp to the nearest BF16 (single rounding, ties to even).
+@rf("bf16_from_ratio")
+routine bf16_from_ratio(neg: Bool, digits: Text, dec_exp: S64) -> BF16
+
+### Rounds significand × 10^dec_exp to the nearest B128 (single rounding, ties to even) and packs
+### the IEEE 754 binary128 bit pattern: 113 significand bits, normal exponents -16382..16383,
+### subnormals down to 2^-16494, overflow to infinity.
+@rf("b128_from_ratio")
+routine b128_from_ratio(neg: Bool, digits: Text, dec_exp: S64) -> B128

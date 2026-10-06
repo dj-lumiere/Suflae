@@ -1,0 +1,156 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents one Unicode scalar value.
+### `Character` stores a code point-sized payload and models text characters
+### rather than arbitrary binary bytes.
+@rf("Character")
+record Character
+obeys Comparable, Copyable
+    pass
+
+### Returns the same character value.
+### This overload exists so generic creator-based code can normalize on the
+### standard construction surface.
+### :param from: The source value to convert.
+### :returns: The resulting `Character` value.
+@rf("Character")
+routine Character(from: Character) -> Character
+
+### Reinterprets a Unicode code point value as `Character`.
+### :param from: The source value to convert.
+### :returns: The resulting `Character` value.
+@rf("Character")
+routine Character(from: U32) -> Character
+
+### Returns `true` when this value is a valid Unicode scalar value.
+### Surrogate code points are treated as invalid standalone characters.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_valid")
+routine Character.is_valid() -> Bool
+
+### Returns `true` when this character is in the ASCII subset.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_ascii")
+routine Character.is_ascii() -> Bool
+
+### Returns `true` when this character falls in the supported alphabetic ranges.
+### This implementation currently focuses on ASCII and common Latin blocks.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_alphabetic")
+routine Character.is_alphabetic() -> Bool
+
+### Returns `true` when this character is an ASCII decimal digit.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_numeric")
+routine Character.is_numeric() -> Bool
+
+### Returns `true` when this character is alphabetic or numeric.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_alphanumeric")
+routine Character.is_alphanumeric() -> Bool
+
+### Returns `true` when this character is an ASCII uppercase letter.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_uppercase")
+routine Character.is_uppercase() -> Bool
+
+### Returns `true` when this character is an ASCII lowercase letter.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_lowercase")
+routine Character.is_lowercase() -> Bool
+
+### Returns `true` when this character is one of the supported whitespace code
+### points.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_whitespace")
+routine Character.is_whitespace() -> Bool
+
+### Returns `true` when this character is an ASCII or Latin-1 control code.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_control")
+routine Character.is_control() -> Bool
+
+### Converts this value to uppercase when the implementation has a matching
+### uppercase form.
+### :returns: The resulting `Character` value.
+@rf("Character.to_uppercase")
+routine Character.to_uppercase() -> Character
+
+### Converts this value to lowercase when the implementation has a matching
+### lowercase form.
+### :returns: The resulting `Character` value.
+@rf("Character.to_lowercase")
+routine Character.to_lowercase() -> Character
+
+### Returns whether both values are equal.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("Character.eq")
+routine Character.eq(you: Character) -> Bool
+
+### Compares this value with the other value.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("Character.cmp")
+routine Character.cmp(you: Character) -> ComparisonSign
+
+### Converts this value to byte.
+### This is only meaningful for characters in the ASCII range and currently
+### truncates to the low 7 bits.
+### :returns: The resulting `Byte` value.
+@rf("Character.to_byte")
+routine Character.to_byte() -> Byte
+
+### Returns the display form of this character.
+### The display form emits the character itself rather than its numeric code.
+### :returns: The resulting `Text` value.
+@rf("Character.represent")
+routine Character.represent() -> Text
+
+### Returns the diagnostic form of this character.
+### The diagnostic form includes both the printable character and its numeric
+### code point.
+### :returns: The resulting `Text` value.
+@rf("Character.diagnose")
+routine Character.diagnose() -> Text
+
+### Returns `true` when this character is a decimal digit.
+### This is an alias for `is_numeric`.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_digit")
+routine Character.is_digit() -> Bool
+
+### Returns `true` when this character is valid and not a control code.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_printable")
+routine Character.is_printable() -> Bool
+
+### Returns `true` when this character is in the Basic Multilingual Plane.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_bmp")
+routine Character.is_bmp() -> Bool
+
+### Returns `true` when this character is in one of the Unicode supplementary
+### planes.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_supplementary")
+routine Character.is_supplementary() -> Bool
+
+### Returns `true` when this character falls in the supported CJK ranges.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_cjk")
+routine Character.is_cjk() -> Bool
+
+### Returns `true` when this character falls in the supported Latin ranges.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_latin")
+routine Character.is_latin() -> Bool
+
+### Returns `true` when this character falls in one of the supported emoji
+### blocks.
+### :returns: The resulting `Bool` value.
+@rf("Character.is_emoji")
+routine Character.is_emoji() -> Bool

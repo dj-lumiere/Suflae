@@ -1,0 +1,19 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a numeric operation has no real-number
+### result — an undefined or out-of-domain operation such as `0/0`, the logarithm
+### of a non-positive value, `acos` of an argument outside `[-1, 1]`, or the square
+### root of a negative value. Distinct from {NumericOverflowError} (the true result
+### is finite but too large) and {DivisionByZeroError} (a nonzero value over zero).
+@rf("NumericDomainError")
+crashable NumericDomainError
+    ### Stores a preformatted description of the domain error.
+    description: Text
+
+### Returns the stored numeric domain-error message.
+### :returns: The resulting `Text` value.
+@rf("NumericDomainError.crash_message")
+routine NumericDomainError.crash_message() -> Text

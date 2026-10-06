@@ -1,0 +1,246 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a span of time with nanosecond precision.
+### `Duration` is the standard temporal offset type used for time arithmetic, scheduling, and rate control.
+### Internally it stores whole seconds plus a normalized sub-second nanosecond component.
+### :see: {Moment}, {LocalMoment}, {Temporal-Types}
+@rf("Duration")
+record Duration
+obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, ScalarFloorDivisible
+    pass
+
+### Normalizes raw second and nanosecond parts into canonical `Duration` storage.
+### The result always has nanoseconds in the range `[0, 1_000_000_000)`.
+### :param seconds: The whole-second component.
+### :param nanoseconds: The nanosecond component within the current second.
+### :returns: The resulting `Duration` value.
+@rf("normalize_duration")
+routine normalize_duration(seconds: S64, nanoseconds: S64) -> Duration
+
+### Returns the zero duration.
+### :returns: The resulting `Duration` value.
+@rf("Duration.zero")
+common routine Duration.zero() -> Duration
+
+### Creates a value from nanoseconds.
+### :param ns: The duration in nanoseconds.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_nanoseconds")
+common routine Duration.from_nanoseconds(ns: S64) -> Duration
+
+### Creates a value from microseconds.
+### :param us: The duration in microseconds.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_microseconds")
+common routine Duration.from_microseconds(us: S64) -> Duration
+
+### Creates a value from milliseconds.
+### :param ms: The duration in milliseconds.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_milliseconds")
+common routine Duration.from_milliseconds(ms: S64) -> Duration
+
+### Creates a value from seconds.
+### :param s: The duration in seconds.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_seconds")
+common routine Duration.from_seconds(s: S64) -> Duration
+
+### Creates a value from minutes.
+### :param m: The duration in minutes.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_minutes")
+common routine Duration.from_minutes(m: S64) -> Duration
+
+### Creates a value from hours.
+### :param h: The duration in hours.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_hours")
+common routine Duration.from_hours(h: S64) -> Duration
+
+### Creates a value from days.
+### :param d: The duration in days.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_days")
+common routine Duration.from_days(d: S64) -> Duration
+
+### Creates a value from weeks.
+### :param w: The duration in weeks.
+### :returns: The resulting `Duration` value.
+@rf("Duration.from_weeks")
+common routine Duration.from_weeks(w: S64) -> Duration
+
+### Returns the total duration in nanoseconds.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_nanoseconds")
+routine Duration.total_nanoseconds() -> S64
+
+### Returns the total duration in microseconds.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_microseconds")
+routine Duration.total_microseconds() -> S64
+
+### Returns the total duration in milliseconds.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_milliseconds")
+routine Duration.total_milliseconds() -> S64
+
+### Returns the total duration in seconds.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_seconds")
+routine Duration.total_seconds() -> S64
+
+### Returns the total duration in minutes.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_minutes")
+routine Duration.total_minutes() -> S64
+
+### Returns the total duration in hours.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_hours")
+routine Duration.total_hours() -> S64
+
+### Returns the total duration in days.
+### :returns: The resulting `S64` value.
+@rf("Duration.total_days")
+routine Duration.total_days() -> S64
+
+### Returns the days component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_days")
+routine Duration.get_days() -> S64
+
+### Returns the hours component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_hours")
+routine Duration.get_hours() -> S64
+
+### Returns the minutes component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_minutes")
+routine Duration.get_minutes() -> S64
+
+### Returns the seconds component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_seconds")
+routine Duration.get_seconds() -> S64
+
+### Returns the milliseconds component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_milliseconds")
+routine Duration.get_milliseconds() -> S64
+
+### Returns the microseconds component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_microseconds")
+routine Duration.get_microseconds() -> S64
+
+### Returns the nanoseconds component.
+### :returns: The resulting `S64` value.
+@rf("Duration.get_nanoseconds")
+routine Duration.get_nanoseconds() -> S64
+
+### Returns the nanosecond remainder within the current second.
+### :returns: The resulting `U32` value.
+@rf("Duration.subsec_nanoseconds")
+routine Duration.subsec_nanoseconds() -> U32
+
+### Returns true if this value is zero.
+### :returns: The resulting `Bool` value.
+@rf("Duration.is_zero")
+routine Duration.is_zero() -> Bool
+
+### Returns true if this value is negative.
+### :returns: The resulting `Bool` value.
+@rf("Duration.is_negative")
+routine Duration.is_negative() -> Bool
+
+### Returns the absolute value.
+### :returns: The resulting `Duration` value.
+@rf("Duration.int_abs")
+routine Duration.int_abs() -> Duration
+
+### Returns `me + you`, adding the two durations and normalizing nanoseconds.
+### :param you: The addend.
+### :returns: The combined `Duration`.
+@rf("Duration.add")
+routine Duration.add(you: Duration) -> Duration
+
+### Returns `me - you`, subtracting `you` from this duration and normalizing.
+### :param you: The duration to subtract.
+### :returns: The resulting `Duration`.
+@rf("Duration.sub")
+routine Duration.sub(you: Duration) -> Duration
+
+### Returns the negated value.
+### :returns: The resulting `Duration` value.
+@rf("Duration.neg")
+routine Duration.neg() -> Duration
+
+### Returns this value scaled by `factor`.
+### :param factor: The scale factor to apply.
+### :returns: The resulting `Duration` value.
+@rf("Duration.scale")
+routine Duration.scale(factor: S64) -> Duration
+
+### Returns the product of this value and the other value.
+### :param factor: The scale factor to apply.
+### :returns: The resulting `Duration` value.
+@rf("Duration.mul")
+routine Duration.mul(factor: S64) -> Duration
+
+### Returns how many times `you` fits into this duration (floor division).
+### :param you: The divisor duration.
+### :returns: The integer quotient as `S64`.
+@rf("Duration.floordiv")
+routine Duration.floordiv(you: Duration) -> S64
+
+### Returns the duration remainder after floor-dividing by `you`.
+### :param you: The divisor duration.
+### :returns: The remaining `Duration`.
+@rf("Duration.mod")
+routine Duration.mod(you: Duration) -> Duration
+
+### Returns this duration divided by `divisor`.
+### :param divisor: The divisor to apply.
+### :returns: The resulting `Duration` value.
+@rf("Duration.div_by")
+routine Duration.div_by(divisor: S64) -> Duration
+
+### Returns the quotient of this value and the other value.
+### :param divisor: The divisor to apply.
+### :returns: The resulting `Duration` value.
+@rf("Duration.floordiv")
+routine Duration.floordiv(divisor: S64) -> Duration
+
+### Returns whether both values are equal.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("Duration.eq")
+routine Duration.eq(you: Duration) -> Bool
+
+### Compares this value with the other value.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("Duration.cmp")
+routine Duration.cmp(you: Duration) -> ComparisonSign
+
+### Returns the textual representation of this value.
+### :returns: The resulting `Text` value.
+@rf("Duration.represent")
+routine Duration.represent() -> Text
+
+### Returns the textual representation of this value.
+### :returns: The resulting `Text` value.
+@rf("Duration.diagnose")
+routine Duration.diagnose() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this duration.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("Duration.hash")
+routine Duration.hash(k0: U64, k1: U64) -> U64

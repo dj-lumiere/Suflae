@@ -1,0 +1,269 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A software decimal32 value in BID storage.
+@rf("D32")
+record D32
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Reinterprets the 32-bit BID storage as a raw U32 (no decode).
+@rf("D32.to_bits")
+routine D32.to_bits() -> U32
+
+### Reinterprets a raw U32 as BID32 storage (no validation).
+@rf("D32.from_bits")
+common routine D32.from_bits(bits: U32) -> D32
+
+### The decimal32 value re-encoded in DPD interchange form. Never crashes.
+@rf("D32.to_dpd")
+routine D32.to_dpd() -> U32
+
+### Decodes a DPD interchange word into a decimal32. Never crashes.
+@rf("D32.from_dpd")
+common routine D32.from_dpd(bits: U32) -> D32
+
+### Infinity / quiet NaN.
+@rf("D32.infinity")
+common routine D32.infinity(sign: Bool) -> D32
+
+### Returns a quiet NaN.
+@rf("D32.quiet_nan")
+common routine D32.quiet_nan() -> D32
+
+### Returns a signaling NaN (interop/testing; never produced by arithmetic).
+@rf("D32.signaling_nan")
+common routine D32.signaling_nan() -> D32
+
+### True when this is a finite value (special field == 0).
+@rf("D32.is_finite")
+routine D32.is_finite() -> Bool
+
+### True when this is ±infinity (special field == 1).
+@rf("D32.is_infinite")
+routine D32.is_infinite() -> Bool
+
+### True when this is a NaN (special field >= 2: 2 quiet, 3 signaling).
+@rf("D32.is_nan")
+routine D32.is_nan() -> Bool
+
+### True when this is a SIGNALING NaN (special field == 3).
+@rf("D32.is_signaling")
+routine D32.is_signaling() -> Bool
+
+### True when this is a finite zero (±0).
+@rf("D32.is_zero")
+routine D32.is_zero() -> Bool
+
+### Builds a finite D32 from a sign, a coefficient and a base-10 exponent: value = (-1)^sign * coeff *
+### 10^exp, rounded half to even to 7 digits and brought into the exponent range.
+@rf("D32.from_components")
+common routine D32.from_components(sign: Bool, coeff: U64, exp: S64) -> D32
+
+### Builds a D32 from a 64-bit signed integer (exponent 0).
+@rf("D32.from_int64")
+common routine D32.from_int64(value: S64) -> D32
+
+### An integer (sign and 256-bit magnitude) as a D32, rounded half to even to 7 digits.
+@rf("d32_of_integer")
+routine d32_of_integer(neg: Bool, m: U256) -> D32
+
+### The bits of the binary float nearest to x, `which` bits wide (16, 32, 64, or 128). An infinity keeps its sign,
+### a NaN becomes the positive quiet NaN.
+@rf("d32_to_binary")
+routine d32_to_binary(x: D32, which: U32) -> U128
+
+### A B128 as a D32, correctly rounded (a narrower binary float widens to B128 exactly first).
+@rf("d32_of_b128")
+routine d32_of_b128(x: B128) -> D32
+
+### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
+### IEEE.
+@rf("D32.add")
+routine D32.add!(you: D32) -> D32
+
+### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
+### IEEE.
+@rf("D32.sub")
+routine D32.sub!(you: D32) -> D32
+
+### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
+### IEEE.
+@rf("D32.mul")
+routine D32.mul!(you: D32) -> D32
+
+### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
+### overflow.
+### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
+@rf("D32.truediv")
+routine D32.truediv!(you: D32) -> D32
+
+### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D32.add_unchecked")
+routine D32.add_unchecked(you: D32) -> D32
+
+### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D32.sub_unchecked")
+routine D32.sub_unchecked(you: D32) -> D32
+
+### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D32.mul_unchecked")
+routine D32.mul_unchecked(you: D32) -> D32
+
+### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
+@rf("D32.truediv_unchecked")
+routine D32.truediv_unchecked(you: D32) -> D32
+
+### Decimal value equality (NaN never equal; infinities equal only with the same sign;
+### finite values compare by value, so different cohorts of the same number are equal).
+@rf("D32.eq")
+routine D32.eq(you: D32) -> Bool
+
+### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
+### maps to `SAME` (matching the B128 engine convention).
+@rf("D32.cmp")
+routine D32.cmp(you: D32) -> ComparisonSign
+
+### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
+@rf("D32.pow")
+routine D32.pow!(you: D32) -> D32
+
+### Shortest decimal text (widens to D128Parts and reuses the shared formatter).
+@rf("D32.represent")
+routine D32.represent() -> Text
+
+### Debug form: `D32(<value>)`.
+@rf("D32.diagnose")
+routine D32.diagnose() -> Text
+
+### Returns the smaller of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`, otherwise `you`.
+@rf("D32.min")
+routine D32.min(you: D32) -> D32
+
+### Returns the larger of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`, otherwise `you`.
+@rf("D32.max")
+routine D32.max(you: D32) -> D32
+
+### Restricts `me` to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound.
+### :param max_val: The upper bound.
+### :returns: The clamped value.
+@rf("D32.clamp")
+routine D32.clamp(min_val: D32, max_val: D32) -> D32
+
+### Returns the reciprocal `1 / me`.
+### :returns: The multiplicative inverse.
+@rf("D32.recip")
+routine D32.recip() -> D32
+
+### Returns `me` raised to the integer power `n` via exponentiation by squaring.
+### A negative `n` inverts the result.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+@rf("D32.powi")
+routine D32.powi(n: S32) -> D32
+
+### Returns `(me + you) / 2`.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("D32.midpoint")
+routine D32.midpoint(you: D32) -> D32
+
+### Converts an S8 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: S8) -> D32
+
+### Converts an S16 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: S16) -> D32
+
+### Converts an S32 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: S32) -> D32
+
+### Converts an S64 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: S64) -> D32
+
+### Converts an S128 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("D32")
+routine D32(from: S128) -> D32
+
+### Converts an S256 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("D32")
+routine D32(from: S256) -> D32
+
+### Converts a U8 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: U8) -> D32
+
+### Converts a U16 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: U16) -> D32
+
+### Converts a U32 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: U32) -> D32
+
+### Converts a U64 into decimal32 (exponent 0).
+@rf("D32")
+routine D32(from: U64) -> D32
+
+### Converts a U128 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("D32")
+routine D32(from: U128) -> D32
+
+### Converts a U256 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("D32")
+routine D32(from: U256) -> D32
+
+### Converts a B16 to decimal32, correctly rounded.
+@rf("D32")
+routine D32(from: B16) -> D32
+
+### Converts a B32 to decimal32, correctly rounded.
+@rf("D32")
+routine D32(from: B32) -> D32
+
+### Converts a B128 to decimal32, correctly rounded.
+@rf("D32")
+routine D32(from: B128) -> D32
+
+### Converts a B64 to decimal32, correctly rounded.
+@rf("D32")
+routine D32(from: B64) -> D32
+
+### The D32 value as a B64, correctly rounded.
+@rf("B64")
+routine B64(from: D32) -> B64
+
+### Identity conversion (D32 -> D32).
+@rf("D32")
+routine D32(from: D32) -> D32
+
+### Converts a D64 to D32 (rounded half to even to 7 digits, then reduced).
+@rf("D32")
+routine D32(from: D64) -> D32
+
+### Converts a D128 to D32 (rounded half to even to 7 digits, then reduced).
+@rf("D32")
+routine D32(from: D128) -> D32
+
+### Parses a decimal literal into a `D32` (the scanned value rounded once to 7 digits).
+### :throws: {InvalidValueError} if the text is not a valid decimal literal.
+@rf("D32")
+routine D32!(from_text: Text) -> D32
+
+### Returns the raw bytes of this value in little-endian order.
+@rf("D32.to_bytes_le")
+routine D32.to_bytes_le() -> Array[Byte, 4]
+
+### Returns the raw bytes of this value in big-endian order.
+@rf("D32.to_bytes_be")
+routine D32.to_bytes_be() -> Array[Byte, 4]

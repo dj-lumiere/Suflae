@@ -1,0 +1,75 @@
+module Random
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A seedable pseudo-random number generator built on xoshiro256**.
+###
+### The generator keeps 256 bits of state (four `U64` words) advanced by the
+### xoshiro256** scrambler. Seeding runs a single `U64` seed through splitmix64
+### to spread entropy across all four state words, so even a small or
+### zero-valued seed produces a well-distributed stream.
+###
+### The output is deterministic for a given seed: the same seed always replays
+### the same sequence. This is a statistical generator for simulations, games,
+### sampling, and shuffling — it is NOT cryptographically secure.
+###
+### The generator's arithmetic is Tessera's `Xoshiro256` (Standard/Random.tess), called
+### through Ingrid (`C::ingrid_xoshiro256ss_*`): this entity keeps the four state words, and
+### a seed gives the same stream on every platform.
+@rf("Random")
+entity Random
+    pass
+
+### Runs one round of the splitmix64 mixer, used to expand a seed into the
+### four xoshiro256** state words.
+### :param x: The running splitmix64 accumulator.
+### :returns: The next well-mixed `U64` output.
+@rf("splitmix64_next")
+routine splitmix64_next(x: U64) -> U64
+
+### Creates a generator seeded from a single `U64` value.
+### The seed is expanded through splitmix64 so all four state words are
+### well-distributed regardless of how small or patterned the seed is.
+### :param seed: The seed value; equal seeds replay equal streams.
+### :returns: A fresh `Random` generator.
+@rf("make_random")
+routine make_random(seed: U64) -> Random
+
+### Advances the generator and returns the next 64-bit output.
+### This is the core primitive; all other draws derive from it.
+### :returns: The next uniformly distributed `U64` in the full 64-bit range.
+@rf("Random.next_u64")
+routine Random.next_u64() -> U64
+
+### Advances the generator and returns the next 32-bit output.
+### Uses the high 32 bits of a fresh 64-bit draw, which carry the strongest
+### statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `U32` in the full 32-bit range.
+@rf("Random.next_u32")
+routine Random.next_u32() -> U32
+
+### Advances the generator and returns the next double in the half-open unit
+### interval `[0.0, 1.0)`.
+### Uses the top 53 bits of a fresh draw, matching the mantissa width of `B64`.
+### :returns: A uniformly distributed `B64` in `[0.0, 1.0)`.
+@rf("Random.next_b64")
+routine Random.next_b64() -> B64
+
+### Returns whether a Bernoulli trial with the given success probability
+### succeeds. A probability of `0.0` never succeeds and `1.0` always does.
+### :param probability: The success probability; values outside `[0.0, 1.0)` are
+###   handled by clamping behaviour (`<= 0.0` never succeeds, `>= 1.0` always
+###   succeeds).
+### :returns: `true` with the given probability, otherwise `false`.
+@rf("Random.chance")
+routine Random.chance(probability: B64) -> Bool
+
+### Returns a uniformly distributed value in the half-open range
+### `[low, high)`, advancing the generator once.
+### :param low: The inclusive lower bound.
+### :param high: The exclusive upper bound.
+### :returns: A `U64` in `[low, high)`.
+### :throws: if `high <= low` (empty range) — the modulo has no valid width.
+@rf("Random.range")
+routine Random.range!(low: U64, high: U64) -> U64

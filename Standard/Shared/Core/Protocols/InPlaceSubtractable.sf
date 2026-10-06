@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for in-place subtraction.
+### `InPlaceSubtractable` is for mutable values whose subtraction operator
+### updates the left-hand operand rather than allocating a new result.
+@rf("InPlaceSubtractable")
+protocol InPlaceSubtractable
+    ### Subtracts `you` from this value in place.
+    ### The right-hand operand should remain unchanged.
+    ### :param you: The value to subtract.
+    routine Me.isub(you: Me)

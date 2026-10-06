@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a byte is not a valid ASCII decimal digit.
+@rf("InvalidDigitError")
+crashable InvalidDigitError
+    pass
+
+### Returns the default message for invalid ASCII decimal digit failures.
+### :returns: The resulting `Text` value.
+@rf("InvalidDigitError.crash_message")
+routine InvalidDigitError.crash_message() -> Text

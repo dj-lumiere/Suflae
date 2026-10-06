@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for exponentiation.
+### `Exponentiable` is for types that define a power operation within their own
+### numeric domain.
+@rf("Exponentiable")
+protocol Exponentiable
+    ### Returns this value raised to the power `you`.
+    ### Implementations define how exponent values are interpreted for the
+    ### conforming type.
+    ### :param you: The exponent value.
+    ### :returns: The resulting `Me` value.
+    routine Me.pow!(you: Me) -> Me

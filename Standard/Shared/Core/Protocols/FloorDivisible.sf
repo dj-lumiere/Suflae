@@ -1,0 +1,21 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for Euclidean quotient and remainder.
+### `FloorDivisible` is for integer-like types whose division surface produces a
+### quotient and remainder pair rather than a true fractional quotient.
+@rf("FloorDivisible")
+protocol FloorDivisible
+    ### Returns the quotient of this value and the other value.
+    ### Implementations should keep the result consistent with the associated
+    ### remainder operation.
+    ### :param you: The divisor.
+    ### :returns: The resulting `Me` value.
+    routine Me.floordiv!(you: Me) -> Me
+    ### Returns the remainder after division.
+    ### This result should correspond to the quotient returned by `floordiv!`.
+    ### :param you: The divisor.
+    ### :returns: The resulting `Me` value.
+    routine Me.mod!(you: Me) -> Me

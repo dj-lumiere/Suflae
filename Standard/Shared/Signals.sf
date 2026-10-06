@@ -1,0 +1,20 @@
+module Signals
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Registers a handler to run when the process is interrupted (Ctrl-C / SIGINT).
+### Registering SUPPRESSES the default termination — the handler decides whether to
+### exit. Multiple handlers may be registered; all run, in registration order, on a
+### dedicated dispatch thread.
+### :param handler: A `() -> None` routine to run on interrupt.
+@rf("when_interrupted")
+routine when_interrupted(handler: Routine[(), None])
+
+### Registers a handler to run when the process is terminated (SIGTERM / console-close).
+### Registering SUPPRESSES the default termination — the handler decides whether to
+### exit. Multiple handlers may be registered; all run, in registration order, on a
+### dedicated dispatch thread. A forced kill (SIGKILL / OOM-killer) cannot be caught.
+### :param handler: A `() -> None` routine to run on termination.
+@rf("when_terminated")
+routine when_terminated(handler: Routine[(), None])

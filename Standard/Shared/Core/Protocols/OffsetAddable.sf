@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for moving a position forward by a number of bytes.
+### `OffsetAddable` is used by memory positions such as `Address`, which move by a `ByteSize` and are never added
+### to each other.
+@rf("OffsetAddable")
+protocol OffsetAddable
+    ### Returns this position moved forward by `offset` bytes.
+    ### :param offset: The byte count to add.
+    ### :returns: The resulting `Me` value.
+    routine Me.add(offset: ByteSize) -> Me

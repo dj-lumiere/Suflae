@@ -1,0 +1,265 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A software decimal64 value in BID storage.
+@rf("D64")
+record D64
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Reinterprets the 64-bit BID storage as a raw U64 (no decode).
+@rf("D64.to_bits")
+routine D64.to_bits() -> U64
+
+### Reinterprets a raw U64 as BID64 storage (no validation).
+@rf("D64.from_bits")
+common routine D64.from_bits(bits: U64) -> D64
+
+### The decimal64 value re-encoded in DPD interchange form. Never crashes.
+@rf("D64.to_dpd")
+routine D64.to_dpd() -> U64
+
+### Decodes a DPD interchange word into a decimal64. Never crashes.
+@rf("D64.from_dpd")
+common routine D64.from_dpd(bits: U64) -> D64
+
+### Infinity / quiet NaN.
+@rf("D64.infinity")
+common routine D64.infinity(sign: Bool) -> D64
+
+### Returns a quiet NaN.
+@rf("D64.quiet_nan")
+common routine D64.quiet_nan() -> D64
+
+### Returns a signaling NaN (interop/testing; never produced by arithmetic).
+@rf("D64.signaling_nan")
+common routine D64.signaling_nan() -> D64
+
+### True when this is a finite value (special field == 0).
+@rf("D64.is_finite")
+routine D64.is_finite() -> Bool
+
+### True when this is ±infinity (special field == 1).
+@rf("D64.is_infinite")
+routine D64.is_infinite() -> Bool
+
+### True when this is a NaN (special field >= 2: 2 quiet, 3 signaling).
+@rf("D64.is_nan")
+routine D64.is_nan() -> Bool
+
+### True when this is a SIGNALING NaN (special field == 3).
+@rf("D64.is_signaling")
+routine D64.is_signaling() -> Bool
+
+### True when this is a finite zero (±0).
+@rf("D64.is_zero")
+routine D64.is_zero() -> Bool
+
+### Builds a finite D64 from a sign, a coefficient and a base-10 exponent: value = (-1)^sign * coeff *
+### 10^exp, rounded half to even to 16 digits and brought into the exponent range.
+@rf("D64.from_components")
+common routine D64.from_components(sign: Bool, coeff: U64, exp: S64) -> D64
+
+### Builds a D64 from a 64-bit signed integer (exponent 0).
+@rf("D64.from_int64")
+common routine D64.from_int64(value: S64) -> D64
+
+### An integer (sign and 256-bit magnitude) as a D64, rounded half to even to 16 digits.
+@rf("d64_of_integer")
+routine d64_of_integer(neg: Bool, m: U256) -> D64
+
+### The bits of the binary float nearest to x, `which` bits wide (16, 32, 64, or 128). An infinity keeps its sign,
+### a NaN becomes the positive quiet NaN.
+@rf("d64_to_binary")
+routine d64_to_binary(x: D64, which: U32) -> U128
+
+### A B128 as a D64, correctly rounded (a narrower binary float widens to B128 exactly first).
+@rf("d64_of_b128")
+routine d64_of_b128(x: B128) -> D64
+
+### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
+### IEEE.
+@rf("D64.add")
+routine D64.add!(you: D64) -> D64
+
+### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
+### IEEE.
+@rf("D64.sub")
+routine D64.sub!(you: D64) -> D64
+
+### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
+### IEEE.
+@rf("D64.mul")
+routine D64.mul!(you: D64) -> D64
+
+### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
+### overflow.
+### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
+@rf("D64.truediv")
+routine D64.truediv!(you: D64) -> D64
+
+### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D64.add_unchecked")
+routine D64.add_unchecked(you: D64) -> D64
+
+### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D64.sub_unchecked")
+routine D64.sub_unchecked(you: D64) -> D64
+
+### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D64.mul_unchecked")
+routine D64.mul_unchecked(you: D64) -> D64
+
+### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
+@rf("D64.truediv_unchecked")
+routine D64.truediv_unchecked(you: D64) -> D64
+
+### Decimal value equality (NaN never equal; infinities equal only with the same sign;
+### finite values compare by value, so different cohorts of the same number are equal).
+@rf("D64.eq")
+routine D64.eq(you: D64) -> Bool
+
+### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
+### maps to `SAME` (matching the B128 engine convention).
+@rf("D64.cmp")
+routine D64.cmp(you: D64) -> ComparisonSign
+
+### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
+@rf("D64.pow")
+routine D64.pow!(you: D64) -> D64
+
+### Shortest decimal text (widens to D128Parts and reuses the shared formatter).
+@rf("D64.represent")
+routine D64.represent() -> Text
+
+### Debug form: `D64(<value>)`.
+@rf("D64.diagnose")
+routine D64.diagnose() -> Text
+
+### Returns the smaller of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`, otherwise `you`.
+@rf("D64.min")
+routine D64.min(you: D64) -> D64
+
+### Returns the larger of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`, otherwise `you`.
+@rf("D64.max")
+routine D64.max(you: D64) -> D64
+
+### Restricts `me` to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound.
+### :param max_val: The upper bound.
+### :returns: The clamped value.
+@rf("D64.clamp")
+routine D64.clamp(min_val: D64, max_val: D64) -> D64
+
+### Returns the reciprocal `1 / me`.
+### :returns: The multiplicative inverse.
+@rf("D64.recip")
+routine D64.recip() -> D64
+
+### Returns `me` raised to the integer power `n` via exponentiation by squaring.
+### A negative `n` inverts the result.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+@rf("D64.powi")
+routine D64.powi(n: S32) -> D64
+
+### Returns `(me + you) / 2`.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("D64.midpoint")
+routine D64.midpoint(you: D64) -> D64
+
+### Converts an S8 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: S8) -> D64
+
+### Converts an S16 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: S16) -> D64
+
+### Converts an S32 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: S32) -> D64
+
+### Converts an S64 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: S64) -> D64
+
+### Converts an S128 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("D64")
+routine D64(from: S128) -> D64
+
+### Converts an S256 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("D64")
+routine D64(from: S256) -> D64
+
+### Converts a U8 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: U8) -> D64
+
+### Converts a U16 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: U16) -> D64
+
+### Converts a U32 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: U32) -> D64
+
+### Converts a U64 into decimal64 (exponent 0).
+@rf("D64")
+routine D64(from: U64) -> D64
+
+### Converts a U128 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("D64")
+routine D64(from: U128) -> D64
+
+### Converts a U256 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("D64")
+routine D64(from: U256) -> D64
+
+### Converts a B16 to decimal64, correctly rounded.
+@rf("D64")
+routine D64(from: B16) -> D64
+
+### Converts a B32 to decimal64, correctly rounded.
+@rf("D64")
+routine D64(from: B32) -> D64
+
+### Converts a B64 to decimal64, correctly rounded.
+@rf("D64")
+routine D64(from: B64) -> D64
+
+### Converts a B128 to decimal64, correctly rounded.
+@rf("D64")
+routine D64(from: B128) -> D64
+
+### Converts a D32 to D64 (exact: every decimal32 is a decimal64).
+@rf("D64")
+routine D64(from: D32) -> D64
+
+### Identity conversion (D64 -> D64).
+@rf("D64")
+routine D64(from: D64) -> D64
+
+### Converts a D128 to D64 (rounded half to even to 16 digits, the exponent kept where it fits).
+@rf("D64")
+routine D64(from: D128) -> D64
+
+### Parses a decimal literal into a `D64` (the scanned value rounded once to 16 digits).
+### :throws: {InvalidValueError} if the text is not a valid decimal literal.
+@rf("D64")
+routine D64!(from_text: Text) -> D64
+
+### Returns the raw bytes of this value in little-endian order.
+@rf("D64.to_bytes_le")
+routine D64.to_bytes_le() -> Array[Byte, 8]
+
+### Returns the raw bytes of this value in big-endian order.
+@rf("D64.to_bytes_be")
+routine D64.to_bytes_be() -> Array[Byte, 8]

@@ -1,0 +1,260 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### e^me.
+@rf("Decimal.exp")
+routine Decimal.exp!() -> Decimal
+
+### e^me - 1, accurate for small me.
+@rf("Decimal.expm1")
+routine Decimal.expm1!() -> Decimal
+
+### 2^me.
+@rf("Decimal.exp2")
+routine Decimal.exp2!() -> Decimal
+
+### 10^me.
+@rf("Decimal.exp10")
+routine Decimal.exp10!() -> Decimal
+
+### Natural logarithm ln(me).
+@rf("Decimal.log")
+routine Decimal.log!() -> Decimal
+
+### ln(1 + me), accurate for small me.
+@rf("Decimal.log1p")
+routine Decimal.log1p!() -> Decimal
+
+### Base-2 logarithm log2(me).
+@rf("Decimal.log2")
+routine Decimal.log2!() -> Decimal
+
+### Base-10 logarithm log10(me).
+@rf("Decimal.log10")
+routine Decimal.log10!() -> Decimal
+
+### me raised to the power `you`.
+@rf("Decimal.pow")
+routine Decimal.pow!(you: Decimal) -> Decimal
+
+### Square root of me.
+@rf("Decimal.sqrt")
+routine Decimal.sqrt!() -> Decimal
+
+### Cube root of me.
+@rf("Decimal.cbrt")
+routine Decimal.cbrt() -> Decimal
+
+### Euclidean norm sqrt(x^2 + y^2), computed without overflow/underflow.
+@rf("hypot")
+routine hypot(x: Decimal, y: Decimal) -> Decimal
+
+### 3D Euclidean norm sqrt(x^2 + y^2 + z^2), computed without overflow/underflow.
+@rf("hypot")
+routine hypot(x: Decimal, y: Decimal, z: Decimal) -> Decimal
+
+### Fused multiply-add me*b + c with a single rounding.
+@rf("Decimal.fma")
+routine Decimal.fma!(b: Decimal, c: Decimal) -> Decimal
+
+### Sine of me (radians).
+@rf("Decimal.sin")
+routine Decimal.sin() -> Decimal
+
+### Cosine of me (radians).
+@rf("Decimal.cos")
+routine Decimal.cos() -> Decimal
+
+### Tangent of me (radians).
+@rf("Decimal.tan")
+routine Decimal.tan() -> Decimal
+
+### Arcsine of me (result in radians).
+@rf("Decimal.asin")
+routine Decimal.asin!() -> Decimal
+
+### Arccosine of me (result in radians).
+@rf("Decimal.acos")
+routine Decimal.acos!() -> Decimal
+
+### Arctangent of me (result in radians).
+@rf("Decimal.atan")
+routine Decimal.atan() -> Decimal
+
+### Two-argument arctangent atan2(y, x) (result in radians).
+@rf("atan2")
+routine atan2(y: Decimal, x: Decimal) -> Decimal
+
+### Hyperbolic sine of me.
+@rf("Decimal.sinh")
+routine Decimal.sinh!() -> Decimal
+
+### Hyperbolic cosine of me.
+@rf("Decimal.cosh")
+routine Decimal.cosh!() -> Decimal
+
+### Hyperbolic tangent of me.
+@rf("Decimal.tanh")
+routine Decimal.tanh() -> Decimal
+
+### Inverse hyperbolic sine of me.
+@rf("Decimal.asinh")
+routine Decimal.asinh() -> Decimal
+
+### Inverse hyperbolic cosine of me.
+@rf("Decimal.acosh")
+routine Decimal.acosh!() -> Decimal
+
+### Inverse hyperbolic tangent of me.
+@rf("Decimal.atanh")
+routine Decimal.atanh!() -> Decimal
+
+### Error function erf(me).
+@rf("Decimal.erf")
+routine Decimal.erf() -> Decimal
+
+### Complementary error function erfc(me) = 1 - erf(me).
+@rf("Decimal.erfc")
+routine Decimal.erfc() -> Decimal
+
+### Gamma function tgamma(me).
+@rf("Decimal.tgamma")
+routine Decimal.tgamma!() -> Decimal
+
+### Natural logarithm of the absolute value of the gamma function, lgamma(me).
+@rf("Decimal.lgamma")
+routine Decimal.lgamma() -> Decimal
+
+### True if me has its sign bit set (negative, including -0).
+@rf("Decimal.signbit")
+routine Decimal.signbit() -> Bool
+
+### True if me is finite and nonzero.
+@rf("Decimal.is_normal")
+routine Decimal.is_normal() -> Bool
+
+### True if me is +-0.
+@rf("Decimal.is_zero")
+routine Decimal.is_zero() -> Bool
+
+### True if me is negative (-0 is negative).
+@rf("Decimal.is_negative")
+routine Decimal.is_negative() -> Bool
+
+### True if me is strictly positive.
+@rf("Decimal.is_positive")
+routine Decimal.is_positive() -> Bool
+
+### True if me is subnormal (finite, nonzero, below the smallest normal).
+@rf("Decimal.is_subnormal")
+routine Decimal.is_subnormal() -> Bool
+
+### -1, 0, or +1 matching the sign of me (+-0 -> +0).
+@rf("Decimal.signum")
+routine Decimal.signum() -> Decimal
+
+### C99 fpclassify code (ZERO / SUBNORMAL / NORMAL; a well-formed Decimal is never inf/NaN).
+@rf("Decimal.fpclassify")
+routine Decimal.fpclassify() -> FpClass
+
+### Absolute value of me.
+@rf("Decimal.abs")
+routine Decimal.abs() -> Decimal
+
+### Negation of me (flips the sign).
+@rf("Decimal.neg")
+routine Decimal.neg() -> Decimal
+
+### Magnitude of me with the sign of `you`.
+@rf("Decimal.copysign")
+routine Decimal.copysign(you: Decimal) -> Decimal
+
+### Larger of me and you (NaN-skipping, per C99 fmax).
+@rf("Decimal.fmax")
+routine Decimal.fmax(you: Decimal) -> Decimal
+
+### Smaller of me and you (NaN-skipping, per C99 fmin).
+@rf("Decimal.fmin")
+routine Decimal.fmin(you: Decimal) -> Decimal
+
+### Positive difference max(me - you, 0).
+@rf("Decimal.fdim")
+routine Decimal.fdim(you: Decimal) -> Decimal
+
+### IEEE minimumNumber(me, you).
+@rf("Decimal.min_num")
+routine Decimal.min_num(you: Decimal) -> Decimal
+
+### IEEE maximumNumber(me, you).
+@rf("Decimal.max_num")
+routine Decimal.max_num(you: Decimal) -> Decimal
+
+### IEEE minimum(me, you).
+@rf("Decimal.minimum")
+routine Decimal.minimum(you: Decimal) -> Decimal
+
+### IEEE maximum(me, you).
+@rf("Decimal.maximum")
+routine Decimal.maximum(you: Decimal) -> Decimal
+
+### Floating remainder of me / you (C fmod; result has me's sign).
+@rf("Decimal.fmod")
+routine Decimal.fmod(you: Decimal) -> Decimal
+
+### IEEE remainder of me / you (result is the nearest, ties to even).
+@rf("Decimal.remainder")
+routine Decimal.remainder(you: Decimal) -> Decimal
+
+### The base-10 exponent of me (floor(log10(|me|)) as a Decimal).
+@rf("Decimal.logb")
+routine Decimal.logb() -> Decimal
+
+### Truncates toward zero to an integral value.
+@rf("Decimal.trunc")
+routine Decimal.trunc() -> Decimal
+
+### Rounds toward negative infinity (floor).
+@rf("Decimal.floor")
+routine Decimal.floor() -> Decimal
+
+### Rounds toward positive infinity (ceil).
+@rf("Decimal.ceil")
+routine Decimal.ceil() -> Decimal
+
+### Rounds to the nearest integral value, ties to even.
+@rf("Decimal.round")
+routine Decimal.round() -> Decimal
+
+### Rounds to the nearest integral value using the current rounding mode (ties to even).
+@rf("Decimal.rint")
+routine Decimal.rint() -> Decimal
+
+### Rounds to the nearest integral value, ties away from zero.
+@rf("Decimal.round_ties_away")
+routine Decimal.round_ties_away() -> Decimal
+
+### The fractional part of me (me - trunc(me), carrying me's sign).
+@rf("Decimal.frac")
+routine Decimal.frac() -> Decimal
+
+### Splits me into its integer and fractional parts, both carrying me's sign.
+@rf("Decimal.modf")
+routine Decimal.modf() -> (Decimal, Decimal)
+
+### True if me and you have the same quantum (exponent).
+@rf("Decimal.same_quantum")
+routine Decimal.same_quantum(you: Decimal) -> Bool
+
+### Rounds me to the quantum (exponent) of you.
+@rf("Decimal.quantize")
+routine Decimal.quantize(you: Decimal) -> Decimal
+
+### IEEE totalOrder predicate (a total order over all values).
+@rf("Decimal.total_order")
+routine Decimal.total_order(you: Decimal) -> Bool
+
+### IEEE totalOrderMag predicate (total order over magnitudes).
+@rf("Decimal.total_order_mag")
+routine Decimal.total_order_mag(you: Decimal) -> Bool

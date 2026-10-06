@@ -1,0 +1,102 @@
+module Math3D
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A three-dimensional vector with `B32` components.
+@rf("Vector3D")
+record Vector3D
+obeys Addable, Subtractable, Negatable, Equatable
+    ### The x component.
+    x: B32
+    ### The y component.
+    y: B32
+    ### The z component.
+    z: B32
+
+### Returns the component-wise sum `me + you`.
+### :param you: The addend.
+### :returns: A `Vector3D` whose components are the sums.
+@rf("Vector3D.add")
+routine Vector3D.add(you: Vector3D) -> Vector3D
+
+### Returns the component-wise difference `me - you`.
+### :param you: The value to subtract.
+### :returns: A `Vector3D` whose components are the differences.
+@rf("Vector3D.sub")
+routine Vector3D.sub(you: Vector3D) -> Vector3D
+
+### Returns the arithmetic negation of this vector.
+### :returns: A `Vector3D` with all components negated.
+@rf("Vector3D.neg")
+routine Vector3D.neg() -> Vector3D
+
+### Returns this vector scaled by a scalar `factor`.
+### :param factor: The scalar multiplier.
+### :returns: `factor · me`, component-wise.
+@rf("Vector3D.scale")
+routine Vector3D.scale(factor: B32) -> Vector3D
+
+### Returns the dot product `me · you`.
+### :param you: The right operand.
+### :returns: `me.x·you.x + me.y·you.y + me.z·you.z`.
+@rf("Vector3D.dot")
+routine Vector3D.dot(you: Vector3D) -> B32
+
+### Returns the cross product `me × you`, perpendicular to both operands.
+### :param you: The right operand.
+### :returns: The vector `(y₁z₂−z₁y₂, z₁x₂−x₁z₂, x₁y₂−y₁x₂)`.
+@rf("Vector3D.cross")
+routine Vector3D.cross(you: Vector3D) -> Vector3D
+
+### Returns the squared Euclidean length (avoids the square root of `length`).
+### :returns: `me · me`.
+@rf("Vector3D.length_squared")
+routine Vector3D.length_squared() -> B32
+
+### Returns the Euclidean length (magnitude) of this vector.
+### :returns: `√(x² + y² + z²)`.
+@rf("Vector3D.length")
+routine Vector3D.length() -> B32
+
+### Returns the unit vector pointing in the same direction. A zero vector is
+### returned unchanged (its length is zero).
+### :returns: `me / |me|`, or `me` when `|me| == 0`.
+@rf("Vector3D.normalize")
+routine Vector3D.normalize() -> Vector3D
+
+### Returns the Euclidean distance between this vector and `you`.
+### :param you: The other point.
+### :returns: `|me − you|`.
+@rf("Vector3D.distance")
+routine Vector3D.distance(you: Vector3D) -> B32
+
+### Returns the linear interpolation between `me` (at `t = 0`) and `you` (at `t = 1`).
+### :param you: The endpoint.
+### :param t: The interpolation parameter (unclamped).
+### :returns: `me + t·(you − me)`.
+@rf("Vector3D.lerp")
+routine Vector3D.lerp(you: Vector3D, t: B32) -> Vector3D
+
+### Returns `true` if all three components compare equal.
+### :param you: The value to compare against.
+### :returns: `true` if every component of `me` equals the matching component of `you`.
+@rf("Vector3D.eq")
+routine Vector3D.eq(you: Vector3D) -> Bool
+
+### Formats this vector as `(x, y, z)`.
+### :returns: The resulting `Text` value.
+@rf("Vector3D.represent")
+routine Vector3D.represent() -> Text
+
+### Returns a diagnostic string wrapping the value with its type name.
+### :returns: The resulting `Text` value.
+@rf("Vector3D.diagnose")
+routine Vector3D.diagnose() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this vector.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash.
+@rf("Vector3D.hash")
+routine Vector3D.hash(k0: U64, k1: U64) -> U64

@@ -1,0 +1,18 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the fallback crashable used for generic runtime failures.
+### `RuntimeError` is the catch-all error shape for failures that do not have a
+### more specific crashable type.
+@rf("RuntimeError")
+crashable RuntimeError
+    pass
+
+### Returns the default message for an unclassified runtime error.
+### This message is intentionally generic and should be overridden by more
+### specific crashables whenever possible.
+### :returns: The resulting `Text` value.
+@rf("RuntimeError.crash_message")
+routine RuntimeError.crash_message() -> Text

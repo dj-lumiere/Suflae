@@ -1,0 +1,399 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### e^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.exp")
+routine D32.exp!() -> D32
+
+### e^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.exp_unchecked")
+routine D32.exp_unchecked() -> D32
+
+### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.expm1")
+routine D32.expm1!() -> D32
+
+### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.expm1_unchecked")
+routine D32.expm1_unchecked() -> D32
+
+### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.exp2")
+routine D32.exp2!() -> D32
+
+### 2^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.exp2_unchecked")
+routine D32.exp2_unchecked() -> D32
+
+### 10^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.exp10")
+routine D32.exp10!() -> D32
+
+### 10^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.exp10_unchecked")
+routine D32.exp10_unchecked() -> D32
+
+### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.log")
+routine D32.log!() -> D32
+
+### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.log_unchecked")
+routine D32.log_unchecked() -> D32
+
+### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.log1p")
+routine D32.log1p!() -> D32
+
+### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.log1p_unchecked")
+routine D32.log1p_unchecked() -> D32
+
+### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.log2")
+routine D32.log2!() -> D32
+
+### log2(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.log2_unchecked")
+routine D32.log2_unchecked() -> D32
+
+### log10(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.log10")
+routine D32.log10!() -> D32
+
+### log10(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.log10_unchecked")
+routine D32.log10_unchecked() -> D32
+
+### sqrt(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.sqrt")
+routine D32.sqrt!() -> D32
+
+### sqrt(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.sqrt_unchecked")
+routine D32.sqrt_unchecked() -> D32
+
+### The real cube root of me, correctly rounded.
+@rf("D32.cbrt")
+routine D32.cbrt() -> D32
+
+### asin(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.asin")
+routine D32.asin!() -> D32
+
+### asin(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.asin_unchecked")
+routine D32.asin_unchecked() -> D32
+
+### acos(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.acos")
+routine D32.acos!() -> D32
+
+### acos(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.acos_unchecked")
+routine D32.acos_unchecked() -> D32
+
+### atan(me) (atan(±inf) = ±pi/2), correctly rounded.
+@rf("D32.atan")
+routine D32.atan() -> D32
+
+### sin(me), me in radians, correctly rounded.
+@rf("D32.sin")
+routine D32.sin() -> D32
+
+### cos(me), me in radians, correctly rounded.
+@rf("D32.cos")
+routine D32.cos() -> D32
+
+### tan(me), me in radians, correctly rounded.
+@rf("D32.tan")
+routine D32.tan() -> D32
+
+### sinh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.sinh")
+routine D32.sinh!() -> D32
+
+### sinh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.sinh_unchecked")
+routine D32.sinh_unchecked() -> D32
+
+### cosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.cosh")
+routine D32.cosh!() -> D32
+
+### cosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.cosh_unchecked")
+routine D32.cosh_unchecked() -> D32
+
+### tanh(me), correctly rounded.
+@rf("D32.tanh")
+routine D32.tanh() -> D32
+
+### asinh(me), correctly rounded.
+@rf("D32.asinh")
+routine D32.asinh() -> D32
+
+### acosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.acosh")
+routine D32.acosh!() -> D32
+
+### acosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.acosh_unchecked")
+routine D32.acosh_unchecked() -> D32
+
+### atanh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.atanh")
+routine D32.atanh!() -> D32
+
+### atanh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.atanh_unchecked")
+routine D32.atanh_unchecked() -> D32
+
+### erf(me) (erf(±inf) = ±1), correctly rounded.
+@rf("D32.erf")
+routine D32.erf() -> D32
+
+### erfc(me) = 1 - erf(me) (erfc(-inf) = 2, erfc(+inf) = 0), correctly rounded.
+@rf("D32.erfc")
+routine D32.erfc() -> D32
+
+### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D32.tgamma")
+routine D32.tgamma!() -> D32
+
+### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D32.tgamma_unchecked")
+routine D32.tgamma_unchecked() -> D32
+
+### ln|tgamma(me)| (+inf at the poles and at ±inf), correctly rounded.
+@rf("D32.lgamma")
+routine D32.lgamma() -> D32
+
+### `me^you` with raw IEEE (the C99 pow special cases), correctly rounded.
+@rf("D32.pow_unchecked")
+routine D32.pow_unchecked(you: D32) -> D32
+
+### atan2(y, x), the angle of (x, y) in (-pi, pi], with the C99 special cases for zeros and infinities.
+@rf("atan2")
+routine atan2(y: D32, x: D32) -> D32
+
+### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
+@rf("hypot")
+routine hypot!(x: D32, y: D32) -> D32
+
+### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: D32, y: D32) -> D32
+
+### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
+@rf("hypot")
+routine hypot!(x: D32, y: D32, z: D32) -> D32
+
+### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: D32, y: D32, z: D32) -> D32
+
+### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
+@rf("D32.fma")
+routine D32.fma!(b: D32, c: D32) -> D32
+
+### me*b + c with a single rounding, raw IEEE.
+@rf("D32.fma_unchecked")
+routine D32.fma_unchecked(b: D32, c: D32) -> D32
+
+### IEEE 754 signbit: the raw sign bit (true for negatives, -0, and -NaN). Never crashes.
+@rf("D32.signbit")
+routine D32.signbit() -> Bool
+
+### True if me is negative (sign bit set, which includes -0 and -NaN).
+@rf("D32.is_negative")
+routine D32.is_negative() -> Bool
+
+### True if me is strictly positive (not signed, not zero).
+@rf("D32.is_positive")
+routine D32.is_positive() -> Bool
+
+### True if me is a finite, nonzero value at the minimum exponent (-101) with fewer than 7 digits.
+@rf("D32.is_subnormal")
+routine D32.is_subnormal() -> Bool
+
+### Splits into integer and fractional parts (C modf), both carrying me's sign.
+@rf("D32.modf")
+routine D32.modf() -> (D32, D32)
+
+### True if me is finite and nonzero (this includes the subnormals).
+@rf("D32.is_normal")
+routine D32.is_normal() -> Bool
+
+### C99 fpclassify: SIGNALING_NAN, NAN, INFINITE, ZERO, SUBNORMAL, or NORMAL.
+@rf("D32.fpclassify")
+routine D32.fpclassify() -> FpClass
+
+### Absolute value |me| (clears the sign bit, keeps specials and the cohort). Never crashes.
+@rf("D32.abs")
+routine D32.abs() -> D32
+
+### IEEE 754 totalOrder for decimals: a total order over all values including signed zeros, cohorts
+### (equal value with differing exponents), and NaNs. For finite operands of equal value the smaller-exponent
+### member precedes when positive (the reverse when negative).
+### :param you: The value to compare against.
+### :returns: Whether `me` precedes or equals `you` in the total order.
+@rf("D32.total_order")
+routine D32.total_order(you: D32) -> Bool
+
+### IEEE 754 totalOrderMag for decimals: `total_order` applied to the magnitudes.
+### :param you: The value whose magnitude to compare against.
+### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
+@rf("D32.total_order_mag")
+routine D32.total_order_mag(you: D32) -> Bool
+
+### Negation -me (flips the sign bit, keeps specials and the cohort). Never crashes.
+@rf("D32.neg")
+routine D32.neg() -> D32
+
+### C99 copysign: me's magnitude with you's sign bit. Never crashes.
+### :param you: The value supplying the sign.
+@rf("D32.copysign")
+routine D32.copysign(you: D32) -> D32
+
+### Returns -1, 0, or +1 for the sign of `me`. A NaN propagates, ±0 gives +0.
+@rf("D32.signum")
+routine D32.signum() -> D32
+
+### Throws when `me` is non-finite (inf or NaN).
+@rf("D32.finite")
+routine D32.finite!() -> D32
+
+### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
+@rf("D32.fmod")
+routine D32.fmod(you: D32) -> D32
+
+### C99 fmax: the larger of me and you, treating NaN as missing (returns the non-NaN operand).
+### :param you: The value to compare against.
+@rf("D32.fmax")
+routine D32.fmax(you: D32) -> D32
+
+### C99 fmin: the smaller of me and you, treating NaN as missing (returns the non-NaN operand).
+### :param you: The value to compare against.
+@rf("D32.fmin")
+routine D32.fmin(you: D32) -> D32
+
+### C99 fdim: the positive difference max(me - you, 0), NaN if either operand is NaN.
+### :param you: The value to subtract.
+@rf("D32.fdim")
+routine D32.fdim(you: D32) -> D32
+
+### `me * 10^n` with raw propagation (overflow -> ±infinity, below the range -> 0).
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me` scaled by `10^n`.
+@rf("D32.scaleb_unchecked")
+routine D32.scaleb_unchecked(n: S64) -> D32
+
+### IEEE 754 logb: the exponent `e` with `10^e <= |me| < 10^(e+1)`, as a decimal integer (logb(0) = -inf,
+### logb(±inf) = +inf, logb(NaN) = NaN). Never crashes.
+### :returns: The radix-10 exponent of `me`.
+@rf("D32.logb")
+routine D32.logb() -> D32
+
+### IEEE 754-2008 minNum: the smaller operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, ignoring NaN.
+@rf("D32.min_num")
+routine D32.min_num(you: D32) -> D32
+
+### IEEE 754-2008 maxNum: the larger operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, ignoring NaN.
+@rf("D32.max_num")
+routine D32.max_num(you: D32) -> D32
+
+### IEEE 754-2019 minimum: the smaller operand, propagating NaN, ordering -0 below +0.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, NaN if either is NaN.
+@rf("D32.minimum")
+routine D32.minimum(you: D32) -> D32
+
+### IEEE 754-2019 maximum: the larger operand, propagating NaN, ordering +0 above -0.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, NaN if either is NaN.
+@rf("D32.maximum")
+routine D32.maximum(you: D32) -> D32
+
+### IEEE 754 roundToIntegralTiesToAway: rounds to the nearest integer, halves away from zero (alias of
+### `round`). Never crashes.
+### :returns: `me` rounded to an integral value with ties away from zero.
+@rf("D32.round_ties_away")
+routine D32.round_ties_away() -> D32
+
+### IEEE 754 sameQuantum: `true` when `me` and `you` have the same exponent (quantum), or are both
+### infinities, or both NaNs. Never crashes.
+### :param you: The value whose quantum to compare against.
+### :returns: Whether the two share a quantum.
+@rf("D32.same_quantum")
+routine D32.same_quantum(you: D32) -> Bool
+
+### IEEE 754 quantize: `me`'s value with the exponent of `you`, rounded half to even when digits are dropped.
+### NaN when the result needs more than 7 digits, or for incompatible specials.
+### :param you: The value supplying the target exponent.
+### :returns: `me` quantized to `you`'s exponent, or NaN if not representable.
+@rf("D32.quantize")
+routine D32.quantize(you: D32) -> D32
+
+### IEEE 754 remainder: `me - you * n`, n the integer nearest `me / you` (ties to even), exact. NaN if `me`
+### is infinite or `you` is zero, `me` if `you` is infinite. Never crashes.
+### :param you: The divisor.
+### :returns: The IEEE remainder of `me / you`.
+@rf("D32.remainder")
+routine D32.remainder(you: D32) -> D32
+
+### IEEE 754 normalize (the `reduce` operation): the value with trailing zeros stripped to the simplest member of
+### its cohort (`3.00` -> `3`, `100` -> `1E+2`, `0.00` -> `0`). Specials pass through. Never crashes.
+### :returns: `me` normalized to its simplest cohort member.
+@rf("D32.normalize")
+routine D32.normalize() -> D32
+
+### Rounds to integral. mode: 0 trunc, 1 floor, 2 ceil, 3 round (half away), 4 rint (half even).
+@rf("d32_round_int")
+routine d32_round_int(x: D32, mode: S64) -> D32
+
+### Truncates toward zero to an integral value. Specials pass through. Never crashes.
+@rf("D32.trunc")
+routine D32.trunc() -> D32
+
+### Rounds down toward -inf to an integral value. Specials pass through. Never crashes.
+@rf("D32.floor")
+routine D32.floor() -> D32
+
+### Rounds up toward +inf to an integral value. Specials pass through. Never crashes.
+@rf("D32.ceil")
+routine D32.ceil() -> D32
+
+### Rounds to the nearest integral value, ties away from zero. Specials pass through. Never crashes.
+@rf("D32.round")
+routine D32.round() -> D32
+
+### Rounds to the nearest integral value, ties to even (IEEE roundTiesToEven). Never crashes.
+@rf("D32.rint")
+routine D32.rint() -> D32
+
+### Fractional part me - trunc(me), with me's sign. A NaN propagates, ±inf gives ±0. Never crashes.
+@rf("D32.frac")
+routine D32.frac() -> D32

@@ -1,0 +1,82 @@
+module IO/FileSystem
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### One directory entry: its bare name, kind, and last-modification time.
+@rf("DirEntry")
+record DirEntry
+    name: Text
+    is_directory: Bool
+    modified: Moment
+
+### Filesystem metadata for a path, captured in a single stat.
+@rf("FileMetadata")
+record FileMetadata
+    size: S64
+    modified: Moment
+    created: Moment
+    is_directory: Bool
+    readonly: Bool
+
+### Joins two path segments.
+### This uses the platform path separator rules implemented by the runtime.
+### :param a: The left-hand path segment.
+### :param b: The right-hand path segment.
+### :returns: The resulting `Text` value.
+@rf("join_path")
+routine join_path(a: Text, b: Text) -> Text
+
+### Returns the parent directory path.
+### Paths without a parent return the runtime's normalized empty-parent representation.
+### :param path: The path to inspect.
+### :returns: The resulting `Text` value.
+@rf("parent_path")
+routine parent_path(path: Text) -> Text
+
+### Returns the final path component.
+### Directory separators are removed from the returned value.
+### :param path: The path to inspect.
+### :returns: The resulting `Text` value.
+@rf("file_name")
+routine file_name(path: Text) -> Text
+
+### Returns the final path component without its extension.
+### Hidden-file semantics follow the runtime path parser.
+### :param path: The path to inspect.
+### :returns: The resulting `Text` value.
+@rf("file_stem")
+routine file_stem(path: Text) -> Text
+
+### Returns the file extension.
+### The returned value omits the leading dot when an extension is present.
+### :param path: The path to inspect.
+### :returns: The resulting `Text` value.
+@rf("extension")
+routine extension(path: Text) -> Text
+
+### Splits a path into its file stem and extension.
+### The stem is the final component without its extension; the extension omits
+### the leading dot. A path without an extension yields an empty extension.
+### The extension is returned WITHOUT a leading dot, so it round-trips through
+### `with_extension` (`with_extension(p, split_extension(p).extension)`).
+### :param path: The path to split.
+### :returns: A `(stem, extension)` tuple.
+@rf("split_extension")
+routine split_extension(path: Text) -> (Text, Text)
+
+### Returns the path with its extension replaced.
+### An empty `ext` drops the extension entirely. The directory portion is preserved.
+### :param path: The path to rebuild.
+### :param ext: The new extension WITHOUT a leading dot (e.g. `"png"`).
+### :returns: The resulting `Text` value.
+@rf("with_extension")
+routine with_extension(path: Text, ext: Text) -> Text
+
+### Returns the path with its final component replaced.
+### The directory portion is preserved.
+### :param path: The path to rebuild.
+### :param name: The new final component.
+### :returns: The resulting `Text` value.
+@rf("with_file_name")
+routine with_file_name(path: Text, name: Text) -> Text

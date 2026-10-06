@@ -1,0 +1,404 @@
+module IO/File
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A `File` names persistent byte content in the filesystem — the data-at-rest itself, NOT an open
+### handle. It is a cheap value (just the path); constructing one opens nothing. From a `File` you open
+### one of three sessions over its content:
+###   * `open_read()` — a sequential {Source} (consume forward with `load`);
+###   * `open_write()` / `open_append()` — a sequential {Sink} (emit forward with `store`).
+### The content outlives every session (closing a session leaves the file intact — criterion: a file
+### persists beyond the program). Things that are NOT files — a socket, pipe, or console — have no such
+### content layer: they are born as {Source}/{Sink} with nothing addressable underneath.
+@rf("File")
+record File
+    ### The path naming this file's content.
+    at: Text
+
+### A sequential read session over a {File}'s content. Owns a unique OS descriptor with a `close`
+### teardown, so it is an `entity` (single owner, no implicit copy — preventing double-close). Consume
+### it forward with `load`; there is no length, index, or seek.
+@rf("FileSource")
+entity FileSource
+obeys Source, Enterable
+    pass
+
+### A sequential write session over a {File}'s content (truncating via `open_write`, or appending via
+### `open_append`). Owns a unique OS descriptor with a `close` teardown, so it is an `entity`. Emit into
+### it forward with `store`; there is no length, index, or seek.
+@rf("FileSink")
+entity FileSink
+obeys Sink, Enterable
+    pass
+
+### A `Directory` names a directory in the filesystem — a container of entries, NOT byte content (that
+### is what {File} is). Like `File` it is a cheap value (just the path); constructing one creates
+### nothing. From a `Directory` you inspect and mutate the directory itself (`create!`/`delete_all!`),
+### enumerate its entries (`list!`/`entries!`/`walk!`), and build the paths of the things inside it
+### (`file(name:)` → a {File}, `subdir(name:)` → a nested `Directory`).
+@rf("Directory")
+record Directory
+    ### The path naming this directory.
+    at: Text
+
+### Whether this file exists. Non-throwing; suitable for preflight logic.
+### :returns: `true` when the path exists.
+@rf("File.exists")
+routine File.exists() -> Bool
+
+### Whether this names a regular file. Missing paths return `false`.
+### :returns: `true` when the path is a regular file.
+@rf("File.is_file")
+routine File.is_file() -> Bool
+
+### The size of this file in bytes.
+### :returns: The size in bytes.
+### :throws: {IOError} when the file cannot be inspected.
+@rf("File.size")
+routine File.size!() -> S64
+
+### Filesystem metadata for this file, captured in a single stat.
+### :returns: The resulting {FileMetadata}.
+### :throws: {IOError} when the file cannot be inspected.
+@rf("File.metadata")
+routine File.metadata!() -> FileMetadata
+
+### This file's extension, without the leading dot (empty when absent).
+### :returns: The extension `Text`.
+@rf("File.extension")
+routine File.extension() -> Text
+
+### This file's final path component.
+### :returns: The name `Text`.
+@rf("File.name")
+routine File.name() -> Text
+
+### This file's final component without its extension.
+### :returns: The stem `Text`.
+@rf("File.stem")
+routine File.stem() -> Text
+
+### The parent directory of this file.
+### :returns: The parent `Directory`.
+@rf("File.parent")
+routine File.parent() -> Directory
+
+### This file with its extension replaced (an empty `ext` drops the extension).
+### :param ext: The new extension WITHOUT a leading dot.
+### :returns: A new `File` naming the rebuilt path.
+@rf("File.with_extension")
+routine File.with_extension(ext: Text) -> File
+
+### This file's absolute path (preserving symlinks and other non-canonical components).
+### :returns: A new `File` naming the absolute path.
+### :throws: {IOError} when the path cannot be resolved.
+@rf("File.absolute")
+routine File.absolute!() -> File
+
+### This file's canonical filesystem location (normalized casing, links and relative segments resolved).
+### :returns: A new `File` naming the canonical path.
+### :throws: {IOError} when the path cannot be resolved.
+@rf("File.canonical")
+routine File.canonical!() -> File
+
+### Reads this whole file as text (UTF-8, lossy). UNCOLORED, like `waitfor`: inside a `suspended
+### routine` the calling coroutine PARKS while a worker thread does the blocking read (sibling coroutines
+### keep progressing); outside one it reads inline. This is the coroutine-safe way to read a whole file —
+### prefer it to opening a {Source} and looping `load` inside a coroutine.
+### :returns: The file contents as `Text`.
+@rf("File.read_text")
+routine File.read_text() -> Text
+
+### Writes `content` to this file, truncating any existing contents. UNCOLORED, like `waitfor`: inside a
+### `suspended routine` the calling coroutine PARKS while a worker thread does the blocking write (sibling
+### coroutines keep progressing); outside one it writes inline. This is the coroutine-safe way to write a
+### whole file. The text is encoded as UTF-8.
+### :param content: The text to write.
+### :returns: The number of bytes written, or a negative value on error.
+@rf("File.write_text")
+routine File.write_text(content: Text) -> S64
+
+### Sets this file's size to exactly `bytes`, creating it if missing (extending with zero bytes or
+### truncating).
+### :param bytes: The exact size in bytes.
+### :throws: {IOError} when the size cannot be set.
+@rf("File.set_size")
+routine File.set_size!(bytes: U64)
+
+### Whether the current process can read this path. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("File.can_read")
+routine File.can_read() -> Bool
+
+### Whether the current process can write to this path. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("File.can_write")
+routine File.can_write() -> Bool
+
+### Whether the current process can execute this path. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("File.can_execute")
+routine File.can_execute() -> Bool
+
+### Enables or disables the readonly attribute for this path (filesystem metadata, not an in-memory flag).
+### :param readonly: `true` to enable readonly mode; `false` to disable it.
+### :throws: {IOError} when the attribute cannot be set.
+@rf("File.set_readonly")
+routine File.set_readonly!(readonly: Bool = true)
+
+### Copies this file to `destination`. Existing-destination handling follows the runtime's native copy
+### semantics. Named `copy_to!` (not `copy`) because a bare `copy` collides with the structural `copy`
+### derive verb. To copy a directory tree, use {Directory}'s `copy_to!`.
+### :param destination: The destination `File`.
+### :throws: {IOError} when the copy fails.
+@rf("File.copy_to")
+routine File.copy_to!(destination: File)
+
+### Moves or renames this file to `destination`. May behave as a rename within one filesystem or as a
+### move across locations.
+### :param destination: The destination `File`.
+### :throws: {IOError} when the move fails.
+@rf("File.move_to")
+routine File.move_to!(destination: File)
+
+### Moves or renames this file WITHOUT overwriting an existing destination. Folds the "does the
+### destination exist?" check into the move itself (one syscall on Windows), so callers that skip on
+### collision need no separate `exists` probe.
+### :param destination: The destination `File`.
+### :returns: `true` when the move happened; `false` when the destination already existed.
+### :throws: {IOError} on any other failure.
+@rf("File.move_to_if_absent")
+routine File.move_to_if_absent!(destination: File) -> Bool
+
+### Removes this file.
+### :throws: {IOError} when the file cannot be removed.
+@rf("File.delete")
+routine File.delete!()
+
+### Creates this empty file, or updates its modification time when it already exists. Parent directories
+### must already exist.
+### :throws: {IOError} when the file cannot be created or updated.
+@rf("File.touch")
+routine File.touch!()
+
+### Opens this file for sequential reading, returning a {Source} you consume forward with `load`.
+### :returns: A {FileSource} over this file's content, to be bound by `using`.
+### :throws: {IOError} when the file cannot be opened for reading.
+@rf("File.open_read")
+routine File.open_read!() -> FileSource
+
+### Opens this file for sequential writing, TRUNCATING any existing contents, returning a {Sink} you
+### emit into with `store`.
+### :returns: A {FileSink} over this file's content, to be bound by `using`.
+### :throws: {IOError} when the file cannot be opened for writing.
+@rf("File.open_write")
+routine File.open_write!() -> FileSink
+
+### Opens this file for sequential APPENDING (writes land after existing contents), returning a {Sink}.
+### :returns: A {FileSink} over this file's content, to be bound by `using`.
+### :throws: {IOError} when the file cannot be opened for appending.
+@rf("File.open_append")
+routine File.open_append!() -> FileSink
+
+### Loads up to `max` bytes from the current position. Returns fewer when end-of-file is reached first;
+### an empty `Bytes` signals EOF.
+### :param max: The maximum byte count to load.
+### :returns: The bytes loaded.
+@rf("FileSource.load")
+routine FileSource.load(max: U64) -> Bytes
+
+### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destroy` never
+### double-close.
+@rf("FileSource.close")
+routine FileSource.close()
+
+### Pass-through entry: the descriptor was already acquired by `File.open_read`.
+### :returns: This `FileSource`.
+@rf("FileSource.enter")
+routine FileSource.enter!() -> FileSource
+
+### Closes the descriptor when leaving a `using` scope.
+@rf("FileSource.exit")
+routine FileSource.exit()
+
+### Stores `data` at the current position, returning the number of bytes accepted.
+### :param data: The bytes to store.
+### :returns: The number of bytes accepted.
+@rf("FileSink.store")
+routine FileSink.store(data: Bytes) -> U64
+
+### Flushes buffered output to the underlying file.
+@rf("FileSink.flush")
+routine FileSink.flush()
+
+### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destroy` never
+### double-close.
+@rf("FileSink.close")
+routine FileSink.close()
+
+### Pass-through entry: the descriptor was already acquired by `File.open_write`/`File.open_append`.
+### :returns: This `FileSink`.
+@rf("FileSink.enter")
+routine FileSink.enter!() -> FileSink
+
+### Flushes and closes the descriptor when leaving a `using` scope.
+@rf("FileSink.exit")
+routine FileSink.exit()
+
+### Reads an entire file as text given its path. UNCOLORED, like `waitfor`: inside a `suspended
+### routine` the calling coroutine PARKS while a worker thread does the blocking read (sibling
+### coroutines keep progressing); outside one it reads inline. This is the coroutine-safe way to read
+### a whole file — prefer it to opening a `Source` and looping `load` inside a coroutine. Decoding uses
+### lossy UTF-8 conversion for invalid byte sequences.
+### :param path: The path to read.
+### :returns: The file contents as `Text`.
+@rf("read_text")
+routine read_text(path: Text) -> Text
+
+### Writes text to a file given its path, truncating any existing contents. UNCOLORED, like `waitfor`:
+### inside a `suspended routine` the calling coroutine PARKS while a worker thread does the blocking
+### write (sibling coroutines keep progressing); outside one it writes inline. This is the
+### coroutine-safe way to write a whole file. The text is encoded as UTF-8.
+### :param path: The path to write.
+### :param content: The text to write.
+### :returns: The number of bytes written, or a negative value on error.
+@rf("write_text")
+routine write_text(path: Text, content: Text) -> S64
+
+### Whether this directory exists. Non-throwing; suitable for preflight logic.
+### :returns: `true` when the path exists.
+@rf("Directory.exists")
+routine Directory.exists() -> Bool
+
+### Whether this actually names a directory. Missing paths return `false`.
+### :returns: `true` when the path is a directory.
+@rf("Directory.is_directory")
+routine Directory.is_directory() -> Bool
+
+### Filesystem metadata for this directory, captured in a single stat.
+### :returns: The resulting {FileMetadata}.
+### :throws: {IOError} when the directory cannot be inspected.
+@rf("Directory.metadata")
+routine Directory.metadata!() -> FileMetadata
+
+### This directory's final path component.
+### :returns: The name `Text`.
+@rf("Directory.name")
+routine Directory.name() -> Text
+
+### The parent of this directory.
+### :returns: The parent `Directory`.
+@rf("Directory.parent")
+routine Directory.parent() -> Directory
+
+### The {File} named `name` directly inside this directory.
+### :param name: The child file's final component.
+### :returns: A `File` at `<this>/<name>`.
+@rf("Directory.file")
+routine Directory.file(name: Text) -> File
+
+### The sub-directory named `name` directly inside this directory.
+### :param name: The child directory's final component.
+### :returns: A `Directory` at `<this>/<name>`.
+@rf("Directory.subdir")
+routine Directory.subdir(name: Text) -> Directory
+
+### This directory's absolute path (preserving symlinks and other non-canonical components).
+### :returns: A new `Directory` naming the absolute path.
+### :throws: {IOError} when the path cannot be resolved.
+@rf("Directory.absolute")
+routine Directory.absolute!() -> Directory
+
+### This directory's canonical filesystem location (normalized casing, links and relative segments
+### resolved).
+### :returns: A new `Directory` naming the canonical path.
+### :throws: {IOError} when the path cannot be resolved.
+@rf("Directory.canonical")
+routine Directory.canonical!() -> Directory
+
+### Whether the current process can read this directory. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("Directory.can_read")
+routine Directory.can_read() -> Bool
+
+### Whether the current process can write to this directory. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("Directory.can_write")
+routine Directory.can_write() -> Bool
+
+### Whether the current process can execute (enter) this directory. Non-throwing capability probe.
+### :returns: The resulting `Bool` value.
+@rf("Directory.can_execute")
+routine Directory.can_execute() -> Bool
+
+### Enables or disables the readonly attribute for this directory (filesystem metadata).
+### :param readonly: `true` to enable readonly mode; `false` to disable it.
+### :throws: {IOError} when the attribute cannot be set.
+@rf("Directory.set_readonly")
+routine Directory.set_readonly!(readonly: Bool = true)
+
+### Creates this directory. Parent directories must already exist.
+### :throws: {IOError} when the directory cannot be created.
+@rf("Directory.create")
+routine Directory.create!()
+
+### Creates this directory and any missing parents (recursive creation).
+### :throws: {IOError} when the directories cannot be created.
+@rf("Directory.create_all")
+routine Directory.create_all!()
+
+### Removes this directory, which must be empty. Use `delete_all!` for a non-empty tree.
+### :throws: {IOError} when the directory cannot be removed.
+@rf("Directory.delete")
+routine Directory.delete!()
+
+### Removes this directory tree recursively (destructive removal for non-empty directories).
+### :throws: {IOError} when the tree cannot be removed.
+@rf("Directory.delete_all")
+routine Directory.delete_all!()
+
+### Moves or renames this directory to `destination`.
+### :param destination: The destination `Directory`.
+### :throws: {IOError} when the move fails.
+@rf("Directory.move_to")
+routine Directory.move_to!(destination: Directory)
+
+### Moves or renames this directory WITHOUT overwriting an existing destination.
+### :param destination: The destination `Directory`.
+### :returns: `true` when the move happened; `false` when the destination already existed.
+### :throws: {IOError} on any other failure.
+@rf("Directory.move_to_if_absent")
+routine Directory.move_to_if_absent!(destination: Directory) -> Bool
+
+### Recursively copies this directory tree to `destination`. The tree is recreated under `destination`
+### (created if missing), copying every descendant. Symlinks are NOT followed, so this cannot loop on
+### link cycles. Existing destination files are overwritten following `File.copy_to!`'s native semantics.
+### :param destination: The destination `Directory`.
+### :throws: {IOError} when any entry cannot be copied.
+@rf("Directory.copy_to")
+routine Directory.copy_to!(destination: Directory)
+
+### The current working directory of the process, as a `Directory`.
+### :returns: The resulting `Directory`.
+### :throws: {IOError} when the working directory cannot be read.
+@rf("current_dir")
+routine current_dir!() -> Directory
+
+### Changes the current working directory of the process to `directory`.
+### :param directory: The directory to switch to.
+### :throws: {IOError} when the directory cannot be entered.
+@rf("set_current_dir")
+routine set_current_dir!(directory: Directory)
+
+### The platform temporary directory, as a `Directory`. Honors the usual environment variables; never
+### fails.
+### :returns: The resulting `Directory`.
+@rf("temp_dir")
+routine temp_dir() -> Directory
+
+### The current user's home directory, as a `Directory`.
+### :returns: The resulting `Directory`.
+### :throws: {IOError} when the home directory cannot be determined.
+@rf("home_dir")
+routine home_dir!() -> Directory

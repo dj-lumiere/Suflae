@@ -1,0 +1,482 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Sign-extends a signed 8-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: S8) -> S64
+
+### Sign-extends a signed 16-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: S16) -> S64
+
+### Sign-extends a signed 32-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: S32) -> S64
+
+### Returns `from` unchanged (identity conversion).
+### :param from: The source value.
+### :returns: `from`.
+@rf("S64")
+routine S64(from: S64) -> S64
+
+### Truncates a signed 128-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside the `S64` range.
+@rf("S64")
+routine S64!(from: S128) -> S64
+
+### Zero-extends an unsigned 8-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: U8) -> S64
+
+### Zero-extends an unsigned 16-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: U16) -> S64
+
+### Zero-extends an unsigned 32-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+@rf("S64")
+routine S64(from: U32) -> S64
+
+### Reinterprets a `U64` as `S64` using two's complement.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` exceeds `S64_MAX`.
+@rf("S64")
+routine S64!(from: U64) -> S64
+
+### Truncates an unsigned 128-bit integer to `S64`.
+### :param from: The source value.
+### :returns: The `S64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` exceeds `S64_MAX`.
+@rf("S64")
+routine S64!(from: U128) -> S64
+
+### Converts an `S256` to `S64`, throwing if outside the S64 range.
+### :param from: The `S256` value to convert.
+### :returns: The lower 64 bits reinterpreted as an `S64`.
+### :throws: {IntegerOverflowError} if `from` is outside −9223372036854775808..9223372036854775807.
+@rf("S64")
+routine S64!(from: S256) -> S64
+
+### Converts a `U256` to `S64`, throwing if the value exceeds S64_MAX.
+### :param from: The `U256` value to convert.
+### :returns: The lower 64 bits reinterpreted as an `S64`.
+### :throws: {IntegerOverflowError} if `from > 9223372036854775807`.
+@rf("S64")
+routine S64!(from: U256) -> S64
+
+### Truncates a 16-bit float to `S64` by first widening to `B32`.
+### :param from: The source float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: B16) -> S64
+
+### Truncates a 32-bit float to `S64`, rounding toward zero.
+### :param from: The source float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: B32) -> S64
+
+### Truncates a 64-bit float to `S64`, rounding toward zero.
+### :param from: The source float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: B64) -> S64
+
+### Truncates a 128-bit float to `S64` by narrowing to `B64` first.
+### :param from: The source float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: B128) -> S64
+
+### Converts a 32-bit decimal float to `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: D32) -> S64
+
+### Converts a 64-bit decimal float to `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: D64) -> S64
+
+### Converts a 128-bit decimal float to `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `S64` representation.
+@rf("S64")
+routine S64!(from: D128) -> S64
+
+### Returns the sum of this value and `you`, and a flag indicating whether the result overflowed.
+### :param you: The right operand.
+### :returns: A tuple of `(sum, overflow_flag)`.
+@rf("S64.add_with_overflow")
+routine S64.add_with_overflow(you: S64) -> (S64, Bool)
+
+### Returns the difference `me - you`, and a flag indicating whether the result overflowed.
+### :param you: The value to subtract.
+### :returns: A tuple of `(difference, overflow_flag)`.
+@rf("S64.sub_with_overflow")
+routine S64.sub_with_overflow(you: S64) -> (S64, Bool)
+
+### Returns the product of this value and `you`, and a flag indicating whether the result
+### overflowed.
+### :param you: The right operand.
+### :returns: A tuple of `(product, overflow_flag)`.
+@rf("S64.mul_with_overflow")
+routine S64.mul_with_overflow(you: S64) -> (S64, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum.
+### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
+@rf("S64.add")
+routine S64.add!(you: S64) -> S64
+
+### Returns `me - you`, throwing on overflow.
+### :param you: The value to subtract.
+### :returns: The difference.
+### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
+@rf("S64.sub")
+routine S64.sub!(you: S64) -> S64
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product.
+### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
+@rf("S64.mul")
+routine S64.mul!(you: S64) -> S64
+
+### Returns `me // you` (euclidean division), throwing on errors.
+### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
+### :param you: The divisor.
+### :returns: The euclidean quotient.
+### :throws: {DivisionByZeroError} if `you == 0`.
+### :throws: {IntegerOverflowError} if `me == S64_MIN and you == -1`.
+@rf("S64.floordiv")
+routine S64.floordiv!(you: S64) -> S64
+
+### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
+### :param you: The divisor.
+### :returns: The euclidean remainder — always non-negative.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("S64.mod")
+routine S64.mod!(you: S64) -> S64
+
+### Returns `-me` (arithmetic negation).
+### :returns: The negated value.
+@rf("S64.neg")
+routine S64.neg!() -> S64
+
+### Returns `-me` in two's complement, wrapping `S64_MIN` to itself.
+### :returns: The wrapped negation.
+@rf("S64.neg_wrap")
+routine S64.neg_wrap() -> S64
+
+### Returns `(-me, overflowed)`. Overflow occurs only for `S64_MIN`.
+### :returns: A tuple of `(wrapped negation, overflow flag)`.
+@rf("S64.neg_with_overflow")
+routine S64.neg_with_overflow() -> (S64, Bool)
+
+### Returns `-me`, clamped to `S64_MAX` when `me == S64_MIN`.
+### :returns: The saturating negation.
+@rf("S64.neg_clamp")
+routine S64.neg_clamp() -> S64
+
+### Returns |me| in two's complement, wrapping `|S64_MIN|` back to `S64_MIN`.
+### :returns: The wrapped absolute value.
+@rf("S64.abs_wrap")
+routine S64.abs_wrap() -> S64
+
+### Returns `(|me|, overflowed)`. Overflow occurs only for `S64_MIN`.
+### :returns: A tuple of `(wrapped absolute value, overflow flag)`.
+@rf("S64.abs_with_overflow")
+routine S64.abs_with_overflow() -> (S64, Bool)
+
+### Returns |me|, clamped to `S64_MAX` when `me == S64_MIN`.
+### :returns: The saturating absolute value.
+@rf("S64.abs_clamp")
+routine S64.abs_clamp() -> S64
+
+### Returns |me| as an unsigned value; `|S64_MIN|` is represented exactly.
+### :returns: The absolute value as `U64`.
+@rf("S64.unsigned_abs")
+routine S64.unsigned_abs() -> U64
+
+### Returns euclidean `me // you`, wrapping the `S64_MIN // -1` overflow to `S64_MIN`.
+### :param you: The divisor.
+### :returns: The wrapped euclidean quotient.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("S64.floordiv_wrap")
+routine S64.floordiv_wrap(you: S64) -> S64
+
+### Returns `(euclidean quotient, overflowed)`; overflow only for `S64_MIN // -1`.
+### :param you: The divisor.
+### :returns: A tuple of `(quotient, overflow flag)`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("S64.floordiv_with_overflow")
+routine S64.floordiv_with_overflow(you: S64) -> (S64, Bool)
+
+### Returns euclidean `me % you`, wrapping the `S64_MIN % -1` overflow to `0`.
+### :param you: The divisor.
+### :returns: The wrapped euclidean remainder.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("S64.mod_wrap")
+routine S64.mod_wrap(you: S64) -> S64
+
+### Returns `(euclidean remainder, overflowed)`; overflow only for `S64_MIN % -1`.
+### :param you: The divisor.
+### :returns: A tuple of `(remainder, overflow flag)`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("S64.mod_with_overflow")
+routine S64.mod_with_overflow(you: S64) -> (S64, Bool)
+
+### Returns `(me + you) mod 2⁶⁴` in two's complement, without overflow check.
+### :param you: The right operand.
+### :returns: The wrapped sum.
+@rf("S64.add_wrap")
+routine S64.add_wrap(you: S64) -> S64
+
+### Returns `(me - you) mod 2⁶⁴` in two's complement, without overflow check.
+### :param you: The value to subtract.
+### :returns: The wrapped difference.
+@rf("S64.sub_wrap")
+routine S64.sub_wrap(you: S64) -> S64
+
+### Returns `(me * you) mod 2⁶⁴` in two's complement, without overflow check.
+### :param you: The right operand.
+### :returns: The wrapped product.
+@rf("S64.mul_wrap")
+routine S64.mul_wrap(you: S64) -> S64
+
+### Returns `me + you`, clamped to `[S64_MIN, S64_MAX]` on overflow.
+### :param you: The right operand.
+### :returns: The clamped sum.
+@rf("S64.add_clamp")
+routine S64.add_clamp(you: S64) -> S64
+
+### Returns `me - you`, clamped to `[S64_MIN, S64_MAX]` on overflow.
+### :param you: The value to subtract.
+### :returns: The clamped difference.
+@rf("S64.sub_clamp")
+routine S64.sub_clamp(you: S64) -> S64
+
+### Returns `me * you`, clamped to `[S64_MIN, S64_MAX]` on overflow.
+### :param you: The right operand.
+### :returns: The clamped product.
+@rf("S64.mul_clamp")
+routine S64.mul_clamp(you: S64) -> S64
+
+### Returns `me + you + carry` as `(wrapped_sum, overflowed)`.
+### Chains across words to add integers wider than `S64`: feed each word's carry
+### bit up the chain. Unlike the unsigned form, the flag reports SIGNED overflow
+### (the two internal overflows cancel via XOR), so it is only meaningful on the
+### most-significant word of a multi-word signed value.
+### :param you: The right operand.
+### :param carry: The incoming carry bit from the lower word.
+### :returns: A tuple of `(wrapped sum, signed-overflow flag)`.
+@rf("S64.carrying_add")
+routine S64.carrying_add(you: S64, carry: Bool) -> (S64, Bool)
+
+### Returns `me - you - borrow` as `(wrapped_difference, overflowed)`.
+### Chains across words to subtract integers wider than `S64`; the flag reports
+### SIGNED overflow, meaningful only on the most-significant word.
+### :param you: The value to subtract.
+### :param borrow: The incoming borrow bit from the lower word.
+### :returns: A tuple of `(wrapped difference, signed-overflow flag)`.
+@rf("S64.borrowing_sub")
+routine S64.borrowing_sub(you: S64, borrow: Bool) -> (S64, Bool)
+
+### Returns `me ** exp` and an overflow flag.
+### Uses repeated squaring. `0 ** 0 == 1` (the empty product); a negative exponent crashes
+### with NumericDomainError (the result would not be an integer).
+### :param exp: The exponent. Must be non-negative.
+### :returns: A tuple of `(result, overflow_flag)`.
+### :throws: {NumericDomainError} if `exp < 0`.
+@rf("S64.pow_with_overflow")
+routine S64.pow_with_overflow!(exp: S64) -> (S64, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent. Must be non-negative.
+### :returns: The result.
+### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
+@rf("S64.pow")
+routine S64.pow!(exp: S64) -> S64
+
+### Returns `me ** exp` with wrapping arithmetic.
+### :param exp: The exponent. Must be non-negative.
+### :returns: The result modulo 2⁶⁴ in two's complement.
+@rf("S64.pow_wrap")
+routine S64.pow_wrap!(exp: S64) -> S64
+
+### Returns `me ** exp` clamped to `[S64_MIN, S64_MAX]` on overflow.
+### :param exp: The exponent. Must be non-negative.
+### :returns: The clamped result.
+@rf("S64.pow_clamp")
+routine S64.pow_clamp!(exp: S64) -> S64
+
+### Returns `me & you` (bitwise AND).
+### :param you: The right operand.
+### :returns: The bitwise intersection.
+@rf("S64.bitand")
+routine S64.bitand(you: S64) -> S64
+
+### Returns `me | you` (bitwise OR).
+### :param you: The right operand.
+### :returns: The bitwise union.
+@rf("S64.bitor")
+routine S64.bitor(you: S64) -> S64
+
+### Returns `me ^ you` (bitwise XOR).
+### :param you: The right operand.
+### :returns: The bitwise exclusive-or.
+@rf("S64.bitxor")
+routine S64.bitxor(you: S64) -> S64
+
+### Returns `~me` (bitwise NOT).
+### :returns: The bitwise complement.
+@rf("S64.bitnot")
+routine S64.bitnot() -> S64
+
+### Returns true if both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`.
+@rf("S64.eq")
+routine S64.eq(you: S64) -> Bool
+
+### Returns the ordering relationship between this value and `you`.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("S64.cmp")
+routine S64.cmp(you: S64) -> ComparisonSign
+
+### Returns the absolute value of this value.
+### :returns: `me` if non-negative; `-me` otherwise.
+### :throws: {IntegerOverflowError} when `me` is `S64_MIN` (its magnitude is not representable in S64).
+@rf("S64.abs")
+routine S64.abs!() -> S64
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("S64.min")
+routine S64.min(you: S64) -> S64
+
+### Returns the integer square root ⌊√me⌋. Throws for a negative `me`.
+### :returns: The floor of the square root of `me`.
+### :throws: {NumericDomainError} if `me < 0`.
+@rf("S64.isqrt")
+routine S64.isqrt() -> S64
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+### :throws: {NumericDomainError} if `me < 0`.
+@rf("S64.sqrtrem")
+routine S64.sqrtrem!() -> (S64, S64)
+
+### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
+### :param base: The logarithm base (must be ≥ 2).
+### :returns: The floor of the base-`base` logarithm.
+### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
+@rf("S64.ilog")
+routine S64.ilog!(base: S64) -> S64
+
+### Returns the absolute difference |me - you| as an unsigned value (no overflow).
+### :param you: The other value.
+### :returns: The non-negative distance between `me` and `you`.
+@rf("S64.abs_diff")
+routine S64.abs_diff(you: S64) -> U64
+
+### Returns this value with the bit order reversed.
+### :returns: The bit-reversed value.
+@rf("S64.reverse_bits")
+routine S64.reverse_bits() -> S64
+
+### Returns this value with the byte order reversed (big/little endian swap).
+### :returns: The byte-swapped value.
+@rf("S64.swap_bytes")
+routine S64.swap_bytes() -> S64
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("S64.to_bytes_le")
+routine S64.to_bytes_le() -> Array[Byte, 8]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("S64.to_bytes_be")
+routine S64.to_bytes_be() -> Array[Byte, 8]
+
+### Builds an `S64` from its little-endian raw byte representation.
+@rf("S64.from_bytes_le")
+common routine S64.from_bytes_le(bytes: Array[Byte, 8]) -> S64
+
+### Builds an `S64` from its big-endian raw byte representation.
+@rf("S64.from_bytes_be")
+common routine S64.from_bytes_be(bytes: Array[Byte, 8]) -> S64
+
+### Returns true if this value is strictly greater than zero.
+### :returns: `true` when `me > 0`.
+@rf("S64.is_positive")
+routine S64.is_positive() -> Bool
+
+### Returns true if this value is zero.
+### :returns: `true` when `me == 0`.
+@rf("S64.is_zero")
+routine S64.is_zero() -> Bool
+
+### Returns true if this value is even.
+### :returns: `true` when the least significant bit is clear.
+@rf("S64.is_even")
+routine S64.is_even() -> Bool
+
+### Returns true if this value is odd.
+### :returns: `true` when the least significant bit is set.
+@rf("S64.is_odd")
+routine S64.is_odd() -> Bool
+
+### Returns true if this value is an exact power of two.
+### Negative values always return `false`.
+### :returns: `true` if `me > 0 and (me & (me - 1)) == 0`.
+@rf("S64.is_power_of_two")
+routine S64.is_power_of_two() -> Bool
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("S64.represent")
+routine S64.represent() -> Text
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("S64.diagnose")
+routine S64.diagnose() -> Text
+
+### Parses a decimal text representation of an `S64`.
+### Accepts an optional leading `+` or `-` sign followed by ASCII decimal digits.
+### :param from_text: The text to parse.
+### :returns: The parsed `S64` value.
+### :throws: {InvalidValueError} if the text is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `S64`.
+@rf("S64")
+routine S64!(from_text: Text) -> S64
+
+### Returns a SipHash-2-4 keyed hash of this value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The 64-bit keyed hash.
+@rf("S64.hash")
+routine S64.hash(k0: U64, k1: U64) -> U64

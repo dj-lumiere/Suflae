@@ -1,0 +1,28 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a 128-bit keyed-hash seed for secure hash tables.
+### `SecureHashKey` is used by `Set` and `Dict` to randomize
+### SipHash state per table instance and reduce collision-based attacks.
+@rf("SecureHashKey")
+record SecureHashKey
+    ### Stores the first 64-bit SipHash key word.
+    k0: U64
+    ### Stores the second 64-bit SipHash key word.
+    k1: U64
+
+### Generates a fresh key from OS entropy (BCryptGenRandom / getrandom).
+### Each generated key is suitable for seeding an independent secure hash table
+### instance.
+### :returns: The resulting `SecureHashKey` value.
+@rf("SecureHashKey.random")
+common routine SecureHashKey.random() -> SecureHashKey
+
+### Returns a SipHash-2-4 keyed hash of this key.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("SecureHashKey.hash")
+routine SecureHashKey.hash(k0: U64, k1: U64) -> U64

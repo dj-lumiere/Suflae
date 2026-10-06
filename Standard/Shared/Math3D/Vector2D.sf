@@ -1,0 +1,100 @@
+module Math3D
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A two-dimensional vector with `B32` components.
+@rf("Vector2D")
+record Vector2D
+obeys Addable, Subtractable, Negatable, Equatable
+    ### The x component.
+    x: B32
+    ### The y component.
+    y: B32
+
+### Returns the component-wise sum `me + you`.
+### :param you: The addend.
+### :returns: A `Vector2D` whose components are the sums.
+@rf("Vector2D.add")
+routine Vector2D.add(you: Vector2D) -> Vector2D
+
+### Returns the component-wise difference `me - you`.
+### :param you: The value to subtract.
+### :returns: A `Vector2D` whose components are the differences.
+@rf("Vector2D.sub")
+routine Vector2D.sub(you: Vector2D) -> Vector2D
+
+### Returns the arithmetic negation of this vector.
+### :returns: A `Vector2D` with both components negated.
+@rf("Vector2D.neg")
+routine Vector2D.neg() -> Vector2D
+
+### Returns this vector scaled by a scalar `factor`.
+### :param factor: The scalar multiplier.
+### :returns: `factor · me`, component-wise.
+@rf("Vector2D.scale")
+routine Vector2D.scale(factor: B32) -> Vector2D
+
+### Returns the dot product `me · you`.
+### :param you: The right operand.
+### :returns: `me.x·you.x + me.y·you.y`.
+@rf("Vector2D.dot")
+routine Vector2D.dot(you: Vector2D) -> B32
+
+### Returns the z component of the 2D cross product (a scalar).
+### :param you: The right operand.
+### :returns: `me.x·you.y − me.y·you.x`.
+@rf("Vector2D.cross")
+routine Vector2D.cross(you: Vector2D) -> B32
+
+### Returns the squared Euclidean length (avoids the square root of `length`).
+### :returns: `me · me`.
+@rf("Vector2D.length_squared")
+routine Vector2D.length_squared() -> B32
+
+### Returns the Euclidean length (magnitude) of this vector.
+### :returns: `√(x² + y²)`.
+@rf("Vector2D.length")
+routine Vector2D.length() -> B32
+
+### Returns the unit vector pointing in the same direction. A zero vector is
+### returned unchanged (its length is zero).
+### :returns: `me / |me|`, or `me` when `|me| == 0`.
+@rf("Vector2D.normalize")
+routine Vector2D.normalize() -> Vector2D
+
+### Returns the Euclidean distance between this vector and `you`.
+### :param you: The other point.
+### :returns: `|me − you|`.
+@rf("Vector2D.distance")
+routine Vector2D.distance(you: Vector2D) -> B32
+
+### Returns the linear interpolation between `me` (at `t = 0`) and `you` (at `t = 1`).
+### :param you: The endpoint.
+### :param t: The interpolation parameter (unclamped).
+### :returns: `me + t·(you − me)`.
+@rf("Vector2D.lerp")
+routine Vector2D.lerp(you: Vector2D, t: B32) -> Vector2D
+
+### Returns `true` if both components compare equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me.x == you.x` and `me.y == you.y`.
+@rf("Vector2D.eq")
+routine Vector2D.eq(you: Vector2D) -> Bool
+
+### Formats this vector as `(x, y)`.
+### :returns: The resulting `Text` value.
+@rf("Vector2D.represent")
+routine Vector2D.represent() -> Text
+
+### Returns a diagnostic string wrapping the value with its type name.
+### :returns: The resulting `Text` value.
+@rf("Vector2D.diagnose")
+routine Vector2D.diagnose() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this vector.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash.
+@rf("Vector2D.hash")
+routine Vector2D.hash(k0: U64, k1: U64) -> U64

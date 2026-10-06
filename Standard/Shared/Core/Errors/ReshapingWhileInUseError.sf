@@ -1,0 +1,17 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a container is changed in a way that can move its elements (an
+### add, a remove, a resize) while an `each` loop over it, or a call on one of its elements, is still
+### running.
+@rf("ReshapingWhileInUseError")
+crashable ReshapingWhileInUseError
+    ### Names the kind of container, such as "list" or "dict".
+    container: Text
+
+### Returns the default message for a container changed while its elements were in use.
+### :returns: The resulting `Text` value.
+@rf("ReshapingWhileInUseError.crash_message")
+routine ReshapingWhileInUseError.crash_message() -> Text

@@ -1,0 +1,83 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents one raw 8-bit byte.
+### `Byte` is a binary payload type, not a text character, so its display form
+### always uses an escaped hexadecimal representation.
+@rf("Byte")
+record Byte
+obeys Copyable
+    pass
+
+### Returns the same byte value.
+### This overload exists so generic creator-based code can normalize on the
+### standard construction surface.
+### :param from: The source value to convert.
+### :returns: The resulting `Byte` value.
+@rf("Byte")
+routine Byte(from: Byte) -> Byte
+
+### Reinterprets an unsigned 8-bit integer as `Byte`.
+### :param from: The source value to convert.
+### :returns: The resulting `Byte` value.
+@rf("Byte")
+routine Byte(from: U8) -> Byte
+
+### Returns whether both values are equal.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("Byte.eq")
+routine Byte.eq(you: Byte) -> Bool
+
+### Compares this value with the other value.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("Byte.cmp")
+routine Byte.cmp(you: Byte) -> ComparisonSign
+
+### Returns `true` when this byte falls within the inclusive range
+### `[low, high]`.
+### :param low: The lower inclusive bound.
+### :param high: The upper inclusive bound.
+### :returns: The resulting `Bool` value.
+@rf("Byte.in_range")
+routine Byte.in_range(low: U8, high: U8) -> Bool
+
+### Returns `true` when this byte is in the 7-bit ASCII range.
+### :returns: The resulting `Bool` value.
+@rf("Byte.is_ascii")
+routine Byte.is_ascii() -> Bool
+
+### Returns `true` when this byte is the ASCII encoding of `0` through `9`.
+### :returns: The resulting `Bool` value.
+@rf("Byte.is_digit")
+routine Byte.is_digit() -> Bool
+
+### Returns `true` when this byte is an ASCII hexadecimal digit.
+### Accepted digits are `0-9`, `A-F`, and `a-f`.
+### :returns: The resulting `Bool` value.
+@rf("Byte.is_hex_digit")
+routine Byte.is_hex_digit() -> Bool
+
+### Returns the display form of this byte.
+### Raw bytes are rendered as `\\xHH` so output remains unambiguous regardless of
+### encoding context.
+### :returns: The resulting `Text` value.
+@rf("Byte.represent")
+routine Byte.represent() -> Text
+
+### Returns the diagnostic form of this byte.
+### The diagnostic form includes both the unsigned numeric value and the escaped
+### byte representation.
+### :returns: The resulting `Text` value.
+@rf("Byte.diagnose")
+routine Byte.diagnose() -> Text
+
+### Returns a keyed hash of this value using SipHash-2-4.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The resulting `U64` value.
+@rf("Byte.hash")
+routine Byte.hash(k0: U64, k1: U64) -> U64

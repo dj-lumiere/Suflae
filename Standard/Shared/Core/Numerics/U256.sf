@@ -1,0 +1,522 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 256-bit unsigned integer in the range 0 to 2²⁵⁶−1.
+###
+### `U256` is used for cryptographic computations, very large counters, and as a
+### wide intermediate for the software float / decimal kernels (e.g. B128 products
+### and division numerators). Note that `U256` does not implement `AtomicType`
+### because hardware atomic operations on 256-bit values are not available.
+@rf("U256")
+record U256
+obeys UnsignedIntegral, Comparable, Copyable
+    pass
+
+### Assemble 4 U64 limbs (little-endian) into a U256.
+@rf("asm256")
+routine asm256(q0: U64, q1: U64, q2: U64, q3: U64) -> U256
+
+### Quotient of num // den (den fits U128) with the round-sticky in bit 0. Register-
+### resident: n=1 long division for a single-limb divisor, unrolled n=2 Knuth otherwise.
+@rf("udiv256_by_u128_sticky")
+routine udiv256_by_u128_sticky(num: U256, den: U256) -> U256
+
+### Quotient of `num // den` for a 128-bit numerator and a 64-bit divisor, with the round-
+### sticky baked into bit 0 (set iff the remainder was nonzero). Two hardware 128/64 divides
+### (high limb, then low) — no `__udivti3` U128 libcall and no separate %/multiply-back to
+### recover the remainder. The D64 single-limb analog of `udiv256_by_u128_sticky`.
+@rf("udiv128_by_u64_sticky")
+routine udiv128_by_u64_sticky(num: U128, den: U64) -> U128
+
+### Quotient of `num // den` when the caller GUARANTEES `hi(num) < den` (so the quotient
+### fits U64) — the sticky is baked into bit 0. A single normalized 2-by-1 divide: ONE x86
+### `divq` (or one M-G `div2by1` on arm64/wasm), NOT the two-limb long division of
+### `udiv128_by_u64_sticky`. Because `hi(num) < den ≤ 2^(64-s)` (s = clz(den)), the shift
+### `num << s` never spills past 128 bits, and the general routine's high-limb step would
+### divide `0:na1` → quotient 0 anyway, so it is pure overhead here. PRECONDITION: `hi(num) <
+### den` (else the result is wrong). D64's divide satisfies it — its digit-scaling caps the
+### quotient at ~18-19 digits (< 2^64).
+@rf("udiv128_hi_lt_den_sticky")
+routine udiv128_hi_lt_den_sticky(num: U128, den: U64) -> U128
+
+### Quotient of `num // den` with the round-sticky baked into bit 0 (set iff the
+### division left a nonzero remainder). One Knuth-D call returns both quotient and
+### remainder, so callers that only need a sticky avoid a separate %/mul-back.
+@rf("udiv256_sticky")
+routine udiv256_sticky(num: U256, den: U256) -> U256
+
+### Diagnostic name (raw wide intermediate; not decimal-formatted).
+@rf("U256.represent")
+routine U256.represent() -> Text
+
+### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
+### when negative (`255.to_text(radix: 16)` is `ff`).
+### :param radix: The numeric base.
+### :returns: The rendered `Text`.
+@rf("U256.to_text")
+routine U256.to_text(radix: S32) -> Text
+
+### Diagnostic representation tagged with the type name.
+@rf("U256.diagnose")
+routine U256.diagnose() -> Text
+
+### Converts an `S8` to `U256`, throwing if the value is negative.
+### :param from: The `S8` value to convert.
+### :returns: A `U256` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S8) -> U256
+
+### Converts an `S16` to `U256`, throwing if the value is negative.
+### :param from: The `S16` value to convert.
+### :returns: A `U256` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S16) -> U256
+
+### Converts an `S32` to `U256`, throwing if the value is negative.
+### :param from: The `S32` value to convert.
+### :returns: A `U256` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S32) -> U256
+
+### Converts an `S64` to `U256`, throwing if the value is negative.
+### :param from: The `S64` value to convert.
+### :returns: A `U256` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S64) -> U256
+
+### Converts an `S128` to `U256`, throwing if the value is negative.
+### A non-negative `S128` sign-extends to the same magnitude in 256 bits.
+### :param from: The `S128` value to convert.
+### :returns: A `U256` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S128) -> U256
+
+### Converts an `S256` to `U256`, throwing if the value is negative.
+### :param from: The `S256` value to convert.
+### :returns: The same bit pattern reinterpreted as `U256`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U256")
+routine U256!(from: S256) -> U256
+
+### Zero-extends a `U8` to `U256`.
+### :param from: The `U8` value to widen.
+### :returns: A `U256` equal in value to `from`.
+@rf("U256")
+routine U256(from: U8) -> U256
+
+### Zero-extends a `U16` to `U256`.
+### :param from: The `U16` value to widen.
+### :returns: A `U256` equal in value to `from`.
+@rf("U256")
+routine U256(from: U16) -> U256
+
+### Zero-extends a `U32` to `U256`.
+### :param from: The `U32` value to widen.
+### :returns: A `U256` equal in value to `from`.
+@rf("U256")
+routine U256(from: U32) -> U256
+
+### Zero-extends a `U64` to `U256`.
+### :param from: The `U64` value to widen.
+### :returns: A `U256` equal in value to `from`.
+@rf("U256")
+routine U256(from: U64) -> U256
+
+### Zero-extends a `U128` to `U256`.
+### :param from: The `U128` value to widen.
+### :returns: A `U256` equal in value to `from`.
+@rf("U256")
+routine U256(from: U128) -> U256
+
+### Identity conversion — returns `from` unchanged.
+### :param from: The `U256` value to return.
+### :returns: `from` unchanged.
+@rf("U256")
+routine U256(from: U256) -> U256
+
+### Converts an `B16` to `U256`, truncating toward zero.
+### :param from: The `B16` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, or negative.
+@rf("U256")
+routine U256!(from: B16) -> U256
+
+### Converts an `B32` to `U256`, truncating toward zero.
+### :param from: The `B32` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, or negative.
+@rf("U256")
+routine U256!(from: B32) -> U256
+
+### Converts an `B64` to `U256`, truncating toward zero.
+### :param from: The `B64` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, negative, or >= 2^256.
+@rf("U256")
+routine U256!(from: B64) -> U256
+
+### Converts an `B128` to `U256`, truncating toward zero.
+### :param from: The `B128` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {NumericOverflowError} if negative or >= 2^256; {NumericDomainError} if NaN.
+@rf("U256")
+routine U256!(from: B128) -> U256
+
+### Converts a `D32` to `U256`, truncating toward zero.
+### :param from: The `D32` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {NumericOverflowError} if the integer part overflows U256.
+@rf("U256")
+routine U256!(from: D32) -> U256
+
+### Converts a `D64` to `U256`, truncating toward zero.
+### :param from: The `D64` value to convert.
+### :returns: The integer part of `from` as a `U256`.
+### :throws: {NumericOverflowError} if the integer part overflows U256.
+@rf("U256")
+routine U256!(from: D64) -> U256
+
+### Returns the sum and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_sum, overflowed)`.
+@rf("U256.add_with_overflow")
+routine U256.add_with_overflow(you: U256) -> (U256, Bool)
+
+### Returns the difference and a flag indicating whether the result wrapped around.
+### :param you: The value to subtract.
+### :returns: A tuple of `(wrapped_difference, overflowed)`.
+@rf("U256.sub_with_overflow")
+routine U256.sub_with_overflow(you: U256) -> (U256, Bool)
+
+### Returns the product and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_product, overflowed)`.
+@rf("U256.mul_with_overflow")
+routine U256.mul_with_overflow(you: U256) -> (U256, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum `me + you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
+@rf("U256.add")
+routine U256.add!(you: U256) -> U256
+
+### Returns `me - you`, throwing on underflow.
+### :param you: The value to subtract.
+### :returns: The difference `me - you`.
+### :throws: {IntegerOverflowError} if the result is less than `U256_MIN` (0).
+@rf("U256.sub")
+routine U256.sub!(you: U256) -> U256
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product `me * you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
+@rf("U256.mul")
+routine U256.mul!(you: U256) -> U256
+
+### Returns `me // you` (integer division), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The quotient `me // you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U256.floordiv")
+routine U256.floordiv!(you: U256) -> U256
+
+### Returns `me % you` (integer remainder), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The remainder `me % you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U256.mod")
+routine U256.mod!(you: U256) -> U256
+
+### (quotient, remainder) of `me // you` and `me % you` from ONE Knuth-D pass — half the work of
+### calling `//` and `%` separately (each runs its own full `udivrem256`). Throws on a zero divisor.
+### :param you: The divisor.
+### :returns: The tuple `(me // you, me % you)`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U256.divmod")
+routine U256.divmod!(you: U256) -> (U256, U256)
+
+### Returns `(me + you) mod 2²⁵⁶` without overflow check.
+### :param you: The right operand.
+### :returns: The sum modulo 2²⁵⁶.
+@rf("U256.add_wrap")
+routine U256.add_wrap(you: U256) -> U256
+
+### Returns `(me - you) mod 2²⁵⁶` without underflow check.
+### :param you: The value to subtract.
+### :returns: The difference modulo 2²⁵⁶.
+@rf("U256.sub_wrap")
+routine U256.sub_wrap(you: U256) -> U256
+
+### Returns `(me * you) mod 2²⁵⁶` without overflow check.
+### :param you: The right operand.
+### :returns: The product modulo 2²⁵⁶.
+@rf("U256.mul_wrap")
+routine U256.mul_wrap(you: U256) -> U256
+
+### Returns `me + you`, clamped to `U256_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The sum, or `U256_MAX` if it would overflow.
+@rf("U256.add_clamp")
+routine U256.add_clamp(you: U256) -> U256
+
+### Returns `me - you`, clamped to `U256_MIN` on underflow.
+### :param you: The value to subtract.
+### :returns: The difference, or `0` if it would go below `U256_MIN`.
+@rf("U256.sub_clamp")
+routine U256.sub_clamp(you: U256) -> U256
+
+### Returns `me * you`, clamped to `U256_MAX` on overflow.
+### Uses a division-based overflow check since no 512-bit public type is available.
+### :param you: The right operand.
+### :returns: The product, or `U256_MAX` if it would overflow.
+@rf("U256.mul_clamp")
+routine U256.mul_clamp(you: U256) -> U256
+
+### Returns `me ** exp` and a flag indicating whether the result wrapped around.
+### :param exp: The exponent.
+### :returns: A tuple of `(wrapped_result, overflowed)`.
+@rf("U256.pow_with_overflow")
+routine U256.pow_with_overflow(exp: U256) -> (U256, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent.
+### :returns: The result of raising `me` to the power `exp`.
+### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
+@rf("U256.pow")
+routine U256.pow!(exp: U256) -> U256
+
+### Returns `me ** exp` with wrapping arithmetic (mod 2²⁵⁶).
+### :param exp: The exponent.
+### :returns: The result modulo 2²⁵⁶.
+@rf("U256.pow_wrap")
+routine U256.pow_wrap(exp: U256) -> U256
+
+### Returns `me ** exp`, clamped to `U256_MAX` on overflow.
+### :param exp: The exponent.
+### :returns: The result, or `U256_MAX` if it would overflow.
+@rf("U256.pow_clamp")
+routine U256.pow_clamp(exp: U256) -> U256
+
+### Returns the bitwise AND of this value and `you`.
+### :param you: The right operand.
+### :returns: `me & you`.
+@rf("U256.bitand")
+routine U256.bitand(you: U256) -> U256
+
+### Returns the bitwise OR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me | you`.
+@rf("U256.bitor")
+routine U256.bitor(you: U256) -> U256
+
+### Returns the bitwise XOR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me ^ you`.
+@rf("U256.bitxor")
+routine U256.bitxor(you: U256) -> U256
+
+### Returns the bitwise complement of this value.
+### :returns: `~me` — each bit flipped.
+@rf("U256.bitnot")
+routine U256.bitnot() -> U256
+
+### Left-shifts this value by `bits` positions, filling vacated bits with zero. Shifting by
+### 256 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+@rf("U256.ashl")
+routine U256.ashl(bits: U32) -> U256
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>>` for an unsigned type). Shifting by 256 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >> bits`.
+@rf("U256.ashr")
+routine U256.ashr(bits: U32) -> U256
+
+### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
+### `>>` for an unsigned type). Shifting by 256 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+@rf("U256.lshr")
+routine U256.lshr(bits: U32) -> U256
+
+### Returns `true` when both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`; `false` otherwise.
+@rf("U256.eq")
+routine U256.eq(you: U256) -> Bool
+
+### Compares this value with `you`, returning the ordering relationship.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("U256.cmp")
+routine U256.cmp(you: U256) -> ComparisonSign
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("U256.min")
+routine U256.min(you: U256) -> U256
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`; otherwise `you`.
+@rf("U256.max")
+routine U256.max(you: U256) -> U256
+
+### Returns this value clamped to the range `min_val..=max_val`.
+### :param min_val: The lower bound (inclusive).
+### :param max_val: The upper bound (inclusive).
+### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
+@rf("U256.clamp")
+routine U256.clamp(min_val: U256, max_val: U256) -> U256
+
+### Returns the count of set bits (popcount) in this value's 256-bit representation.
+### :returns: The number of `1` bits; between 0 and 256.
+@rf("U256.count_ones")
+routine U256.count_ones() -> U256
+
+### Returns the count of clear bits in this value's 256-bit representation.
+### :returns: `256` minus the popcount; between 0 and 256.
+@rf("U256.count_zeros")
+routine U256.count_zeros() -> U256
+
+### Returns the number of leading zero bits, starting from the most-significant bit.
+### :returns: The leading zero count; `256` if the value is zero.
+@rf("U256.leading_zeros")
+routine U256.leading_zeros() -> U256
+
+### Returns the number of trailing zero bits, starting from the least-significant bit.
+### :returns: The trailing zero count; `256` if the value is zero.
+@rf("U256.trailing_zeros")
+routine U256.trailing_zeros() -> U256
+
+### Returns the number of leading one bits, starting from the most-significant bit.
+### :returns: The leading one count; `256` if the value is `U256_MAX`.
+@rf("U256.leading_ones")
+routine U256.leading_ones() -> U256
+
+### Returns the number of trailing one bits, starting from the least-significant bit.
+### :returns: The trailing one count; `256` if the value is `U256_MAX`.
+@rf("U256.trailing_ones")
+routine U256.trailing_ones() -> U256
+
+### Returns this value with its bits reversed (bit 255 ↔ bit 0, etc.).
+### :returns: The bit-reversed `U256`.
+@rf("U256.reverse_bits")
+routine U256.reverse_bits() -> U256
+
+### Returns this value with its 32 bytes swapped (for endianness conversion).
+### :returns: A `U256` with its bytes in reverse order.
+@rf("U256.swap_bytes")
+routine U256.swap_bytes() -> U256
+
+### Returns `true` if this value is an exact power of two.
+### :returns: `true` if `me` is 1, 2, 4, ..., 2²⁵⁵; `false` otherwise (including zero).
+@rf("U256.is_power_of_two")
+routine U256.is_power_of_two() -> Bool
+
+### Returns this value rotated left by `bits` positions.
+@rf("U256.rotate_left")
+routine U256.rotate_left(bits: U32) -> U256
+
+### Returns this value rotated right by `bits` positions.
+@rf("U256.rotate_right")
+routine U256.rotate_right(bits: U32) -> U256
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("U256.to_bytes_le")
+routine U256.to_bytes_le() -> Array[Byte, 32]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("U256.to_bytes_be")
+routine U256.to_bytes_be() -> Array[Byte, 32]
+
+### Builds a `U256` from its little-endian raw byte representation.
+@rf("U256.from_bytes_le")
+common routine U256.from_bytes_le(bytes: Array[Byte, 32]) -> U256
+
+### Builds a `U256` from its big-endian raw byte representation.
+@rf("U256.from_bytes_be")
+common routine U256.from_bytes_be(bytes: Array[Byte, 32]) -> U256
+
+### Returns `true` if this value is zero.
+### :returns: `true` if `me == 0`.
+@rf("U256.is_zero")
+routine U256.is_zero() -> Bool
+
+### Returns `true` if this value is divisible by 2.
+### :returns: `true` if the least-significant bit is 0.
+@rf("U256.is_even")
+routine U256.is_even() -> Bool
+
+### Returns `true` if this value is not divisible by 2.
+### :returns: `true` if the least-significant bit is 1.
+@rf("U256.is_odd")
+routine U256.is_odd() -> Bool
+
+### Returns the upper 128 bits of this 256-bit value.
+### :returns: Bits 255..128 as a `U128`.
+@rf("U256.high128")
+routine U256.high128() -> U128
+
+### Returns the lower 128 bits of this 256-bit value.
+### :returns: Bits 127..0 as a `U128`.
+@rf("U256.low128")
+routine U256.low128() -> U128
+
+### Parses a decimal string into a `U256`.
+### :param from_text: The decimal string to parse (no sign, no prefix).
+### :returns: The parsed `U256` value.
+### :throws: {InvalidValueError} if `from_text` is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U256`.
+@rf("U256")
+routine U256!(from_text: Text) -> U256
+
+### Returns a SipHash-2-4 keyed hash of this 256-bit value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("U256.hash")
+routine U256.hash(k0: U64, k1: U64) -> U64
+
+### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
+### :returns: The floor of the square root of `me`.
+@rf("U256.isqrt")
+routine U256.isqrt() -> U256
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+@rf("U256.sqrtrem")
+routine U256.sqrtrem() -> (U256, U256)
+
+### The 9 decimal digits of a U64 in [0, 10⁹), zero-padded (interior base-10⁹ chunk of `wide_dec`).
+### The `// 10` / `% 10` here are on a scalar U64 by a constant, so the backend lowers them to a
+### reciprocal multiply (no hardware divide) — the "magic/Montgomery" step for the constant divisor.
+@rf("wide_dec9")
+routine wide_dec9(c: U64) -> Text
+
+### The decimal digits of a nonzero U64 with no leading zeros (the most-significant base-10⁹ chunk).
+@rf("wide_dec_head")
+routine wide_dec_head(c: U64) -> Text
+
+### Decimal digit string of a wide unsigned integer (MSD first; "0" for zero). Peels base-10⁹
+### chunks: one wide `// 10⁹` / `% 10⁹` per 9 digits (vs per-digit) through the type's knuth-based
+### FloorDivisible, then formats each 9-digit chunk with scalar reciprocal-multiply `// 10`. The
+### wide divisor 10⁹ fits one limb, so each peel is the fast single-limb divide. Backs the wide-int
+### and Decimal `represent`s; table-free, any width.
+@rf("wide_dec")
+routine wide_dec[T](v: T) -> Text
+needs RecordType T
+needs T obeys FloorDivisible

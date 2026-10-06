@@ -1,0 +1,53 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### One frame of the crash trace, as the builder's trace helpers keep it: the routine's name and the source
+### file (NUL-terminated C strings), and the line and column the routine has reached.
+@rf("TraceFrame")
+record TraceFrame
+    routine_name: Address
+    file: Address
+    line: S32
+    column: S32
+
+### Ends the program with a crash report: the error type's name, its message, where it was raised, then
+### the call trace, and exit status 82. The builder calls it for a `throw` nothing recovers and for an
+### `absent` in a failable routine, so every crash report has this one shape.
+### :param type_name: The name of the error type.
+### :param message: What went wrong.
+### :param file: The source file the crash was raised in.
+### :param line: The source line.
+### :param column: The source column.
+@rf("crash_report")
+routine crash_report(type_name: Text, message: Text, file: Text, line: S32, column: S32)
+
+### Writes the calling thread's crash trace, most recent frame first: the trace keeps the last 32 frames
+### and says how many there were in all when there were more. Writes nothing when the build keeps no trace.
+@rf("crash_write_trace")
+routine crash_write_trace()
+
+### Writes a text to the error stream as UTF-8, one character at a time.
+### :param text: The text to write.
+@rf("crash_write")
+routine crash_write(text: Text)
+
+### Writes one Unicode code point to the error stream as its one to four UTF-8 bytes.
+### :param code: The code point.
+@rf("crash_write_code_point")
+routine crash_write_code_point(code: U32)
+
+### One UTF-8 byte: the lead bits, then the code point's bits from `shift` up (six of them, or all that
+### remain under a lead byte).
+### :param lead: The byte's fixed high bits.
+### :param code: The code point.
+### :param shift: How far the code point is shifted right for this byte.
+### :returns: The byte.
+@rf("crash_utf8_byte")
+routine crash_utf8_byte(lead: U32, code: U32, shift: U32) -> U8
+
+### Writes a number in decimal to the error stream, with a minus sign when it is negative.
+### :param value: The number.
+@rf("crash_write_number")
+routine crash_write_number(value: S32)

@@ -1,0 +1,47 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy mapping adapter over an input iterable.
+### Each source element is transformed only when requested by iteration.
+### :typeparam T: The source element type.
+### :typeparam TResult: The projected output type.
+### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
+@rf("SelectIterable")
+entity SelectIterable[T, TResult, TSource]
+relates SelectEmittable[T, TResult, TSource/Iter] as Iter
+obeys Iterable[TResult]
+needs TSource obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence and projects each yielded value through a transform routine.
+### :typeparam T: The source element type.
+### :typeparam TResult: The projected output type.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("SelectEmittable")
+entity SelectEmittable[T, TResult, TSourceIter]
+obeys Emittable[TResult]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Returns the stateful iterator that drives this projection adapter.
+### The emitted iterator reuses the same transform routine for every yielded
+### source value.
+### :returns: The resulting `SelectEmittable[T, TResult, TSource/Iter]` value.
+@rf("SelectIterable.iter")
+routine SelectIterable[T, TResult, TSource].iter() -> SelectEmittable[T, TResult, TSource/Iter]
+
+### Returns the next projected value from the mapped sequence.
+### The transform runs once for each successfully yielded source value.
+### :returns: The resulting `TResult` value.
+@rf("SelectEmittable.emit")
+routine SelectEmittable[T, TResult, TSourceIter].emit!() -> TResult
+
+### Returns a lazy projection of this iterable.
+### The source sequence is not evaluated until the resulting iterator is
+### consumed.
+### :param transform: The routine used to map each source value to a result value.
+### :returns: The resulting `SelectIterable[T, TResult, Me]` value.
+@rf("Iterable.select")
+routine Iterable[T].select[TResult](transform: Routine[(T,), TResult]) -> SelectIterable[T, TResult, Me]

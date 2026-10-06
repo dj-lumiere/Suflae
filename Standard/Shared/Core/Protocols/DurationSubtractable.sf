@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for shifting a value backward by a duration.
+### `DurationSubtractable` is used by temporal values that can move earlier by a
+### concrete `Duration`.
+@rf("DurationSubtractable")
+protocol DurationSubtractable
+    ### Returns this value shifted backward by `you`.
+    ### :param you: The duration to subtract.
+    ### :returns: The resulting `Me` value.
+    routine Me.sub(you: Duration) -> Me

@@ -1,0 +1,47 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The boolean type, representing a single `true` or `false` value.
+###
+### `Bool` is the result type of all comparison and logical operations.
+### It maps to LLVM `i1` and occupies a single bit in registers,
+### though it is stored as a byte in memory.
+@rf("Bool")
+record Bool
+obeys Equatable, Copyable
+    pass
+
+### Returns `true` when both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`; `false` otherwise.
+@rf("Bool.eq")
+routine Bool.eq(you: Bool) -> Bool
+
+### Converts this boolean to an `S32` integer.
+### :returns: `1` if `me` is `true`; `0` if `me` is `false`.
+@rf("S32")
+routine S32(from: Bool) -> S32
+
+### Converts this boolean to a `U8` byte.
+### :returns: `1u8` if `me` is `true`; `0u8` if `me` is `false`.
+@rf("U8")
+routine U8(from: Bool) -> U8
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("Bool.diagnose")
+routine Bool.diagnose() -> Text
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("Bool.represent")
+routine Bool.represent() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("Bool.hash")
+routine Bool.hash(k0: U64, k1: U64) -> U64

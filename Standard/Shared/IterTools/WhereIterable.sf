@@ -1,0 +1,50 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy filtering adapter over a source iterable.
+### The adapter can keep either matching or non-matching items depending on `inverted`.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
+@rf("WhereIterable")
+entity WhereIterable[T, TSource]
+relates WhereEmittable[T, TSource/Iter] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence while yielding only values that satisfy the effective filter.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("WhereEmittable")
+entity WhereEmittable[T, TSourceIter]
+obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Returns the stateful iterator that applies the filter lazily.
+### Source values are examined only as the caller requests more output values.
+### :returns: The resulting `WhereEmittable[T, TSource/Iter]` value.
+@rf("WhereIterable.iter")
+routine WhereIterable[T, TSource].iter() -> WhereEmittable[T, TSource/Iter]
+
+### Returns the next value that satisfies the effective filter condition.
+### Source values are consumed and discarded until one passes the filter.
+### :returns: The resulting `T` value.
+@rf("WhereEmittable.emit")
+routine WhereEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+
+### Returns a lazy adapter that keeps only values for which `predicate` returns
+### `true`.
+### :param predicate: The filter predicate.
+### :returns: The resulting `WhereIterable[T, Me]` value.
+@rf("Iterable.where")
+routine Iterable[T].where(predicate: Routine[(T,), Bool]) -> WhereIterable[T, Me]
+
+### Returns a lazy adapter that keeps only values for which `predicate` returns
+### `false`.
+### :param predicate: The filter predicate.
+### :returns: The resulting `WhereIterable[T, Me]` value.
+@rf("Iterable.where_not")
+routine Iterable[T].where_not(predicate: Routine[(T,), Bool]) -> WhereIterable[T, Me]

@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for values with a known element count.
+### A `Sized` value can report how many elements it currently holds, without
+### consuming or traversing itself. This underpins length-aware operations such
+### as uniform random selection and shuffling.
+@rf("Sized")
+protocol Sized
+    ### Returns the number of elements currently held by this value.
+    ### The count reflects the live contents at the moment of the call; it does
+    ### not include capacity or reserved-but-unused slots.
+    ### :returns: The element count as a `U64`.
+    routine Me.count() -> U64

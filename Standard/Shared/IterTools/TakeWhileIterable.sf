@@ -1,0 +1,46 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields values while a predicate remains true.
+### Iteration stops permanently after the first predicate failure.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
+@rf("TakeWhileIterable")
+entity TakeWhileIterable[T, TSource]
+relates TakeWhileEmittable[T, TSource/Iter] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence until the continuation predicate fails.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("TakeWhileEmittable")
+entity TakeWhileEmittable[T, TSourceIter]
+obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Returns the stateful iterator that enforces the continuation predicate.
+### The emitted iterator remembers when the predicate has already failed so it
+### never resumes after termination.
+### :returns: The resulting `TakeWhileEmittable[T, TSource/Iter]` value.
+@rf("TakeWhileIterable.iter")
+routine TakeWhileIterable[T, TSource].iter() -> TakeWhileEmittable[T, TSource/Iter]
+
+### Returns the next value while the continuation predicate still succeeds.
+### Once `done` becomes true, the iterator remains exhausted for all later
+### calls.
+### :returns: The resulting `T` value.
+### :absent: Returns absent when the predicate has failed or the source ends first.
+@rf("TakeWhileEmittable.emit")
+routine TakeWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+
+### Returns a lazy adapter that yields values while `predicate` returns `true`.
+### The first failing value is consumed but not yielded.
+### :param predicate: The predicate that controls when iteration stops.
+### :returns: The resulting `TakeWhileIterable[T, Me]` value.
+@rf("Iterable.take_while")
+routine Iterable[T].take_while(predicate: Routine[(T,), Bool]) -> TakeWhileIterable[T, Me]

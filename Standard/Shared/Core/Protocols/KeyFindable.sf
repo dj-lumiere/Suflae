@@ -1,0 +1,21 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Key-based read and write access for map types (Dict, SortedDict).
+### Both `[]` read and `[]` write are failable: the key must already exist for either to succeed.
+### To insert a new key-value pair, use the `put(key:, value:)` method instead.
+@rf("KeyFindable")
+protocol KeyFindable
+relates Key, Value
+    ### Returns the value associated with `key`.
+    ### :param key: The key to look up.
+    ### :returns: The associated value.
+    ### :throws: absent if `key` is not present in the map.
+    routine Me.getitem!(key: Accessing[Me/Key]) -> Me/Value
+    ### Replaces the value at an existing `key` with `value`.
+    ### :param key: The key to update (must already exist).
+    ### :param value: The replacement value.
+    ### :throws: absent if `key` is not present in the map.
+    routine Me.setitem!(key: Accessing[Me/Key], value: Me/Value)

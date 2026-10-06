@@ -1,0 +1,32 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when the runtime cannot satisfy an
+### allocation request.
+@rf("MemoryAllocationError")
+crashable MemoryAllocationError
+    ### Stores the number of bytes requested by the failed allocation.
+    requested_bytes: U64
+
+### Represents the crashable raised when a raw memory access extends beyond the
+### allocated region.
+@rf("MemoryBoundsError")
+crashable MemoryBoundsError
+    ### Stores the starting offset of the attempted access.
+    offset: U64
+    ### Stores the size in bytes of the attempted access.
+    size: U64
+    ### Stores the number of bytes that were actually allocated.
+    allocated: U64
+
+### Returns the default message for allocation failure.
+### :returns: The resulting `Text` value.
+@rf("MemoryAllocationError.crash_message")
+routine MemoryAllocationError.crash_message() -> Text
+
+### Returns the default message for out-of-bounds memory access.
+### :returns: The resulting `Text` value.
+@rf("MemoryBoundsError.crash_message")
+routine MemoryBoundsError.crash_message() -> Text

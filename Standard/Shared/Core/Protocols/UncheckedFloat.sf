@@ -1,0 +1,12 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the unchecked arithmetic surface for floating-style numeric types.
+### `UncheckedFloat` extends the unchecked arithmetic family with `fdiv fast`
+### division, making it the aggregate protocol for fixed-width float types that
+### expose unchecked operator variants.
+@rf("UncheckedFloat")
+protocol UncheckedFloat
+obeys UncheckedArithmetic, UncheckedTrueDivisible

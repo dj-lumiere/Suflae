@@ -1,0 +1,15 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Computes the next backing capacity for a contiguous buffer that must hold at least
+### `min_needed` elements. Buffers whose current allocation is under
+### `GROWTH_HYBRID_THRESHOLD_BYTES` double; larger buffers grow by 1.5x. An empty buffer
+### seeds at four slots. The result is always at least `min_needed`.
+### :param current: The current capacity, in elements.
+### :param min_needed: The minimum capacity the caller requires after growth, in elements.
+### :param element_size: The size of one element, in bytes (`T.data_size()`).
+### :returns: The capacity to reserve, in elements.
+@rf("next_grow_capacity")
+routine next_grow_capacity(current: U64, min_needed: U64, element_size: U64) -> U64

@@ -1,0 +1,41 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when indexed access uses a position outside
+### the valid range of a collection or view.
+@rf("IndexOutOfBoundsError")
+crashable IndexOutOfBoundsError
+    ### Stores the index that was requested.
+    index: U64
+    ### Stores the total number of addressable elements.
+    count: U64
+
+### Represents the crashable raised when an operation requires at least one
+### element but the collection is empty.
+@rf("EmptyCollectionError")
+crashable EmptyCollectionError
+    ### Stores the operation name or summary that could not be completed.
+    operation: Text
+
+### Represents the crashable raised when a search operation cannot find any
+### matching element.
+@rf("ElementNotFoundError")
+crashable ElementNotFoundError
+    pass
+
+### Returns the default message for failed indexed access.
+### :returns: The resulting `Text` value.
+@rf("IndexOutOfBoundsError.crash_message")
+routine IndexOutOfBoundsError.crash_message() -> Text
+
+### Returns the default message for invalid empty-collection operations.
+### :returns: The resulting `Text` value.
+@rf("EmptyCollectionError.crash_message")
+routine EmptyCollectionError.crash_message() -> Text
+
+### Returns the default message for failed element search.
+### :returns: The resulting `Text` value.
+@rf("ElementNotFoundError.crash_message")
+routine ElementNotFoundError.crash_message() -> Text

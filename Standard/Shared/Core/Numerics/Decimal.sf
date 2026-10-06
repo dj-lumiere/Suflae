@@ -1,0 +1,203 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A finite-only canonical software decimal128 value (shares D128's i128 BID storage).
+@rf("Decimal")
+record Decimal
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Views this Decimal as its underlying `D128` (bit-for-bit; a Decimal is always finite).
+@rf("dec_to_d128")
+routine dec_to_d128(x: Decimal) -> D128
+
+### Wraps a `D128` bit pattern as a Decimal (bit-for-bit; the caller guarantees finiteness).
+@rf("dec_of_d128")
+routine dec_of_d128(x: D128) -> Decimal
+
+### Crashes if `d` is non-finite, else wraps it as a Decimal. The single guard that keeps
+### Decimal finite-only on every conversion from a possibly infinite/NaN source.
+### :throws: {NumericOverflowError} if `d` is +-infinity; {NumericDomainError} if `d` is NaN.
+@rf("dec_of_d128_finite")
+routine dec_of_d128_finite!(d: D128) -> Decimal
+
+### Returns the raw i128 BID storage of this value.
+@rf("Decimal.to_bits")
+routine Decimal.to_bits() -> U128
+
+### Reinterprets a raw U128 as a Decimal (bit-for-bit; assumes a valid finite BID encoding).
+@rf("Decimal.from_bits")
+common routine Decimal.from_bits(bits: U128) -> Decimal
+
+### Returns the raw 16 bytes of this value in little-endian order.
+@rf("Decimal.to_bytes_le")
+routine Decimal.to_bytes_le() -> Array[Byte, 16]
+
+### Returns the raw 16 bytes of this value in big-endian order.
+@rf("Decimal.to_bytes_be")
+routine Decimal.to_bytes_be() -> Array[Byte, 16]
+
+### Parses a decimal literal into a Decimal.
+### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
+@rf("Decimal")
+routine Decimal!(from_text: Text) -> Decimal
+
+### Builds a Decimal from a sign + U128 coefficient at the given exponent (rounds to <= 34 digits).
+@rf("Decimal.from_components")
+common routine Decimal.from_components(sign: Bool, coeff: U128, exp: S64) -> Decimal
+
+### S8 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: S8) -> Decimal
+
+### S16 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: S16) -> Decimal
+
+### S32 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: S32) -> Decimal
+
+### S64 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: S64) -> Decimal
+
+### S128 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: S128) -> Decimal
+
+### S256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+@rf("Decimal")
+routine Decimal(from: S256) -> Decimal
+
+### U8 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: U8) -> Decimal
+
+### U16 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: U16) -> Decimal
+
+### U32 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: U32) -> Decimal
+
+### U64 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: U64) -> Decimal
+
+### U128 -> Decimal.
+@rf("Decimal")
+routine Decimal(from: U128) -> Decimal
+
+### U256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+@rf("Decimal")
+routine Decimal(from: U256) -> Decimal
+
+### B16 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: B16) -> Decimal
+
+### B32 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: B32) -> Decimal
+
+### B64 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: B64) -> Decimal
+
+### B128 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: B128) -> Decimal
+
+### D32 -> Decimal (exact widen; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: D32) -> Decimal
+
+### D64 -> Decimal (exact widen; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: D64) -> Decimal
+
+### D128 -> Decimal (bit-for-bit; crashes if the value is non-finite).
+@rf("Decimal")
+routine Decimal(from: D128) -> Decimal
+
+### True when this is a finite value (always true for a Decimal built through the normal paths).
+@rf("Decimal.is_finite")
+routine Decimal.is_finite() -> Bool
+
+### True when this is +-infinity (never true through the normal paths).
+@rf("Decimal.is_infinite")
+routine Decimal.is_infinite() -> Bool
+
+### True when this is NaN (never true through the normal paths).
+@rf("Decimal.is_nan")
+routine Decimal.is_nan() -> Bool
+
+### Three-way comparison under IEEE ordered semantics (delegated to D128).
+@rf("Decimal.cmp")
+routine Decimal.cmp(you: Decimal) -> ComparisonSign
+
+### Value equality (delegated to D128): 1.0 and 1.00 are equal; +0 and -0 are equal.
+@rf("Decimal.eq")
+routine Decimal.eq(you: Decimal) -> Bool
+
+### Returns `me * you`.
+@rf("Decimal.mul")
+routine Decimal.mul!(you: Decimal) -> Decimal
+
+### Returns `me + you`.
+@rf("Decimal.add")
+routine Decimal.add!(you: Decimal) -> Decimal
+
+### Returns `me - you`.
+@rf("Decimal.sub")
+routine Decimal.sub!(you: Decimal) -> Decimal
+
+### Returns `me / you`.
+@rf("Decimal.truediv")
+routine Decimal.truediv!(you: Decimal) -> Decimal
+
+### Returns the smaller of `me` and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`, otherwise `you`.
+@rf("Decimal.min")
+routine Decimal.min(you: Decimal) -> Decimal
+
+### Returns the larger of `me` and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`, otherwise `you`.
+@rf("Decimal.max")
+routine Decimal.max(you: Decimal) -> Decimal
+
+### Restricts `me` to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound.
+### :param max_val: The upper bound.
+### :returns: The clamped value.
+@rf("Decimal.clamp")
+routine Decimal.clamp(min_val: Decimal, max_val: Decimal) -> Decimal
+
+### Returns the reciprocal `1 / me`. Crashes if `me` is zero (no finite inverse), as for all
+### `Decimal` arithmetic.
+### :returns: The multiplicative inverse.
+@rf("Decimal.recip")
+routine Decimal.recip() -> Decimal
+
+### Returns `(me + you) / 2`. A non-finite intermediate crashes, as for all `Decimal` arithmetic.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("Decimal.midpoint")
+routine Decimal.midpoint(you: Decimal) -> Decimal
+
+### Returns the canonical decimal text of this value. Fractional trailing zeros (exponent < 0)
+### are stripped up toward exponent 0 so equal values render identically (2.50 -> "2.5", 1.230 ->
+### "1.23"), while integers (exponent >= 0) keep their zeros (100 -> "100"). The stripped parts are
+### then formatted by the shared D128 formatter.
+@rf("Decimal.represent")
+routine Decimal.represent() -> Text
+
+### Returns a debug rendering of this value, e.g. `Decimal(3.5)`. Mirrors the D32/D64/D128 surface.
+@rf("Decimal.diagnose")
+routine Decimal.diagnose() -> Text

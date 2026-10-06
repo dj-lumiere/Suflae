@@ -1,0 +1,816 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a 16-bit IEEE 754 binary floating-point value.
+### `B16` trades away precision and range for compact storage, which makes it a
+### good fit for packed numeric data, graphics formats, and bandwidth-sensitive
+### workloads.
+@rf("B16")
+record B16
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Converts an `S8` into half-precision floating-point form.
+### :param from: The signed 8-bit integer to convert.
+### :returns: The corresponding `B16` value.
+@rf("B16")
+routine B16(from: S8) -> B16
+
+### Converts an `S16` into half-precision floating-point form.
+### :param from: The signed 16-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16(from: S16) -> B16
+
+### Converts an `S32` into half-precision floating-point form.
+### :param from: The signed 32-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: S32) -> B16
+
+### Converts an `S64` into half-precision floating-point form.
+### :param from: The signed 64-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: S64) -> B16
+
+### Converts an `S128` into half-precision floating-point form.
+### :param from: The signed 128-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: S128) -> B16
+
+### Converts a `U8` into half-precision floating-point form.
+### :param from: The unsigned 8-bit integer to convert.
+### :returns: The corresponding `B16` value.
+@rf("B16")
+routine B16(from: U8) -> B16
+
+### Converts a `U16` into half-precision floating-point form.
+### :param from: The unsigned 16-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: U16) -> B16
+
+### Converts a `U32` into half-precision floating-point form.
+### :param from: The unsigned 32-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: U32) -> B16
+
+### Converts a `U64` into half-precision floating-point form.
+### :param from: The unsigned 64-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: U64) -> B16
+
+### Converts a `U128` into half-precision floating-point form.
+### :param from: The unsigned 128-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: U128) -> B16
+
+### Converts an `S256` into half-precision floating-point form.
+### :param from: The signed 256-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: S256) -> B16
+
+### Converts a `U256` into half-precision floating-point form.
+### :param from: The unsigned 256-bit integer to convert.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16!(from: U256) -> B16
+
+### Returns an existing `B16` unchanged.
+### :param from: The half-precision value to forward.
+### :returns: `from`.
+@rf("B16")
+routine B16(from: B16) -> B16
+
+### Narrows a single-precision float to half precision.
+### :param from: The `B32` value to convert.
+### :returns: The nearest representable `B16` value.
+@rf("B16")
+routine B16(from: B32) -> B16
+
+### Narrows a double-precision float to half precision.
+### :param from: The `B64` value to convert.
+### :returns: The nearest representable `B16` value.
+@rf("B16")
+routine B16(from: B64) -> B16
+
+### Narrows a quadruple-precision float to half precision.
+### :param from: The `B128` value to convert.
+### :returns: The nearest representable `B16` value.
+@rf("B16")
+routine B16(from: B128) -> B16
+
+### Converts a decimal32 value to half-precision binary floating point.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16(from: D32) -> B16
+
+### Converts a decimal64 value to half-precision binary floating point.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16(from: D64) -> B16
+
+### Converts a decimal128 value to half-precision binary floating point.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B16` value.
+@rf("B16")
+routine B16(from: D128) -> B16
+
+### Returns `me + you`. Checked: crashes if the IEEE result is non-finite. Use `add_unchecked` for
+### raw IEEE.
+### :param you: The addend.
+### :returns: The half-precision sum (always finite).
+@rf("B16.add")
+routine B16.add!(you: B16) -> B16
+
+### Returns `me - you`. Checked: crashes if the IEEE result is non-finite. Use `sub_unchecked` for
+### raw IEEE.
+### :param you: The value to subtract.
+### :returns: The half-precision difference (always finite).
+@rf("B16.sub")
+routine B16.sub!(you: B16) -> B16
+
+### Returns `me * you`. Checked: crashes if the IEEE result is non-finite. Use `mul_unchecked` for
+### raw IEEE.
+### :param you: The multiplier.
+### :returns: The half-precision product (always finite).
+@rf("B16.mul")
+routine B16.mul!(you: B16) -> B16
+
+### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
+### overflow.
+### Use `truediv_unchecked` for raw IEEE 754, or `(a / b).finite()` for recoverable handling.
+### :param you: The divisor.
+### :returns: The half-precision quotient (always finite).
+@rf("B16.truediv")
+routine B16.truediv!(you: B16) -> B16
+
+### Returns `me` if it is finite; throws if it is ±infinity or NaN. The opt-in
+### finiteness assertion for IEEE arithmetic, e.g. `var x = (a * b + c).finite()`.
+### :returns: `me`, when finite.
+### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
+@rf("B16.finite")
+routine B16.finite!() -> B16
+
+### Returns the negated value.
+### :returns: The resulting `B16` value.
+@rf("B16.neg")
+routine B16.neg() -> B16
+
+### Returns `me / you` with raw IEEE 754 semantics: `x/0` -> ±infinity, `0/0` -> NaN. No crash.
+@rf("B16.truediv_unchecked")
+routine B16.truediv_unchecked(you: B16) -> B16
+
+### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B16.add_unchecked")
+routine B16.add_unchecked(you: B16) -> B16
+
+### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B16.sub_unchecked")
+routine B16.sub_unchecked(you: B16) -> B16
+
+### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B16.mul_unchecked")
+routine B16.mul_unchecked(you: B16) -> B16
+
+### Returns whether both values are equal.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("B16.eq")
+routine B16.eq(you: B16) -> Bool
+
+### Compares this value with the other value.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("B16.cmp")
+routine B16.cmp(you: B16) -> ComparisonSign
+
+### Returns the square root of this value in half precision.
+### :returns: The intrinsic square-root result for `me`.
+@rf("B16.sqrt")
+routine B16.sqrt!() -> B16
+
+### Square root with raw IEEE 754 propagation (`sqrt(<0)` -> NaN). Thin wrapper over LLVM `sqrt`.
+@rf("B16.sqrt_unchecked")
+routine B16.sqrt_unchecked() -> B16
+
+### Returns the absolute value.
+### :returns: The resulting `B16` value.
+@rf("B16.abs")
+routine B16.abs() -> B16
+
+### Rounds this value toward negative infinity.
+### :returns: The greatest integral-valued `B16` not larger than `me`.
+@rf("B16.floor")
+routine B16.floor() -> B16
+
+### Rounds this value toward positive infinity.
+### :returns: The smallest integral-valued `B16` not smaller than `me`.
+@rf("B16.ceil")
+routine B16.ceil() -> B16
+
+### Rounds this value to the nearest integral-valued `B16`.
+### :returns: The rounded result in half precision.
+@rf("B16.round")
+routine B16.round() -> B16
+
+### Discards the fractional part of this value toward zero.
+### :returns: The truncated result in half precision.
+@rf("B16.int_truncate")
+routine B16.int_truncate() -> B16
+
+### Returns this value with its sign bit replaced by the sign of `sign`.
+### :param sign: The value supplying the sign bit.
+### :returns: A value with the magnitude of `me` and the sign of `sign`.
+@rf("B16.copysign")
+routine B16.copysign(sign: B16) -> B16
+
+### Returns the reciprocal `1 / me` (`±∞` for `±0`, following IEEE rules).
+### :returns: The multiplicative inverse.
+@rf("B16.recip")
+routine B16.recip() -> B16
+
+### Returns `me` converted from radians to degrees (`me × 180 / π`).
+### :returns: The angle in degrees.
+@rf("B16.to_degrees")
+routine B16.to_degrees() -> B16
+
+### Returns `me` converted from degrees to radians (`me × π / 180`).
+### :returns: The angle in radians.
+@rf("B16.to_radians")
+routine B16.to_radians() -> B16
+
+### Returns `me` raised to the integer power `n`, correctly rounded: the exact `me^n` rounded to the nearest
+### `B16` (ties to even), identical on every platform, with raw IEEE 754 propagation. `powi(0)` is 1 for every
+### `me`, NaN included.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+@rf("B16.powi")
+routine B16.powi(n: S32) -> B16
+
+### Returns `(me + you) / 2`, computed without intermediate overflow.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("B16.midpoint")
+routine B16.midpoint(you: B16) -> B16
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare against.
+### :returns: The lower of the two values under the ordered comparison rules.
+@rf("B16.min")
+routine B16.min(you: B16) -> B16
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare against.
+### :returns: The greater of the two values under the ordered comparison rules.
+@rf("B16.max")
+routine B16.max(you: B16) -> B16
+
+### Restricts this value to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound to enforce.
+### :param max_val: The upper bound to enforce.
+### :returns: `me` if already in range, otherwise the nearest bound.
+@rf("B16.clamp")
+routine B16.clamp(min_val: B16, max_val: B16) -> B16
+
+### Returns `true` if this value is strictly positive (greater than zero).
+### :returns: `true` if `me > 0.0`.
+@rf("B16.is_positive")
+routine B16.is_positive() -> Bool
+
+### Returns `true` if this value is strictly negative (less than zero).
+### :returns: `true` if `me < 0.0`.
+@rf("B16.is_negative")
+routine B16.is_negative() -> Bool
+
+### Returns `true` if this value compares equal to zero.
+### :returns: `true` if `me == 0.0`.
+@rf("B16.is_zero")
+routine B16.is_zero() -> Bool
+
+### Returns `true` when this value encodes an IEEE 754 NaN.
+### :returns: Whether the bit pattern represents a not-a-number payload.
+@rf("B16.is_nan")
+routine B16.is_nan() -> Bool
+
+### True when this is a SIGNALING NaN (quiet bit clear). Arithmetic only makes quiet NaN.
+@rf("B16.is_signaling")
+routine B16.is_signaling() -> Bool
+
+### Returns `true` when this value encodes positive or negative infinity.
+### :returns: Whether the bit pattern represents an infinity.
+@rf("B16.is_infinite")
+routine B16.is_infinite() -> Bool
+
+### Returns `true` when this value is neither NaN nor infinity.
+### :returns: Whether the value is finite.
+@rf("B16.is_finite")
+routine B16.is_finite() -> Bool
+
+### Returns the sign of this value as `-1.0`, `0.0`, or `1.0`.
+### :returns: A unit-sign value describing the sign of `me`.
+@rf("B16.signum")
+routine B16.signum() -> B16
+
+### Reinterprets this float as its raw IEEE 754 bit pattern.
+### :returns: The underlying `U16` encoding of this value.
+@rf("B16.to_bits")
+routine B16.to_bits() -> U16
+
+### Reinterprets a raw IEEE 754 bit pattern as an `B16`.
+### :param bits: The exact half-precision encoding to decode.
+### :returns: The `B16` value with that bit pattern.
+@rf("B16.from_bits")
+common routine B16.from_bits(bits: U16) -> B16
+
+### Returns a signaling NaN (interop/testing; never produced by arithmetic).
+@rf("B16.signaling_nan")
+common routine B16.signaling_nan() -> B16
+
+### Returns the shortest decimal text that reads back as this exact value (`B16(from_text:)`
+### round-trips it bit for bit).
+### :returns: The resulting `Text` value.
+@rf("B16.represent")
+routine B16.represent() -> Text
+
+### Returns the textual representation of this value.
+### :returns: The resulting `Text` value.
+@rf("B16.diagnose")
+routine B16.diagnose() -> Text
+
+### Implements the wired routine behavior for this value.
+### :param from_text: The `from_text` value.
+### :returns: The resulting `B16` value.
+### :throws: May throw {InvalidValueError}.
+@rf("B16")
+routine B16!(from_text: Text) -> B16
+
+### Returns the raw bytes of this value in little-endian order.
+### :returns: The resulting `Array[Byte, 2]` value.
+@rf("B16.to_bytes_le")
+routine B16.to_bytes_le() -> Array[Byte, 2]
+
+### Returns the raw bytes of this value in big-endian order.
+### :returns: The resulting `Array[Byte, 2]` value.
+@rf("B16.to_bytes_be")
+routine B16.to_bytes_be() -> Array[Byte, 2]
+
+### Returns a keyed hash of this value using SipHash-2-4.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The resulting `U64` value.
+@rf("B16.hash")
+routine B16.hash(k0: U64, k1: U64) -> U64
+
+### Arc sine.
+@rf("B16.asin")
+routine B16.asin!() -> B16
+
+### Arc cosine.
+@rf("B16.acos")
+routine B16.acos!() -> B16
+
+### Hyperbolic sine.
+@rf("B16.sinh")
+routine B16.sinh!() -> B16
+
+### Hyperbolic cosine.
+@rf("B16.cosh")
+routine B16.cosh!() -> B16
+
+### Inverse hyperbolic cosine.
+@rf("B16.acosh")
+routine B16.acosh!() -> B16
+
+### Inverse hyperbolic tangent.
+@rf("B16.atanh")
+routine B16.atanh!() -> B16
+
+### Natural exponential.
+@rf("B16.exp")
+routine B16.exp!() -> B16
+
+### Base-2 exponential.
+@rf("B16.exp2")
+routine B16.exp2!() -> B16
+
+### exp(me) - 1, accurate near zero.
+@rf("B16.expm1")
+routine B16.expm1!() -> B16
+
+### Base-10 exponential.
+@rf("B16.exp10")
+routine B16.exp10!() -> B16
+
+### Natural logarithm.
+@rf("B16.log")
+routine B16.log!() -> B16
+
+### Base-2 logarithm.
+@rf("B16.log2")
+routine B16.log2!() -> B16
+
+### Base-10 logarithm.
+@rf("B16.log10")
+routine B16.log10!() -> B16
+
+### log(1 + me), accurate near zero.
+@rf("B16.log1p")
+routine B16.log1p!() -> B16
+
+### Raises this value to `exp`, checked: crashes on a non-finite result (overflow -> inf, domain ->
+### NaN). Use `pow_unchecked` for raw IEEE 754 propagation.
+### :param exp: The exponent applied to `me`.
+### :returns: `me` raised to `exp` (always finite).
+@rf("B16.pow")
+routine B16.pow!(exp: B16) -> B16
+
+### Hypotenuse without overflow.
+### :param x: One leg.
+### :param y: The other leg.
+@rf("hypot")
+routine hypot!(x: B16, y: B16) -> B16
+
+### 3D hypotenuse sqrt(x^2 + y^2 + z^2) without overflow. Checked: crashes on overflow.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+@rf("hypot")
+routine hypot!(x: B16, y: B16, z: B16) -> B16
+
+### 3D hypotenuse with raw IEEE 754 propagation (overflow -> +inf). Composed as
+### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: B16, y: B16, z: B16) -> B16
+
+### Fused multiply-add me*b + c with a single rounding.
+@rf("B16.fma")
+routine B16.fma!(b: B16, c: B16) -> B16
+
+### Fused multiply-add me*b + c with raw IEEE 754 propagation, correctly rounded (one rounding to
+### nearest, ties to even).
+@rf("B16.fma_unchecked")
+routine B16.fma_unchecked(b: B16, c: B16) -> B16
+
+### Floating-point remainder (C fmod).
+@rf("B16.fmod")
+routine B16.fmod(you: B16) -> B16
+
+### IEEE remainder (C remainder).
+@rf("B16.remainder")
+routine B16.remainder(you: B16) -> B16
+
+### Positive difference max(me - you, 0) (C fdim).
+@rf("B16.fdim")
+routine B16.fdim(you: B16) -> B16
+
+### Larger of me and you (C fmax).
+@rf("B16.fmax")
+routine B16.fmax(you: B16) -> B16
+
+### Smaller of me and you (C fmin).
+@rf("B16.fmin")
+routine B16.fmin(you: B16) -> B16
+
+### Next representable value after me toward you. Steps the 16-bit sign-magnitude
+### pattern directly (a B32 step would narrow back to the same B16 value).
+@rf("B16.nextafter")
+routine B16.nextafter(you: B16) -> B16
+
+### Rounds to nearest integer in the current rounding mode (C rint).
+@rf("B16.rint")
+routine B16.rint() -> B16
+
+### Gamma function.
+@rf("B16.tgamma")
+routine B16.tgamma!() -> B16
+
+### Truncates toward zero (alias of int_truncate).
+@rf("B16.trunc")
+routine B16.trunc() -> B16
+
+### Fractional part me - trunc(me).
+@rf("B16.frac")
+routine B16.frac() -> B16
+
+### Integer and fractional parts (C modf); both carry the sign of me.
+@rf("B16.modf")
+routine B16.modf() -> (B16, B16)
+
+### Fraction in [0.5,1) and power-of-two exponent (C frexp).
+@rf("B16.frexp")
+routine B16.frexp() -> (B16, S64)
+
+### True if the sign bit is set (C signbit).
+@rf("B16.signbit")
+routine B16.signbit() -> Bool
+
+### True for a subnormal (denormalized, nonzero) value.
+@rf("B16.is_subnormal")
+routine B16.is_subnormal() -> Bool
+
+### True for a finite, normal value (nonzero and not subnormal).
+@rf("B16.is_normal")
+routine B16.is_normal() -> Bool
+
+### C fpclassify: 0 NaN, 1 infinite, 2 zero, 3 subnormal, 4 normal.
+@rf("B16.fpclassify")
+routine B16.fpclassify() -> FpClass
+
+### Sign-magnitude total-order key: negatives become small, non-negatives large, so an
+### unsigned `<=` reproduces the IEEE 754 totalOrder ranking (-NaN < -inf < ... < +inf < +NaN).
+@rf("b16_order_key")
+routine b16_order_key(bits: U16) -> U16
+
+### IEEE 754 totalOrder: a total order over all values including signed zeros and NaNs
+### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
+### :param you: The value to compare against.
+### :returns: Whether `me` precedes or equals `you` in the total order.
+@rf("B16.total_order")
+routine B16.total_order(you: B16) -> Bool
+
+### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### :param you: The value whose magnitude to compare against.
+### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
+@rf("B16.total_order_mag")
+routine B16.total_order_mag(you: B16) -> Bool
+
+### IEEE 754 nextUp: the least value greater than `me`. Propagating; never crashes.
+### :returns: The next representable value toward +infinity.
+@rf("B16.next_up")
+routine B16.next_up() -> B16
+
+### IEEE 754 nextDown: the greatest value less than `me`. Never crashes.
+### :returns: The next representable value toward -infinity.
+@rf("B16.next_down")
+routine B16.next_down() -> B16
+
+### IEEE 754 logb: the unbiased exponent of `me` as a floating value (logb(0)=-inf,
+### logb(±inf)=+inf, logb(NaN)=NaN). Propagating; never crashes.
+### :returns: The radix-2 exponent of `me`.
+@rf("B16.logb")
+routine B16.logb() -> B16
+
+### `me * 2^n` with raw IEEE 754 propagation (overflow -> ±infinity).
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+@rf("B16.scaleb_unchecked")
+routine B16.scaleb_unchecked(n: S64) -> B16
+
+### IEEE 754-2008 minNum: the smaller operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, ignoring NaN.
+@rf("B16.min_num")
+routine B16.min_num(you: B16) -> B16
+
+### IEEE 754-2008 maxNum: the larger operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, ignoring NaN.
+@rf("B16.max_num")
+routine B16.max_num(you: B16) -> B16
+
+### IEEE 754-2019 minimum: the smaller operand, propagating NaN, ordering -0 below +0.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, NaN if either is NaN.
+@rf("B16.minimum")
+routine B16.minimum(you: B16) -> B16
+
+### IEEE 754-2019 maximum: the larger operand, propagating NaN, ordering +0 above -0.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, NaN if either is NaN.
+@rf("B16.maximum")
+routine B16.maximum(you: B16) -> B16
+
+### IEEE 754 roundToIntegralTiesToAway: rounds to nearest integer, halves away from zero.
+### :returns: `me` rounded to an integral value with ties away from zero.
+@rf("B16.round_ties_away")
+routine B16.round_ties_away() -> B16
+
+### Returns the arc cosine of this value (in radians), correctly rounded: the exact arc cosine rounded
+### to the nearest `B16` (ties to even), identical on every platform. Raw IEEE 754 propagation:
+### `|me| > 1`, ±infinity and NaN give NaN (the default NaN 0xFE00, as the original's `0.0f / 0.0f`
+### on x86-64).
+### :returns: The correctly rounded arc cosine.
+@rf("B16.acos_unchecked")
+routine B16.acos_unchecked() -> B16
+
+### Inverse hyperbolic cosine with raw IEEE 754 propagation, correctly rounded: the exact acosh rounded to
+### the nearest `B16` (ties to even), identical on every platform. `x < 1` and -infinity give NaN,
+### +infinity maps to itself.
+### :returns: The correctly rounded inverse hyperbolic cosine.
+@rf("B16.acosh_unchecked")
+routine B16.acosh_unchecked() -> B16
+
+### Returns the arc sine of this value (in radians), correctly rounded: the exact arc sine rounded to
+### the nearest `B16` (ties to even), identical on every platform. Raw IEEE 754 propagation: `|me| > 1`,
+### ±infinity and NaN give NaN (the default NaN 0xFE00, as the original's `0.0f / 0.0f` on x86-64).
+### :returns: The correctly rounded arc sine.
+@rf("B16.asin_unchecked")
+routine B16.asin_unchecked() -> B16
+
+### Inverse hyperbolic sine, correctly rounded: the exact asinh rounded to the nearest `B16` (ties to
+### even), identical on every platform. ±0 and ±infinity map to themselves, NaN gives NaN.
+### :returns: The correctly rounded inverse hyperbolic sine.
+@rf("B16.asinh")
+routine B16.asinh() -> B16
+
+### Returns the arc tangent of this value (in radians), correctly rounded: the exact arc tangent
+### rounded to the nearest `B16` (ties to even), identical on every platform. ±infinity gives ±pi/2
+### rounded; a NaN comes back quieted (sign and payload kept).
+### :returns: The correctly rounded arc tangent.
+@rf("B16.atan")
+routine B16.atan() -> B16
+
+### Returns the two-argument arc tangent atan2(y, x) (in radians), correctly rounded: the exact angle of
+### the point (x, y) rounded to the nearest `B16` (ties to even), identical on every platform. The result
+### lies in [-pi, pi] (rounded); the signs of zero and infinite arguments pick the quadrant as in C
+### `atan2`, and a NaN argument comes back quieted (x's NaN when both are NaN).
+### :param y: The y-coordinate.
+### :param x: The x-coordinate.
+### :returns: The correctly rounded angle.
+@rf("atan2")
+routine atan2(y: B16, x: B16) -> B16
+
+### Inverse hyperbolic tangent with raw IEEE 754 propagation, correctly rounded: the exact atanh rounded to
+### the nearest `B16` (ties to even), identical on every platform. `±1` gives ±infinity, `|x| > 1` gives
+### NaN.
+### :returns: The correctly rounded inverse hyperbolic tangent.
+@rf("B16.atanh_unchecked")
+routine B16.atanh_unchecked() -> B16
+
+### Returns the cube root of this value, correctly rounded: the exact cube root rounded to the nearest
+### `B16` (ties to even), identical on every platform. `cbrt(-x) == -cbrt(x)`, and ±0, ±infinity and NaN
+### map to themselves.
+### :returns: The correctly rounded cube root.
+@rf("B16.cbrt")
+routine B16.cbrt() -> B16
+
+### Returns the cosine of this value (in radians), correctly rounded: the exact cosine rounded to the
+### nearest `B16` (ties to even), identical on every platform. ±infinity and NaN give NaN.
+### :returns: The correctly rounded cosine.
+@rf("B16.cos")
+routine B16.cos() -> B16
+
+### Hyperbolic cosine with raw IEEE 754 propagation, correctly rounded: the exact cosh rounded to the
+### nearest `B16` (ties to even), identical on every platform. Overflow gives +infinity, NaN gives NaN.
+### :returns: The correctly rounded hyperbolic cosine.
+@rf("B16.cosh_unchecked")
+routine B16.cosh_unchecked() -> B16
+
+### Returns cos(pi * this value), correctly rounded: the exact value rounded to the nearest `B16`
+### (ties to even), identical on every platform. A zero result is +0; ±infinity and NaN give NaN.
+### :returns: The correctly rounded cos(pi * x).
+@rf("B16.cospi")
+routine B16.cospi() -> B16
+
+### Error function, correctly rounded: the exact erf rounded to the nearest `B16` (ties to even),
+### identical on every platform. ±infinity gives ±1 and NaN gives NaN.
+### :returns: The correctly rounded error function.
+@rf("B16.erf")
+routine B16.erf() -> B16
+
+### Complementary error function `1 - erf(x)`, correctly rounded: the exact erfc rounded to the nearest
+### `B16` (ties to even), identical on every platform. -infinity gives 2, +infinity gives 0 and NaN gives
+### NaN.
+### :returns: The correctly rounded complementary error function.
+@rf("B16.erfc")
+routine B16.erfc() -> B16
+
+### Returns e raised to this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. Overflows to +infinity, underflows to 0, and a NaN input gives
+### a NaN.
+### :returns: The correctly rounded exp.
+@rf("B16.exp_unchecked")
+routine B16.exp_unchecked() -> B16
+
+### Returns 10 raised to this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. Overflows to +infinity, underflows to 0, and a NaN input gives
+### a NaN.
+### :returns: The correctly rounded exp10.
+@rf("B16.exp10_unchecked")
+routine B16.exp10_unchecked() -> B16
+
+### Returns 2 raised to this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. Overflows to +infinity, underflows to 0, and a NaN input gives
+### a NaN.
+### :returns: The correctly rounded exp2.
+@rf("B16.exp2_unchecked")
+routine B16.exp2_unchecked() -> B16
+
+### Returns `exp(me) - 1`, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform, and accurate near zero. Overflows to +infinity, tends to -1 for large
+### negative inputs, and a NaN input gives a NaN.
+### :returns: The correctly rounded `exp(me) - 1`.
+@rf("B16.expm1_unchecked")
+routine B16.expm1_unchecked() -> B16
+
+### Hypotenuse sqrt(x^2 + y^2) with raw IEEE 754 propagation (overflow -> +inf), correctly rounded (one
+### rounding to nearest, ties to even). An infinite leg gives +inf even when the other leg is a quiet NaN.
+### :param x: One leg.
+### :param y: The other leg.
+### :returns: The correctly rounded hypotenuse.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: B16, y: B16) -> B16
+
+### Natural logarithm of the absolute value of gamma(x), correctly rounded: the exact log|gamma(x)|
+### rounded to the nearest `B16` (ties to even), identical on every platform. Poles (zero and the
+### negative integers) and ±infinity give +infinity, NaN gives NaN.
+### :returns: The correctly rounded log-gamma.
+@rf("B16.lgamma")
+routine B16.lgamma() -> B16
+
+### Returns the natural logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. `log(±0)` is -infinity, a negative input gives NaN, `log(+infinity)`
+### is +infinity and a NaN input gives a quiet NaN.
+### :returns: The correctly rounded log.
+@rf("B16.log_unchecked")
+routine B16.log_unchecked() -> B16
+
+### Returns the base-10 logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. `log10(±0)` is -infinity, a negative input gives NaN, `log10(+infinity)`
+### is +infinity and a NaN input gives a quiet NaN.
+### :returns: The correctly rounded log10.
+@rf("B16.log10_unchecked")
+routine B16.log10_unchecked() -> B16
+
+### Returns `log(1 + me)`, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform, and accurate near zero. `log1p(-1)` is -infinity, an input below -1
+### gives NaN, `log1p(+infinity)` is +infinity and a NaN input gives a NaN.
+### :returns: The correctly rounded `log(1 + me)`.
+@rf("B16.log1p_unchecked")
+routine B16.log1p_unchecked() -> B16
+
+### Returns the base-2 logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform. `log2(±0)` is -infinity, a negative input gives NaN, `log2(+infinity)`
+### is +infinity and a NaN input gives a quiet NaN.
+### :returns: The correctly rounded log2.
+@rf("B16.log2_unchecked")
+routine B16.log2_unchecked() -> B16
+
+### `me` raised to `exp` with raw IEEE 754 propagation, correctly rounded: the exact power rounded to the
+### nearest `B16` (ties to even), identical on every platform. Overflow gives ±infinity, a negative base
+### with a non-integer exponent gives NaN, and the special cases follow C `pow` (`pow(x, ±0) = 1`,
+### `pow(1, y) = 1`, `pow(-1, ±infinity) = 1`, ...).
+### :param exp: The exponent applied to `me`.
+### :returns: The correctly rounded power.
+@rf("B16.pow_unchecked")
+routine B16.pow_unchecked(exp: B16) -> B16
+
+### Returns the sine of this value (in radians), correctly rounded: the exact sine rounded to the
+### nearest `B16` (ties to even), identical on every platform. ±infinity and NaN give NaN.
+### :returns: The correctly rounded sine.
+@rf("B16.sin")
+routine B16.sin() -> B16
+
+### Hyperbolic sine with raw IEEE 754 propagation, correctly rounded: the exact sinh rounded to the
+### nearest `B16` (ties to even), identical on every platform. Overflow gives ±infinity, NaN gives NaN.
+### :returns: The correctly rounded hyperbolic sine.
+@rf("B16.sinh_unchecked")
+routine B16.sinh_unchecked() -> B16
+
+### Returns sin(pi * this value), correctly rounded: the exact value rounded to the nearest `B16`
+### (ties to even), identical on every platform. An integer gives +0 when it is positive and -0 when
+### it is negative; ±infinity and NaN give NaN.
+### :returns: The correctly rounded sin(pi * x).
+@rf("B16.sinpi")
+routine B16.sinpi() -> B16
+
+### Returns the tangent of this value (in radians), correctly rounded: the exact tangent rounded to the
+### nearest `B16` (ties to even), identical on every platform. ±infinity and NaN give NaN.
+### :returns: The correctly rounded tangent.
+@rf("B16.tan")
+routine B16.tan() -> B16
+
+### Hyperbolic tangent, correctly rounded: the exact tanh rounded to the nearest `B16` (ties to even),
+### identical on every platform. ±infinity gives ±1 and NaN gives NaN.
+### :returns: The correctly rounded hyperbolic tangent.
+@rf("B16.tanh")
+routine B16.tanh() -> B16
+
+### Returns tan(pi * this value), correctly rounded: the exact value rounded to the nearest `B16`
+### (ties to even), identical on every platform. An integer n gives +0 when n is even and positive or
+### odd and negative, else -0; a half-integer n + 1/2 gives +infinity when n is even and x positive or
+### n odd and x negative, else -infinity; ±infinity and NaN give NaN.
+### :returns: The correctly rounded tan(pi * x).
+@rf("B16.tanpi")
+routine B16.tanpi() -> B16
+
+### Gamma function with raw IEEE 754 propagation, correctly rounded: the exact gamma(x) rounded to the
+### nearest `B16` (ties to even), identical on every platform. Overflow and the pole at ±0 give
+### ±infinity, the negative integers and -infinity give NaN.
+### :returns: The correctly rounded gamma function.
+@rf("B16.tgamma_unchecked")
+routine B16.tgamma_unchecked() -> B16

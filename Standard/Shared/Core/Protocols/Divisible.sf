@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for true division.
+### `Divisible` is used by numeric types whose `/` operator produces a quotient
+### in the same domain rather than an integer floor result.
+@rf("Divisible")
+protocol Divisible
+    ### Returns the quotient of this value and the other value.
+    ### Implementations should model the type's natural division semantics,
+    ### including any domain-specific failure or rounding behavior.
+    ### :param you: The divisor.
+    ### :returns: The resulting `Me` value.
+    routine Me.truediv!(you: Me) -> Me

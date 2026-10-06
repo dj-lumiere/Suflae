@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Integer-indexed read and write access for mutable ordered sequences.
+### Extends {Indexable[T]} with a write arm for the `[]` assignment operator.
+### :typeparam T: The element type stored in the sequence.
+@rf("MutableIndexable")
+protocol MutableIndexable[T]
+obeys Indexable[T]
+    ### Replaces the element at `index` with `value`.
+    ### :param index: The zero-based position to update.
+    ### :param value: The replacement value.
+    ### :throws: {IndexOutOfBoundsError} if `index >= count()`.
+    routine Me.setitem!(index: U64, value: T)

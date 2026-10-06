@@ -1,0 +1,283 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Returns `e^me`.
+@rf("B128.exp")
+routine B128.exp!() -> B128
+
+### Returns `ln(me)`.
+@rf("B128.log")
+routine B128.log!() -> B128
+
+### Returns `e^me - 1`.
+@rf("B128.expm1")
+routine B128.expm1!() -> B128
+
+### Returns `ln(1 + me)`.
+@rf("B128.log1p")
+routine B128.log1p!() -> B128
+
+### `ln(1+me)` with raw IEEE (NaN -> qNaN, me=-1 -> -inf, me<-1 -> qNaN, +inf -> +inf). No crash.
+@rf("B128.log1p_unchecked")
+routine B128.log1p_unchecked() -> B128
+
+### Returns `log2(me)`.
+@rf("B128.log2")
+routine B128.log2!() -> B128
+
+### `log2(me)` with raw IEEE. No crash.
+@rf("B128.log2_unchecked")
+routine B128.log2_unchecked() -> B128
+
+### Returns `log10(me)`.
+@rf("B128.log10")
+routine B128.log10!() -> B128
+
+### `log10(me)` with raw IEEE. No crash.
+@rf("B128.log10_unchecked")
+routine B128.log10_unchecked() -> B128
+
+### Returns `2^me`.
+@rf("B128.exp2")
+routine B128.exp2!() -> B128
+
+### Returns `10^me`.
+@rf("B128.exp10")
+routine B128.exp10!() -> B128
+
+### Returns `me ^ you`.
+@rf("B128.pow")
+routine B128.pow!(you: B128) -> B128
+
+### `me^you` with raw IEEE (the full C99 pow special-case ladder). No crash. The general case is
+### exp(you * ln|me|) on the 384-bit tier when the fast path leaves the rounding open, the sign of an
+### odd-integer exponent reapplied.
+@rf("B128.pow_unchecked")
+routine B128.pow_unchecked(you: B128) -> B128
+
+### Returns `asin(me)`.
+@rf("B128.asin")
+routine B128.asin!() -> B128
+
+### Returns `acos(me)`.
+@rf("B128.acos")
+routine B128.acos!() -> B128
+
+### Returns `sinh(me)`.
+@rf("B128.sinh")
+routine B128.sinh!() -> B128
+
+### `sinh(me)` with raw IEEE (large |me| -> signed inf). No crash.
+@rf("B128.sinh_unchecked")
+routine B128.sinh_unchecked() -> B128
+
+### Returns `cosh(me)`.
+@rf("B128.cosh")
+routine B128.cosh!() -> B128
+
+### `cosh(me)` with raw IEEE (large |me| -> +inf). No crash.
+@rf("B128.cosh_unchecked")
+routine B128.cosh_unchecked() -> B128
+
+### Returns `tanh(me)`.
+@rf("B128.tanh")
+routine B128.tanh() -> B128
+
+### Returns `atanh(me)`.
+@rf("B128.atanh")
+routine B128.atanh!() -> B128
+
+### `atanh(me)` with raw IEEE (|me|=1 -> signed inf, |me|>1 -> qNaN). No crash.
+@rf("B128.atanh_unchecked")
+routine B128.atanh_unchecked() -> B128
+
+### Returns `asinh(me)`.
+@rf("B128.asinh")
+routine B128.asinh() -> B128
+
+### Returns `acosh(me)`.
+@rf("B128.acosh")
+routine B128.acosh!() -> B128
+
+### `acosh(me)` with raw IEEE (me<1 -> qNaN). No crash.
+@rf("B128.acosh_unchecked")
+routine B128.acosh_unchecked() -> B128
+
+### Returns `tan(me)`.
+@rf("B128.tan")
+routine B128.tan() -> B128
+
+### Returns the fused multiply-add `me*b + c` with a single rounding.
+@rf("B128.fma")
+routine B128.fma!(b: B128, c: B128) -> B128
+
+### Returns the fused multiply-add `me*b + c` with a single rounding, with raw IEEE 754 propagation.
+@rf("B128.fma_unchecked")
+routine B128.fma_unchecked(b: B128, c: B128) -> B128
+
+### Returns `sqrt(x^2 + y^2)` without spurious overflow.
+### :param x: One leg.
+### :param y: The other leg.
+@rf("hypot")
+routine hypot!(x: B128, y: B128) -> B128
+
+### Returns `sqrt(x^2 + y^2 + z^2)` without spurious overflow. Checked: crashes on non-finite.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+@rf("hypot")
+routine hypot!(x: B128, y: B128, z: B128) -> B128
+
+### `sqrt(x^2 + y^2 + z^2)`, correctly rounded, with raw IEEE (any inf -> +inf, any NaN -> qNaN). No crash.
+### The squares are exact and their sum exact up to a sticky bit; the root of its top 229 or 230 bits (an
+### even power of two left over) is an exact integer square root whose remainder joins the sticky bit.
+### :param x: First leg.
+### :param y: Second leg.
+### :param z: Third leg.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: B128, y: B128, z: B128) -> B128
+
+### Returns `sin(pi*me)`: sin(pi*n) is ±0 with the sign of me.
+@rf("B128.sinpi")
+routine B128.sinpi() -> B128
+
+### Returns `cos(pi*me)`: cos(pi*(n + 1/2)) is +0.
+@rf("B128.cospi")
+routine B128.cospi() -> B128
+
+### Returns `tan(pi*me)`. At an integer n it is +0 for a positive even n and -0 for a positive odd one (IEEE
+### 754 tanPi), with the opposite signs for negative n since tanpi is odd.
+@rf("B128.tanpi")
+routine B128.tanpi() -> B128
+
+### Returns the error function `erf(me)`.
+@rf("B128.erf")
+routine B128.erf() -> B128
+
+### Returns the complementary error function `erfc(me)`.
+@rf("B128.erfc")
+routine B128.erfc() -> B128
+
+### Returns the gamma function `tgamma(me)`.
+@rf("B128.tgamma")
+routine B128.tgamma!() -> B128
+
+### `tgamma(me)` with raw IEEE (poles at 0/negative integers -> inf/qNaN). No crash.
+@rf("B128.tgamma_unchecked")
+routine B128.tgamma_unchecked() -> B128
+
+### Returns the log-gamma function `lgamma(me)` (= ln|gamma(me)|).
+@rf("B128.lgamma")
+routine B128.lgamma() -> B128
+
+### `acos(me)`, correctly rounded: the exact arc cosine rounded to the nearest `B128` (ties to even),
+### identical on every platform. The result lies in [0, pi]. |me| > 1, ±infinity and a signaling NaN give
+### NaN, and a quiet NaN is returned unchanged. No crash.
+### :returns: The correctly rounded arc cosine in radians.
+@rf("B128.acos_unchecked")
+routine B128.acos_unchecked() -> B128
+
+### `asin(me)`, correctly rounded: the exact arc sine rounded to the nearest `B128` (ties to even),
+### identical on every platform. The result lies in [-pi/2, pi/2] and `asin(-x) == -asin(x)`. ±0 map to
+### themselves; |me| > 1, ±infinity and a signaling NaN give NaN, and a quiet NaN is returned unchanged.
+### No crash.
+### :returns: The correctly rounded arc sine in radians.
+@rf("B128.asin_unchecked")
+routine B128.asin_unchecked() -> B128
+
+### Returns the arc tangent of this value, correctly rounded: the exact angle in [-pi/2, pi/2] rounded to
+### the nearest `B128` (ties to even), identical on every platform. `atan(-x) == -atan(x)`, ±0 map to
+### themselves, ±infinity give ±pi/2 and NaN gives NaN.
+### :returns: The correctly rounded arc tangent in radians.
+@rf("B128.atan")
+routine B128.atan() -> B128
+
+### Two-argument arc tangent atan2(y, x), correctly rounded: the exact angle of the point (x, y) rounded to
+### the nearest `B128` (ties to even), identical on every platform. The result lies in [-pi, pi]; the signs
+### of zero and infinite coordinates select the quadrant as in IEEE 754, and a NaN coordinate gives NaN.
+### :param y: The y-coordinate.
+### :param x: The x-coordinate.
+### :returns: The correctly rounded angle in radians.
+@rf("atan2")
+routine atan2(y: B128, x: B128) -> B128
+
+### Returns the cube root of this value, correctly rounded: the exact cube root rounded to the nearest
+### `B128` (ties to even), identical on every platform. `cbrt(-x) == -cbrt(x)`, and ±0, ±infinity and NaN
+### map to themselves (a signaling NaN is quieted).
+### :returns: The correctly rounded cube root.
+@rf("B128.cbrt")
+routine B128.cbrt() -> B128
+
+### Returns the cosine, correctly rounded: the exact cosine of this value (in radians) rounded to the nearest
+### `B128` (ties to even), identical on every platform. `cos(-x) == cos(x)`, and ±infinity and NaN give
+### NaN.
+### :returns: The correctly rounded cosine.
+@rf("B128.cos")
+routine B128.cos() -> B128
+
+### Returns `e` raised to this value, correctly rounded: the exact exponential rounded to the nearest
+### `B128` (ties to even), identical on every platform, with raw IEEE 754 propagation (overflow ->
+### +infinity, `exp(-infinity) == 0`, NaN -> quiet NaN). No crash.
+### :returns: The correctly rounded exponential, possibly +infinity.
+@rf("B128.exp_unchecked")
+routine B128.exp_unchecked() -> B128
+
+### Returns 10 raised to this value, correctly rounded: the exact power rounded to the nearest `B128`
+### (ties to even), identical on every platform, exact for x = 1, 2, ..., 48, with raw IEEE 754
+### propagation (overflow -> +infinity, `exp10(-infinity) == 0`, NaN -> quiet NaN). No crash.
+### :returns: The correctly rounded power of ten, possibly +infinity.
+@rf("B128.exp10_unchecked")
+routine B128.exp10_unchecked() -> B128
+
+### Returns 2 raised to this value, correctly rounded: the exact power rounded to the nearest `B128`
+### (ties to even), identical on every platform, exact for integer arguments, with raw IEEE 754
+### propagation (overflow -> +infinity, `exp2(-infinity) == 0`, NaN -> quiet NaN). No crash.
+### :returns: The correctly rounded power of two, possibly +infinity.
+@rf("B128.exp2_unchecked")
+routine B128.exp2_unchecked() -> B128
+
+### `e^me - 1`, correctly rounded: the exact value rounded to the nearest `B128` (ties to even), identical on
+### every platform, and accurate near 0. Raw IEEE 754 propagation, no crash: NaN -> quiet NaN,
+### -infinity -> -1, +infinity -> +infinity, overflow -> +infinity.
+### :returns: The correctly rounded `e^me - 1`.
+@rf("B128.expm1_unchecked")
+routine B128.expm1_unchecked() -> B128
+
+### `sqrt(x^2 + y^2)`, correctly rounded: the exact Euclidean distance rounded to the nearest `B128` (ties
+### to even), identical on every platform, without spurious overflow or underflow. Raw IEEE 754
+### propagation: an infinite leg gives +infinity (even with a quiet NaN in the other leg), otherwise a NaN
+### leg gives NaN.
+### :param x: One leg.
+### :param y: The other leg.
+### :returns: The correctly rounded hypotenuse.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: B128, y: B128) -> B128
+
+### `ln(me)`, correctly rounded: the exact natural logarithm rounded to the nearest `B128` (ties to even),
+### identical on every platform. Raw IEEE 754 propagation, no crash: ±0 -> -infinity, x < 0 -> NaN,
+### +infinity -> +infinity, NaN -> quiet NaN.
+### :returns: The correctly rounded natural logarithm.
+@rf("B128.log_unchecked")
+routine B128.log_unchecked() -> B128
+
+### Returns the sine, correctly rounded: the exact sine of this value (in radians) rounded to the nearest
+### `B128` (ties to even), identical on every platform. `sin(-x) == -sin(x)`, ±0 maps to itself, and
+### ±infinity and NaN give NaN.
+### :returns: The correctly rounded sine.
+@rf("B128.sin")
+routine B128.sin() -> B128
+
+### Returns the sine and the cosine together, each correctly rounded exactly as `sin()` and `cos()` return
+### them. They share the argument reduction, so the pair costs little more than one of them.
+### :returns: `(sin(me), cos(me))`.
+@rf("B128.sincos")
+routine B128.sincos() -> (B128, B128)
+
+### Returns the square root, correctly rounded: the exact square root rounded to the nearest `B128` (ties to
+### even), identical on every platform, with raw IEEE 754 propagation (C `sqrt`): NaN for negatives and
+### NaN inputs, +infinity for +infinity, ±0 for ±0.
+### :returns: The correctly rounded square root.
+@rf("B128.sqrt_unchecked")
+routine B128.sqrt_unchecked() -> B128

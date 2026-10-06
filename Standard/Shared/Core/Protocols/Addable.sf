@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for non-mutating addition.
+### Types that obey `Addable` support a sum operation that produces a new value
+### and leaves both operands observationally unchanged.
+@rf("Addable")
+protocol Addable
+    ### Returns the sum of this value and `you`.
+    ### Implementations should preserve the invariants of the conforming type and
+    ### leave both operands unchanged.
+    ### :param you: The other value to add.
+    ### :returns: The resulting `Me` value.
+    routine Me.add!(you: Me) -> Me

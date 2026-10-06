@@ -1,0 +1,17 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for saturating exponentiation.
+### `ClampingExponentiable` is intended for bounded numeric types that expose a
+### power operation and define a nearest-bound fallback when the exact result
+### exceeds the destination range.
+@rf("ClampingExponentiable")
+protocol ClampingExponentiable
+    ### Returns the clamping power result of this value raised by `you`.
+    ### :param you: The exponent value.
+    ### :returns: The resulting `Me` value.
+    ### :note: Clamp semantics apply only when the conforming type cannot
+    ### represent the mathematical result exactly.
+    routine Me.pow_clamp(you: Me) -> Me

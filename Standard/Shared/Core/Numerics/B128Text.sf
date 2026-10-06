@@ -1,0 +1,10 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Renders a B128 as the shortest decimal that reads back as the same value (scientific from a
+### leading-digit exponent of 34, FLT128_DIG + 1), written as `wrap(...)` when wrap is nonempty.
+### Specials: "NaN" / "inf" / "-inf".
+@rf("format_b128_shortest_wrapped")
+routine format_b128_shortest_wrapped(value: B128, wrap: Text) -> Text

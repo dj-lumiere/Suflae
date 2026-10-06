@@ -1,0 +1,26 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the success-or-crash-or-absent carrier produced by the `lookup` recovery keyword: absent, the
+### successful `T`, or the caught error, as a `Crashables`. It is `Check[T]` with an absent arm, for APIs where
+### "not found" is not itself an error.
+### :typeparam T: The successful return value type.
+@rf("Lookup")
+variant Lookup[T]
+    None
+    T
+    Crashables
+
+### Returns the display form of this lookup result. Absent renders as `"none"`; the success value and the caught
+### error use their own `represent`.
+### :returns: The resulting `Text` value.
+@rf("Lookup.represent")
+routine Lookup[T].represent() -> Text
+
+### Returns the diagnostic form of this lookup result: the type, the type id of what it holds (the caught error's
+### own type, not `Crashables`; 0 when absent), then that value's own `diagnose`, or `none`.
+### :returns: The resulting `Text` value.
+@rf("Lookup.diagnose")
+routine Lookup[T].diagnose() -> Text

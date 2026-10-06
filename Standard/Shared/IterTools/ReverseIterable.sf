@@ -1,0 +1,42 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields source elements in reverse order.
+### The source is fully materialized when iteration begins.
+### :typeparam T: The element type of the source sequence.
+### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
+@rf("ReverseIterable")
+entity ReverseIterable[T, TSource]
+relates ReverseEmittable[T] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+    pass
+
+### Iterates over a pre-materialized buffer from back to front.
+### The buffer holds the source's values as read, not copies it owns: an adapter is used only in the statement
+### that makes it, so the source outlives it, and a source cannot change while it is iterated. The buffer frees
+### its storage and leaves the values to the source.
+### :typeparam T: The element type of the reversed sequence.
+@rf("ReverseEmittable")
+entity ReverseEmittable[T]
+obeys Emittable[T]
+    pass
+
+### Materializes the source into a buffer and returns an iterator that walks it backwards.
+### :returns: The resulting `ReverseEmittable[T]` value.
+@rf("ReverseIterable.iter")
+routine ReverseIterable[T, TSource].iter() -> ReverseEmittable[T]
+
+### Returns the next element counting backward through the buffer.
+### Signals absence once all elements have been yielded.
+### :returns: The resulting `T` value.
+@rf("ReverseEmittable.emit")
+routine ReverseEmittable[T].emit!() -> T
+
+### Returns a lazy adapter that yields this iterable's elements in reverse order.
+### The source is fully consumed when the returned adapter is first iterated.
+### :returns: The resulting `ReverseIterable[T, Me]` value.
+@rf("Iterable.reverse")
+routine Iterable[T].reverse() -> ReverseIterable[T, Me]

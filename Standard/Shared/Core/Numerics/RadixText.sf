@@ -1,0 +1,34 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Crashes unless `radix` is a base this module can render (2 to 36).
+### :param radix: The requested numeric base.
+### :throws: {NumericDomainError} if `radix` is below 2 or above 36.
+@rf("check_radix")
+routine check_radix!(radix: S32)
+
+### The digit character for `d` (0 to 35): `0`-`9`, then `a`-`z`.
+@rf("radix_digit")
+routine radix_digit(d: U64) -> Character
+
+### The digits of `mag` in base `radix`, with a leading `-` when `negative`.
+### :param mag: The magnitude to render.
+### :param negative: Whether to prefix a minus sign.
+### :param radix: The numeric base (2 to 36).
+### :returns: The rendered `Text`.
+@rf("radix_text")
+routine radix_text(mag: U64, negative: Bool, radix: S32) -> Text
+
+### `radix_text` for a signed 64-bit value (the 8/16/32-bit signed types sign-extend into it first).
+### Takes the magnitude through the raw bits so `S64` minimum renders correctly.
+@rf("signed_radix_text")
+routine signed_radix_text(value: S64, radix: S32) -> Text
+
+### `radix_text` for a wide unsigned magnitude (`U128`, `U256`), dividing in the value's own width through its
+### `//` and `%` (Knuth division, never a 128-bit or 256-bit LLVM divide).
+@rf("wide_radix_text")
+routine wide_radix_text[T](mag: T, negative: Bool, radix: S32) -> Text
+needs RecordType T
+needs T obeys FloorDivisible

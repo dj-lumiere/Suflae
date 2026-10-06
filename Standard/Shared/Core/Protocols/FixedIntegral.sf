@@ -1,0 +1,13 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the aggregate protocol for bounded fixed-width integers.
+### `FixedIntegral` combines exact integer operators with bitwise behavior and
+### the alternate wrapping, clamping, and unchecked arithmetic surfaces expected
+### from machine-sized integer types.
+@rf("FixedIntegral")
+protocol FixedIntegral
+obeys Integral, Invertible, WrappingArithmetic, ClampingArithmetic, UncheckedArithmetic,
+    UncheckedFloorDivisible

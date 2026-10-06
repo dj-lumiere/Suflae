@@ -1,0 +1,140 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Raised when a `SerialValue` does not have the shape a `T(from: SerialValue)` constructor expects: a
+### missing member variable, a text where a number was expected, an unknown choice case, and so on.
+@rf("SerialShapeError")
+crashable SerialShapeError
+    ### What was expected and what was found.
+    detail: Text
+
+### Returns the message for a serialized value that does not fit its target type.
+### :returns: The resulting `Text` value.
+@rf("SerialShapeError.crash_message")
+routine SerialShapeError.crash_message() -> Text
+
+### The serialized value of member variable `name` inside a serialized record or entity (the
+### `Dict[Text, SerialValue]` that `serialize` produces).
+### :param value: The serialized record or entity.
+### :param name: The member variable to look up.
+### :returns: The member variable's serialized value.
+### :throws: {SerialShapeError} when `value` is not a member-variable table or has no entry for `name`.
+@rf("serial_field")
+routine serial_field!(value: SerialValue, name: Text) -> SerialValue
+
+### The text inside a serialized `Text` value.
+### :param value: The serialized value.
+### :returns: The text.
+### :throws: {SerialShapeError} when `value` is not text.
+@rf("serial_text")
+routine serial_text!(value: SerialValue) -> Text
+
+### Builds a `T` from its serialized form: the generic entry point the builder-synthesized
+### `T(from: SerialValue)` constructors call for their member variables and arms. Not failable itself:
+### the `T(from:)` it calls is, so a value that does not fit crashes loudly with a `SerialShapeError`.
+### :typeparam T: The type to build.
+### :param value: The serialized value.
+### :returns: The rebuilt value.
+@rf("serial_decode")
+routine serial_decode[T](value: SerialValue) -> T
+
+### Builds a choice value from its serialized case name.
+### :typeparam T: The choice type.
+### :param value: The serialized case name.
+### :returns: The matching case.
+### :throws: {SerialShapeError} when the name is not a case of `T`.
+@rf("choice_from_serial")
+routine choice_from_serial![T](value: SerialValue) -> T
+needs ChoiceType T
+
+### Builds a flags value from the serialized list of its set member names.
+### :typeparam T: The flags type.
+### :param value: The serialized list of member names.
+### :returns: The flags value with exactly those members set.
+### :throws: {SerialShapeError} when `value` is not a list of names or a name is not a member of `T`.
+@rf("flags_from_serial")
+routine flags_from_serial![T](value: SerialValue) -> T
+needs FlagsType T
+
+### Builds a variant value from its serialized `{arm: payload}` table. (A variant with a `None` arm
+### handles a serialized `None` in its builder-synthesized `T(from: SerialValue)` before calling this.)
+### :typeparam T: The variant type.
+### :param value: The serialized variant.
+### :returns: The variant holding the rebuilt payload in the named arm.
+### :throws: {SerialShapeError} when `value` is not a one-entry table naming an arm of `T`.
+@rf("variant_from_serial")
+routine variant_from_serial![T](value: SerialValue) -> T
+needs VariantType T
+
+### A `SerialValue` is already its own serialized form.
+### :param from: The serialized value.
+### :returns: The same value.
+@rf("SerialValue")
+routine SerialValue(from: SerialValue) -> SerialValue
+
+### Builds a `Byte` from its serialized form (a `U8`). :throws: {SerialShapeError} on any other arm.
+@rf("Byte")
+routine Byte!(from: SerialValue) -> Byte
+
+### Builds a `Character` from its serialized form (a one-character `Text`).
+### :throws: {SerialShapeError} when the value is not a one-character text.
+@rf("Character")
+routine Character!(from: SerialValue) -> Character
+
+### Builds an `S128` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("S128")
+routine S128!(from: SerialValue) -> S128
+
+### Builds a `U128` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("U128")
+routine U128!(from: SerialValue) -> U128
+
+### Builds an `S256` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("S256")
+routine S256!(from: SerialValue) -> S256
+
+### Builds a `U256` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("U256")
+routine U256!(from: SerialValue) -> U256
+
+### Builds a `B16` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("B16")
+routine B16!(from: SerialValue) -> B16
+
+### Builds a `BF16` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("BF16")
+routine BF16!(from: SerialValue) -> BF16
+
+### Builds a `B128` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("B128")
+routine B128!(from: SerialValue) -> B128
+
+### Builds a `D32` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("D32")
+routine D32!(from: SerialValue) -> D32
+
+### Builds a `D64` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("D64")
+routine D64!(from: SerialValue) -> D64
+
+### Builds a `D128` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("D128")
+routine D128!(from: SerialValue) -> D128
+
+### Builds a `Decimal` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("Decimal")
+routine Decimal!(from: SerialValue) -> Decimal
+
+### Builds a `C64` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("C64")
+routine C64!(from: SerialValue) -> C64
+
+### Builds a `C128` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("C128")
+routine C128!(from: SerialValue) -> C128
+
+### Builds a `C256` from its serialized text. :throws: {SerialShapeError} or a parse error.
+@rf("C256")
+routine C256!(from: SerialValue) -> C256

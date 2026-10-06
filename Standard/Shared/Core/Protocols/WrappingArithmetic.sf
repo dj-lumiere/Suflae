@@ -1,0 +1,11 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the aggregate protocol for modulo-width arithmetic.
+### `WrappingArithmetic` groups the arithmetic operators that deliberately keep
+### only the low bits that fit in the conforming type when overflow occurs.
+@rf("WrappingArithmetic")
+protocol WrappingArithmetic
+obeys WrappingAddable, WrappingSubtractable, WrappingMultiplicable, WrappingExponentiable

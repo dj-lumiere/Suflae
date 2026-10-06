@@ -1,0 +1,26 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the call-trace payload captured for runtime failures.
+### `RoutineTrace` is a compact inline record used by diagnostics and crash
+### reporting to preserve the most recent routine frames without heap
+### allocation during failure handling.
+@rf("RoutineTrace")
+record RoutineTrace
+    ### Stores the recorded routine frames in caller-to-callee order.
+    ### Only the prefix indicated by `depth` is considered valid.
+    frames: Array[RoutineRecord, 10]
+    ### Stores the number of valid entries currently present in `frames`.
+    depth: U32
+    ### Stores whether additional frames were dropped because the trace buffer was
+    ### exhausted.
+    truncated: Bool
+
+### Returns a SipHash-2-4 keyed hash of this routine trace.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("RoutineTrace.hash")
+routine RoutineTrace.hash(k0: U64, k1: U64) -> U64

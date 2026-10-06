@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for saturating subtraction.
+### `ClampingSubtractable` is for bounded types whose subtraction surface can
+### clamp to the nearest representable bound instead of overflowing.
+@rf("ClampingSubtractable")
+protocol ClampingSubtractable
+    ### Returns the clamping difference between this value and `you`.
+    ### :param you: The value to subtract.
+    ### :returns: The resulting `Me` value.
+    ### :note: Implementations should preserve exact subtraction behavior whenever
+    ### the mathematical result is representable.
+    routine Me.sub_clamp(you: Me) -> Me

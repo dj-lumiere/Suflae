@@ -1,0 +1,202 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a `Moment` paired with an explicit UTC offset.
+### `LocalMoment` models local civil time without losing the underlying UTC instant.
+### Ordering and instant arithmetic are based on the embedded UTC `Moment`, while display-style accessors use the local offset.
+### :see: {Moment}, {Duration}, {Temporal-Types}
+@rf("LocalMoment")
+record LocalMoment
+obeys Comparable, DurationAddable, DurationSubtractable
+    pass
+
+### Creates a `LocalMoment` from local civil date-time components and a UTC offset.
+### The supplied civil time is interpreted in the local offset and converted to the equivalent UTC `Moment`.
+### :param year: The local calendar year.
+### :param month: The local month number.
+### :param day: The local day of month.
+### :param hour: The local hour.
+### :param minute: The local minute.
+### :param second: The local second.
+### :param offset: The UTC offset associated with the local civil time.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.from_local")
+common routine LocalMoment.from_local(
+    year: S64,
+    month: S64,
+    day: S64,
+    hour: S64,
+    minute: S64,
+    second: S64,
+    offset: Duration,
+) -> LocalMoment
+
+### Returns the current instant with a zero UTC offset.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.now_utc")
+common routine LocalMoment.now_utc() -> LocalMoment
+
+### Extracts the underlying UTC `Moment` from a `LocalMoment`.
+### :param from: The local moment to convert.
+### :returns: The resulting `Moment` value.
+@rf("Moment")
+routine Moment(from: LocalMoment) -> Moment
+
+### Converts this value to moment.
+### :returns: The resulting `Moment` value.
+@rf("LocalMoment.to_moment")
+routine LocalMoment.to_moment() -> Moment
+
+### Returns the UTC offset associated with this local-time view.
+### :returns: The resulting `Duration` value.
+@rf("LocalMoment.utc_offset")
+routine LocalMoment.utc_offset() -> Duration
+
+### Returns the civil-time `Moment` produced by applying the stored UTC offset to
+### the underlying UTC instant.
+### :returns: The resulting `Moment` value.
+@rf("LocalMoment.local_moment")
+routine LocalMoment.local_moment() -> Moment
+
+### Returns the local calendar year of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.year")
+routine LocalMoment.year() -> S64
+
+### Returns the local calendar month of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.month")
+routine LocalMoment.month() -> S64
+
+### Returns the local day of month of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.day")
+routine LocalMoment.day() -> S64
+
+### Returns the local day of week for this moment.
+### The result uses `0 = Monday` through `6 = Sunday`.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.day_of_week")
+routine LocalMoment.day_of_week() -> S64
+
+### Returns the local hour component of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.hour")
+routine LocalMoment.hour() -> S64
+
+### Returns the local minute component of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.minute")
+routine LocalMoment.minute() -> S64
+
+### Returns the local second component of this moment.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.second")
+routine LocalMoment.second() -> S64
+
+### Returns the local millisecond component within the current second.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.millisecond")
+routine LocalMoment.millisecond() -> S64
+
+### Returns the local microsecond component within the current millisecond.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.microsecond")
+routine LocalMoment.microsecond() -> S64
+
+### Returns the local nanosecond component within the current microsecond.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.nanosecond")
+routine LocalMoment.nanosecond() -> S64
+
+### Returns the underlying UTC Unix timestamp in whole seconds.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.timestamp")
+routine LocalMoment.timestamp() -> S64
+
+### Returns the underlying UTC Unix timestamp in milliseconds.
+### :returns: The resulting `S64` value.
+@rf("LocalMoment.timestamp_ms")
+routine LocalMoment.timestamp_ms() -> S64
+
+### Returns a new local-time view of the same instant using `new_offset`.
+### The underlying UTC moment is preserved.
+### :param new_offset: The offset to apply for local-time accessors.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.to_offset")
+routine LocalMoment.to_offset(new_offset: Duration) -> LocalMoment
+
+### Returns this local moment viewed with a zero UTC offset.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.to_utc")
+routine LocalMoment.to_utc() -> LocalMoment
+
+### Adds a value using `add_duration`.
+### :param duration: The `duration` value.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.add_duration")
+routine LocalMoment.add_duration(duration: Duration) -> LocalMoment
+
+### Returns this local moment shifted backward by `duration`.
+### The stored offset is preserved.
+### :param duration: The time span to subtract.
+### :returns: The resulting `LocalMoment` value.
+@rf("LocalMoment.subtract_duration")
+routine LocalMoment.subtract_duration(duration: Duration) -> LocalMoment
+
+### Returns the elapsed duration from `earlier` to this local moment.
+### Offset differences do not affect the result because arithmetic is based on
+### the underlying UTC instants.
+### :param earlier: The earlier comparison local moment.
+### :returns: The resulting `Duration` value.
+@rf("LocalMoment.elapsed_since")
+routine LocalMoment.elapsed_since(earlier: LocalMoment) -> Duration
+
+### Returns the local moment reached by advancing this one by `you`.
+### :param you: The duration to advance by.
+### :returns: The resulting `LocalMoment`.
+@rf("LocalMoment.add")
+routine LocalMoment.add(you: Duration) -> LocalMoment
+
+### Returns the local moment reached by retreating this one by `you`.
+### :param you: The duration to subtract.
+### :returns: The resulting `LocalMoment`.
+@rf("LocalMoment.sub")
+routine LocalMoment.sub(you: Duration) -> LocalMoment
+
+### Returns the elapsed time from `you` to this moment.
+### :param you: The earlier moment to measure from.
+### :returns: The `Duration` between the two moments.
+@rf("LocalMoment.sub")
+routine LocalMoment.sub(you: LocalMoment) -> Duration
+
+### Returns whether both values are equal.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("LocalMoment.eq")
+routine LocalMoment.eq(you: LocalMoment) -> Bool
+
+### Compares this value with the other value.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("LocalMoment.cmp")
+routine LocalMoment.cmp(you: LocalMoment) -> ComparisonSign
+
+### Returns the display form of this local moment including its UTC offset.
+### :returns: The resulting `Text` value.
+@rf("LocalMoment.represent")
+routine LocalMoment.represent() -> Text
+
+### Returns the diagnostic form of this local moment.
+### :returns: The resulting `Text` value.
+@rf("LocalMoment.diagnose")
+routine LocalMoment.diagnose() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this local moment.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("LocalMoment.hash")
+routine LocalMoment.hash(k0: U64, k1: U64) -> U64

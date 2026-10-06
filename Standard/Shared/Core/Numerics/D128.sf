@@ -1,0 +1,305 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A software decimal128 value in BID storage.
+@rf("D128")
+record D128
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Reinterprets this value as its raw decimal128 bit pattern.
+@rf("D128.to_bits")
+routine D128.to_bits() -> U128
+
+### Builds a value directly from a raw decimal128 bit pattern.
+@rf("D128.from_bits")
+common routine D128.from_bits(bits: U128) -> D128
+
+### Builds a value from its low/high 64-bit words (matching Core.D128 layout).
+@rf("D128.from_words")
+common routine D128.from_words(low: U64, high: U64) -> D128
+
+### The decimal128 value re-encoded in DPD interchange form. Never crashes.
+@rf("D128.to_dpd")
+routine D128.to_dpd() -> U128
+
+### Decodes a DPD interchange word into a decimal128. Never crashes.
+@rf("D128.from_dpd")
+common routine D128.from_dpd(bits: U128) -> D128
+
+### Infinity with the given sign.
+@rf("D128.infinity")
+common routine D128.infinity(sign: Bool) -> D128
+
+### A quiet NaN.
+@rf("D128.quiet_nan")
+common routine D128.quiet_nan() -> D128
+
+### Returns a signaling NaN (interop/testing; never produced by arithmetic).
+@rf("D128.signaling_nan")
+common routine D128.signaling_nan() -> D128
+
+### True when finite (neither inf nor NaN).
+@rf("D128.is_finite")
+routine D128.is_finite() -> Bool
+
+### True when infinite.
+@rf("D128.is_infinite")
+routine D128.is_infinite() -> Bool
+
+### True when NaN (quiet or signaling).
+@rf("D128.is_nan")
+routine D128.is_nan() -> Bool
+
+### True when this is a SIGNALING NaN (special field == 3).
+@rf("D128.is_signaling")
+routine D128.is_signaling() -> Bool
+
+### True when this is a finite zero (±0).
+@rf("D128.is_zero")
+routine D128.is_zero() -> Bool
+
+### Builds a finite D128 from a sign, a coefficient and a base-10 exponent: value = (-1)^sign * coeff *
+### 10^exp, rounded half to even to 34 digits and brought into the exponent range.
+@rf("D128.from_components")
+common routine D128.from_components(sign: Bool, coeff: U128, exp: S64) -> D128
+
+### Builds a D128 from a 64-bit signed integer (exponent 0).
+@rf("D128.from_int64")
+common routine D128.from_int64(value: S64) -> D128
+
+### An integer (sign and 256-bit magnitude) as a D128, rounded half to even to 34 digits.
+@rf("d128_of_integer")
+routine d128_of_integer(neg: Bool, m: U256) -> D128
+
+### The bits of the binary float nearest to x, `which` bits wide (16, 32, 64, or 128). An infinity keeps its sign,
+### a NaN becomes the positive quiet NaN.
+@rf("d128_to_binary")
+routine d128_to_binary(x: D128, which: U32) -> U128
+
+### A B128 as a D128, correctly rounded (a narrower binary float widens to B128 exactly first).
+@rf("d128_of_b128")
+routine d128_of_b128(x: B128) -> D128
+
+### The truncated integer magnitude of a finite decimal coeff * 10^exp as a U256. Throws when it exceeds U256.
+@rf("d128_int_magnitude")
+routine d128_int_magnitude!(coeff: U128, exp: S64) -> U256
+
+### The truncated integer magnitude of a finite decimal as a U128. Throws when it exceeds U128.
+@rf("d128_int_magnitude_u128")
+routine d128_int_magnitude_u128!(coeff: U128, exp: S64) -> U128
+
+### Truncates toward zero to an unsigned 128-bit integer. Throws on a non-finite value, a
+### negative value, or an integer part beyond U128.
+@rf("U128")
+routine U128!(from: D128) -> U128
+
+### Truncates toward zero to a signed 128-bit integer. Throws on a non-finite value or an
+### integer part outside [-2^127, 2^127-1].
+@rf("S128")
+routine S128!(from: D128) -> S128
+
+### Truncates toward zero to an unsigned 256-bit integer. Throws on a non-finite value, a
+### negative value, or an integer part beyond U256.
+@rf("U256")
+routine U256!(from: D128) -> U256
+
+### Truncates toward zero to a signed 256-bit integer. Throws on a non-finite value or an
+### integer part outside [-2^255, 2^255-1].
+@rf("S256")
+routine S256!(from: D128) -> S256
+
+### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
+### IEEE.
+@rf("D128.add")
+routine D128.add!(you: D128) -> D128
+
+### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
+### IEEE.
+@rf("D128.sub")
+routine D128.sub!(you: D128) -> D128
+
+### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
+### IEEE.
+@rf("D128.mul")
+routine D128.mul!(you: D128) -> D128
+
+### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
+### overflow.
+### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
+@rf("D128.truediv")
+routine D128.truediv!(you: D128) -> D128
+
+### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D128.add_unchecked")
+routine D128.add_unchecked(you: D128) -> D128
+
+### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D128.sub_unchecked")
+routine D128.sub_unchecked(you: D128) -> D128
+
+### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("D128.mul_unchecked")
+routine D128.mul_unchecked(you: D128) -> D128
+
+### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
+@rf("D128.truediv_unchecked")
+routine D128.truediv_unchecked(you: D128) -> D128
+
+### Decimal value equality. NaN is never equal to anything (including itself);
+### infinities are equal only with the same sign; finite values compare by value
+### (so different cohorts of the same number — e.g. 1.0 and 1.00 — are equal).
+@rf("D128.eq")
+routine D128.eq(you: D128) -> Bool
+
+### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
+### maps to `SAME` (matching the B128 engine convention).
+@rf("D128.cmp")
+routine D128.cmp(you: D128) -> ComparisonSign
+
+### Returns `me` raised to the `you` power. Delegates to the transcendental `pow`;
+### follows IEEE semantics (overflow/domain errors yield inf/NaN, never throw), so the
+### wired `pow!` is crashable and satisfies `Exponentiable`.
+@rf("D128.pow")
+routine D128.pow!(you: D128) -> D128
+
+### Returns the decimal text of this value.
+@rf("D128.represent")
+routine D128.represent() -> Text
+
+### Returns a diagnostic representation tagged with the type name.
+@rf("D128.diagnose")
+routine D128.diagnose() -> Text
+
+### Returns the smaller of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`, otherwise `you`.
+@rf("D128.min")
+routine D128.min(you: D128) -> D128
+
+### Returns the larger of `me` and `you` under decimal ordering.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`, otherwise `you`.
+@rf("D128.max")
+routine D128.max(you: D128) -> D128
+
+### Restricts `me` to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound.
+### :param max_val: The upper bound.
+### :returns: The clamped value.
+@rf("D128.clamp")
+routine D128.clamp(min_val: D128, max_val: D128) -> D128
+
+### Returns the reciprocal `1 / me`.
+### :returns: The multiplicative inverse.
+@rf("D128.recip")
+routine D128.recip() -> D128
+
+### Returns `me` raised to the integer power `n` via exponentiation by squaring.
+### A negative `n` inverts the result.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+@rf("D128.powi")
+routine D128.powi(n: S32) -> D128
+
+### Returns `(me + you) / 2`.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("D128.midpoint")
+routine D128.midpoint(you: D128) -> D128
+
+### Converts an S8 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: S8) -> D128
+
+### Converts an S16 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: S16) -> D128
+
+### Converts an S32 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: S32) -> D128
+
+### Converts an S64 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: S64) -> D128
+
+### Converts an S128 into decimal128 (exponent 0, rounded half to even when it has more than 34 digits).
+@rf("D128")
+routine D128(from: S128) -> D128
+
+### Converts an S256 into decimal128 (exponent 0, rounded half to even when it has more than 34 digits).
+@rf("D128")
+routine D128(from: S256) -> D128
+
+### Converts a U8 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: U8) -> D128
+
+### Converts a U16 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: U16) -> D128
+
+### Converts a U32 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: U32) -> D128
+
+### Converts a U64 into decimal128 (exponent 0).
+@rf("D128")
+routine D128(from: U64) -> D128
+
+### Converts a U128 into decimal128 (exponent 0, rounded half to even when it has more than 34 digits).
+@rf("D128")
+routine D128(from: U128) -> D128
+
+### Converts a U256 into decimal128 (exponent 0, rounded half to even when it has more than 34 digits).
+@rf("D128")
+routine D128(from: U256) -> D128
+
+### Converts a B16 to decimal128, correctly rounded.
+@rf("D128")
+routine D128(from: B16) -> D128
+
+### Converts a B32 to decimal128, correctly rounded.
+@rf("D128")
+routine D128(from: B32) -> D128
+
+### Converts a B64 to decimal128, correctly rounded.
+@rf("D128")
+routine D128(from: B64) -> D128
+
+### Converts a B128 to decimal128, correctly rounded.
+@rf("D128")
+routine D128(from: B128) -> D128
+
+### Widens a decimal32 to decimal128 (exact).
+@rf("D128")
+routine D128(from: D32) -> D128
+
+### Widens a decimal64 to decimal128 (exact).
+@rf("D128")
+routine D128(from: D64) -> D128
+
+### Identity conversion (decimal128 -> decimal128).
+@rf("D128")
+routine D128(from: D128) -> D128
+
+### Parses decimal text into a `D128` (the scanned value rounded half to even to 34 digits).
+### :throws: {InvalidValueError} on malformed input.
+@rf("parse_decimal_d128")
+routine parse_decimal_d128!(from_text: Text) -> D128
+
+### Parses a decimal literal into a `D128`.
+### :throws: {InvalidValueError} if the text is not a valid decimal literal.
+@rf("D128")
+routine D128!(from_text: Text) -> D128
+
+### Returns the raw bytes of this value in little-endian order.
+@rf("D128.to_bytes_le")
+routine D128.to_bytes_le() -> Array[Byte, 16]
+
+### Returns the raw bytes of this value in big-endian order.
+@rf("D128.to_bytes_be")
+routine D128.to_bytes_be() -> Array[Byte, 16]

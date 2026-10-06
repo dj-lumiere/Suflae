@@ -1,0 +1,12 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the aggregate protocol for unchecked arithmetic.
+### `UncheckedArithmetic` groups the arithmetic operators that lower to LLVM
+### `nsw`/`nuw` flagged instructions, deferring overflow detection to the caller.
+### Every member is undefined behavior on overflow.
+@rf("UncheckedArithmetic")
+protocol UncheckedArithmetic
+obeys UncheckedAddable, UncheckedSubtractable, UncheckedMultiplicable, UncheckedExponentiable

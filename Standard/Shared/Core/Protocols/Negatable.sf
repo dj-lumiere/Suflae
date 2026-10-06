@@ -1,0 +1,13 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for additive inversion.
+### `Negatable` is for values that can produce an equivalent value with the
+### opposite sign or orientation in their algebraic domain.
+@rf("Negatable")
+protocol Negatable
+    ### Returns the additive inverse of this value.
+    ### :returns: The arithmetic negation of this value.
+    routine Me.neg() -> Me

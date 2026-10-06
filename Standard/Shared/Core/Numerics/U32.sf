@@ -1,0 +1,478 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 32-bit unsigned integer in the range 0 to 4,294,967,295.
+###
+### `U32` is the natural unsigned integer type for 32-bit quantities such as
+### Unicode code points, IPv4 addresses, pixel colours, and shift amounts
+### (the shift operators expect `U32` for their count argument).
+@rf("U32")
+record U32
+obeys UnsignedIntegral, Comparable, Copyable
+    pass
+
+### Converts an `S8` to `U32`, throwing if the value is negative.
+### :param from: The `S8` value to convert.
+### :returns: A `U32` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U32")
+routine U32!(from: S8) -> U32
+
+### Converts an `S16` to `U32`, throwing if the value is negative.
+### :param from: The `S16` value to convert.
+### :returns: A `U32` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U32")
+routine U32!(from: S16) -> U32
+
+### Converts an `S32` to `U32`, throwing if the value is negative.
+### :param from: The `S32` value to convert.
+### :returns: The same bit pattern reinterpreted as an unsigned value.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U32")
+routine U32!(from: S32) -> U32
+
+### Converts an `S64` to `U32`, throwing if the value is outside 0..4294967295.
+### :param from: The `S64` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=4294967295`.
+@rf("U32")
+routine U32!(from: S64) -> U32
+
+### Converts an `S128` to `U32`, throwing if the value is outside 0..4294967295.
+### :param from: The `S128` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=4294967295`.
+@rf("U32")
+routine U32!(from: S128) -> U32
+
+### Zero-extends a `U8` to `U32`.
+### :param from: The `U8` value to widen.
+### :returns: A `U32` equal in value to `from`.
+@rf("U32")
+routine U32(from: U8) -> U32
+
+### Zero-extends a `U16` to `U32`.
+### :param from: The `U16` value to widen.
+### :returns: A `U32` equal in value to `from`.
+@rf("U32")
+routine U32(from: U16) -> U32
+
+### Identity conversion — returns `from` unchanged.
+### :param from: The `U32` value to return.
+### :returns: `from` unchanged.
+@rf("U32")
+routine U32(from: U32) -> U32
+
+### Converts a `U64` to `U32`, throwing if the value exceeds 4294967295.
+### :param from: The `U64` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 4294967295`.
+@rf("U32")
+routine U32!(from: U64) -> U32
+
+### Converts a `U128` to `U32`, throwing if the value exceeds 4294967295.
+### :param from: The `U128` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 4294967295`.
+@rf("U32")
+routine U32!(from: U128) -> U32
+
+### Converts an `S256` to `U32`, throwing if the value is negative or exceeds 4294967295.
+### :param from: The `S256` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside 0..4294967295.
+@rf("U32")
+routine U32!(from: S256) -> U32
+
+### Converts a `U256` to `U32`, throwing if the value exceeds 4294967295.
+### :param from: The `U256` value to convert.
+### :returns: The lower 32 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 4294967295`.
+@rf("U32")
+routine U32!(from: U256) -> U32
+
+### Converts an `B16` to `U32` by widening to `B32` first, then truncating.
+### :param from: The `B16` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 4294967295.
+@rf("U32")
+routine U32!(from: B16) -> U32
+
+### Converts an `B32` to `U32`, truncating toward zero.
+### :param from: The `B32` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: B32) -> U32
+
+### Converts an `B64` to `U32`, truncating toward zero.
+### :param from: The `B64` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: B64) -> U32
+
+### Converts an `B128` to `U32` by narrowing to `B64` first, then truncating.
+### :param from: The `B128` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: B128) -> U32
+
+### Converts a `D32` to `U32` via `S64` conversion.
+### :param from: The `D32` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: D32) -> U32
+
+### Converts a `D64` to `U32` via `S64` conversion.
+### :param from: The `D64` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: D64) -> U32
+
+### Converts a `D128` to `U32` via `S64` conversion.
+### :param from: The `D128` value to convert.
+### :returns: The integer part of `from` as a `U32`.
+### :throws: {IntegerOverflowError} if the value is negative or exceeds 4294967295.
+@rf("U32")
+routine U32!(from: D128) -> U32
+
+### Returns the sum and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_sum, overflowed)`.
+@rf("U32.add_with_overflow")
+routine U32.add_with_overflow(you: U32) -> (U32, Bool)
+
+### Returns the difference and a flag indicating whether the result wrapped around.
+### :param you: The value to subtract.
+### :returns: A tuple of `(wrapped_difference, overflowed)`.
+@rf("U32.sub_with_overflow")
+routine U32.sub_with_overflow(you: U32) -> (U32, Bool)
+
+### Returns the product and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_product, overflowed)`.
+@rf("U32.mul_with_overflow")
+routine U32.mul_with_overflow(you: U32) -> (U32, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum `me + you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U32_MAX`.
+@rf("U32.add")
+routine U32.add!(you: U32) -> U32
+
+### Returns `me - you`, throwing on underflow.
+### :param you: The value to subtract.
+### :returns: The difference `me - you`.
+### :throws: {IntegerOverflowError} if the result is less than `U32_MIN` (0).
+@rf("U32.sub")
+routine U32.sub!(you: U32) -> U32
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product `me * you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U32_MAX`.
+@rf("U32.mul")
+routine U32.mul!(you: U32) -> U32
+
+### Returns `me // you` (integer division), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The quotient `me // you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U32.floordiv")
+routine U32.floordiv!(you: U32) -> U32
+
+### Returns `me % you` (integer remainder).
+### :param you: The divisor.
+### :returns: The remainder `me % you`. Behavior is undefined if `you == 0`.
+@rf("U32.mod")
+routine U32.mod!(you: U32) -> U32
+
+### Returns the two's-complement negation `(2³² - me) mod 2³²`.
+### :returns: The wrapped negation.
+@rf("U32.neg_wrap")
+routine U32.neg_wrap() -> U32
+
+### Returns `(wrapping negation, overflowed)`. Overflow occurs for any non-zero value.
+### :returns: A tuple of `(wrapped negation, overflow flag)`.
+@rf("U32.neg_with_overflow")
+routine U32.neg_with_overflow() -> (U32, Bool)
+
+### Returns `(me + you) mod 2³²` without overflow check.
+### :param you: The right operand.
+### :returns: The sum modulo 4294967296.
+@rf("U32.add_wrap")
+routine U32.add_wrap(you: U32) -> U32
+
+### Returns `(me - you) mod 2³²` without underflow check.
+### :param you: The value to subtract.
+### :returns: The difference modulo 4294967296.
+@rf("U32.sub_wrap")
+routine U32.sub_wrap(you: U32) -> U32
+
+### Returns `(me * you) mod 2³²` without overflow check.
+### :param you: The right operand.
+### :returns: The product modulo 4294967296.
+@rf("U32.mul_wrap")
+routine U32.mul_wrap(you: U32) -> U32
+
+### Returns `me + you`, clamped to `U32_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The sum, or `4294967295` if it would exceed `U32_MAX`.
+@rf("U32.add_clamp")
+routine U32.add_clamp(you: U32) -> U32
+
+### Returns `me - you`, clamped to `U32_MIN` on underflow.
+### :param you: The value to subtract.
+### :returns: The difference, or `0` if it would go below `U32_MIN`.
+@rf("U32.sub_clamp")
+routine U32.sub_clamp(you: U32) -> U32
+
+### Returns `me * you`, clamped to `U32_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The product, or `4294967295` if it would exceed `U32_MAX`.
+@rf("U32.mul_clamp")
+routine U32.mul_clamp(you: U32) -> U32
+
+### Returns `me + you + carry` as `(wrapped_sum, carry_out)`.
+### Chains across words to add integers wider than `U32`: feed each word's
+### `carry_out` in as the next higher word's `carry`.
+### :param you: The right operand.
+### :param carry: The incoming carry bit from the lower word.
+### :returns: A tuple of `(wrapped sum, outgoing carry)`.
+@rf("U32.carrying_add")
+routine U32.carrying_add(you: U32, carry: Bool) -> (U32, Bool)
+
+### Returns `me - you - borrow` as `(wrapped_difference, borrow_out)`.
+### Chains across words to subtract integers wider than `U32`.
+### :param you: The value to subtract.
+### :param borrow: The incoming borrow bit from the lower word.
+### :returns: A tuple of `(wrapped difference, outgoing borrow)`.
+@rf("U32.borrowing_sub")
+routine U32.borrowing_sub(you: U32, borrow: Bool) -> (U32, Bool)
+
+### Returns the full `me * you` product as `(low, high)` halves.
+### The product of two `U32` values needs 64 bits; this splits it into the low
+### and high `U32` words without loss.
+### :param you: The right operand.
+### :returns: A tuple of `(low 32 bits, high 32 bits)`.
+@rf("U32.widening_mul")
+routine U32.widening_mul(you: U32) -> (U32, U32)
+
+### Returns `me * you + carry` as `(low, high)` halves.
+### Never overflows: the largest result is `(2³²-1)² + (2³²-1) < 2⁶⁴`. The
+### workhorse of schoolbook multiplication — `carry` accumulates the high word
+### carried out of the previous column.
+### :param you: The right operand.
+### :param carry: The value to add to the product.
+### :returns: A tuple of `(low 32 bits, high 32 bits)`.
+@rf("U32.carrying_mul")
+routine U32.carrying_mul(you: U32, carry: U32) -> (U32, U32)
+
+### Returns `me ** exp` and a flag indicating whether the result wrapped around.
+### :param exp: The exponent.
+### :returns: A tuple of `(wrapped_result, overflowed)`.
+@rf("U32.pow_with_overflow")
+routine U32.pow_with_overflow(exp: U32) -> (U32, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent.
+### :returns: The result of raising `me` to the power `exp`.
+### :throws: {IntegerOverflowError} if the result exceeds `U32_MAX`.
+@rf("U32.pow")
+routine U32.pow!(exp: U32) -> U32
+
+### Returns `me ** exp` with wrapping arithmetic (mod 2³²).
+### :param exp: The exponent.
+### :returns: The result modulo 4294967296.
+@rf("U32.pow_wrap")
+routine U32.pow_wrap(exp: U32) -> U32
+
+### Returns `me ** exp`, clamped to `U32_MAX` on overflow.
+### :param exp: The exponent.
+### :returns: The result, or `4294967295` if it would overflow.
+@rf("U32.pow_clamp")
+routine U32.pow_clamp(exp: U32) -> U32
+
+### Returns the bitwise AND of this value and `you`.
+### :param you: The right operand.
+### :returns: `me & you`.
+@rf("U32.bitand")
+routine U32.bitand(you: U32) -> U32
+
+### Returns the bitwise OR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me | you`.
+@rf("U32.bitor")
+routine U32.bitor(you: U32) -> U32
+
+### Returns the bitwise XOR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me ^ you`.
+@rf("U32.bitxor")
+routine U32.bitxor(you: U32) -> U32
+
+### Returns the bitwise complement of this value.
+### :returns: `~me` — each bit flipped.
+@rf("U32.bitnot")
+routine U32.bitnot() -> U32
+
+### Returns `true` when both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`; `false` otherwise.
+@rf("U32.eq")
+routine U32.eq(you: U32) -> Bool
+
+### Compares this value with `you`, returning the ordering relationship.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("U32.cmp")
+routine U32.cmp(you: U32) -> ComparisonSign
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("U32.min")
+routine U32.min(you: U32) -> U32
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`; otherwise `you`.
+@rf("U32.max")
+routine U32.max(you: U32) -> U32
+
+### Returns this value clamped to the range `min_val..=max_val`.
+### :param min_val: The lower bound (inclusive).
+### :param max_val: The upper bound (inclusive).
+### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
+@rf("U32.clamp")
+routine U32.clamp(min_val: U32, max_val: U32) -> U32
+
+### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
+### :returns: The floor of the square root of `me`.
+@rf("U32.isqrt")
+routine U32.isqrt() -> U32
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+@rf("U32.sqrtrem")
+routine U32.sqrtrem() -> (U32, U32)
+
+### Returns ⌊log_base me⌋. Throws if `me` is zero or `base < 2`.
+### :param base: The logarithm base (must be ≥ 2).
+### :returns: The floor of the base-`base` logarithm.
+### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
+@rf("U32.ilog")
+routine U32.ilog!(base: U32) -> U32
+
+### Returns the absolute difference |me - you| without overflow.
+### :param you: The other value.
+### :returns: The non-negative distance between `me` and `you`.
+@rf("U32.abs_diff")
+routine U32.abs_diff(you: U32) -> U32
+
+### Returns ⌈me / you⌉ (division rounding toward positive infinity).
+### :param you: The divisor.
+### :returns: The ceiling of `me / you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U32.div_ceil")
+routine U32.div_ceil(you: U32) -> U32
+
+### Returns the smallest power of two that is ≥ me. Both `0` and `1` map to `1`.
+### :returns: The next power of two at or above `me`.
+### :throws: {IntegerOverflowError} if the next power of two exceeds `U32_MAX`.
+@rf("U32.next_power_of_two")
+routine U32.next_power_of_two!() -> U32
+
+### Returns the smallest multiple of `you` that is ≥ me.
+### :param you: The base to round up to.
+### :returns: The next multiple of `you` at or above `me`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+### :throws: {IntegerOverflowError} if the result exceeds `U32_MAX`.
+@rf("U32.next_multiple_of")
+routine U32.next_multiple_of(you: U32) -> U32
+
+### Returns ⌊(me + you) / 2⌋ computed without overflow.
+### :param you: The other value.
+### :returns: The midpoint of `me` and `you`, rounding toward negative infinity.
+@rf("U32.midpoint")
+routine U32.midpoint(you: U32) -> U32
+
+### Returns this value with its bits reversed (bit 31 ↔ bit 0, etc.).
+### :returns: The bit-reversed `U32`.
+@rf("U32.reverse_bits")
+routine U32.reverse_bits() -> U32
+
+### Returns this value with its four bytes swapped (for endianness conversion).
+### :returns: A `U32` with its bytes in reverse order.
+@rf("U32.swap_bytes")
+routine U32.swap_bytes() -> U32
+
+### Returns `true` if this value is an exact power of two.
+### :returns: `true` if `me` is 1, 2, 4, ..., 2147483648; `false` otherwise (including zero).
+@rf("U32.is_power_of_two")
+routine U32.is_power_of_two() -> Bool
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("U32.to_bytes_le")
+routine U32.to_bytes_le() -> Array[Byte, 4]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("U32.to_bytes_be")
+routine U32.to_bytes_be() -> Array[Byte, 4]
+
+### Builds a `U32` from its little-endian raw byte representation.
+@rf("U32.from_bytes_le")
+common routine U32.from_bytes_le(bytes: Array[Byte, 4]) -> U32
+
+### Builds a `U32` from its big-endian raw byte representation.
+@rf("U32.from_bytes_be")
+common routine U32.from_bytes_be(bytes: Array[Byte, 4]) -> U32
+
+### Returns `true` if this value is zero.
+### :returns: `true` if `me == 0`.
+@rf("U32.is_zero")
+routine U32.is_zero() -> Bool
+
+### Returns `true` if this value is divisible by 2.
+### :returns: `true` if the least-significant bit is 0.
+@rf("U32.is_even")
+routine U32.is_even() -> Bool
+
+### Returns `true` if this value is not divisible by 2.
+### :returns: `true` if the least-significant bit is 1.
+@rf("U32.is_odd")
+routine U32.is_odd() -> Bool
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("U32.represent")
+routine U32.represent() -> Text
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("U32.diagnose")
+routine U32.diagnose() -> Text
+
+### Parses a decimal string into a `U32`.
+### :param from_text: The decimal string to parse (no sign, no prefix).
+### :returns: The parsed `U32` value.
+### :throws: {InvalidValueError} if `from_text` is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U32`.
+@rf("U32")
+routine U32!(from_text: Text) -> U32
+
+### Returns a SipHash-2-4 keyed hash of this value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("U32.hash")
+routine U32.hash(k0: U64, k1: U64) -> U64

@@ -1,0 +1,42 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that discards leading values while a predicate stays true.
+### Once the predicate fails, all remaining source values are yielded unchanged.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
+@rf("SkipWhileIterable")
+entity SkipWhileIterable[T, TSource]
+relates SkipWhileEmittable[T, TSource/Iter] as Iter
+obeys Iterable[T]
+needs TSource obeys Iterable[T]
+    pass
+
+### Iterates over a source sequence after dropping its leading predicate-matching prefix.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceIter: The concrete source iterator type (owned).
+@rf("SkipWhileEmittable")
+entity SkipWhileEmittable[T, TSourceIter]
+obeys Emittable[T]
+needs TSourceIter obeys Emittable[T]
+    pass
+
+### Returns the stateful iterator that skips leading values while the predicate succeeds.
+### The returned emitter tracks whether it is still in the skipping phase.
+### :returns: The resulting `SkipWhileEmittable[T, TSource/Iter]` value.
+@rf("SkipWhileIterable.iter")
+routine SkipWhileIterable[T, TSource].iter() -> SkipWhileEmittable[T, TSource/Iter]
+
+### Returns the next value after any remaining skippable prefix has been consumed.
+### After the first predicate failure, later values are yielded without rechecking earlier skip state.
+### :returns: The resulting `T` value.
+@rf("SkipWhileEmittable.emit")
+routine SkipWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+
+### Returns a lazy adapter that skips values while `predicate` returns `true`.
+### :param predicate: The predicate that controls the initial skipping phase.
+### :returns: The resulting `SkipWhileIterable[T, Me]` value.
+@rf("Iterable.skip_while")
+routine Iterable[T].skip_while(predicate: Routine[(T,), Bool]) -> SkipWhileIterable[T, Me]

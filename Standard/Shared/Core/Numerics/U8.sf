@@ -1,0 +1,522 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### An 8-bit unsigned integer in the range 0 to 255.
+###
+### `U8` is the standard byte-sized unsigned integer type, used
+### for raw byte manipulation, character codes, and compact numeric data.
+@rf("U8")
+record U8
+obeys UnsignedIntegral, Comparable, Copyable
+    pass
+
+### Converts a signed 8-bit integer to `U8`, throwing if the value is negative.
+### :param from: The `S8` value to convert.
+### :returns: A `U8` with the same bit pattern as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U8")
+routine U8!(from: S8) -> U8
+
+### Converts an `S16` to `U8`, throwing if the value is outside 0..255.
+### :param from: The `S16` value to convert.
+### :returns: The `U8` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
+@rf("U8")
+routine U8!(from: S16) -> U8
+
+### Converts an `S32` to `U8`, throwing if the value is outside 0..255.
+### :param from: The `S32` value to convert.
+### :returns: The `U8` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
+@rf("U8")
+routine U8!(from: S32) -> U8
+
+### Converts an `S64` to `U8`, throwing if the value is outside 0..255.
+### :param from: The `S64` value to convert.
+### :returns: The `U8` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
+@rf("U8")
+routine U8!(from: S64) -> U8
+
+### Converts an `S128` to `U8`, throwing if the value is outside 0..255.
+### :param from: The `S128` value to convert.
+### :returns: The `U8` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
+@rf("U8")
+routine U8!(from: S128) -> U8
+
+### Identity conversion — returns `from` unchanged.
+### :param from: The `U8` value to return.
+### :returns: `from` unchanged.
+@rf("U8")
+routine U8(from: U8) -> U8
+
+### Converts a `U16` to `U8`, throwing if the value exceeds 255.
+### :param from: The `U16` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 255`.
+@rf("U8")
+routine U8!(from: U16) -> U8
+
+### Converts a `U32` to `U8`, throwing if the value exceeds 255.
+### :param from: The `U32` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 255`.
+@rf("U8")
+routine U8!(from: U32) -> U8
+
+### Converts a `U64` to `U8`, throwing if the value exceeds 255.
+### :param from: The `U64` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 255`.
+@rf("U8")
+routine U8!(from: U64) -> U8
+
+### Converts a `U128` to `U8`, throwing if the value exceeds 255.
+### :param from: The `U128` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 255`.
+@rf("U8")
+routine U8!(from: U128) -> U8
+
+### Converts an `S256` to `U8`, throwing if the value is negative or exceeds 255.
+### :param from: The `S256` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside 0..255.
+@rf("U8")
+routine U8!(from: S256) -> U8
+
+### Converts a `U256` to `U8`, throwing if the value exceeds 255.
+### :param from: The `U256` value to convert.
+### :returns: The lower 8 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 255`.
+@rf("U8")
+routine U8!(from: U256) -> U8
+
+### Converts an `B16` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `B16` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: B16) -> U8
+
+### Converts an `B32` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `B32` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: B32) -> U8
+
+### Converts an `B64` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `B64` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: B64) -> U8
+
+### Converts an `B128` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `B128` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: B128) -> U8
+
+### Converts a `D32` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `D32` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: D32) -> U8
+
+### Converts a `D64` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `D64` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: D64) -> U8
+
+### Converts a `D128` to `U8` by first converting to `U32`, then truncating.
+### :param from: The `D128` value to convert.
+### :returns: The integer part of `from` as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("U8")
+routine U8!(from: D128) -> U8
+
+### Returns the sum and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_sum, overflowed)`.
+@rf("U8.add_with_overflow")
+routine U8.add_with_overflow(you: U8) -> (U8, Bool)
+
+### Returns the difference and a flag indicating whether the result wrapped around.
+### :param you: The value to subtract.
+### :returns: A tuple of `(wrapped_difference, overflowed)`.
+@rf("U8.sub_with_overflow")
+routine U8.sub_with_overflow(you: U8) -> (U8, Bool)
+
+### Returns the product and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_product, overflowed)`.
+@rf("U8.mul_with_overflow")
+routine U8.mul_with_overflow(you: U8) -> (U8, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum `me + you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U8_MAX`.
+@rf("U8.add")
+routine U8.add!(you: U8) -> U8
+
+### Returns `me - you`, throwing on underflow.
+### :param you: The value to subtract.
+### :returns: The difference `me - you`.
+### :throws: {IntegerOverflowError} if the result is less than `U8_MIN` (0).
+@rf("U8.sub")
+routine U8.sub!(you: U8) -> U8
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product `me * you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U8_MAX`.
+@rf("U8.mul")
+routine U8.mul!(you: U8) -> U8
+
+### Returns `me // you` (integer division), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The quotient `me // you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U8.floordiv")
+routine U8.floordiv!(you: U8) -> U8
+
+### Returns `me % you` (integer remainder).
+### :param you: The divisor.
+### :returns: The remainder `me % you`. Behavior is undefined if `you == 0`.
+@rf("U8.mod")
+routine U8.mod!(you: U8) -> U8
+
+### Returns the two's-complement negation `(2⁸ - me) mod 2⁸`.
+### :returns: The wrapped negation.
+@rf("U8.neg_wrap")
+routine U8.neg_wrap() -> U8
+
+### Returns `(wrapping negation, overflowed)`. Overflow occurs for any non-zero value.
+### :returns: A tuple of `(wrapped negation, overflow flag)`.
+@rf("U8.neg_with_overflow")
+routine U8.neg_with_overflow() -> (U8, Bool)
+
+### Returns `(me + you) mod 256` without overflow check.
+### :param you: The right operand.
+### :returns: The sum modulo 256.
+@rf("U8.add_wrap")
+routine U8.add_wrap(you: U8) -> U8
+
+### Returns `(me - you) mod 256` without underflow check.
+### :param you: The value to subtract.
+### :returns: The difference modulo 256.
+@rf("U8.sub_wrap")
+routine U8.sub_wrap(you: U8) -> U8
+
+### Returns `(me * you) mod 256` without overflow check.
+### :param you: The right operand.
+### :returns: The product modulo 256.
+@rf("U8.mul_wrap")
+routine U8.mul_wrap(you: U8) -> U8
+
+### Returns `me + you`, clamped to `U8_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The sum, or `255` if it would exceed `U8_MAX`.
+@rf("U8.add_clamp")
+routine U8.add_clamp(you: U8) -> U8
+
+### Returns `me - you`, clamped to `U8_MIN` on underflow.
+### :param you: The value to subtract.
+### :returns: The difference, or `0` if it would go below `U8_MIN`.
+@rf("U8.sub_clamp")
+routine U8.sub_clamp(you: U8) -> U8
+
+### Returns `me * you`, clamped to `U8_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The product, or `255` if it would exceed `U8_MAX`.
+@rf("U8.mul_clamp")
+routine U8.mul_clamp(you: U8) -> U8
+
+### Returns `me + you + carry` as `(wrapped_sum, carry_out)`.
+### Chains across words to add integers wider than `U8`: feed each word's
+### `carry_out` in as the next higher word's `carry`.
+### :param you: The right operand.
+### :param carry: The incoming carry bit from the lower word.
+### :returns: A tuple of `(wrapped sum, outgoing carry)`.
+@rf("U8.carrying_add")
+routine U8.carrying_add(you: U8, carry: Bool) -> (U8, Bool)
+
+### Returns `me - you - borrow` as `(wrapped_difference, borrow_out)`.
+### Chains across words to subtract integers wider than `U8`.
+### :param you: The value to subtract.
+### :param borrow: The incoming borrow bit from the lower word.
+### :returns: A tuple of `(wrapped difference, outgoing borrow)`.
+@rf("U8.borrowing_sub")
+routine U8.borrowing_sub(you: U8, borrow: Bool) -> (U8, Bool)
+
+### Returns the full `me * you` product as `(low, high)` halves.
+### The product of two `U8` values needs 16 bits; this splits it into the low
+### and high `U8` words without loss.
+### :param you: The right operand.
+### :returns: A tuple of `(low 8 bits, high 8 bits)`.
+@rf("U8.widening_mul")
+routine U8.widening_mul(you: U8) -> (U8, U8)
+
+### Returns `me * you + carry` as `(low, high)` halves.
+### Never overflows: the largest result is `(2⁸-1)² + (2⁸-1) < 2¹⁶`. The
+### workhorse of schoolbook multiplication — `carry` accumulates the high word
+### carried out of the previous column.
+### :param you: The right operand.
+### :param carry: The value to add to the product.
+### :returns: A tuple of `(low 8 bits, high 8 bits)`.
+@rf("U8.carrying_mul")
+routine U8.carrying_mul(you: U8, carry: U8) -> (U8, U8)
+
+### Returns `me ** exp` and a flag indicating whether the result wrapped around.
+### :param exp: The exponent.
+### :returns: A tuple of `(wrapped_result, overflowed)`.
+@rf("U8.pow_with_overflow")
+routine U8.pow_with_overflow(exp: U8) -> (U8, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent.
+### :returns: The result of raising `me` to the power `exp`.
+### :throws: {IntegerOverflowError} if the result exceeds `U8_MAX`.
+@rf("U8.pow")
+routine U8.pow!(exp: U8) -> U8
+
+### Returns `me ** exp` with wrapping arithmetic (mod 256).
+### :param exp: The exponent.
+### :returns: The result modulo 256.
+@rf("U8.pow_wrap")
+routine U8.pow_wrap(exp: U8) -> U8
+
+### Returns `me ** exp`, clamped to `U8_MAX` on overflow.
+### :param exp: The exponent.
+### :returns: The result, or `255` if it would overflow.
+@rf("U8.pow_clamp")
+routine U8.pow_clamp(exp: U8) -> U8
+
+### Returns the bitwise AND of this value and `you`.
+### :param you: The right operand.
+### :returns: `me & you`.
+@rf("U8.bitand")
+routine U8.bitand(you: U8) -> U8
+
+### Returns the bitwise OR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me | you`.
+@rf("U8.bitor")
+routine U8.bitor(you: U8) -> U8
+
+### Returns the bitwise XOR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me ^ you`.
+@rf("U8.bitxor")
+routine U8.bitxor(you: U8) -> U8
+
+### Returns the bitwise complement of this value.
+### :returns: `~me` — each bit flipped.
+@rf("U8.bitnot")
+routine U8.bitnot() -> U8
+
+### Returns `true` when both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`; `false` otherwise.
+@rf("U8.eq")
+routine U8.eq(you: U8) -> Bool
+
+### Compares this value with `you`, returning the ordering relationship.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("U8.cmp")
+routine U8.cmp(you: U8) -> ComparisonSign
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("U8.min")
+routine U8.min(you: U8) -> U8
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`; otherwise `you`.
+@rf("U8.max")
+routine U8.max(you: U8) -> U8
+
+### Returns this value clamped to the range `min_val..=max_val`.
+### :param min_val: The lower bound (inclusive).
+### :param max_val: The upper bound (inclusive).
+### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
+@rf("U8.clamp")
+routine U8.clamp(min_val: U8, max_val: U8) -> U8
+
+### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
+### :returns: The floor of the square root of `me`.
+@rf("U8.isqrt")
+routine U8.isqrt() -> U8
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+@rf("U8.sqrtrem")
+routine U8.sqrtrem() -> (U8, U8)
+
+### Returns ⌊log_base me⌋. Throws if `me` is zero or `base < 2`.
+### :param base: The logarithm base (must be ≥ 2).
+### :returns: The floor of the base-`base` logarithm.
+### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
+@rf("U8.ilog")
+routine U8.ilog!(base: U8) -> U8
+
+### Returns the absolute difference |me - you| without overflow.
+### :param you: The other value.
+### :returns: The non-negative distance between `me` and `you`.
+@rf("U8.abs_diff")
+routine U8.abs_diff(you: U8) -> U8
+
+### Returns ⌈me / you⌉ (division rounding toward positive infinity).
+### :param you: The divisor.
+### :returns: The ceiling of `me / you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U8.div_ceil")
+routine U8.div_ceil(you: U8) -> U8
+
+### Returns the smallest power of two that is ≥ me. Both `0` and `1` map to `1`.
+### :returns: The next power of two at or above `me`.
+### :throws: {IntegerOverflowError} if the next power of two exceeds `U8_MAX`.
+@rf("U8.next_power_of_two")
+routine U8.next_power_of_two!() -> U8
+
+### Returns the smallest multiple of `you` that is ≥ me.
+### :param you: The base to round up to.
+### :returns: The next multiple of `you` at or above `me`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+### :throws: {IntegerOverflowError} if the result exceeds `U8_MAX`.
+@rf("U8.next_multiple_of")
+routine U8.next_multiple_of(you: U8) -> U8
+
+### Returns ⌊(me + you) / 2⌋ computed without overflow.
+### :param you: The other value.
+### :returns: The midpoint of `me` and `you`, rounding toward negative infinity.
+@rf("U8.midpoint")
+routine U8.midpoint(you: U8) -> U8
+
+### Returns this value with its bits reversed (bit 7 ↔ bit 0, etc.).
+### :returns: The bit-reversed `U8`.
+@rf("U8.reverse_bits")
+routine U8.reverse_bits() -> U8
+
+### Reverses the byte order. A single-byte value is its own byte-swap, so this returns `me`
+### unchanged — provided for parity with the wider unsigned types and `S8.swap_bytes`.
+### :returns: `me`.
+@rf("U8.swap_bytes")
+routine U8.swap_bytes() -> U8
+
+### Returns `true` if this value is an exact power of two.
+### :returns: `true` if `me` is 1, 2, 4, 8, ..., 128; `false` otherwise (including zero).
+@rf("U8.is_power_of_two")
+routine U8.is_power_of_two() -> Bool
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("U8.to_bytes_le")
+routine U8.to_bytes_le() -> Array[Byte, 1]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("U8.to_bytes_be")
+routine U8.to_bytes_be() -> Array[Byte, 1]
+
+### Builds a `U8` from its little-endian raw byte representation.
+@rf("U8.from_bytes_le")
+common routine U8.from_bytes_le(bytes: Array[Byte, 1]) -> U8
+
+### Builds a `U8` from its big-endian raw byte representation.
+@rf("U8.from_bytes_be")
+common routine U8.from_bytes_be(bytes: Array[Byte, 1]) -> U8
+
+### Zero-extends `from` to a 16-bit `U16`.
+### :param from: The `U8` value to widen.
+### :returns: A `U16` equal in value to `from`.
+@rf("U16")
+routine U16(from: U8) -> U16
+
+### Zero-extends `from` to a 32-bit `U32`.
+### :param from: The `U8` value to widen.
+### :returns: A `U32` equal in value to `from`.
+@rf("U32")
+routine U32(from: U8) -> U32
+
+### Zero-extends `from` to a 64-bit `U64`.
+### :param from: The `U8` value to widen.
+### :returns: A `U64` equal in value to `from`.
+@rf("U64")
+routine U64(from: U8) -> U64
+
+### Zero-extends `from` to a 128-bit `U128`.
+### :param from: The `U8` value to widen.
+### :returns: A `U128` equal in value to `from`.
+@rf("U128")
+routine U128(from: U8) -> U128
+
+### Converts `from` to the nearest representable `B32`.
+### :param from: The `U8` value to convert.
+### :returns: An `B32` with the same numeric value as `from`.
+@rf("B32")
+routine B32(from: U8) -> B32
+
+### Converts `from` to the nearest representable `B64`.
+### :param from: The `U8` value to convert.
+### :returns: An `B64` with the same numeric value as `from`.
+@rf("B64")
+routine B64(from: U8) -> B64
+
+### Returns `false` if `from` is `0`; `true` for any other value.
+### :param from: The `U8` value to convert.
+### :returns: `true` if `from != 0`.
+@rf("Bool")
+routine Bool(from: U8) -> Bool
+
+### Returns `true` if this value is zero.
+### :returns: `true` if `me == 0`.
+@rf("U8.is_zero")
+routine U8.is_zero() -> Bool
+
+### Returns `true` if this value is divisible by 2.
+### :returns: `true` if the least-significant bit is 0.
+@rf("U8.is_even")
+routine U8.is_even() -> Bool
+
+### Returns `true` if this value is not divisible by 2.
+### :returns: `true` if the least-significant bit is 1.
+@rf("U8.is_odd")
+routine U8.is_odd() -> Bool
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("U8.represent")
+routine U8.represent() -> Text
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("U8.diagnose")
+routine U8.diagnose() -> Text
+
+### Parses a decimal string into a `U8`.
+### :param from_text: The decimal string to parse (no sign, no prefix).
+### :returns: The parsed `U8` value.
+### :throws: {InvalidValueError} if `from_text` is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U8`.
+@rf("U8")
+routine U8!(from_text: Text) -> U8
+
+### Returns a SipHash-2-4 keyed hash of this value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("U8.hash")
+routine U8.hash(k0: U64, k1: U64) -> U64

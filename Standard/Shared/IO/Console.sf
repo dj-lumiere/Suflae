@@ -1,0 +1,112 @@
+module IO/Console
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### stdin as a {Source}. Consume forward with `load`; an empty result signals EOF.
+@rf("ConsoleIn")
+record ConsoleIn
+obeys Source
+    pass
+
+### stdout or stderr as a {Sink}, discriminated by `fd` (1 = stdout, 2 = stderr).
+@rf("ConsoleOut")
+record ConsoleOut
+obeys Sink
+    pass
+
+### Writes text to standard output.
+### `end` is appended after `value`.
+### :param value: The text to write.
+### :param end: The trailing text to append.
+@rf("show")
+routine show(value: Text, end: Text = "\n")
+
+### Writes raw bytes to standard output.
+### `end` is appended after `value`.
+### :param value: The bytes to write.
+### :param end: The trailing text to append.
+@rf("show")
+routine show(value: Bytes, end: Text = "\n")
+
+### Writes a single value to standard output using its representable form.
+### :param value: The value to render and write.
+### :param end: The trailing text to append.
+@rf("show")
+routine show[T](value: T, end: Text = "\n")
+
+### Writes text to standard error.
+### :param value: The text to write.
+### :param end: The trailing text to append.
+@rf("alert")
+routine alert(value: Text, end: Text = "\n")
+
+### Writes raw bytes to standard error.
+### :param value: The bytes to write.
+### :param end: The trailing text to append.
+@rf("alert")
+routine alert(value: Bytes, end: Text = "\n")
+
+### Writes a single value to standard error using its diagnostic form.
+### :param value: The value to render and write.
+### :param end: The trailing text to append.
+@rf("alert")
+routine alert[T](value: T, end: Text = "\n")
+
+### Reads one line of text from standard input.
+### Line termination is not included in the returned text.
+### :returns: The resulting `Text` value.
+@rf("ask_line")
+routine ask_line() -> Text
+
+### Reads one whitespace-delimited word from standard input.
+### :returns: The resulting `Text` value.
+@rf("ask_word")
+routine ask_word() -> Text
+
+### Reads all remaining text from standard input.
+### :returns: The resulting `Text` value.
+@rf("ask_all")
+routine ask_all() -> Text
+
+### Reads all remaining standard input as raw bytes.
+### :returns: The resulting `Bytes` value.
+@rf("ask_raw")
+routine ask_raw() -> Bytes
+
+### Reads up to `count` bytes from standard input.
+### :param count: The maximum number of bytes to read.
+### :returns: The resulting `Bytes` value.
+@rf("ask_bytes")
+routine ask_bytes(count: U64) -> Bytes
+
+### The standard-input source.
+### :returns: A {ConsoleIn} over stdin.
+@rf("stdin")
+routine stdin() -> ConsoleIn
+
+### The standard-output sink.
+### :returns: A {ConsoleOut} over stdout.
+@rf("stdout")
+routine stdout() -> ConsoleOut
+
+### The standard-error sink.
+### :returns: A {ConsoleOut} over stderr.
+@rf("stderr")
+routine stderr() -> ConsoleOut
+
+### Loads up to `max` bytes from standard input; an empty `Bytes` signals EOF.
+### :param max: The maximum byte count to load.
+### :returns: The bytes loaded, or empty at EOF.
+@rf("ConsoleIn.load")
+routine ConsoleIn.load(max: U64) -> Bytes
+
+### Stores `data` to the underlying standard stream, returning the number of bytes accepted.
+### :param data: The bytes to store.
+### :returns: The number of bytes accepted (always `data.count()`).
+@rf("ConsoleOut.store")
+routine ConsoleOut.store(data: Bytes) -> U64
+
+### Flushes the standard stream. No-op — the runtime flushes stdout/stderr for you.
+@rf("ConsoleOut.flush")
+routine ConsoleOut.flush()

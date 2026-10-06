@@ -1,0 +1,15 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a division operation receives a zero
+### divisor.
+@rf("DivisionByZeroError")
+crashable DivisionByZeroError
+    pass
+
+### Returns the default message for division-by-zero failures.
+### :returns: The resulting `Text` value.
+@rf("DivisionByZeroError.crash_message")
+routine DivisionByZeroError.crash_message() -> Text

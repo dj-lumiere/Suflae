@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for true division by an external scalar.
+### `ScalarDivisible` is for values whose natural division operation takes a
+### numeric scale factor rather than another value of the same type.
+@rf("ScalarDivisible")
+protocol ScalarDivisible
+    ### Returns this value divided by the scalar `you`.
+    ### :param you: The scalar divisor.
+    ### :returns: The resulting `Me` value.
+    routine Me.truediv(you: Numeric) -> Me

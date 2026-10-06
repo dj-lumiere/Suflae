@@ -1,0 +1,509 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 128-bit unsigned integer in the range 0 to
+### 340,282,366,920,938,463,463,374,607,431,768,211,455.
+###
+### `U128` is used for cryptographic keys, UUIDs, very large counters, and
+### other data that requires more than 64 bits. Note that `U128` does not
+### implement `AtomicType` because hardware atomic operations on 128-bit
+### values are not universally available.
+@rf("U128")
+record U128
+obeys UnsignedIntegral, Comparable, Copyable
+    pass
+
+### Converts an `S8` to `U128`, throwing if the value is negative.
+### :param from: The `S8` value to convert.
+### :returns: A `U128` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U128")
+routine U128!(from: S8) -> U128
+
+### Converts an `S16` to `U128`, throwing if the value is negative.
+### :param from: The `S16` value to convert.
+### :returns: A `U128` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U128")
+routine U128!(from: S16) -> U128
+
+### Converts an `S32` to `U128`, throwing if the value is negative.
+### :param from: The `S32` value to convert.
+### :returns: A `U128` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U128")
+routine U128!(from: S32) -> U128
+
+### Converts an `S64` to `U128`, throwing if the value is negative.
+### :param from: The `S64` value to convert.
+### :returns: A `U128` with the same unsigned value as `from`.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U128")
+routine U128!(from: S64) -> U128
+
+### Converts an `S128` to `U128`, throwing if the value is negative.
+### :param from: The `S128` value to convert.
+### :returns: The same bit pattern reinterpreted as an unsigned value.
+### :throws: {IntegerOverflowError} if `from < 0`.
+@rf("U128")
+routine U128!(from: S128) -> U128
+
+### Zero-extends a `U8` to `U128`.
+### :param from: The `U8` value to widen.
+### :returns: A `U128` equal in value to `from`.
+@rf("U128")
+routine U128(from: U8) -> U128
+
+### Zero-extends a `U16` to `U128`.
+### :param from: The `U16` value to widen.
+### :returns: A `U128` equal in value to `from`.
+@rf("U128")
+routine U128(from: U16) -> U128
+
+### Zero-extends a `U32` to `U128`.
+### :param from: The `U32` value to widen.
+### :returns: A `U128` equal in value to `from`.
+@rf("U128")
+routine U128(from: U32) -> U128
+
+### Zero-extends a `U64` to `U128`.
+### :param from: The `U64` value to widen.
+### :returns: A `U128` equal in value to `from`.
+@rf("U128")
+routine U128(from: U64) -> U128
+
+### Identity conversion — returns `from` unchanged.
+### :param from: The `U128` value to return.
+### :returns: `from` unchanged.
+@rf("U128")
+routine U128(from: U128) -> U128
+
+### Converts an `S256` to `U128`, throwing if the value is negative or exceeds U128_MAX.
+### :param from: The `S256` value to convert.
+### :returns: The lower 128 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside 0..340282366920938463463374607431768211455.
+@rf("U128")
+routine U128!(from: S256) -> U128
+
+### Converts a `U256` to `U128`, throwing if the value exceeds U128_MAX.
+### :param from: The `U256` value to convert.
+### :returns: The lower 128 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 340282366920938463463374607431768211455`.
+@rf("U128")
+routine U128!(from: U256) -> U128
+
+### Converts an `B16` to `U128`, truncating toward zero.
+### :param from: The `B16` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, or negative.
+@rf("U128")
+routine U128!(from: B16) -> U128
+
+### Converts an `B32` to `U128`, truncating toward zero.
+### :param from: The `B32` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, or negative.
+@rf("U128")
+routine U128!(from: B32) -> U128
+
+### Converts an `B64` to `U128`, truncating toward zero.
+### :param from: The `B64` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {IntegerOverflowError} if `from` is NaN, infinite, negative, or >= 2^128.
+@rf("U128")
+routine U128!(from: B64) -> U128
+
+### Converts an `B128` to `U128`, truncating toward zero.
+### :param from: The `B128` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {NumericOverflowError} if negative or >= 2^128; {NumericDomainError} if NaN.
+@rf("U128")
+routine U128!(from: B128) -> U128
+
+### Converts a `D32` to `U128`, truncating toward zero.
+### :param from: The `D32` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {NumericOverflowError} if the integer part overflows U128.
+@rf("U128")
+routine U128!(from: D32) -> U128
+
+### Converts a `D64` to `U128`, truncating toward zero.
+### :param from: The `D64` value to convert.
+### :returns: The integer part of `from` as a `U128`.
+### :throws: {NumericOverflowError} if the integer part overflows U128.
+@rf("U128")
+routine U128!(from: D64) -> U128
+
+### Returns the sum and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_sum, overflowed)`.
+@rf("U128.add_with_overflow")
+routine U128.add_with_overflow(you: U128) -> (U128, Bool)
+
+### Returns the difference and a flag indicating whether the result wrapped around.
+### :param you: The value to subtract.
+### :returns: A tuple of `(wrapped_difference, overflowed)`.
+@rf("U128.sub_with_overflow")
+routine U128.sub_with_overflow(you: U128) -> (U128, Bool)
+
+### Returns the product and a flag indicating whether the result wrapped around.
+### :param you: The right operand.
+### :returns: A tuple of `(wrapped_product, overflowed)`.
+@rf("U128.mul_with_overflow")
+routine U128.mul_with_overflow(you: U128) -> (U128, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum `me + you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
+@rf("U128.add")
+routine U128.add!(you: U128) -> U128
+
+### Returns `me - you`, throwing on underflow.
+### :param you: The value to subtract.
+### :returns: The difference `me - you`.
+### :throws: {IntegerOverflowError} if the result is less than `U128_MIN` (0).
+@rf("U128.sub")
+routine U128.sub!(you: U128) -> U128
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product `me * you`.
+### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
+@rf("U128.mul")
+routine U128.mul!(you: U128) -> U128
+
+### Unsigned 128/128 floor division via the generic base-2⁶⁴ Knuth-D kernel
+### (`knuth_divide[2]`), which bottoms out on hardware `DIV r64` for every estimation
+### step — avoiding the slow soft `__udivti3`/inline-expansion at every divisor size.
+### The `i128` storage is reinterpreted in place as two little-endian U64 limbs.
+### PRECONDITION: `b != 0`.
+@rf("u128_floordiv")
+routine u128_floordiv(a: U128, b: U128) -> U128
+
+### Returns `me // you` (integer division), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The quotient `me // you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U128.floordiv")
+routine U128.floordiv!(you: U128) -> U128
+
+### Returns `me % you` (integer remainder).
+### :param you: The divisor.
+### :returns: The remainder `me % you`. Behavior is undefined if `you == 0`.
+### Unsigned 128-bit remainder via the Knuth-D kernel. PRECONDITION: `b != 0`.
+@rf("u128_mod")
+routine u128_mod(a: U128, b: U128) -> U128
+
+### Remainder of `me` divided by `you`.
+### :param you: The divisor.
+### :returns: The remainder.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U128.mod")
+routine U128.mod!(you: U128) -> U128
+
+### (quotient, remainder) of `a // b` and `a % b` from ONE `knuth_divide[2]` pass. PRECONDITION: `b != 0`.
+@rf("u128_divmod")
+routine u128_divmod(a: U128, b: U128) -> (U128, U128)
+
+### (quotient, remainder) of `me // you` and `me % you` from ONE Knuth-D pass — half the work of
+### calling `//` and `%` separately. Throws on a zero divisor.
+### :param you: The divisor.
+### :returns: The tuple `(me // you, me % you)`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U128.divmod")
+routine U128.divmod!(you: U128) -> (U128, U128)
+
+### Returns the two's-complement negation `(2¹²⁸ - me) mod 2¹²⁸`.
+### :returns: The wrapped negation.
+@rf("U128.neg_wrap")
+routine U128.neg_wrap() -> U128
+
+### Returns `(wrapping negation, overflowed)`. Overflow occurs for any non-zero value.
+### :returns: A tuple of `(wrapped negation, overflow flag)`.
+@rf("U128.neg_with_overflow")
+routine U128.neg_with_overflow() -> (U128, Bool)
+
+### Returns `(me + you) mod 2¹²⁸` without overflow check.
+### :param you: The right operand.
+### :returns: The sum modulo 2¹²⁸.
+@rf("U128.add_wrap")
+routine U128.add_wrap(you: U128) -> U128
+
+### Returns `(me - you) mod 2¹²⁸` without underflow check.
+### :param you: The value to subtract.
+### :returns: The difference modulo 2¹²⁸.
+@rf("U128.sub_wrap")
+routine U128.sub_wrap(you: U128) -> U128
+
+### Returns `(me * you) mod 2¹²⁸` without overflow check.
+### :param you: The right operand.
+### :returns: The product modulo 2¹²⁸.
+@rf("U128.mul_wrap")
+routine U128.mul_wrap(you: U128) -> U128
+
+### Returns `me + you`, clamped to `U128_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The sum, or `U128_MAX` if it would overflow.
+@rf("U128.add_clamp")
+routine U128.add_clamp(you: U128) -> U128
+
+### Returns `me - you`, clamped to `U128_MIN` on underflow.
+### :param you: The value to subtract.
+### :returns: The difference, or `0` if it would go below `U128_MIN`.
+@rf("U128.sub_clamp")
+routine U128.sub_clamp(you: U128) -> U128
+
+### Returns `me * you`, clamped to `U128_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The product, or `U128_MAX` if it would overflow.
+@rf("U128.mul_clamp")
+routine U128.mul_clamp(you: U128) -> U128
+
+### Returns `me + you + carry` as `(wrapped_sum, carry_out)`.
+### Chains across words to add integers wider than `U128`: feed each word's
+### `carry_out` in as the next higher word's `carry`.
+### :param you: The right operand.
+### :param carry: The incoming carry bit from the lower word.
+### :returns: A tuple of `(wrapped sum, outgoing carry)`.
+@rf("U128.carrying_add")
+routine U128.carrying_add(you: U128, carry: Bool) -> (U128, Bool)
+
+### Returns `me - you - borrow` as `(wrapped_difference, borrow_out)`.
+### Chains across words to subtract integers wider than `U128`.
+### :param you: The value to subtract.
+### :param borrow: The incoming borrow bit from the lower word.
+### :returns: A tuple of `(wrapped difference, outgoing borrow)`.
+@rf("U128.borrowing_sub")
+routine U128.borrowing_sub(you: U128, borrow: Bool) -> (U128, Bool)
+
+### Returns the full `me * you` product as `(low, high)` halves.
+### The product of two `U128` values needs 256 bits; this splits it into the
+### low and high `U128` words without loss.
+### :param you: The right operand.
+### :returns: A tuple of `(low 128 bits, high 128 bits)`.
+@rf("U128.widening_mul")
+routine U128.widening_mul(you: U128) -> (U128, U128)
+
+### Returns `me * you + carry` as `(low, high)` halves.
+### Never overflows: the largest result is `(2¹²⁸-1)² + (2¹²⁸-1) < 2²⁵⁶`. The
+### workhorse of schoolbook multiplication — `carry` accumulates the high word
+### carried out of the previous column.
+### :param you: The right operand.
+### :param carry: The value to add to the product.
+### :returns: A tuple of `(low 128 bits, high 128 bits)`.
+@rf("U128.carrying_mul")
+routine U128.carrying_mul(you: U128, carry: U128) -> (U128, U128)
+
+### Returns `me ** exp` and a flag indicating whether the result wrapped around.
+### :param exp: The exponent.
+### :returns: A tuple of `(wrapped_result, overflowed)`.
+@rf("U128.pow_with_overflow")
+routine U128.pow_with_overflow(exp: U128) -> (U128, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent.
+### :returns: The result of raising `me` to the power `exp`.
+### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
+@rf("U128.pow")
+routine U128.pow!(exp: U128) -> U128
+
+### Returns `me ** exp` with wrapping arithmetic (mod 2¹²⁸).
+### :param exp: The exponent.
+### :returns: The result modulo 2¹²⁸.
+@rf("U128.pow_wrap")
+routine U128.pow_wrap(exp: U128) -> U128
+
+### Returns `me ** exp`, clamped to `U128_MAX` on overflow.
+### :param exp: The exponent.
+### :returns: The result, or `U128_MAX` if it would overflow.
+@rf("U128.pow_clamp")
+routine U128.pow_clamp(exp: U128) -> U128
+
+### Returns the bitwise AND of this value and `you`.
+### :param you: The right operand.
+### :returns: `me & you`.
+@rf("U128.bitand")
+routine U128.bitand(you: U128) -> U128
+
+### Returns the bitwise OR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me | you`.
+@rf("U128.bitor")
+routine U128.bitor(you: U128) -> U128
+
+### Returns the bitwise XOR of this value and `you`.
+### :param you: The right operand.
+### :returns: `me ^ you`.
+@rf("U128.bitxor")
+routine U128.bitxor(you: U128) -> U128
+
+### Returns the bitwise complement of this value.
+### :returns: `~me` — each bit flipped.
+@rf("U128.bitnot")
+routine U128.bitnot() -> U128
+
+### Returns `true` when both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`; `false` otherwise.
+@rf("U128.eq")
+routine U128.eq(you: U128) -> Bool
+
+### Compares this value with `you`, returning the ordering relationship.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("U128.cmp")
+routine U128.cmp(you: U128) -> ComparisonSign
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("U128.min")
+routine U128.min(you: U128) -> U128
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare against.
+### :returns: `me` if `me >= you`; otherwise `you`.
+@rf("U128.max")
+routine U128.max(you: U128) -> U128
+
+### Returns this value clamped to the range `min_val..=max_val`.
+### :param min_val: The lower bound (inclusive).
+### :param max_val: The upper bound (inclusive).
+### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; otherwise `me`.
+@rf("U128.clamp")
+routine U128.clamp(min_val: U128, max_val: U128) -> U128
+
+### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
+### :returns: The floor of the square root of `me`.
+@rf("U128.isqrt")
+routine U128.isqrt() -> U128
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+@rf("U128.sqrtrem")
+routine U128.sqrtrem() -> (U128, U128)
+
+### Returns ⌊log_base me⌋. Throws if `me` is zero or `base < 2`.
+### :param base: The logarithm base (must be ≥ 2).
+### :returns: The floor of the base-`base` logarithm.
+### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
+@rf("U128.ilog")
+routine U128.ilog!(base: U128) -> U128
+
+### Returns the absolute difference |me - you| without overflow.
+### :param you: The other value.
+### :returns: The non-negative distance between `me` and `you`.
+@rf("U128.abs_diff")
+routine U128.abs_diff(you: U128) -> U128
+
+### Returns ⌈me / you⌉ (division rounding toward positive infinity).
+### :param you: The divisor.
+### :returns: The ceiling of `me / you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U128.div_ceil")
+routine U128.div_ceil(you: U128) -> U128
+
+### Returns the smallest power of two that is ≥ me. Both `0` and `1` map to `1`.
+### :returns: The next power of two at or above `me`.
+### :throws: {IntegerOverflowError} if the next power of two exceeds `U128_MAX`.
+@rf("U128.next_power_of_two")
+routine U128.next_power_of_two!() -> U128
+
+### Returns the smallest multiple of `you` that is ≥ me.
+### :param you: The base to round up to.
+### :returns: The next multiple of `you` at or above `me`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+### :throws: {IntegerOverflowError} if the result exceeds `U128_MAX`.
+@rf("U128.next_multiple_of")
+routine U128.next_multiple_of(you: U128) -> U128
+
+### Returns ⌊(me + you) / 2⌋ computed without overflow.
+### :param you: The other value.
+### :returns: The midpoint of `me` and `you`, rounding toward negative infinity.
+@rf("U128.midpoint")
+routine U128.midpoint(you: U128) -> U128
+
+### Returns this value with its bits reversed (bit 127 ↔ bit 0, etc.).
+### :returns: The bit-reversed `U128`.
+@rf("U128.reverse_bits")
+routine U128.reverse_bits() -> U128
+
+### Returns this value with its 16 bytes swapped (for endianness conversion).
+### :returns: A `U128` with its bytes in reverse order.
+@rf("U128.swap_bytes")
+routine U128.swap_bytes() -> U128
+
+### Returns `true` if this value is an exact power of two.
+### :returns: `true` if `me` is 1, 2, 4, ..., 2¹²⁷; `false` otherwise (including zero).
+@rf("U128.is_power_of_two")
+routine U128.is_power_of_two() -> Bool
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("U128.to_bytes_le")
+routine U128.to_bytes_le() -> Array[Byte, 16]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("U128.to_bytes_be")
+routine U128.to_bytes_be() -> Array[Byte, 16]
+
+### Builds a `U128` from its little-endian raw byte representation.
+@rf("U128.from_bytes_le")
+common routine U128.from_bytes_le(bytes: Array[Byte, 16]) -> U128
+
+### Builds a `U128` from its big-endian raw byte representation.
+@rf("U128.from_bytes_be")
+common routine U128.from_bytes_be(bytes: Array[Byte, 16]) -> U128
+
+### Returns `true` if this value is zero.
+### :returns: `true` if `me == 0`.
+@rf("U128.is_zero")
+routine U128.is_zero() -> Bool
+
+### Returns `true` if this value is divisible by 2.
+### :returns: `true` if the least-significant bit is 0.
+@rf("U128.is_even")
+routine U128.is_even() -> Bool
+
+### Returns `true` if this value is not divisible by 2.
+### :returns: `true` if the least-significant bit is 1.
+@rf("U128.is_odd")
+routine U128.is_odd() -> Bool
+
+### Returns the upper 64 bits of this 128-bit value.
+### :returns: Bits 127..64 as a `U64`.
+@rf("U128.high64")
+routine U128.high64() -> U64
+
+### Returns the lower 64 bits of this 128-bit value.
+### :returns: Bits 63..0 as a `U64`.
+@rf("U128.low64")
+routine U128.low64() -> U64
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("U128.represent")
+routine U128.represent() -> Text
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("U128.diagnose")
+routine U128.diagnose() -> Text
+
+### Parses a decimal string into a `U128`.
+### :param from_text: The decimal string to parse (no sign, no prefix).
+### :returns: The parsed `U128` value.
+### :throws: {InvalidValueError} if `from_text` is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U128`.
+@rf("U128")
+routine U128!(from_text: Text) -> U128
+
+### Returns a SipHash-2-4 keyed hash of this 128-bit value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("U128.hash")
+routine U128.hash(k0: U64, k1: U64) -> U64

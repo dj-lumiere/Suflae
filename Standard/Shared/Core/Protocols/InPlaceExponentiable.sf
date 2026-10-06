@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for in-place exponentiation.
+### `InPlaceExponentiable` is for mutable numeric values that update themselves
+### with a power result instead of returning a separate value.
+@rf("InPlaceExponentiable")
+protocol InPlaceExponentiable
+    ### Raises this value by `you` in place.
+    ### :param you: The exponent value.
+    ### :note: The right-hand operand should remain unchanged.
+    routine Me.ipow(you: Me)

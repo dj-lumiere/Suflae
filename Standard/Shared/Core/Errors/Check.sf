@@ -1,0 +1,24 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the success-or-crash carrier produced by the `grab` recovery keyword: either the successful `T` or
+### the caught error, as a `Crashables`. A `when` on it names the `T` arm and, when it handles the error, the
+### `Crashables` arm (or a specific crashable, `is NopeError e`). One that does not handle the error passes it on.
+### :typeparam T: The successful return value type.
+@rf("Check")
+variant Check[T]
+    T
+    Crashables
+
+### Returns the display form of this result: the success value's or the caught error's own `represent`.
+### :returns: The resulting `Text` value.
+@rf("Check.represent")
+routine Check[T].represent() -> Text
+
+### Returns the diagnostic form of this result: the type, the type id of what it holds (the caught error's own
+### type, not `Crashables`), then that value's own `diagnose`.
+### :returns: The resulting `Text` value.
+@rf("Check.diagnose")
+routine Check[T].diagnose() -> Text

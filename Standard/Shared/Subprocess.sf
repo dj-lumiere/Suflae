@@ -1,0 +1,45 @@
+module Subprocess
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The outcome of running an external command.
+@rf("ProcessResult")
+record ProcessResult
+    ### The child's exit code. Meaningful when `signal` is absent. (S64 holds POSIX 0–255 and the full
+    ### Windows DWORD, including crash codes, without loss.)
+    exit_code: S64
+    ### The signal that killed the child (POSIX), or absent if it exited normally. Always absent on
+    ### Windows, which has no signals.
+    signal: S32?
+    ### The captured stdout ("show" stream), decoded as lossy UTF-8.
+    output: Text
+    ### The captured stderr ("alert" stream), decoded as lossy UTF-8.
+    errors: Text
+
+### Whether the command finished cleanly: exited normally (no signal) with exit code 0.
+### :returns: true if not signalled and `exit_code == 0`.
+@rf("ProcessResult.succeeded")
+routine ProcessResult.succeeded() -> Bool
+
+### Maps the runtime's term-signal convention (0 = not signalled) to a `Maybe`: absent when 0,
+### otherwise the signal number. `try`-recovering it yields the `S32?` that ProcessResult carries.
+@rf("term_signal_value")
+routine term_signal_value!(raw: S32) -> S32
+
+### Assembles a `ProcessResult` from the just-run child's exit code plus the runtime's captured-stream
+### and signal accessors. Guarded by both `run_process` forms.
+### :param code: The child's exit code, as returned by the native run.
+### :returns: The assembled `ProcessResult`.
+@rf("proc_result_of")
+routine proc_result_of(code: S64) -> ProcessResult
+
+### Runs `command` through the platform shell (`/bin/sh -c` on POSIX, `cmd /c` on Windows), capturing
+### its stdout and stderr, and returns the result. The shell form is convenient for pipes and globs,
+### but interpolating untrusted input is a shell-injection hazard — prefer the argv form below for
+### that. Inside a `suspended routine` the calling coroutine parks while the child runs; on a plain
+### thread it blocks.
+### :param command: The command line to run.
+### :returns: A `ProcessResult` with exit code, optional signal, and captured streams.
+@rf("run_process")
+routine run_process(command: Text) -> ProcessResult

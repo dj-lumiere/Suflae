@@ -1,0 +1,20 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for in-place bitwise mutation.
+### `InPlaceBitwiseable` is for mutable values whose bitwise combination
+### operators update the current value directly.
+@rf("InPlaceBitwiseable")
+protocol InPlaceBitwiseable
+    ### Applies bitwise AND with `you` in place.
+    ### :param you: The other value to combine with.
+    ### :note: The right-hand operand should remain unchanged.
+    routine Me.ibitand(you: Me)
+    ### Applies bitwise OR with `you` in place.
+    ### :param you: The other value to combine with.
+    routine Me.ibitor(you: Me)
+    ### Applies bitwise XOR with `you` in place.
+    ### :param you: The other value to combine with.
+    routine Me.ibitxor(you: Me)

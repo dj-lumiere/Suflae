@@ -1,0 +1,469 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 64-bit unsigned integer in the range 0 to 18,446,744,073,709,551,615.
+### `U64` is the default word-sized counter and index type.
+@rf("U64")
+record U64
+obeys UnsignedIntegral, Comparable, Copyable
+    pass
+
+### Converts a signed 8-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is negative.
+@rf("U64")
+routine U64!(from: S8) -> U64
+
+### Converts a signed 16-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is negative.
+@rf("U64")
+routine U64!(from: S16) -> U64
+
+### Converts a signed 32-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is negative.
+@rf("U64")
+routine U64!(from: S32) -> U64
+
+### Converts a signed 64-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is negative.
+@rf("U64")
+routine U64!(from: S64) -> U64
+
+### Converts a signed 128-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside the `U64` range.
+@rf("U64")
+routine U64!(from: S128) -> U64
+
+### Zero-extends an unsigned 8-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+@rf("U64")
+routine U64(from: U8) -> U64
+
+### Zero-extends an unsigned 16-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+@rf("U64")
+routine U64(from: U16) -> U64
+
+### Zero-extends an unsigned 32-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The `U64` representation of `from`.
+@rf("U64")
+routine U64(from: U32) -> U64
+
+### Returns `from` unchanged (identity conversion).
+### :param from: The source value.
+### :returns: `from`.
+@rf("U64")
+routine U64(from: U64) -> U64
+
+### Truncates an unsigned 128-bit integer to `U64`.
+### :param from: The source value.
+### :returns: The lower 64 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` exceeds `U64_MAX`.
+@rf("U64")
+routine U64!(from: U128) -> U64
+
+### Converts an `S256` to `U64`, throwing if the value is negative or exceeds U64_MAX.
+### :param from: The `S256` value to convert.
+### :returns: The lower 64 bits of `from`.
+### :throws: {IntegerOverflowError} if `from` is outside 0..18446744073709551615.
+@rf("U64")
+routine U64!(from: S256) -> U64
+
+### Converts a `U256` to `U64`, throwing if the value exceeds U64_MAX.
+### :param from: The `U256` value to convert.
+### :returns: The lower 64 bits of `from`.
+### :throws: {IntegerOverflowError} if `from > 18446744073709551615`.
+@rf("U64")
+routine U64!(from: U256) -> U64
+
+### Truncates a 16-bit float to `U64` by first widening to `B32`.
+### :param from: The source float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: B16) -> U64
+
+### Truncates a 32-bit float to `U64`, rounding toward zero.
+### :param from: The source float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: B32) -> U64
+
+### Truncates a 64-bit float to `U64`, rounding toward zero.
+### :param from: The source float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: B64) -> U64
+
+### Truncates a 128-bit float to `U64` by narrowing to `B64` first.
+### :param from: The source float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: B128) -> U64
+
+### Converts a 32-bit decimal float to `U64` via `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: D32) -> U64
+
+### Converts a 64-bit decimal float to `U64` via `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: D64) -> U64
+
+### Converts a 128-bit decimal float to `U64` via `S64`.
+### :param from: The source decimal float value.
+### :returns: The truncated `U64` representation.
+@rf("U64")
+routine U64!(from: D128) -> U64
+
+### Returns the sum of this value and `you`, and a flag indicating whether the result wrapped.
+### :param you: The right operand.
+### :returns: A tuple of `(sum, overflow_flag)`.
+@rf("U64.add_with_overflow")
+routine U64.add_with_overflow(you: U64) -> (U64, Bool)
+
+### Returns the difference `me - you`, and a flag indicating whether the result wrapped.
+### :param you: The value to subtract.
+### :returns: A tuple of `(difference, overflow_flag)`.
+@rf("U64.sub_with_overflow")
+routine U64.sub_with_overflow(you: U64) -> (U64, Bool)
+
+### Returns the product of this value and `you`, and a flag indicating whether the result wrapped.
+### :param you: The right operand.
+### :returns: A tuple of `(product, overflow_flag)`.
+@rf("U64.mul_with_overflow")
+routine U64.mul_with_overflow(you: U64) -> (U64, Bool)
+
+### Returns `me + you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The sum.
+### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
+@rf("U64.add")
+routine U64.add!(you: U64) -> U64
+
+### Returns `me - you`, throwing on underflow.
+### :param you: The value to subtract.
+### :returns: The difference.
+### :throws: {IntegerOverflowError} if the result would go below zero.
+@rf("U64.sub")
+routine U64.sub!(you: U64) -> U64
+
+### Returns `me * you`, throwing on overflow.
+### :param you: The right operand.
+### :returns: The product.
+### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
+@rf("U64.mul")
+routine U64.mul!(you: U64) -> U64
+
+### Returns `me // you` (floor division), throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The quotient, rounding toward zero.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U64.floordiv")
+routine U64.floordiv!(you: U64) -> U64
+
+### Returns `me % you`, throwing if `you` is zero.
+### :param you: The divisor.
+### :returns: The remainder.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U64.mod")
+routine U64.mod!(you: U64) -> U64
+
+### Returns the two's-complement negation `(2⁶⁴ - me) mod 2⁶⁴`.
+### :returns: The wrapped negation.
+@rf("U64.neg_wrap")
+routine U64.neg_wrap() -> U64
+
+### Returns `(wrapping negation, overflowed)`. Overflow occurs for any non-zero value.
+### :returns: A tuple of `(wrapped negation, overflow flag)`.
+@rf("U64.neg_with_overflow")
+routine U64.neg_with_overflow() -> (U64, Bool)
+
+### Returns `(me + you) mod 2⁶⁴` without overflow check.
+### :param you: The right operand.
+### :returns: The wrapped sum.
+@rf("U64.add_wrap")
+routine U64.add_wrap(you: U64) -> U64
+
+### Returns `(me - you) mod 2⁶⁴` without underflow check.
+### :param you: The value to subtract.
+### :returns: The wrapped difference.
+@rf("U64.sub_wrap")
+routine U64.sub_wrap(you: U64) -> U64
+
+### Returns `(me * you) mod 2⁶⁴` without overflow check.
+### :param you: The right operand.
+### :returns: The wrapped product.
+@rf("U64.mul_wrap")
+routine U64.mul_wrap(you: U64) -> U64
+
+### Returns `me + you`, clamped to `U64_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The sum, or `U64_MAX` if it would overflow.
+@rf("U64.add_clamp")
+routine U64.add_clamp(you: U64) -> U64
+
+### Returns `me - you`, clamped to `U64_MIN` on underflow.
+### :param you: The value to subtract.
+### :returns: The difference, or `0` if it would underflow.
+@rf("U64.sub_clamp")
+routine U64.sub_clamp(you: U64) -> U64
+
+### Returns `me * you`, clamped to `U64_MAX` on overflow.
+### :param you: The right operand.
+### :returns: The product, or `U64_MAX` if it would overflow.
+@rf("U64.mul_clamp")
+routine U64.mul_clamp(you: U64) -> U64
+
+### Returns `me + you + carry` as `(wrapped_sum, carry_out)`.
+### Chains across words to add integers wider than `U64`: feed each word's
+### `carry_out` in as the next higher word's `carry`.
+### :param you: The right operand.
+### :param carry: The incoming carry bit from the lower word.
+### :returns: A tuple of `(wrapped sum, outgoing carry)`.
+@rf("U64.carrying_add")
+routine U64.carrying_add(you: U64, carry: Bool) -> (U64, Bool)
+
+### Returns `me - you - borrow` as `(wrapped_difference, borrow_out)`.
+### Chains across words to subtract integers wider than `U64`.
+### :param you: The value to subtract.
+### :param borrow: The incoming borrow bit from the lower word.
+### :returns: A tuple of `(wrapped difference, outgoing borrow)`.
+@rf("U64.borrowing_sub")
+routine U64.borrowing_sub(you: U64, borrow: Bool) -> (U64, Bool)
+
+### Returns the full `me * you` product as `(low, high)` halves.
+### The product of two `U64` values needs 128 bits; this splits it into the low
+### and high `U64` words without loss.
+### :param you: The right operand.
+### :returns: A tuple of `(low 64 bits, high 64 bits)`.
+@rf("U64.widening_mul")
+routine U64.widening_mul(you: U64) -> (U64, U64)
+
+### Returns `me * you + carry` as `(low, high)` halves.
+### Never overflows: the largest result is `(2⁶⁴-1)² + (2⁶⁴-1) < 2¹²⁸`. The
+### workhorse of schoolbook multiplication — `carry` accumulates the high word
+### carried out of the previous column.
+### :param you: The right operand.
+### :param carry: The value to add to the product.
+### :returns: A tuple of `(low 64 bits, high 64 bits)`.
+@rf("U64.carrying_mul")
+routine U64.carrying_mul(you: U64, carry: U64) -> (U64, U64)
+
+### Returns `me ** exp` and an overflow flag.
+### Uses repeated squaring. `0 ** 0 == 1` (the empty product).
+### :param exp: The exponent.
+### :returns: A tuple of `(result, overflow_flag)`.
+@rf("U64.pow_with_overflow")
+routine U64.pow_with_overflow(exp: U64) -> (U64, Bool)
+
+### Returns `me ** exp`, throwing on overflow.
+### :param exp: The exponent.
+### :returns: The result.
+### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
+@rf("U64.pow")
+routine U64.pow!(exp: U64) -> U64
+
+### Returns `me ** exp` with wrapping arithmetic.
+### :param exp: The exponent.
+### :returns: The result modulo 2⁶⁴.
+@rf("U64.pow_wrap")
+routine U64.pow_wrap(exp: U64) -> U64
+
+### Returns `me ** exp` clamped to `U64_MAX` on overflow.
+### :param exp: The exponent.
+### :returns: The clamped result.
+@rf("U64.pow_clamp")
+routine U64.pow_clamp(exp: U64) -> U64
+
+### Returns `me & you` (bitwise AND).
+### :param you: The right operand.
+### :returns: The bitwise intersection.
+@rf("U64.bitand")
+routine U64.bitand(you: U64) -> U64
+
+### Returns `me | you` (bitwise OR).
+### :param you: The right operand.
+### :returns: The bitwise union.
+@rf("U64.bitor")
+routine U64.bitor(you: U64) -> U64
+
+### Returns `me ^ you` (bitwise XOR).
+### :param you: The right operand.
+### :returns: The bitwise exclusive-or.
+@rf("U64.bitxor")
+routine U64.bitxor(you: U64) -> U64
+
+### Returns `~me` (bitwise NOT).
+### :returns: The bitwise complement.
+@rf("U64.bitnot")
+routine U64.bitnot() -> U64
+
+### Returns true if both values are equal.
+### :param you: The value to compare against.
+### :returns: `true` if `me == you`.
+@rf("U64.eq")
+routine U64.eq(you: U64) -> Bool
+
+### Returns the ordering relationship between this value and `you`.
+### :param you: The value to compare against.
+### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
+@rf("U64.cmp")
+routine U64.cmp(you: U64) -> ComparisonSign
+
+### Returns the smaller of this value and `you`.
+### :param you: The value to compare.
+### :returns: `me` if `me <= you`; otherwise `you`.
+@rf("U64.min")
+routine U64.min(you: U64) -> U64
+
+### Returns the larger of this value and `you`.
+### :param you: The value to compare.
+### :returns: `me` if `me >= you`; otherwise `you`.
+@rf("U64.max")
+routine U64.max(you: U64) -> U64
+
+### Returns this value clamped to the inclusive range `[min_val, max_val]`.
+### :param min_val: The lower bound of the allowed range.
+### :param max_val: The upper bound of the allowed range.
+### :returns: `min_val` if `me < min_val`; `max_val` if `me > max_val`; `me` otherwise.
+@rf("U64.clamp")
+routine U64.clamp(min_val: U64, max_val: U64) -> U64
+
+### Returns the integer square root ⌊√me⌋ — the largest value whose square is ≤ me.
+### :returns: The floor of the square root of `me`.
+@rf("U64.isqrt")
+routine U64.isqrt() -> U64
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+@rf("U64.sqrtrem")
+routine U64.sqrtrem() -> (U64, U64)
+
+### Returns ⌊log_base me⌋. Throws if `me` is zero or `base < 2`.
+### :param base: The logarithm base (must be ≥ 2).
+### :returns: The floor of the base-`base` logarithm.
+### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
+@rf("U64.ilog")
+routine U64.ilog!(base: U64) -> U64
+
+### Returns the absolute difference |me - you| without overflow.
+### :param you: The other value.
+### :returns: The non-negative distance between `me` and `you`.
+@rf("U64.abs_diff")
+routine U64.abs_diff(you: U64) -> U64
+
+### Returns ⌈me / you⌉ (division rounding toward positive infinity).
+### :param you: The divisor.
+### :returns: The ceiling of `me / you`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+@rf("U64.div_ceil")
+routine U64.div_ceil(you: U64) -> U64
+
+### Returns the smallest power of two that is ≥ me. Both `0` and `1` map to `1`.
+### :returns: The next power of two at or above `me`.
+### :throws: {IntegerOverflowError} if the next power of two exceeds `U64_MAX`.
+@rf("U64.next_power_of_two")
+routine U64.next_power_of_two!() -> U64
+
+### Returns the smallest multiple of `you` that is ≥ me.
+### :param you: The base to round up to.
+### :returns: The next multiple of `you` at or above `me`.
+### :throws: {DivisionByZeroError} if `you == 0`.
+### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
+@rf("U64.next_multiple_of")
+routine U64.next_multiple_of(you: U64) -> U64
+
+### Returns ⌊(me + you) / 2⌋ computed without overflow.
+### :param you: The other value.
+### :returns: The midpoint of `me` and `you`, rounding toward negative infinity.
+@rf("U64.midpoint")
+routine U64.midpoint(you: U64) -> U64
+
+### Returns this value with the bit order reversed.
+### :returns: The bit-reversed value.
+@rf("U64.reverse_bits")
+routine U64.reverse_bits() -> U64
+
+### Returns this value with the byte order reversed (big/little endian swap).
+### :returns: The byte-swapped value.
+@rf("U64.swap_bytes")
+routine U64.swap_bytes() -> U64
+
+### Returns true if this value is an exact power of two.
+### :returns: `true` if `me != 0 and (me & (me - 1)) == 0`.
+@rf("U64.is_power_of_two")
+routine U64.is_power_of_two() -> Bool
+
+### Returns the raw byte representation of this value in little-endian order.
+@rf("U64.to_bytes_le")
+routine U64.to_bytes_le() -> Array[Byte, 8]
+
+### Returns the raw byte representation of this value in big-endian order.
+@rf("U64.to_bytes_be")
+routine U64.to_bytes_be() -> Array[Byte, 8]
+
+### Builds a `U64` from its little-endian raw byte representation.
+@rf("U64.from_bytes_le")
+common routine U64.from_bytes_le(bytes: Array[Byte, 8]) -> U64
+
+### Builds a `U64` from its big-endian raw byte representation.
+@rf("U64.from_bytes_be")
+common routine U64.from_bytes_be(bytes: Array[Byte, 8]) -> U64
+
+### Returns true if this value is zero.
+### :returns: `true` when `me == 0`.
+@rf("U64.is_zero")
+routine U64.is_zero() -> Bool
+
+### Returns true if this value is even.
+### :returns: `true` when the least significant bit is clear.
+@rf("U64.is_even")
+routine U64.is_even() -> Bool
+
+### Returns true if this value is odd.
+### :returns: `true` when the least significant bit is set.
+@rf("U64.is_odd")
+routine U64.is_odd() -> Bool
+
+### Returns the human-readable text of this value.
+### :returns: The value rendered as `Text`.
+@rf("U64.represent")
+routine U64.represent() -> Text
+
+### Returns a type-tagged debug rendering of this value.
+### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
+@rf("U64.diagnose")
+routine U64.diagnose() -> Text
+
+### Parses a decimal text representation of a `U64`.
+### :param from_text: A non-empty string of ASCII decimal digits.
+### :returns: The parsed `U64` value.
+### :throws: {InvalidValueError} if the text is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U64`.
+@rf("U64")
+routine U64!(from_text: Text) -> U64
+
+### Returns a SipHash-2-4 keyed hash of this value.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The 64-bit keyed hash.
+@rf("U64.hash")
+routine U64.hash(k0: U64, k1: U64) -> U64

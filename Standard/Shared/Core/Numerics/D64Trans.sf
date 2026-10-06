@@ -1,0 +1,399 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### e^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.exp")
+routine D64.exp!() -> D64
+
+### e^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.exp_unchecked")
+routine D64.exp_unchecked() -> D64
+
+### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.expm1")
+routine D64.expm1!() -> D64
+
+### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.expm1_unchecked")
+routine D64.expm1_unchecked() -> D64
+
+### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.exp2")
+routine D64.exp2!() -> D64
+
+### 2^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.exp2_unchecked")
+routine D64.exp2_unchecked() -> D64
+
+### 10^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.exp10")
+routine D64.exp10!() -> D64
+
+### 10^me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.exp10_unchecked")
+routine D64.exp10_unchecked() -> D64
+
+### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.log")
+routine D64.log!() -> D64
+
+### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.log_unchecked")
+routine D64.log_unchecked() -> D64
+
+### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.log1p")
+routine D64.log1p!() -> D64
+
+### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.log1p_unchecked")
+routine D64.log1p_unchecked() -> D64
+
+### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.log2")
+routine D64.log2!() -> D64
+
+### log2(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.log2_unchecked")
+routine D64.log2_unchecked() -> D64
+
+### log10(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.log10")
+routine D64.log10!() -> D64
+
+### log10(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.log10_unchecked")
+routine D64.log10_unchecked() -> D64
+
+### sqrt(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.sqrt")
+routine D64.sqrt!() -> D64
+
+### sqrt(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.sqrt_unchecked")
+routine D64.sqrt_unchecked() -> D64
+
+### The real cube root of me, correctly rounded.
+@rf("D64.cbrt")
+routine D64.cbrt() -> D64
+
+### asin(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.asin")
+routine D64.asin!() -> D64
+
+### asin(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.asin_unchecked")
+routine D64.asin_unchecked() -> D64
+
+### acos(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.acos")
+routine D64.acos!() -> D64
+
+### acos(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.acos_unchecked")
+routine D64.acos_unchecked() -> D64
+
+### atan(me) (atan(±inf) = ±pi/2), correctly rounded.
+@rf("D64.atan")
+routine D64.atan() -> D64
+
+### sin(me), me in radians, correctly rounded.
+@rf("D64.sin")
+routine D64.sin() -> D64
+
+### cos(me), me in radians, correctly rounded.
+@rf("D64.cos")
+routine D64.cos() -> D64
+
+### tan(me), me in radians, correctly rounded.
+@rf("D64.tan")
+routine D64.tan() -> D64
+
+### sinh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.sinh")
+routine D64.sinh!() -> D64
+
+### sinh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.sinh_unchecked")
+routine D64.sinh_unchecked() -> D64
+
+### cosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.cosh")
+routine D64.cosh!() -> D64
+
+### cosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.cosh_unchecked")
+routine D64.cosh_unchecked() -> D64
+
+### tanh(me), correctly rounded.
+@rf("D64.tanh")
+routine D64.tanh() -> D64
+
+### asinh(me), correctly rounded.
+@rf("D64.asinh")
+routine D64.asinh() -> D64
+
+### acosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.acosh")
+routine D64.acosh!() -> D64
+
+### acosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.acosh_unchecked")
+routine D64.acosh_unchecked() -> D64
+
+### atanh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.atanh")
+routine D64.atanh!() -> D64
+
+### atanh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.atanh_unchecked")
+routine D64.atanh_unchecked() -> D64
+
+### erf(me) (erf(±inf) = ±1), correctly rounded.
+@rf("D64.erf")
+routine D64.erf() -> D64
+
+### erfc(me) = 1 - erf(me) (erfc(-inf) = 2, erfc(+inf) = 0), correctly rounded.
+@rf("D64.erfc")
+routine D64.erfc() -> D64
+
+### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
+### infinity).
+@rf("D64.tgamma")
+routine D64.tgamma!() -> D64
+
+### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
+@rf("D64.tgamma_unchecked")
+routine D64.tgamma_unchecked() -> D64
+
+### ln|tgamma(me)| (+inf at the poles and at ±inf), correctly rounded.
+@rf("D64.lgamma")
+routine D64.lgamma() -> D64
+
+### `me^you` with raw IEEE (the C99 pow special cases), correctly rounded.
+@rf("D64.pow_unchecked")
+routine D64.pow_unchecked(you: D64) -> D64
+
+### atan2(y, x), the angle of (x, y) in (-pi, pi], with the C99 special cases for zeros and infinities.
+@rf("atan2")
+routine atan2(y: D64, x: D64) -> D64
+
+### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
+@rf("hypot")
+routine hypot!(x: D64, y: D64) -> D64
+
+### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: D64, y: D64) -> D64
+
+### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
+@rf("hypot")
+routine hypot!(x: D64, y: D64, z: D64) -> D64
+
+### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
+@rf("hypot_unchecked")
+routine hypot_unchecked(x: D64, y: D64, z: D64) -> D64
+
+### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
+@rf("D64.fma")
+routine D64.fma!(b: D64, c: D64) -> D64
+
+### me*b + c with a single rounding, raw IEEE.
+@rf("D64.fma_unchecked")
+routine D64.fma_unchecked(b: D64, c: D64) -> D64
+
+### IEEE 754 signbit: the raw sign bit (true for negatives, -0, and -NaN). Never crashes.
+@rf("D64.signbit")
+routine D64.signbit() -> Bool
+
+### True if me is negative (sign bit set, which includes -0 and -NaN).
+@rf("D64.is_negative")
+routine D64.is_negative() -> Bool
+
+### True if me is strictly positive (not signed, not zero).
+@rf("D64.is_positive")
+routine D64.is_positive() -> Bool
+
+### True if me is a finite, nonzero value at the minimum exponent (-398) with fewer than 16 digits.
+@rf("D64.is_subnormal")
+routine D64.is_subnormal() -> Bool
+
+### Splits into integer and fractional parts (C modf), both carrying me's sign.
+@rf("D64.modf")
+routine D64.modf() -> (D64, D64)
+
+### True if me is finite and nonzero (this includes the subnormals).
+@rf("D64.is_normal")
+routine D64.is_normal() -> Bool
+
+### C99 fpclassify: SIGNALING_NAN, NAN, INFINITE, ZERO, SUBNORMAL, or NORMAL.
+@rf("D64.fpclassify")
+routine D64.fpclassify() -> FpClass
+
+### Absolute value |me| (clears the sign bit, keeps specials and the cohort). Never crashes.
+@rf("D64.abs")
+routine D64.abs() -> D64
+
+### IEEE 754 totalOrder for decimals: a total order over all values including signed zeros, cohorts
+### (equal value with differing exponents), and NaNs. For finite operands of equal value the smaller-exponent
+### member precedes when positive (the reverse when negative).
+### :param you: The value to compare against.
+### :returns: Whether `me` precedes or equals `you` in the total order.
+@rf("D64.total_order")
+routine D64.total_order(you: D64) -> Bool
+
+### IEEE 754 totalOrderMag for decimals: `total_order` applied to the magnitudes.
+### :param you: The value whose magnitude to compare against.
+### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
+@rf("D64.total_order_mag")
+routine D64.total_order_mag(you: D64) -> Bool
+
+### Negation -me (flips the sign bit, keeps specials and the cohort). Never crashes.
+@rf("D64.neg")
+routine D64.neg() -> D64
+
+### C99 copysign: me's magnitude with you's sign bit. Never crashes.
+### :param you: The value supplying the sign.
+@rf("D64.copysign")
+routine D64.copysign(you: D64) -> D64
+
+### Returns -1, 0, or +1 for the sign of `me`. A NaN propagates, ±0 gives +0.
+@rf("D64.signum")
+routine D64.signum() -> D64
+
+### Throws when `me` is non-finite (inf or NaN).
+@rf("D64.finite")
+routine D64.finite!() -> D64
+
+### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
+@rf("D64.fmod")
+routine D64.fmod(you: D64) -> D64
+
+### C99 fmax: the larger of me and you, treating NaN as missing (returns the non-NaN operand).
+### :param you: The value to compare against.
+@rf("D64.fmax")
+routine D64.fmax(you: D64) -> D64
+
+### C99 fmin: the smaller of me and you, treating NaN as missing (returns the non-NaN operand).
+### :param you: The value to compare against.
+@rf("D64.fmin")
+routine D64.fmin(you: D64) -> D64
+
+### C99 fdim: the positive difference max(me - you, 0), NaN if either operand is NaN.
+### :param you: The value to subtract.
+@rf("D64.fdim")
+routine D64.fdim(you: D64) -> D64
+
+### `me * 10^n` with raw propagation (overflow -> ±infinity, below the range -> 0).
+### :param n: The power-of-ten exponent to apply.
+### :returns: `me` scaled by `10^n`.
+@rf("D64.scaleb_unchecked")
+routine D64.scaleb_unchecked(n: S64) -> D64
+
+### IEEE 754 logb: the exponent `e` with `10^e <= |me| < 10^(e+1)`, as a decimal integer (logb(0) = -inf,
+### logb(±inf) = +inf, logb(NaN) = NaN). Never crashes.
+### :returns: The radix-10 exponent of `me`.
+@rf("D64.logb")
+routine D64.logb() -> D64
+
+### IEEE 754-2008 minNum: the smaller operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, ignoring NaN.
+@rf("D64.min_num")
+routine D64.min_num(you: D64) -> D64
+
+### IEEE 754-2008 maxNum: the larger operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, ignoring NaN.
+@rf("D64.max_num")
+routine D64.max_num(you: D64) -> D64
+
+### IEEE 754-2019 minimum: the smaller operand, propagating NaN, ordering -0 below +0.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, NaN if either is NaN.
+@rf("D64.minimum")
+routine D64.minimum(you: D64) -> D64
+
+### IEEE 754-2019 maximum: the larger operand, propagating NaN, ordering +0 above -0.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, NaN if either is NaN.
+@rf("D64.maximum")
+routine D64.maximum(you: D64) -> D64
+
+### IEEE 754 roundToIntegralTiesToAway: rounds to the nearest integer, halves away from zero (alias of
+### `round`). Never crashes.
+### :returns: `me` rounded to an integral value with ties away from zero.
+@rf("D64.round_ties_away")
+routine D64.round_ties_away() -> D64
+
+### IEEE 754 sameQuantum: `true` when `me` and `you` have the same exponent (quantum), or are both
+### infinities, or both NaNs. Never crashes.
+### :param you: The value whose quantum to compare against.
+### :returns: Whether the two share a quantum.
+@rf("D64.same_quantum")
+routine D64.same_quantum(you: D64) -> Bool
+
+### IEEE 754 quantize: `me`'s value with the exponent of `you`, rounded half to even when digits are dropped.
+### NaN when the result needs more than 16 digits, or for incompatible specials.
+### :param you: The value supplying the target exponent.
+### :returns: `me` quantized to `you`'s exponent, or NaN if not representable.
+@rf("D64.quantize")
+routine D64.quantize(you: D64) -> D64
+
+### IEEE 754 remainder: `me - you * n`, n the integer nearest `me / you` (ties to even), exact. NaN if `me`
+### is infinite or `you` is zero, `me` if `you` is infinite. Never crashes.
+### :param you: The divisor.
+### :returns: The IEEE remainder of `me / you`.
+@rf("D64.remainder")
+routine D64.remainder(you: D64) -> D64
+
+### IEEE 754 normalize (the `reduce` operation): the value with trailing zeros stripped to the simplest member of
+### its cohort (`3.00` -> `3`, `100` -> `1E+2`, `0.00` -> `0`). Specials pass through. Never crashes.
+### :returns: `me` normalized to its simplest cohort member.
+@rf("D64.normalize")
+routine D64.normalize() -> D64
+
+### Rounds to integral. mode: 0 trunc, 1 floor, 2 ceil, 3 round (half away), 4 rint (half even).
+@rf("d64_round_int")
+routine d64_round_int(x: D64, mode: S64) -> D64
+
+### Truncates toward zero to an integral value. Specials pass through. Never crashes.
+@rf("D64.trunc")
+routine D64.trunc() -> D64
+
+### Rounds down toward -inf to an integral value. Specials pass through. Never crashes.
+@rf("D64.floor")
+routine D64.floor() -> D64
+
+### Rounds up toward +inf to an integral value. Specials pass through. Never crashes.
+@rf("D64.ceil")
+routine D64.ceil() -> D64
+
+### Rounds to the nearest integral value, ties away from zero. Specials pass through. Never crashes.
+@rf("D64.round")
+routine D64.round() -> D64
+
+### Rounds to the nearest integral value, ties to even (IEEE roundTiesToEven). Never crashes.
+@rf("D64.rint")
+routine D64.rint() -> D64
+
+### Fractional part me - trunc(me), with me's sign. A NaN propagates, ±inf gives ±0. Never crashes.
+@rf("D64.frac")
+routine D64.frac() -> D64

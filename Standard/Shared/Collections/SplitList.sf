@@ -1,0 +1,11 @@
+module Collections
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Creates an empty split list. Heap-allocates the entity with every column null (`hijacked_none`) and
+### the counts zero via the `hollow[T]()` footprint-alloc primitive; the first `add_last` reserves the
+### backing column buffers.
+### :returns: An empty `SplitList[T]`.
+@rf("SplitList")
+routine SplitList[T]() -> SplitList[T]

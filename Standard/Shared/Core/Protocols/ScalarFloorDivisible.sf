@@ -1,0 +1,15 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for floor division by an integral scalar.
+### `ScalarFloorDivisible` is the integer-scaled counterpart to `ScalarDivisible`
+### for types that define Euclidean-style quotient behavior against an integral
+### divisor.
+@rf("ScalarFloorDivisible")
+protocol ScalarFloorDivisible
+    ### Returns this value floor-divided by the scalar `you`.
+    ### :param you: The scalar divisor.
+    ### :returns: The resulting `Me` value.
+    routine Me.floordiv(you: Integral) -> Me

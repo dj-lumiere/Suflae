@@ -1,0 +1,14 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a byte is not a valid ASCII hexadecimal digit.
+@rf("InvalidHexDigitError")
+crashable InvalidHexDigitError
+    pass
+
+### Returns the default message for invalid ASCII hexadecimal digit failures.
+### :returns: The resulting `Text` value.
+@rf("InvalidHexDigitError.crash_message")
+routine InvalidHexDigitError.crash_message() -> Text

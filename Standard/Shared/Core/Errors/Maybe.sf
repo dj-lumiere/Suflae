@@ -1,0 +1,63 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents an optional record value.
+### `Maybe[T]` stores either a present `T` or the absence of a value without
+### carrying crash information.
+### :typeparam T: The wrapped value type.
+@rf("Maybe")
+record Maybe[T]
+    pass
+
+### Returns the display form of this optional value.
+### Present values are rendered using the wrapped value's text form.
+### :returns: The resulting `Text` value.
+@rf("Maybe.represent")
+routine Maybe[T].represent() -> Text
+
+### Returns the diagnostic form of this optional value.
+### This form keeps the `Maybe` wrapper visible for debugging and logs.
+### :returns: The resulting `Text` value.
+@rf("Maybe.diagnose")
+routine Maybe[T].diagnose() -> Text
+
+### `unwrap` for a single-owner entity: it cannot be shared, so the caller gets an independent duplicate,
+### which needs the entity to declare it can be copied.
+@rf("Maybe.unwrap")
+routine Maybe[T].unwrap!() -> T
+needs EntityType T
+needs T obeys Copyable
+
+### `unwrap` for a variant: one with an entity arm cannot be shared, so the caller gets a duplicate.
+@rf("Maybe.unwrap")
+routine Maybe[T].unwrap!() -> T
+needs VariantType T
+needs T obeys Copyable
+
+### `unwrap_or` for a single-owner entity: the present value comes back as a duplicate (see `unwrap`).
+@rf("Maybe.unwrap_or")
+routine Maybe[T].unwrap_or(fallback: T) -> T
+needs EntityType T
+needs T obeys Copyable
+
+### `unwrap_or` for a variant: the present value comes back as a duplicate (see `unwrap`).
+@rf("Maybe.unwrap_or")
+routine Maybe[T].unwrap_or(fallback: T) -> T
+needs VariantType T
+needs T obeys Copyable
+
+### MOVES the wrapped value out, CONSUMING this optional (marks it absent). Unlike `unwrap` (which
+### co-owns via a retaining copy and leaves the optional intact), this hands the payload's SINGLE
+### reference to the caller and empties the carrier — the model a `Maybe[Entity]` requires (an entity is
+### single-owner: it cannot be co-owned/retained, only moved). The carrier's own `destroy` then no-ops on
+### `value` (guarded by `is_present()`), so the moved-out payload is freed exactly once by its new owner.
+### A re-`strip_out` of the now-absent optional fails LOUDLY (AbsentValueError), never silently corrupts.
+### :returns: The contained `T` value, moved out.
+### :throws: {AbsentValueError} if this `Maybe` is absent.
+@rf("Maybe.strip_out")
+routine Maybe[T].strip_out!() -> T
+
+@rf("Maybe.is_present")
+routine Maybe[T].is_present() -> Bool

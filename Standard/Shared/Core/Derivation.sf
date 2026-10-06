@@ -1,0 +1,28 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The form a value takes as a CONTAINER ELEMENT: stringy leaves are quoted (Text/Bytes in `"…"`,
+### Character/Byte in `'…'`) so nested strings print delimited (`["a", "b"]` / `['a', 'b']`), while
+### numbers, nested containers and records stay structural. A single generic free routine — the `when T`
+### type-switch is folded at monomorphization (T is concrete there; RF has no inheritance, so `T is X` is
+### exact type-identity), so each instantiation collapses to just its arm. Containers call `nested_repr`
+### on every element; the top-level `represent()` stays bare.
+@rf("nested_repr")
+routine nested_repr(value: T) -> Text
+needs AnyType T
+
+### A choice value IS its S32 discriminant and a flags value IS its U64 bitmask (both are the raw backing
+### scalar at the machine level), so `S32(from: choice)` / `U64(from: flags)` are pure representation
+### reinterprets — a `bitcast` of identical width, i.e. a no-op. Written as universal templates so the demand
+### collector materializes a REAL body per concrete choice/flags (rather than a bodyless phantom creator that
+### would link-fail). The choice/flags eq/cmp/represent/diagnose derives below, and `is`/`in` pattern
+### lowering, read the discriminant/bitmask through these.
+@rf("S32")
+routine S32(from: T) -> S32
+needs ChoiceType T
+
+@rf("U64")
+routine U64(from: T) -> U64
+needs FlagsType T

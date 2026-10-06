@@ -1,0 +1,25 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A whole number in 64 bits, from -9223372036854775808 to 9223372036854775807. Arithmetic past either end
+### crashes; `+%` wraps around and `+^` stops at the end instead. Write one as `5_s64`.
+@rf("S64")
+record S64
+    pass
+
+### Returns the larger of this number and `you`.
+### :param you: The other number.
+@rf("S64.max")
+routine S64.max(you: S64) -> S64
+
+### Returns this number moved into the range from `min_val` to `max_val`.
+### :param min_val: The smallest number allowed.
+### :param max_val: The largest number allowed.
+@rf("S64.clamp")
+routine S64.clamp(min_val: S64, max_val: S64) -> S64
+
+### Returns whether this number is below zero.
+@rf("S64.is_negative")
+routine S64.is_negative() -> Bool

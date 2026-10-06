@@ -1,0 +1,18 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a byte sequence cannot be decoded as
+### well-formed UTF-8.
+@rf("MalformedUtf8Error")
+crashable MalformedUtf8Error
+    ### Stores the byte index where decoding failed.
+    index: U64
+    ### Stores a short description of the decoding failure.
+    reason: Text
+
+### Returns the default message for malformed UTF-8 input.
+### :returns: The resulting `Text` value.
+@rf("MalformedUtf8Error.crash_message")
+routine MalformedUtf8Error.crash_message() -> Text

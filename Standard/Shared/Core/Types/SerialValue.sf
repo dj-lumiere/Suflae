@@ -1,0 +1,30 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+@rf("SerialValue")
+variant SerialValue
+    None
+    Bool
+    S8
+    S16
+    S32
+    S64
+    U8
+    U16
+    U32
+    U64
+    B32
+    B64
+    Moment
+    Bytes
+    Text
+    List[SerialValue]
+    Dict[Text, SerialValue]
+
+### The value to store at a destination: an independent deep copy, because a list or dictionary arm holds a
+### single-owner entity that two values cannot share.
+### :returns: A copy of this value that owns its own lists and dictionaries.
+@rf("SerialValue.assign")
+routine SerialValue.assign() -> SerialValue

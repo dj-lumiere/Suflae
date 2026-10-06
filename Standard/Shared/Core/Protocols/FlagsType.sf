@@ -1,0 +1,29 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol implemented by bitmask-style choice types.
+### `FlagsType` is for closed sets of named bits that can be combined into one
+### payload and inspected as a single flags value.
+@rf("FlagsType")
+protocol FlagsType
+obeys Hashable
+    ### Converts a flags value to its unsigned bitmask representation.
+    ### The returned bit pattern uses the declaration-defined flag positions.
+    ### :param from: The flags value to convert.
+    ### :returns: The resulting `U64` value.
+    routine U64(from: Me) -> U64
+    ### Returns every declared flag case for this type.
+    ### The cases are returned in declaration order, not filtered by whether a
+    ### specific flags value currently contains them.
+    ### :returns: The resulting `List[Me]` value.
+    routine Me.all_cases() -> List[Me]
+    ### Returns the value with all declared flags enabled.
+    ### This is the union of every individual declared flag bit.
+    ### :returns: The resulting `Me` value.
+    routine Me.all_on() -> Me
+    ### Returns the value with all declared flags disabled.
+    ### This is the zero-bitmask identity for the flag type.
+    ### :returns: The resulting `Me` value.
+    routine Me.all_off() -> Me

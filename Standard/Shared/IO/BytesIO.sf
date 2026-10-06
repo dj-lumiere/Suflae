@@ -1,0 +1,148 @@
+module IO/BytesIO
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Parses a signed decimal integer directly from a byte buffer. Skips leading
+### ASCII whitespace, accepts an optional `+` or `-` sign, then consumes digits
+### up to the first non-digit (which may be EOF).
+###
+### :param bytes: The buffer to read from.
+### :returns: The parsed `S64` value.
+### :throws: {InvalidValueError} if no digits were found after the optional sign.
+@rf("S64.from_digit_bytes")
+common routine S64.from_digit_bytes!(bytes: Bytes) -> S64
+
+### Streaming variant: parses a signed decimal integer starting at `start` and
+### returns `(value, next_index)` where `next_index` points one past the last
+### consumed byte. Use this to walk a buffer of many integers without re-slicing.
+###
+### :param bytes: The buffer to read from.
+### :param start: The byte index to begin scanning at. Indices past `bytes.count()`
+###               are treated as EOF and produce {InvalidValueError}.
+### :returns: A tuple `(parsed_value, index_one_past_last_digit)`.
+### :throws: {InvalidValueError} if no digits were found after the optional sign.
+@rf("S64.from_digit_bytes_at")
+common routine S64.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[S64, U64]
+
+### Formats this `S64` as ASCII decimal digit bytes. The result includes a
+### leading `-` for negative values; positive and zero produce digits only.
+###
+### Marked `!` because the inner `U8(from: S64)` narrowing is failable in the
+### general case. Every per-iteration value is in `[0, 9]` by construction so
+### the failure path is unreachable in practice — but propagating via `!`
+### avoids `danger` and lets callers recover with `try x.to_digit_bytes()` for free.
+### :returns: A freshly allocated `Bytes` carrying the digit sequence.
+@rf("S64.to_digit_bytes")
+routine S64.to_digit_bytes!() -> Bytes
+
+### Parses an unsigned decimal integer directly from a byte buffer. Skips leading
+### ASCII whitespace, accepts an optional `+` sign (a `-` sign is rejected), then
+### consumes digits up to the first non-digit.
+###
+### :param bytes: The buffer to read from.
+### :returns: The parsed `U64` value.
+### :throws: {InvalidValueError} if no digits were found or a `-` sign appeared.
+@rf("U64.from_digit_bytes")
+common routine U64.from_digit_bytes!(bytes: Bytes) -> U64
+
+### Streaming variant of `U64.from_digit_bytes!` — see that routine's doc.
+@rf("U64.from_digit_bytes_at")
+common routine U64.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[U64, U64]
+
+### Formats this `U64` as ASCII decimal digit bytes. Zero produces a single
+### `'0'`; otherwise digits-only with no sign.
+###
+### Marked `!` for the same reason as `S64.to_digit_bytes!` — the per-iteration
+### `U8(from: U64)` narrowing is failable in general but unreachable here.
+### :returns: A freshly allocated `Bytes` carrying the digit sequence.
+@rf("U64.to_digit_bytes")
+routine U64.to_digit_bytes!() -> Bytes
+
+@rf("S8.from_digit_bytes")
+common routine S8.from_digit_bytes!(bytes: Bytes) -> S8
+
+@rf("S8.from_digit_bytes_at")
+common routine S8.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[S8, U64]
+
+@rf("S8.to_digit_bytes")
+routine S8.to_digit_bytes!() -> Bytes
+
+@rf("S16.from_digit_bytes")
+common routine S16.from_digit_bytes!(bytes: Bytes) -> S16
+
+@rf("S16.from_digit_bytes_at")
+common routine S16.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[S16, U64]
+
+@rf("S16.to_digit_bytes")
+routine S16.to_digit_bytes!() -> Bytes
+
+@rf("S32.from_digit_bytes")
+common routine S32.from_digit_bytes!(bytes: Bytes) -> S32
+
+@rf("S32.from_digit_bytes_at")
+common routine S32.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[S32, U64]
+
+@rf("S32.to_digit_bytes")
+routine S32.to_digit_bytes!() -> Bytes
+
+@rf("U8.from_digit_bytes")
+common routine U8.from_digit_bytes!(bytes: Bytes) -> U8
+
+@rf("U8.from_digit_bytes_at")
+common routine U8.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[U8, U64]
+
+@rf("U8.to_digit_bytes")
+routine U8.to_digit_bytes!() -> Bytes
+
+@rf("U16.from_digit_bytes")
+common routine U16.from_digit_bytes!(bytes: Bytes) -> U16
+
+@rf("U16.from_digit_bytes_at")
+common routine U16.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[U16, U64]
+
+@rf("U16.to_digit_bytes")
+routine U16.to_digit_bytes!() -> Bytes
+
+@rf("U32.from_digit_bytes")
+common routine U32.from_digit_bytes!(bytes: Bytes) -> U32
+
+@rf("U32.from_digit_bytes_at")
+common routine U32.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[U32, U64]
+
+@rf("U32.to_digit_bytes")
+routine U32.to_digit_bytes!() -> Bytes
+
+@rf("S128.from_digit_bytes")
+common routine S128.from_digit_bytes!(bytes: Bytes) -> S128
+
+@rf("S128.from_digit_bytes_at")
+common routine S128.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[S128, U64]
+
+### The decimal digits of a POSITIVE U128 magnitude, least-significant first (caller reverses).
+### Peels base-10⁹ chunks — one wide `// 10⁹` per 9 digits, remainder as `mag - q*10⁹` (mul+sub,
+### not a second wide divide) — then formats each chunk with scalar `// 10` (the backend lowers a
+### constant divisor to a reciprocal multiply). Requires `mag > 0`.
+@rf("u128_digits_lsd")
+routine u128_digits_lsd(mag: U128) -> List[Byte]
+
+@rf("S128.to_digit_bytes")
+routine S128.to_digit_bytes!() -> Bytes
+
+@rf("U128.from_digit_bytes")
+common routine U128.from_digit_bytes!(bytes: Bytes) -> U128
+
+@rf("U128.from_digit_bytes_at")
+common routine U128.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[U128, U64]
+
+@rf("U128.to_digit_bytes")
+routine U128.to_digit_bytes!() -> Bytes
+
+@rf("Integer.from_digit_bytes")
+common routine Integer.from_digit_bytes!(bytes: Bytes) -> Integer
+
+@rf("Integer.from_digit_bytes_at")
+common routine Integer.from_digit_bytes_at!(bytes: Bytes, start: U64) -> Tuple[Integer, U64]
+
+@rf("Integer.to_digit_bytes")
+routine Integer.to_digit_bytes!() -> Bytes

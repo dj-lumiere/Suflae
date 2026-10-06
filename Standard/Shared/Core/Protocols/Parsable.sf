@@ -1,0 +1,16 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for text-to-value construction.
+### `Parsable` is for types that can interpret textual input and either produce
+### a value or fail through the language's failable creation path.
+@rf("Parsable")
+protocol Parsable
+    ### Parses a value from text.
+    ### Implementations define the accepted syntax and failure conditions for the
+    ### conforming type.
+    ### :param from: The source text to parse.
+    ### :returns: The resulting `Me` value.
+    routine Me!(from: Text) -> Me

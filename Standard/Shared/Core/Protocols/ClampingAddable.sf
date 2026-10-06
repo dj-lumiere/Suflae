@@ -1,0 +1,17 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for saturating addition.
+### `ClampingAddable` is for bounded types whose addition operator can produce a
+### nearest-bound result instead of failing or wrapping when the mathematical
+### sum is out of range.
+@rf("ClampingAddable")
+protocol ClampingAddable
+    ### Returns the clamping sum of this value and `you`.
+    ### If the exact mathematical sum is not representable, implementations
+    ### should return the closest supported bound instead of overflowing.
+    ### :param you: The other value to add.
+    ### :returns: The resulting `Me` value.
+    routine Me.add_clamp(you: Me) -> Me

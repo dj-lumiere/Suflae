@@ -1,0 +1,745 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a 128-bit IEEE 754 binary floating-point value (software binary128).
+### `B128` provides quadruple precision for workloads that need far more range and
+### significand precision than `B64`. It is a pure-integer software implementation
+### (raw 128-bit container, no LLVM `fp128`), so results are bit-identical on every
+### platform without relying on compiler-rt `__*tf*` libcalls.
+@rf("B128")
+record B128
+obeys Numeric, Comparable, Copyable
+    pass
+
+### Reinterprets this value as its raw IEEE 754 bit pattern.
+### :returns: The underlying 128-bit encoding.
+@rf("B128.to_bits")
+routine B128.to_bits() -> U128
+
+### Builds a value directly from a raw IEEE 754 bit pattern.
+### :param bits: The exact 128-bit encoding.
+### :returns: The decoded `B128`.
+@rf("B128.from_bits")
+common routine B128.from_bits(bits: U128) -> B128
+
+### Returns the raw biased exponent field (0..32767).
+### :returns: The 15-bit exponent field.
+@rf("B128.raw_exponent")
+routine B128.raw_exponent() -> U64
+
+### Returns the raw 112-bit mantissa field (no implicit bit).
+### :returns: The stored fraction bits.
+@rf("B128.raw_mantissa")
+routine B128.raw_mantissa() -> U128
+
+### Returns `true` when the value is negative (sign bit set).
+### :returns: Whether the sign bit is set.
+@rf("B128.is_negative")
+routine B128.is_negative() -> Bool
+
+### Returns `true` when the value is strictly positive.
+### :returns: Whether the value is greater than zero.
+@rf("B128.is_positive")
+routine B128.is_positive() -> Bool
+
+### Returns `true` when the value encodes a NaN.
+### :returns: Whether the bit pattern is not-a-number.
+@rf("B128.is_nan")
+routine B128.is_nan() -> Bool
+
+### True when this is a SIGNALING NaN (quiet bit clear). Arithmetic only makes quiet NaN.
+@rf("B128.is_signaling")
+routine B128.is_signaling() -> Bool
+
+### Returns `true` when the value encodes positive or negative infinity.
+### :returns: Whether the bit pattern is an infinity.
+@rf("B128.is_infinite")
+routine B128.is_infinite() -> Bool
+
+### Returns `true` when the value is neither NaN nor infinity.
+### :returns: Whether the value is finite.
+@rf("B128.is_finite")
+routine B128.is_finite() -> Bool
+
+### Returns `true` when the value is zero (either sign).
+### :returns: Whether the value is +0 or -0.
+@rf("B128.is_zero")
+routine B128.is_zero() -> Bool
+
+### Returns `true` when the value is subnormal (denormalized, nonzero).
+### :returns: Whether the value is subnormal.
+@rf("B128.is_subnormal")
+routine B128.is_subnormal() -> Bool
+
+### Returns `true` when the sign bit is set (C `signbit`; true for -0 and -NaN too).
+@rf("B128.signbit")
+routine B128.signbit() -> Bool
+
+### Returns `true` for a finite, normal value (nonzero and not subnormal).
+@rf("B128.is_normal")
+routine B128.is_normal() -> Bool
+
+### C `fpclassify`: 0 NaN, 1 infinite, 2 zero, 3 subnormal, 4 normal.
+@rf("B128.fpclassify")
+routine B128.fpclassify() -> FpClass
+
+### Sign-magnitude total-order key: negatives become small, non-negatives large, so an
+### unsigned `<=` reproduces the IEEE 754 totalOrder ranking (-NaN < -inf < ... < +inf < +NaN).
+@rf("b128_order_key")
+routine b128_order_key(bits: U128) -> U128
+
+### IEEE 754 totalOrder: a total order over all values including signed zeros and NaNs
+### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
+### :param you: The value to compare against.
+### :returns: Whether `me` precedes or equals `you` in the total order.
+@rf("B128.total_order")
+routine B128.total_order(you: B128) -> Bool
+
+### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### :param you: The value whose magnitude to compare against.
+### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
+@rf("B128.total_order_mag")
+routine B128.total_order_mag(you: B128) -> Bool
+
+### IEEE 754 nextUp: the least value greater than `me`. Propagating; never crashes.
+### :returns: The next representable value toward +infinity.
+@rf("B128.next_up")
+routine B128.next_up() -> B128
+
+### IEEE 754 nextDown: the greatest value less than `me`. Never crashes.
+### :returns: The next representable value toward -infinity.
+@rf("B128.next_down")
+routine B128.next_down() -> B128
+
+### IEEE 754 logb: the unbiased exponent of `me` as a floating value (logb(0)=-inf,
+### logb(±inf)=+inf, logb(NaN)=NaN). Propagating; never crashes.
+### :returns: The radix-2 exponent of `me`.
+@rf("B128.logb")
+routine B128.logb() -> B128
+
+### `me * 2^n` with raw IEEE 754 propagation (overflow -> ±infinity).
+### :param n: The power-of-two exponent to apply.
+### :returns: `me` scaled by `2^n`.
+@rf("B128.scaleb_unchecked")
+routine B128.scaleb_unchecked(n: S64) -> B128
+
+### IEEE 754-2008 minNum: the smaller operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, ignoring NaN.
+@rf("B128.min_num")
+routine B128.min_num(you: B128) -> B128
+
+### IEEE 754-2008 maxNum: the larger operand, treating NaN as missing. Never crashes.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, ignoring NaN.
+@rf("B128.max_num")
+routine B128.max_num(you: B128) -> B128
+
+### IEEE 754-2019 minimum: the smaller operand, propagating NaN, ordering -0 below +0.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, NaN if either is NaN.
+@rf("B128.minimum")
+routine B128.minimum(you: B128) -> B128
+
+### IEEE 754-2019 maximum: the larger operand, propagating NaN, ordering +0 above -0.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, NaN if either is NaN.
+@rf("B128.maximum")
+routine B128.maximum(you: B128) -> B128
+
+### C `fmax`: the larger operand, treating NaN as missing (alias of `max_num`). Provided for
+### parity with B16/B32/B64 and the decimal types. Never crashes.
+### :param you: The value to compare against.
+### :returns: The maximum of `me` and `you`, ignoring NaN.
+@rf("B128.fmax")
+routine B128.fmax(you: B128) -> B128
+
+### C `fmin`: the smaller operand, treating NaN as missing (alias of `min_num`). Provided for
+### parity with B16/B32/B64 and the decimal types. Never crashes.
+### :param you: The value to compare against.
+### :returns: The minimum of `me` and `you`, ignoring NaN.
+@rf("B128.fmin")
+routine B128.fmin(you: B128) -> B128
+
+### IEEE 754 roundToIntegralTiesToAway: rounds to nearest integer, halves away from zero.
+### :returns: `me` rounded to an integral value with ties away from zero.
+@rf("B128.round_ties_away")
+routine B128.round_ties_away() -> B128
+
+### Returns the fractional part `me - trunc(me)`, preserving sign (frac(±inf) = ±0).
+@rf("B128.frac")
+routine B128.frac() -> B128
+
+### Returns the arithmetic negation (sign bit flipped).
+### :returns: The negated value.
+@rf("B128.neg")
+routine B128.neg() -> B128
+
+### Returns the absolute value (sign bit cleared).
+### :returns: The magnitude of this value.
+@rf("B128.abs")
+routine B128.abs() -> B128
+
+### Returns this magnitude carrying the sign of `sign`.
+### :param sign: The value supplying the sign bit.
+### :returns: A value combining this magnitude with the sign of `sign`.
+@rf("B128.copysign")
+routine B128.copysign(sign: B128) -> B128
+
+### Returns whether two values compare equal (NaN compares unequal; +0 == -0).
+### :param you: The value to compare against.
+### :returns: Whether the values are ordered-equal.
+@rf("B128.eq")
+routine B128.eq(you: B128) -> Bool
+
+### Compares this value with `you` under IEEE ordered semantics (pure bit logic).
+### :param you: The value to compare against.
+### :returns: The comparison sign (SAME for unordered/NaN).
+@rf("B128.cmp")
+routine B128.cmp(you: B128) -> ComparisonSign
+
+### Returns `me + you` (software IEEE 754, round-to-nearest-even). Checked: crashes if the result is
+### non-finite. Use `add_unchecked` for raw IEEE 754 propagation.
+### :param you: The addend.
+### :returns: The sum (always finite).
+@rf("B128.add")
+routine B128.add!(you: B128) -> B128
+
+### Returns `me - you` (software IEEE 754). Checked: crashes if the result is non-finite.
+### Use `sub_unchecked` for raw IEEE 754 propagation.
+### :param you: The value to subtract.
+### :returns: The difference (always finite).
+@rf("B128.sub")
+routine B128.sub!(you: B128) -> B128
+
+### Returns `me + you`, promoting the real `me` to complex (imaginary part 0). Only `+`/`-` allow
+### real↔complex mixing; the component width must match (B128 pairs with C256).
+### :param you: The complex addend.
+### :returns: The complex sum.
+@rf("B128.add")
+routine B128.add(you: C256) -> C256
+
+### Returns `me - you`, promoting the real `me` to complex (imaginary part 0).
+### :param you: The complex value to subtract.
+### :returns: The complex difference.
+@rf("B128.sub")
+routine B128.sub(you: C256) -> C256
+
+### Returns `me * you` (software IEEE 754). Checked: crashes if the result is non-finite.
+### Use `mul_unchecked` for raw IEEE 754 propagation.
+### :param you: The multiplier.
+### :returns: The product (always finite).
+@rf("B128.mul")
+routine B128.mul!(you: B128) -> B128
+
+### Returns `me / you` (software IEEE 754). Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain,
+### overflow -> overflow. Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
+### :param you: The divisor.
+### :returns: The quotient (always finite).
+@rf("B128.truediv")
+routine B128.truediv!(you: B128) -> B128
+
+### Truncates toward zero to an integer value (C `trunc`).
+### :returns: The integer part, preserving sign (NaN/inf returned unchanged).
+@rf("B128.trunc")
+routine B128.trunc() -> B128
+
+### Rounds toward negative infinity (C `floor`).
+### :returns: The largest integer not greater than this value.
+@rf("B128.floor")
+routine B128.floor() -> B128
+
+### Rounds toward positive infinity (C `ceil`).
+### :returns: The smallest integer not less than this value.
+@rf("B128.ceil")
+routine B128.ceil() -> B128
+
+### Rounds to nearest integer, ties away from zero (C `round`).
+### :returns: The rounded integer value.
+@rf("B128.round")
+routine B128.round() -> B128
+
+### Rounds to nearest integer, ties to even (C `rint` under the default mode).
+### :returns: The rounded integer value.
+@rf("B128.rint")
+routine B128.rint() -> B128
+
+### Guarded round-to-integer core for round/rint over packed (finite) bits.
+### :param bits: The raw encoding (assumed finite).
+### :param half_even: Break ties to even when `true`, else away from zero.
+### :returns: The rounded encoding.
+@rf("b128_round_to_int")
+routine b128_round_to_int(bits: U128, half_even: Bool) -> U128
+
+### Returns the smaller of two values (C `fmin`: NaN-agnostic, -0 < +0).
+### :param you: The value to compare against.
+### :returns: The minimum.
+@rf("B128.min")
+routine B128.min(you: B128) -> B128
+
+### Returns the larger of two values (C `fmax`: NaN-agnostic, -0 < +0).
+### :param you: The value to compare against.
+### :returns: The maximum.
+@rf("B128.max")
+routine B128.max(you: B128) -> B128
+
+### Returns the positive difference `max(me - you, 0)` (C `fdim`).
+### :param you: The value to subtract.
+### :returns: The positive difference, or +0.
+@rf("B128.fdim")
+routine B128.fdim(you: B128) -> B128
+
+### The implicit-bit mask `1 << 112`.
+@rf("b128_implicit")
+routine b128_implicit() -> U128
+
+### The 112-bit mantissa mask `(1 << 112) - 1`.
+@rf("b128_mant_mask")
+routine b128_mant_mask() -> U128
+
+### The sign-bit mask `1 << 127`.
+@rf("b128_sign_mask")
+routine b128_sign_mask() -> U128
+
+### The magnitude mask `~(1 << 127)` (all but the sign bit).
+@rf("b128_abs_mask")
+routine b128_abs_mask() -> U128
+
+### The infinity encoding `0x7FFF << 112` for the given sign bit.
+@rf("b128_inf")
+routine b128_inf(sign: U64) -> U128
+
+### The canonical quiet-NaN encoding (exponent all ones, top mantissa bit set).
+@rf("b128_qnan")
+routine b128_qnan() -> U128
+
+### Forces the quiet bit on a NaN encoding (top mantissa bit).
+@rf("b128_quiet")
+routine b128_quiet(bits: U128) -> U128
+
+### Returns a signaling NaN (interop/testing; never produced by arithmetic).
+@rf("B128.signaling_nan")
+common routine B128.signaling_nan() -> B128
+
+### Sign-magnitude total-order key for comparison: negatives are bit-inverted,
+### non-negatives get the sign bit set, so an unsigned compare orders the floats.
+### :param bits: The raw encoding.
+### :returns: The order key.
+@rf("b128_order_key")
+routine b128_order_key(bits: U128) -> U128
+
+### Widens a `U128` into a `U256`.
+@rf("b128_u256")
+routine b128_u256(x: U128) -> U256
+
+### Narrows a `U256` to its low 128 bits.
+@rf("b128_u256_to128")
+routine b128_u256_to128(x: U256) -> U128
+
+### Logical left shift of a `U256` by a `U128` amount.
+@rf("b128_u256_shl")
+routine b128_u256_shl(v: U256, n: U128) -> U256
+
+### Logical right shift of a `U256` by a `U128` amount.
+@rf("b128_u256_shr")
+routine b128_u256_shr(v: U256, n: U128) -> U256
+
+### The wide bit mask `1 << n` as a `U256`.
+@rf("b128_u256_bit")
+routine b128_u256_bit(n: U128) -> U256
+
+### The wide low mask `(1 << n) - 1` as a `U256`.
+@rf("b128_u256_lowmask")
+routine b128_u256_lowmask(n: U128) -> U256
+
+### Shifts a 128-bit significand right by `amount`, folding all bits shifted out
+### into a sticky bit (bit 0). Used for exponent alignment and rounding.
+### :param value: The significand to shift.
+### :param amount: The right-shift distance.
+### :returns: The shifted significand with sticky bit folded in.
+@rf("b128_shr_sticky")
+routine b128_shr_sticky(value: U128, amount: U128) -> U128
+
+### Packs a sign / 113-bit significand (implicit at bit 112) / biased exponent into
+### a final binary128 encoding, applying overflow and the normal vs. subnormal rule.
+### :param sign: The sign bit (0 or 1).
+### :param biased: The biased exponent.
+### :param sig: The 113-bit significand (no guard bits).
+### :returns: The packed encoding.
+@rf("b128_pack")
+routine b128_pack(sign: U64, biased: U64, sig: U128) -> U128
+
+### Software binary128 addition over raw encodings.
+@rf("b128_add_bits")
+routine b128_add_bits(a: U128, b: U128) -> U128
+
+### Software binary128 multiplication over raw encodings (U256 product).
+@rf("b128_mul_bits")
+routine b128_mul_bits(a: U128, b: U128) -> U128
+
+### Software binary128 division over raw encodings (U256 numerator).
+@rf("b128_div_bits")
+routine b128_div_bits(a: U128, b: U128) -> U128
+
+### A subnormal (or zero, or the smallest normal) result v 2^-sh of the minimum exponent's unit, rounded once to
+### nearest even: `sticky` says the true value lies above v by less than one of v's units.
+@rf("b128_round_subnormal")
+routine b128_round_subnormal(sign: U64, v: U256, sh: S64, sticky: Bool) -> U128
+
+### Denormalizes a normalized significand into the subnormal range by shifting right
+### `under` places with round-to-nearest-even, then packs the result.
+### :param sign: The sign bit.
+### :param sig: The 113-bit significand to denormalize.
+### :param under: The number of right shifts needed (>= 1).
+### :returns: The packed subnormal (or zero) encoding.
+@rf("b128_finish_subnormal")
+routine b128_finish_subnormal(sign: U64, sig: U128, under: S64) -> U128
+
+### floor(sqrt(n)) for n below 2^240 (the callers stay below 2^238: B128 hypot of three, D128 sqrt and hypot). The
+### B128 square root of n truncated to 113 bits is within s 2^-111 + 1 of the root s (at most 2^9 units, 3 below
+### 2^226), one Newton step s + (n - s^2) / (2s), its quotient taken in B128, brings a larger error within a unit,
+### and s^2 <= n < (s + 1)^2 settles it. No wide division.
+### :param n: The radicand.
+### :returns: floor(sqrt(n)).
+@rf("b128_isqrt256")
+routine b128_isqrt256(n: U256) -> U256
+
+### Returns the square root. Checked: crashes (domain error) if `me` is negative (`sqrt(<0)` ->
+### NaN).
+### Use `sqrt_unchecked` for raw IEEE 754 propagation.
+### :returns: The quadruple-precision square root (always finite for finite non-negative input).
+@rf("B128.sqrt")
+routine B128.sqrt!() -> B128
+
+### Normalizes a positive integer significand `sig * 2^exp_lsb` into packed bits.
+### Exact: assumes the value is representable (true for fmod/remainder results).
+### :param sign: The sign bit (0 or 1).
+### :param sig: The nonzero integer significand (<= 127 bits).
+### :param exp_lsb: The binary exponent of `sig`'s least-significant bit.
+### :returns: The packed `B128` encoding.
+@rf("b128_norm_pack")
+routine b128_norm_pack(sign: U64, sig: U128, exp_lsb: S64) -> U128
+
+### Long-division core: for nonzero finite magnitudes, returns the truncated
+### remainder `|a| mod |b|` (as packed bits) and the parity of `floor(|a|/|b|)`.
+### :param abits: Magnitude bits of the dividend.
+### :param bbits: Magnitude bits of the divisor.
+### :returns: A pair `(remainder-bits, quotient-is-odd)`.
+@rf("b128_fmod_core")
+routine b128_fmod_core(abits: U128, bbits: U128) -> (U128, Bool)
+
+### Returns `me mod you` truncated toward zero (C `fmod`): result has the sign of
+### `me` and magnitude strictly less than `|you|`.
+### :param you: The divisor.
+### :returns: The truncated remainder.
+@rf("B128.fmod")
+routine B128.fmod(you: B128) -> B128
+
+### Returns the IEEE 754 remainder `me - n*you` where `n` is `me/you` rounded to
+### the nearest integer, ties to even (C `remainder`).
+### :param you: The divisor.
+### :returns: The remainder in `[-|you|/2, |you|/2]`.
+@rf("B128.remainder")
+routine B128.remainder(you: B128) -> B128
+
+### Returns the shortest decimal text that reads back as this exact value (`B128(from_text:)`
+### round-trips it bit for bit).
+### :returns: The formatted representation.
+@rf("B128.represent")
+routine B128.represent() -> Text
+
+### Returns a diagnostic representation tagged with the type name.
+### :returns: The formatted representation.
+@rf("B128.diagnose")
+routine B128.diagnose() -> Text
+
+### Builds the `B128` value of a small non-negative integer (castFromInt).
+### :param n: The integer to convert.
+### :returns: The corresponding `B128`.
+@rf("b128_from_int")
+routine b128_from_int(n: U64) -> B128
+
+### Returns the unbiased binary exponent (floor log2 |v|), TLFloat's `ilogb`.
+### :param v: The value (assumed nonzero).
+### :returns: The binary exponent.
+@rf("b128_ilogb")
+routine b128_ilogb(v: B128) -> S64
+
+### Returns the next representable value after `me` toward `you` (C `nextafter`).
+@rf("B128.nextafter")
+routine B128.nextafter(you: B128) -> B128
+
+### Splits into integer and fractional parts (C `modf`): returns (intpart, fracpart).
+@rf("B128.modf")
+routine B128.modf() -> (B128, B128)
+
+### Splits into a fraction in [0.5,1) and a power-of-two exponent (C `frexp`).
+@rf("B128.frexp")
+routine B128.frexp() -> (B128, S64)
+
+### Converts an `S8` into quadruple-precision floating-point form.
+### :param from: The signed 8-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: S8) -> B128
+
+### Converts an `S16` into quadruple-precision floating-point form.
+### :param from: The signed 16-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: S16) -> B128
+
+### Converts an `S32` into quadruple-precision floating-point form.
+### :param from: The signed 32-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: S32) -> B128
+
+### Converts an `S64` into quadruple-precision floating-point form.
+### :param from: The signed 64-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: S64) -> B128
+
+### Converts an `S128` into quadruple-precision floating-point form.
+### :param from: The signed 128-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: S128) -> B128
+
+### Converts an `S256` into quadruple-precision floating-point form.
+### :param from: The signed 256-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: S256) -> B128
+
+### Converts a `U8` into quadruple-precision floating-point form.
+### :param from: The unsigned 8-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: U8) -> B128
+
+### Converts a `U16` into quadruple-precision floating-point form.
+### :param from: The unsigned 16-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: U16) -> B128
+
+### Converts a `U32` into quadruple-precision floating-point form.
+### :param from: The unsigned 32-bit integer to convert.
+### :returns: The corresponding `B128` value.
+@rf("B128")
+routine B128(from: U32) -> B128
+
+### Converts a `U64` into quadruple-precision floating-point form.
+### :param from: The unsigned 64-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: U64) -> B128
+
+### Converts a `U128` into quadruple-precision floating-point form.
+### :param from: The unsigned 128-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: U128) -> B128
+
+### Converts a `U256` into quadruple-precision floating-point form.
+### value = hi * 2^128 + lo, evaluated in correctly-rounded B128 arithmetic (2^256 is
+### far inside B128's range, so the checked `*`/`+` never overflow).
+### :param from: The unsigned 256-bit integer to convert.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: U256) -> B128
+
+### Widens a half-precision float to quadruple precision.
+### :param from: The `B16` value to widen.
+### :returns: An `B128` carrying the same numeric value when representable.
+@rf("B128")
+routine B128(from: B16) -> B128
+
+### Widens a single-precision float to quadruple precision.
+### :param from: The `B32` value to widen.
+### :returns: An `B128` carrying the same numeric value when representable.
+@rf("B128")
+routine B128(from: B32) -> B128
+
+### Widens a double-precision float to quadruple precision (exact, pure bit surgery).
+### B64 (1+11+52, bias 1023) re-encodes into B128 (1+15+112, bias 16383). Widening is
+### always exact; B64 subnormals normalize into the vast B128 normal range.
+### :param from: The `B64` value to widen.
+### :returns: An `B128` carrying the same numeric value.
+@rf("B128")
+routine B128(from: B64) -> B128
+
+### Returns an existing `B128` unchanged.
+### :param from: The quadruple-precision value to forward.
+### :returns: `from`.
+@rf("B128")
+routine B128(from: B128) -> B128
+
+### Converts a decimal32 value to quadruple-precision binary floating point.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: D32) -> B128
+
+### Converts a decimal64 value to quadruple-precision binary floating point.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: D64) -> B128
+
+### Converts a decimal128 value to quadruple-precision binary floating point, correctly rounded: the exact
+### value when c * 10^q is an integer below 2^384 or a binary fraction (the only cases that can be exact or
+### halfway), else within about 2^-372 of it.
+### :param from: The decimal floating-point input value.
+### :returns: The closest representable `B128` value.
+@rf("B128")
+routine B128(from: D128) -> B128
+
+### Returns `me` if it is finite; throws if it is ±infinity or NaN. The opt-in
+### finiteness assertion for IEEE arithmetic, e.g. `var x = (a * b + c).finite()`.
+### :returns: `me`, when finite.
+### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
+@rf("B128.finite")
+routine B128.finite!() -> B128
+
+### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
+@rf("B128.truediv_unchecked")
+routine B128.truediv_unchecked(you: B128) -> B128
+
+### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B128.add_unchecked")
+routine B128.add_unchecked(you: B128) -> B128
+
+### Returns `me - you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B128.sub_unchecked")
+routine B128.sub_unchecked(you: B128) -> B128
+
+### Returns `me * you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
+@rf("B128.mul_unchecked")
+routine B128.mul_unchecked(you: B128) -> B128
+
+### Discards the fractional part of this value toward zero.
+### :returns: The truncated result in quadruple precision.
+@rf("B128.int_truncate")
+routine B128.int_truncate() -> B128
+
+### Returns the reciprocal `1 / me` (`±∞` for `±0`, following IEEE rules).
+### :returns: The multiplicative inverse.
+@rf("B128.recip")
+routine B128.recip() -> B128
+
+### Returns `me` converted from radians to degrees (`me × 180 / π`).
+### :returns: The angle in degrees.
+@rf("B128.to_degrees")
+routine B128.to_degrees() -> B128
+
+### Returns `me` converted from degrees to radians (`me × π / 180`).
+### :returns: The angle in radians.
+@rf("B128.to_radians")
+routine B128.to_radians() -> B128
+
+### Returns `me` raised to the integer power `n`, correctly rounded: the exact `me^n` rounded to the nearest
+### `B128` (ties to even), identical on every platform, with raw IEEE 754 propagation. `powi(0)` is 1 for every
+### `me`, NaN included.
+### :param n: The integer exponent.
+### :returns: `me ** n`.
+@rf("B128.powi")
+routine B128.powi(n: S32) -> B128
+
+### Returns `(me + you) / 2`, computed without intermediate overflow.
+### :param you: The other value.
+### :returns: The arithmetic midpoint of `me` and `you`.
+@rf("B128.midpoint")
+routine B128.midpoint(you: B128) -> B128
+
+### Restricts this value to the closed interval `[min_val, max_val]`.
+### :param min_val: The lower bound to enforce.
+### :param max_val: The upper bound to enforce.
+### :returns: `me` if already in range, otherwise the nearest bound.
+@rf("B128.clamp")
+routine B128.clamp(min_val: B128, max_val: B128) -> B128
+
+### Returns the sign of this value as `-1.0`, `0.0`, or `1.0`.
+### :returns: A unit-sign value describing the sign of `me`.
+@rf("B128.signum")
+routine B128.signum() -> B128
+
+### Returns the low 64 bits of the raw `B128` encoding.
+### :returns: The least-significant half of the bit pattern.
+@rf("B128.low_bits")
+routine B128.low_bits() -> U64
+
+### Returns the high 64 bits of the raw `B128` encoding.
+### :returns: The most-significant half of the bit pattern.
+@rf("B128.high_bits")
+routine B128.high_bits() -> U64
+
+### Converts this value to `S64` by first narrowing to `B64`, then truncating toward zero.
+### Values outside the `S64` range or non-finite inputs produce unspecified results.
+### :returns: The truncated `S64` value.
+@rf("B128.S64")
+routine B128.S64!() -> S64
+
+### Converts this value to `S128` by first narrowing to `B64`, then truncating toward zero.
+### Values outside the `S128` range or non-finite inputs produce unspecified results.
+### :returns: The truncated `S128` value.
+@rf("B128.S128")
+routine B128.S128!() -> S128
+
+### Shifts `sig` right by `drop` bits, rounding to nearest with ties to even.
+### Used by the `B128 -> B64` narrowing to discard the low significand bits.
+### :param sig: The significand to round (up to 113 significant bits).
+### :param drop: The count of low bits to discard.
+### :returns: The rounded, right-shifted magnitude.
+@rf("b128_rshift_rne")
+routine b128_rshift_rne(sig: U128, drop: U64) -> U64
+
+### Narrows this quadruple-precision value to single precision.
+### :returns: The nearest representable `B32` value.
+@rf("B32")
+routine B32(from: B128) -> B32
+
+### Narrows this quadruple-precision value to double precision (correctly rounded,
+### pure bit surgery — B128 is an i128 carrier, so no LLVM `fptrunc` is available).
+### Handles inf/NaN, overflow to ±inf, the B64 subnormal range, and underflow to ±0.
+### :returns: The nearest representable `B64` value (round-to-nearest-ties-to-even).
+@rf("B64")
+routine B64(from: B128) -> B64
+
+### Returns a stable hash derived from the raw floating-point encoding.
+### NaN payloads and negative zero are normalized so equal numeric values hash
+### identically under the equality rules.
+### :returns: The hash code for this value.
+@rf("B128.hash")
+routine B128.hash() -> U64
+
+### Parses decimal text into the correctly-rounded `B128` (round-to-nearest-even). Accepts standard
+### decimal notation and the special values `nan`, `inf`, and `infinity` (case-insensitive, with
+### optional leading sign). The value is built as an exact rational and rounded once, straight to
+### binary128 (`b128_from_ratio`, the same path B16/B32/B64 use).
+### :param from_text: The decimal literal.
+### :returns: The correctly-rounded `B128` value.
+### :throws: {InvalidValueError} on malformed input.
+@rf("B128")
+routine B128!(from_text: Text) -> B128
+
+### Returns the raw bytes of this value in little-endian order.
+### :returns: The resulting `Array[Byte, 16]` value.
+@rf("B128.to_bytes_le")
+routine B128.to_bytes_le() -> Array[Byte, 16]
+
+### Returns the raw bytes of this value in big-endian order.
+### :returns: The resulting `Array[Byte, 16]` value.
+@rf("B128.to_bytes_be")
+routine B128.to_bytes_be() -> Array[Byte, 16]
+
+### Returns a keyed hash of this value using SipHash-2-4.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The resulting `U64` value.
+@rf("B128.hash")
+routine B128.hash(k0: U64, k1: U64) -> U64

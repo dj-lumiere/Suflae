@@ -1,0 +1,15 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a range is iterated or tested with a step that is zero or negative. The
+### step of a range is always a positive distance and the endpoints decide the direction.
+@rf("RangeStepNotPositiveError")
+crashable RangeStepNotPositiveError
+    pass
+
+### Returns the default message for a range whose step is not positive.
+### :returns: The resulting `Text` value.
+@rf("RangeStepNotPositiveError.crash_message")
+routine RangeStepNotPositiveError.crash_message() -> Text

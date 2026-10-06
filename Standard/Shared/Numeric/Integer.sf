@@ -1,0 +1,383 @@
+module Numerics
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents an arbitrary-precision signed integer, computed by the integer engine in Ingrid.
+### `Integer` is the unbounded integer type for workloads where fixed-width overflow is not acceptable.
+### It preserves exact integer semantics across arithmetic, parsing, and formatting operations.
+###
+### `Integer` is a record (value semantics from the user's view). A magnitude below 2^64 is held in the value
+### itself, so small numbers need no heap and are computed without calling the engine. A bigger magnitude lives in
+### a heap buffer of 64-bit limbs shared by copies under an atomic refcount: copying bumps the refcount (no number
+### data is copied), and the last drop frees the buffer + controller. Division is Euclidean: `a // b` and `a % b`
+### satisfy `a == b * (a // b) + a % b` with `0 <= a % b < |b|`. The bitwise operators act on the two's-complement
+### form. There is no `/`: an integer quotient is `//`, and a fractional one is computed in `Decimal`.
+### :see: {Decimal}, {Numeric-Types}
+@rf("Integer")
+record Integer
+obeys Copyable, Integral, Negatable, Comparable, Hashable
+    pass
+
+### Creates the integer value `0`.
+### Use this overload when the surrounding context needs an explicit `Integer`
+### instead of a fixed-width literal.
+### :returns: The resulting `Integer` value.
+@rf("Integer")
+routine Integer() -> Integer
+
+### Creates an `Integer` from a signed 64-bit source value.
+### The numeric payload is copied into the arbitrary-precision representation,
+### so the result is no longer limited by `S64` range after construction.
+### :param from: The initial signed value.
+### :returns: The resulting `Integer` value.
+@rf("Integer")
+routine Integer(from: S64) -> Integer
+
+### Creates an `Integer` from an unsigned 64-bit source value.
+### This is the direct widening entry point for exact conversion from native
+### unsigned integer data.
+### :param from: The initial unsigned value.
+### :returns: The resulting `Integer` value.
+@rf("Integer")
+routine Integer(from: U64) -> Integer
+
+@rf("integer_of_s64")
+routine integer_of_s64(v: S64) -> Integer
+
+@rf("integer_of_u64")
+routine integer_of_u64(v: U64) -> Integer
+
+### Widens a fixed-width integer into an `Integer` (exact). 64-bit limbs go through the
+### base builders; wider widths compose them with shift+add.
+### :param from: The signed source value.
+### :returns: The equal `Integer` value.
+@rf("Integer")
+routine Integer(from: S8) -> Integer
+
+@rf("Integer")
+routine Integer(from: S16) -> Integer
+
+@rf("Integer")
+routine Integer(from: S32) -> Integer
+
+@rf("Integer")
+routine Integer(from: S128) -> Integer
+
+@rf("Integer")
+routine Integer(from: S256) -> Integer
+
+### Widens an unsigned fixed-width integer into an `Integer` (exact).
+### :param from: The unsigned source value.
+### :returns: The equal `Integer` value.
+@rf("Integer")
+routine Integer(from: U8) -> Integer
+
+@rf("Integer")
+routine Integer(from: U16) -> Integer
+
+@rf("Integer")
+routine Integer(from: U32) -> Integer
+
+@rf("Integer")
+routine Integer(from: U128) -> Integer
+
+@rf("Integer")
+routine Integer(from: U256) -> Integer
+
+### Materializes an `Integer` from a decimal digit string its caller has already validated.
+### The float conversions call it on the digits they collected. An `n` literal never does: the builder
+### lays its limbs down as static data. Infallible, unlike the public `Integer(text:)`.
+### :param text: The decimal digit string (no suffix, no separators).
+### :returns: The resulting `Integer` value.
+@rf("Integer.from_literal")
+common routine Integer.from_literal(text: Text) -> Integer
+
+### Returns a copy of this value. A value below 2^64 is copied as it is. A bigger one shares its limb buffer
+### with the copy and bumps its refcount: no big-integer data is copied.
+### :returns: The resulting `Integer` value.
+@rf("Integer.assign")
+routine Integer.assign() -> Integer
+
+### Adds `other` to this value using exact integer arithmetic.
+### No overflow occurs; the storage grows as needed.
+### :param other: The value to add.
+### :returns: The resulting `Integer` value.
+@rf("Integer.add")
+routine Integer.add(other: Integer) -> Integer
+
+### Subtracts `other` from this value using exact integer arithmetic.
+### :param other: The value to subtract.
+### :returns: The resulting `Integer` value.
+@rf("Integer.sub")
+routine Integer.sub(other: Integer) -> Integer
+
+### Multiplies this value by `other` using exact integer arithmetic.
+### :param other: The value to multiply by.
+### :returns: The resulting `Integer` value.
+@rf("Integer.mul")
+routine Integer.mul(other: Integer) -> Integer
+
+### Divides this value by `other` and returns the Euclidean quotient: the `q` for which
+### `me - other * q` lies in `[0, |other|)`.
+### :param other: The non-zero divisor.
+### :returns: The integer quotient.
+@rf("Integer.floordiv")
+routine Integer.floordiv!(other: Integer) -> Integer
+
+### Returns the Euclidean remainder of this value divided by `other`.
+### :param other: The non-zero divisor.
+### :returns: The remainder, always in `[0, |other|)`.
+@rf("Integer.mod")
+routine Integer.mod!(other: Integer) -> Integer
+
+### Returns the additive inverse of this value.
+### :returns: The resulting `Integer` value.
+@rf("Integer.neg")
+routine Integer.neg() -> Integer
+
+### Returns `true` when both values represent the same mathematical integer.
+### :param you: The other value to compare against.
+### :returns: The resulting `Bool` value.
+@rf("Integer.eq")
+routine Integer.eq(you: Integer) -> Bool
+
+### Compares this value with `you` using numeric ordering.
+### :param you: The other value to compare against.
+### :returns: The resulting `ComparisonSign` value.
+@rf("Integer.cmp")
+routine Integer.cmp(you: Integer) -> ComparisonSign
+
+### Computes the bitwise AND of this value and `other` (two's-complement form).
+### :param other: The other operand.
+### :returns: The resulting `Integer` value.
+@rf("Integer.bitand")
+routine Integer.bitand(other: Integer) -> Integer
+
+### Computes the bitwise OR of this value and `other` (two's-complement form).
+### :param other: The other operand.
+### :returns: The resulting `Integer` value.
+@rf("Integer.bitor")
+routine Integer.bitor(other: Integer) -> Integer
+
+### Computes the bitwise XOR of this value and `other` (two's-complement form).
+### :param other: The other operand.
+### :returns: The resulting `Integer` value.
+@rf("Integer.bitxor")
+routine Integer.bitxor(other: Integer) -> Integer
+
+### Shifts this value left by `bits` positions (`me << bits`): `me * 2^bits`.
+### :param bits: The number of bit positions to shift.
+### :returns: The resulting `Integer` value.
+@rf("Integer.ashl")
+routine Integer.ashl(bits: U32) -> Integer
+
+### Shifts this value right by `bits` positions (`me >> bits`): `floor(me / 2^bits)`, so `-5 >> 1` is `-3`.
+### :param bits: The number of bit positions to shift.
+### :returns: The resulting `Integer` value.
+@rf("Integer.ashr")
+routine Integer.ashr(bits: U32) -> Integer
+
+### Shifts this value right by `bits` positions filling with zeros (`me >>> bits`). An `Integer` has no fixed
+### width, so a negative value has no zero-filled form: this is `>>` for a value that is not negative.
+### :param bits: The number of bit positions to shift.
+### :returns: The resulting `Integer` value.
+### :throws: {NumericDomainError} when this value is negative.
+@rf("Integer.lshr")
+routine Integer.lshr!(bits: U32) -> Integer
+
+### Returns the absolute magnitude of this value.
+### :returns: The resulting `Integer` value.
+@rf("Integer.abs")
+routine Integer.abs() -> Integer
+
+### Returns the integer square root of this value.
+### The result is the greatest integer whose square does not exceed the input.
+### :returns: The resulting `Integer` value.
+### :throws: {NumericDomainError} when this value is negative (it has no real square root).
+@rf("Integer.sqrt")
+routine Integer.sqrt!() -> Integer
+
+### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
+### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
+### :returns: The tuple `(root, remainder)`.
+### :throws: {NumericDomainError} when this value is negative (it has no real square root).
+@rf("Integer.sqrtrem")
+routine Integer.sqrtrem!() -> (Integer, Integer)
+
+### Computes the greatest common divisor of this value and `other` (non-negative).
+### :param other: The other operand.
+### :returns: The resulting `Integer` value.
+@rf("Integer.gcd")
+routine Integer.gcd(other: Integer) -> Integer
+
+### Computes the least common multiple of this value and `other` (non-negative, 0 when either is 0).
+### :param other: The other operand.
+### :returns: The resulting `Integer` value.
+@rf("Integer.lcm")
+routine Integer.lcm(other: Integer) -> Integer
+
+### Returns `true` when this value is exactly zero.
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_zero")
+routine Integer.is_zero() -> Bool
+
+### Returns `true` when this value is less than zero.
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_negative")
+routine Integer.is_negative() -> Bool
+
+### Returns `true` when this value is greater than zero.
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_positive")
+routine Integer.is_positive() -> Bool
+
+### Returns `true` when this value is even (divisible by two).
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_even")
+routine Integer.is_even() -> Bool
+
+### Returns `true` when this value is odd.
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_odd")
+routine Integer.is_odd() -> Bool
+
+### Returns `true` when this value is a positive power of two (1, 2, 4, 8, ...).
+### :returns: The resulting `Bool` value.
+@rf("Integer.is_power_of_two")
+routine Integer.is_power_of_two() -> Bool
+
+### Returns the bitwise complement `~me`, defined in the two's-complement sense as `-me - 1`.
+### :returns: The resulting `Integer` value.
+@rf("Integer.bitnot")
+routine Integer.bitnot() -> Integer
+
+### Returns the smaller of this value and `other`.
+### :param other: The value to compare against.
+### :returns: The resulting `Integer` value.
+@rf("Integer.min")
+routine Integer.min(other: Integer) -> Integer
+
+### Returns the larger of this value and `other`.
+### :param other: The value to compare against.
+### :returns: The resulting `Integer` value.
+@rf("Integer.max")
+routine Integer.max(other: Integer) -> Integer
+
+### Clamps this value into the inclusive range `[low, high]`.
+### :param low: The lower bound.
+### :param high: The upper bound.
+### :returns: The resulting `Integer` value.
+@rf("Integer.clamp")
+routine Integer.clamp(low: Integer, high: Integer) -> Integer
+
+### Divides by `other`, returning the Euclidean quotient and remainder together
+### (`me == other * q + r`, `0 <= r < |other|`).
+### :param other: The non-zero divisor.
+### :returns: A tuple `(quotient, remainder)`.
+### :throws: {DivisionByZeroError} when `other` is zero.
+@rf("Integer.divmod")
+routine Integer.divmod!(other: Integer) -> (Integer, Integer)
+
+### Modular exponentiation `me^exp mod modulus` via right-to-left binary exponentiation
+### (each step reduced modulo `modulus`, so intermediates never blow up).
+### :param exp: The non-negative exponent.
+### :param modulus: The non-zero modulus.
+### :returns: The resulting `Integer` value in `[0, modulus)`.
+### :throws: {DivisionByZeroError} when `modulus` is zero; {NumericDomainError} when `exp` is negative.
+@rf("Integer.modpow")
+routine Integer.modpow!(exp: Integer, modulus: Integer) -> Integer
+
+### Converts an arbitrary-precision integer to `S64`.
+### :param from: The source value to convert.
+### :returns: The resulting `S64` value.
+### :throws: {IntegerOverflowError} if `from` is outside `S64_MIN..S64_MAX`.
+@rf("S64")
+routine S64!(from: Integer) -> S64
+
+### Converts an arbitrary-precision integer to `U64`.
+### :param from: The source value to convert.
+### :returns: The resulting `U64` value.
+### :throws: {IntegerOverflowError} if `from` is negative or exceeds `U64_MAX`.
+@rf("U64")
+routine U64!(from: Integer) -> U64
+
+### Converts an arbitrary-precision integer to `Decimal`, rounding half-even to its 34 significant digits.
+### :param from: The source value to convert.
+### :returns: The resulting `Decimal` value.
+### :throws: {NumericOverflowError} if `from` is beyond the range of `Decimal` (about `1e6144`).
+@rf("Decimal")
+routine Decimal!(from: Integer) -> Decimal
+
+### Formats this value as base-10 text. Standard `represent` shape (no args)
+### so the f-string machinery can dispatch without supplying a radix.
+### :returns: The resulting `Text` value.
+@rf("Integer.represent")
+routine Integer.represent() -> Text
+
+### Serializes this value as its base-10 text, which `Integer(from: SerialValue)` parses back exactly.
+### :returns: The `SerialValue` text arm.
+@rf("Integer.serialize")
+routine Integer.serialize() -> SerialValue
+
+### Builds an `Integer` from its serialized base-10 text.
+### :param from: The serialized value.
+### :returns: The parsed value.
+### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
+@rf("Integer")
+routine Integer!(from: SerialValue) -> Integer
+
+### Returns a SipHash-2-4 keyed hash of this value: of the magnitude word (with the key changed for a negative
+### value) below 2^64, of the base-10 text above. A value has one form only, so equal values hash equal.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The 64-bit keyed hash.
+@rf("Integer.hash")
+routine Integer.hash(k0: U64, k1: U64) -> U64
+
+### Parses a base-10 integer from text.
+### This is the canonical text-to-`Integer` conversion used by generic parsing
+### surfaces.
+### :param text: The text to parse.
+### :returns: The resulting `Integer` value.
+### :throws: May throw {ParseError}.
+@rf("Integer")
+routine Integer!(text: Text) -> Integer
+
+### Parses a base-2 integer from text.
+### :param text: The binary digits to parse.
+### :returns: The resulting `Integer` value.
+### :throws: May throw {ParseError}.
+@rf("Integer.from_binary")
+common routine Integer.from_binary!(text: Text) -> Integer
+
+### Parses a base-16 integer from text.
+### :param text: The hexadecimal digits to parse.
+### :returns: The resulting `Integer` value.
+### :throws: May throw {ParseError}.
+@rf("Integer.from_hex")
+common routine Integer.from_hex!(text: Text) -> Integer
+
+### Returns the additive identity for `Integer`.
+### :returns: The resulting `Integer` value.
+@rf("Integer.zero")
+common routine Integer.zero() -> Integer
+
+### Returns the multiplicative identity for `Integer`.
+### :returns: The resulting `Integer` value.
+@rf("Integer.one")
+common routine Integer.one() -> Integer
+
+### Computes `n!` using iterative multiplication.
+### This routine is included as a worked example for larger integer workloads.
+### :param n: The non-negative input value.
+### :returns: The resulting `Integer` value.
+@rf("factorial")
+routine factorial(n: Integer) -> Integer
+
+### Computes the `n`th Fibonacci number using arbitrary-precision integers.
+### This routine demonstrates growth beyond fixed-width integer range.
+### :param n: The zero-based sequence index.
+### :returns: The resulting `Integer` value.
+@rf("fibonacci_big")
+routine fibonacci_big(n: S64) -> Integer

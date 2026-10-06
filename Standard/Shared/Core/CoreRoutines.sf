@@ -1,0 +1,35 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Executes `stop`.
+### :throws: May throw {UserTerminationError}.
+@rf("stop")
+routine stop!()
+
+### Checks that `expr` holds, and crashes when it does not.
+### :param expr: The condition that must hold.
+### :throws: {VerificationFailedError} when `expr` is false.
+@rf("verify")
+routine verify!(expr: Bool)
+
+### Executes `breach`.
+### :throws: May throw {LogicBreachedError}.
+@rf("breach")
+routine breach!()
+
+### Sets the exit status the program ends with when `start` returns, 0 (success) until something sets it. The last
+### call wins: it is one atomic value, so any thread may set it, but a thread still running when `start` returns may
+### or may not get its call in. A crash still exits with its own status (82), whatever was set.
+### :param code: The exit status.
+@rf("set_exit_code")
+routine set_exit_code(code: S32)
+
+### Möller-Granlund reciprocal of a normalized `d`, delegated to the arch-gated C primitive
+### `rf_reciprocal_word` (returns 0 on x86-64/MSVC where the divide is hardware; the real M-G
+### reciprocal on arm64/wasm). Hoist it: compute once per divisor, reuse across every `div2by1`
+### by that `d` — that reuse is what makes M-G win on arm64 (see div_ab_bench).
+### :returns: the reciprocal `v` feeding `div2by1` (meaningful only on the M-G targets).
+@rf("reciprocal_word")
+routine reciprocal_word(d: U64) -> U64

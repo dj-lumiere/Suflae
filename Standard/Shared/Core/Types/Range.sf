@@ -1,0 +1,102 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the `Range` record.
+### `Range[T]` describes a lazily iterated arithmetic progression between two bounds.
+### :typeparam T: The type argument bound to `T`.
+@rf("Range")
+record Range[T]
+relates RangeEmittable[T] as Iter
+obeys Iterable[T], Container
+needs RecordType T
+needs T obeys Comparable, Addable, Subtractable
+    ### Stores the first value in the progression.
+    start: T
+    ### Stores the terminating bound.
+    end: T
+    ### Stores the step applied between successive values.
+    step: T
+    ### Stores whether the terminating bound is included.
+    inclusive: Bool
+
+### Represents the `RangeEmittable` entity.
+### `RangeEmittable[T]` holds the mutable iteration state for a `Range[T]`.
+### :typeparam T: The type argument bound to `T`.
+@rf("RangeEmittable")
+entity RangeEmittable[T]
+needs RecordType T
+needs T obeys Comparable, Addable, Subtractable
+    ### Stores the next value to yield.
+    current: T
+    ### Stores the terminating bound.
+    end: T
+    ### Stores the step size between yielded values.
+    step: T
+    ### Stores whether iteration is moving upward.
+    ascending: Bool
+    ### Stores whether the terminating bound may be yielded.
+    inclusive: Bool
+    ### Stores whether iteration has already completed.
+    done: Bool
+
+### Creates an inclusive range from `start` to `end` using a step of `1`.
+### :param start: The inclusive starting position.
+### :param end: The terminating bound.
+### :returns: The resulting `Range[T]` value.
+@rf("Range")
+routine Range[T](start: T, end: T) -> Range[T]
+
+### Creates a range from `start` to `end` using a step of `1`.
+### :param start: The inclusive starting position.
+### :param end: The terminating bound.
+### :param inclusive: `true` to include `end`; `false` to stop before it.
+### :returns: The resulting `Range[T]` value.
+@rf("Range")
+routine Range[T](start: T, end: T, inclusive: Bool) -> Range[T]
+
+### Returns true if this value is ascending.
+### Ascending ranges move from smaller values to larger ones.
+### :returns: The resulting `Bool` value.
+@rf("Range.is_ascending")
+routine Range[T].is_ascending() -> Bool
+
+### Returns the step component.
+### This is the increment used for each successive value.
+### :returns: The resulting `T` value.
+@rf("Range.get_step")
+routine Range[T].get_step() -> T
+
+### Returns true if this value is empty.
+### Emptiness depends on the bound ordering and whether the end is inclusive.
+### :returns: The resulting `Bool` value.
+@rf("Range.is_empty")
+routine Range[T].is_empty() -> Bool
+
+### Returns true if iterating the range would yield `value`: `0 to 10 have 10` is true,
+### `0 til 10 have 10` is false, and `0 to 10 by 2 have 3` is false. Works for descending ranges too.
+### :param value: The value to test.
+### :returns: `true` if `value` is within the bounds and on a step from `start`.
+@rf("Range.contains")
+routine Range[T].contains(value: T) -> Bool
+needs T obeys FloorDivisible
+
+### Crashes when the step is zero or negative. The endpoints decide the direction of a range, so its step is
+### always a positive distance, and a step that is not would never reach the end.
+### :throws: {RangeStepNotPositiveError} when `step` is zero or negative.
+@rf("Range.require_positive_step")
+routine Range[T].require_positive_step!()
+
+### Creates an iterator for this value.
+### The emitter starts at `me.start`. A step that is zero or negative crashes here.
+### :returns: The resulting `RangeEmittable[T]` value.
+@rf("Range.iter")
+routine Range[T].iter() -> RangeEmittable[T]
+
+### Returns the next value from this iterator.
+### Each successful call yields the current value and advances by `step`.
+### :returns: The resulting `T` value.
+### :absent: Returns absent when the requested value is unavailable.
+@rf("RangeEmittable.emit")
+routine RangeEmittable[T].emit!() -> T

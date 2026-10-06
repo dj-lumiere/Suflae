@@ -1,0 +1,221 @@
+module Math3D
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A single-precision quaternion `w + x·i + y·j + z·k` with `B32` components.
+### `Q128` is the standard rotation type for graphics-facing code; use `Q256` when
+### double precision is needed. A quaternion is a value record (four `B32`
+### fields), trivially copyable.
+###
+### Quaternions form a (non-commutative) division ring, so `Q128` obeys the
+### arithmetic protocols `Addable`, `Subtractable`, `Multiplicable` (the Hamilton
+### product — note `a·b ≠ b·a`), `Divisible`, `Negatable`, plus `Equatable`.
+@rf("Q128")
+record Q128
+obeys Addable, Subtractable, Multiplicable, Divisible, Negatable, Equatable, Hashable
+    ### The real (scalar) component.
+    w: B32
+    ### The i (x) component.
+    x: B32
+    ### The j (y) component.
+    y: B32
+    ### The k (z) component.
+    z: B32
+
+### Constructs a real quaternion `w + 0i + 0j + 0k` from a scalar.
+### :param from: The scalar value.
+### :returns: The corresponding real quaternion.
+@rf("Q128")
+routine Q128(from: B32) -> Q128
+
+### Narrows a `Q256` to `Q128` by rounding each component to `B32`.
+### :param from: The double-precision quaternion.
+### :returns: The nearest single-precision quaternion.
+@rf("Q128")
+routine Q128(from: Q256) -> Q128
+
+### Builds a unit rotation quaternion from an axis and an angle (right-hand rule).
+### The axis is normalized internally; a zero-length axis yields the identity.
+### :param axis: The rotation axis (need not be unit length).
+### :param angle: The rotation angle in radians.
+### :returns: The unit quaternion representing that rotation.
+@rf("Q128.from_axis_angle")
+routine Q128.from_axis_angle(axis: Vector3D, angle: B32) -> Q128
+
+### Returns the component-wise sum `me + you`.
+### :param you: The addend.
+### :returns: A `Q128` whose components are the sums.
+@rf("Q128.add")
+routine Q128.add(you: Q128) -> Q128
+
+### Returns the component-wise difference `me - you`.
+### :param you: The value to subtract.
+### :returns: A `Q128` whose components are the differences.
+@rf("Q128.sub")
+routine Q128.sub(you: Q128) -> Q128
+
+### Returns the Hamilton product `me · you`. Quaternion multiplication is NOT
+### commutative: `me · you` composes `you`'s rotation followed by `me`'s.
+### :param you: The right operand.
+### :returns: The Hamilton product.
+@rf("Q128.mul")
+routine Q128.mul(you: Q128) -> Q128
+
+### Returns the quotient `me / you = me · you⁻¹`.
+### :param you: The divisor.
+### :returns: The quaternion quotient.
+@rf("Q128.truediv")
+routine Q128.truediv(you: Q128) -> Q128
+
+### Returns this quaternion scaled by a real scalar `factor`.
+### :param factor: The scalar multiplier.
+### :returns: `factor · me`, component-wise.
+@rf("Q128.scale")
+routine Q128.scale(factor: B32) -> Q128
+
+### Returns `me * you` for a real `you` (the same as `scale`).
+### :param you: The scalar factor.
+### :returns: `you · me`, component-wise.
+@rf("Q128.mul")
+routine Q128.mul(you: B32) -> Q128
+
+### Returns `me / you` for a real `you`.
+### :param you: The scalar divisor.
+### :returns: `me / you`, component-wise.
+@rf("Q128.truediv")
+routine Q128.truediv(you: B32) -> Q128
+
+### Returns the arithmetic negation of this quaternion.
+### :returns: A `Q128` with all components negated.
+@rf("Q128.neg")
+routine Q128.neg() -> Q128
+
+### Returns `true` if all four components compare equal.
+### :param you: The value to compare against.
+### :returns: `true` if every component of `me` equals the matching component of `you`.
+@rf("Q128.eq")
+routine Q128.eq(you: Q128) -> Bool
+
+### Returns the conjugate (negates the vector part).
+### :returns: `w − x·i − y·j − z·k`.
+@rf("Q128.conjugate")
+routine Q128.conjugate() -> Q128
+
+### Returns the squared norm (avoids the square root of `abs`).
+### :returns: `w² + x² + y² + z²`.
+@rf("Q128.norm")
+routine Q128.norm() -> B32
+
+### Returns the norm (magnitude) of this quaternion.
+### :returns: `√(w² + x² + y² + z²)`.
+@rf("Q128.abs")
+routine Q128.abs() -> B32
+
+### Returns the unit quaternion in the same direction. A zero quaternion is
+### returned unchanged (its norm is zero).
+### :returns: `me / |me|`, or `me` when `|me| == 0`.
+@rf("Q128.normalize")
+routine Q128.normalize() -> Q128
+
+### Returns the multiplicative inverse `me⁻¹ = conj(me) / |me|²`.
+### :returns: The quaternion inverse.
+@rf("Q128.reciprocal")
+routine Q128.reciprocal() -> Q128
+
+### Returns the dot product of the two quaternions viewed as 4-vectors.
+### :param you: The right operand.
+### :returns: `w₁w₂ + x₁x₂ + y₁y₂ + z₁z₂`.
+@rf("Q128.dot")
+routine Q128.dot(you: Q128) -> B32
+
+### Rotates a `Vector3D` by this quaternion (assumed unit length), computing
+### `q · (0, v) · q⁻¹` via the conjugate.
+### :param v: The vector to rotate.
+### :returns: The rotated vector.
+@rf("Q128.rotate")
+routine Q128.rotate(v: Vector3D) -> Vector3D
+
+### Returns the spherical linear interpolation between `me` (at `t = 0`) and
+### `you` (at `t = 1`). Both operands are assumed to be unit quaternions; the
+### shorter arc is chosen. Falls back to linear interpolation for nearly
+### parallel inputs.
+### :param you: The endpoint rotation.
+### :param t: The interpolation parameter.
+### :returns: The interpolated unit quaternion.
+@rf("Q128.slerp")
+routine Q128.slerp(you: Q128, t: B32) -> Q128
+
+### Returns the rotation angle encoded by this unit quaternion, in radians.
+### :returns: `2·acos(w)`, in the range [0, 2π).
+@rf("Q128.angle")
+routine Q128.angle() -> B32
+
+### Returns the rotation axis (unit length) and angle (radians) of this unit quaternion, the inverse of
+### `from_axis_angle`. A rotation by 0 has no axis; it reports the x axis with angle 0.
+### :returns: A tuple `(axis, angle)`.
+@rf("Q128.to_axis_angle")
+routine Q128.to_axis_angle() -> (Vector3D, B32)
+
+### Returns the shortest rotation that turns direction `from` onto direction `target` (neither needs to be
+### unit length). Opposite directions turn vy half a turn about an axis perpendicular to `from`.
+### :param from: The starting direction.
+### :param target: The target direction.
+### :returns: The unit rotation quaternion.
+@rf("Q128.from_to")
+common routine Q128.from_to(from: Vector3D, target: Vector3D) -> Q128
+
+### Returns the normalized linear interpolation between `me` (at `t = 0`) and `you` (at `t = 1`) along
+### the shorter arc: cheaper than `slerp`, with a non-constant angular speed.
+### :param you: The endpoint rotation.
+### :param t: The interpolation parameter.
+### :returns: The interpolated unit quaternion.
+@rf("Q128.nlerp")
+routine Q128.nlerp(you: Q128, t: B32) -> Q128
+
+### Returns `true` if this quaternion has unit length within rounding (`|norm - 1| <= 0.00001`).
+@rf("Q128.is_unit")
+routine Q128.is_unit() -> Bool
+
+### Returns the rotation of the upper-left 3x3 part of `m` (assumed a pure rotation), the inverse of
+### `Matrix4R4C.from_quaternion`.
+### :param m: The rotation matrix.
+### :returns: The unit rotation quaternion.
+@rf("Q128.from_matrix")
+common routine Q128.from_matrix(m: Matrix4R4C) -> Q128
+
+### Builds a rotation from Euler angles in radians, applied as yaw about z, then pitch about y, then
+### roll about x (the aerospace Z-Y-X order; the rotation is `yaw * pitch * roll`).
+### :param roll: The rotation about the x axis.
+### :param pitch: The rotation about the y axis.
+### :param yaw: The rotation about the z axis.
+### :returns: The unit rotation quaternion.
+@rf("Q128.from_euler")
+common routine Q128.from_euler(roll: B32, pitch: B32, yaw: B32) -> Q128
+
+### Returns the Z-Y-X Euler angles `(roll, pitch, yaw)` of this unit quaternion, the inverse of
+### `from_euler`. At pitch +-90 degrees (gimbal lock) roll and yaw are not unique; pitch is clamped there.
+### :returns: A tuple `(roll, pitch, yaw)` in radians.
+@rf("Q128.to_euler")
+routine Q128.to_euler() -> (B32, B32, B32)
+
+### Formats this quaternion as `w+xi+yj+zk` (signs collapse for negatives).
+### :returns: The resulting `Text` value.
+@rf("Q128.represent")
+routine Q128.represent() -> Text
+
+### One imaginary term of `fixed`, with an explicit leading sign.
+@rf("q128_fixed_term")
+routine q128_fixed_term(v: B32, unit: Text, places: U64) -> Text
+
+### Returns a diagnostic string wrapping the value with its type name.
+### :returns: The resulting `Text` value.
+@rf("Q128.diagnose")
+routine Q128.diagnose() -> Text
+
+### Returns a SipHash-2-4 keyed hash of this quaternion.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash.
+@rf("Q128.hash")
+routine Q128.hash(k0: U64, k1: U64) -> U64

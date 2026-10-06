@@ -1,0 +1,50 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A condition-variable monitor: a lock plus a wait set. See the module notes for the pattern.
+@rf("SignalCaster")
+entity SignalCaster
+    pass
+
+### Creates a new monitor.
+### :returns: A fresh `SignalCaster`.
+@rf("SignalCaster")
+routine SignalCaster() -> SignalCaster
+
+### Acquires the monitor lock guarding your shared condition. Pair every `lock` with an `unlock`.
+@rf("SignalCaster.lock")
+routine SignalCaster.lock()
+
+### Releases the monitor lock.
+@rf("SignalCaster.unlock")
+routine SignalCaster.unlock()
+
+### Waits for a cast. MUST be called holding the lock: it releases the lock while suspended and
+### re-acquires it before returning. UNCOLORED — parks a coroutine (siblings run) or blocks a thread.
+### Always re-check your condition in a loop, since wakes can be spurious.
+@rf("SignalCaster.wait")
+routine SignalCaster.wait()
+
+### Like `wait`, but gives up after `deadline`. MUST hold the lock. Returns `true` if a cast (or a
+### spurious wake) arrived in time — re-check your predicate — and `false` if the deadline elapsed
+### first, so a loop can stop waiting. UNCOLORED: parks a coroutine on a timer / does a timed thread
+### wait. The timeout is per call, so a spurious wake restarts the clock.
+### :param deadline: How long to wait before giving up.
+### :returns: `true` if woken in time, `false` on timeout.
+@rf("SignalCaster.wait_within")
+routine SignalCaster.wait_within(deadline: Duration) -> Bool
+
+### Wakes one waiting agent. Call after making the condition true and releasing the lock.
+@rf("SignalCaster.cast_one")
+routine SignalCaster.cast_one()
+
+### Wakes every waiting agent. Call after making the condition true and releasing the lock.
+@rf("SignalCaster.cast_all")
+routine SignalCaster.cast_all()
+
+### Produces another handle on the same monitor, so another agent can synchronize through it.
+### :returns: A new `SignalCaster` sharing this monitor.
+@rf("SignalCaster.duplicate")
+routine SignalCaster.duplicate() -> SignalCaster

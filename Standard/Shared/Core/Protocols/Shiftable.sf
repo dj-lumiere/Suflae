@@ -1,0 +1,27 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the protocol for bit-shift operations.
+### `Shiftable` separates arithmetic and logical right shifting so conforming
+### types can describe sign-extending and zero-filling behavior explicitly. A left
+### shift fills with zeros either way, so it has one form.
+@rf("Shiftable")
+protocol Shiftable
+    ### Returns this value arithmetic-left-shifted by `amount`.
+    ### Arithmetic left shift is typically equivalent to shifting the numeric
+    ### bit pattern toward more significant positions.
+    ### :param amount: The shift amount.
+    ### :returns: The resulting `Me` value.
+    routine Me.ashl(amount: Integral) -> Me
+    ### Returns this value arithmetic-right-shifted by `amount`.
+    ### Arithmetic right shift preserves sign semantics for signed-like types.
+    ### :param amount: The shift amount.
+    ### :returns: The resulting `Me` value.
+    routine Me.ashr(amount: Integral) -> Me
+    ### Returns this value logical-right-shifted by `amount`.
+    ### Logical right shift fills vacated high bits with zero.
+    ### :param amount: The shift amount.
+    ### :returns: The resulting `Me` value.
+    routine Me.lshr(amount: Integral) -> Me
