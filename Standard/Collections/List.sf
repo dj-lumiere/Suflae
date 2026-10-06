@@ -426,6 +426,13 @@ routine List[T].sorted_by(compare: Routine[(T, T), Bool]) -> List[T]
     result.sort_by(compare: compare)
     return result
 
+### Swaps the elements at `first` and `second` in place.
+### :param first: One position.
+### :param second: The other position.
+routine List[T].swap!(first: Integer, second: Integer)
+    me.items.swap_at(first: me.place(index: me.check(index: first)), second: me.place(index: me.check(index: second)))
+    return
+
 ### Reverses the order of the elements.
 routine List[T].reverse_in_place()
     me.straighten()

@@ -71,5 +71,10 @@ routine start()
     var empty = List[Integer]()
     var nothing = try empty.remove_first()
     show(f"empty remove: {nothing is None}")
+
+    var words = ["alpha", "beta", "gamma"]
+    words.rotate_left(n: 1)
+    words.swap(first: 0, second: 2)
+    show(f"swap: {words}")
     show("DONE")
     return
