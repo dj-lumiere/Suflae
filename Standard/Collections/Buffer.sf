@@ -71,11 +71,11 @@ obeys Emittable[T]
 ### Creates a buffer of `capacity` places, all zero.
 ### :param capacity: How many places it has.
 routine Buffer[T](capacity: Integer) -> Buffer[T]
-    var room = U64(from: capacity)
-    return Buffer[T](storage: new_buffer_storage[T](room: room), start: 0_u64, room: room)
+    return Buffer[T](room: U64(from: capacity))
 
-### A buffer of `room` places, all zero.
-secret routine new_buffer[T](room: U64) -> Buffer[T]
+### Creates a buffer of `room` places, all zero, counted with `U64`.
+### :param room: How many places it has.
+routine Buffer[T](room: U64) -> Buffer[T]
     return Buffer[T](storage: new_buffer_storage[T](room: room), start: 0_u64, room: room)
 
 ### Creates a buffer of `count` places, each holding `fill`.
@@ -106,6 +106,10 @@ secret routine new_buffer_storage[T](room: U64) -> BufferStorage[T]
 routine Buffer[T].capacity() -> Integer
     return Integer(from: me.room)
 
+### Returns how many places the buffer has, as a `U64`.
+routine Buffer[T].room() -> U64
+    return me.room
+
 # ============================================================================
 # Reading and writing places
 # ============================================================================
@@ -113,24 +117,67 @@ routine Buffer[T].capacity() -> Integer
 ### Returns what the place at `index` holds (`buf[i]`).
 ### :param index: The position to read.
 routine Buffer[T].getitem!(index: Integer) -> T
-    return me.read(position: me.filled_position(index: index)).assign()
+    return me.at(position: position_of(value: index))
 
 ### Replaces what the place at `index` holds (`buf[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new value.
 routine Buffer[T].setitem!(index: Integer, value: T)
-    me.put(position: me.position(index: index), value: value)
+    me.put(position: position_of(value: index), value: value)
     return
+
+### Returns what the place at `position` holds, counted with `U64`.
+### :param position: The position to read.
+@inline
+routine Buffer[T].at!(position: U64) -> T
+    return me.read(position: me.filled(position: position)).assign()
+
+### Replaces what the place at `position` holds, counted with `U64`.
+### :param position: The position to write.
+### :param value: The new value.
+@inline
+routine Buffer[T].put!(position: U64, value: T)
+    danger
+        var slot = me.slot(position: me.checked(position: position))
+        slot.peek().destroy()
+        slot.poke(value)
+    return
+
+### Hands out what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+routine Buffer[T].take_at!(position: U64) -> T
+    var place = me.filled(position: position)
+    var value = me.read(position: place)
+    me.clear_places(from: place, count: 1_u64)
+    return value
+
+### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+routine Buffer[T].erase_at!(position: U64)
+    var place = me.checked(position: position)
+    danger
+        me.slot(position: place).peek().destroy()
+    me.clear_places(from: place, count: 1_u64)
+    return
+
+### Returns a view of `room` places from `first`, counted with `U64`: a buffer that shares this one's memory, as
+### `buf[a til b]` is.
+### :param first: The first place of the view.
+### :param room: How many places the view spans.
+routine Buffer[T].view!(first: U64, room: U64) -> Buffer[T]
+    if first + room > me.room
+        throw IndexOutOfBoundsError(index: first + room, count: me.room)
+    return Buffer[T](storage: me.storage, start: me.start + first, room: room)
 
 ### Hands out what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Buffer[T].take!(index: Integer) -> T
-    return me.take_at(position: me.filled_position(index: index))
+    return me.take_at(position: position_of(value: index))
 
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Buffer[T].erase!(index: Integer)
-    me.erase_at(position: me.position(index: index))
+    me.erase_at(position: position_of(value: index))
     return
 
 ### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
@@ -144,11 +191,15 @@ routine Buffer[T].move!(from: Integer, into: Integer, count: Integer)
     var n = U64(from: count)
     if n == 0_u64
         return
-    me.carry(source: me.position(index: from), target: me.position(index: into), count: n)
+    me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
     return
 
-### Carries what `count` places from `source` hold into the places from `target`, as `move` does.
-secret routine Buffer[T].carry!(source: U64, target: U64, count: U64)
+### Carries what `count` places from `source` hold into the places from `target`, as `move` does, counted with
+### `U64`.
+### :param source: The first place to carry from.
+### :param target: The first place to carry into.
+### :param count: How many places to carry.
+routine Buffer[T].carry!(source: U64, target: U64, count: U64)
     var n = count
     if n == 0_u64
         return
@@ -174,7 +225,14 @@ secret routine Buffer[T].carry!(source: U64, target: U64, count: U64)
 ### :param first: One position.
 ### :param second: The other position.
 routine Buffer[T].swap!(first: Integer, second: Integer)
-    me.swap_places(a: me.position(index: first), b: me.position(index: second))
+    me.swap_at(first: position_of(value: first), second: position_of(value: second))
+    return
+
+### Swaps what the places at `first` and `second` hold, counted with `U64`.
+### :param first: One position.
+### :param second: The other position.
+routine Buffer[T].swap_at!(first: U64, second: U64)
+    me.swap_places(a: me.checked(position: first), b: me.checked(position: second))
     return
 
 ### Returns a view of the places at the positions in `range` (`buf[a til b]`): a buffer that shares this one's
@@ -217,8 +275,9 @@ routine Buffer[T].grow!(capacity: Integer)
     me.grow_to(room: U64(from: capacity))
     return
 
-### Moves everything into a new row of `room` places, as `grow` does.
-secret routine Buffer[T].grow_to!(room: U64)
+### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.
+### :param room: How many places the new row has, at least `room()`.
+routine Buffer[T].grow_to!(room: U64)
     if me.start != 0_u64 or me.room != me.storage.room
         throw BufferViewShapeError(operation: "grow")
     if room < me.room
@@ -244,8 +303,9 @@ routine Buffer[T].rotate_left!(count: Integer)
     me.turn(count: U64(from: count))
     return
 
-### Moves every place `count` positions toward the front, as `rotate_left` does.
-secret routine Buffer[T].turn(count: U64)
+### Moves every place `count` positions toward the front, as `rotate_left` does, counted with `U64`.
+### :param count: How many positions to rotate by.
+routine Buffer[T].turn(count: U64)
     if me.room == 0_u64
         return
     var shift = LLVM::unsigned_rem(count, me.room)
@@ -520,12 +580,22 @@ routine Buffer[T].iter() -> BufferEmittable[T]
 routine Buffer[T].walk!(first: Integer, count: Integer) -> BufferEmittable[T]
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    var n = U64(from: count)
-    if n == 0_u64
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    if count == 0
         return me.walking(first: 0_u64, count: 0_u64)
-    if n > me.room
-        throw IndexOutOfBoundsError(index: n, count: me.room)
-    return me.walking(first: me.position(index: first), count: n)
+    return me.walk_at(first: position_of(value: first), count: U64(from: count))
+
+### Returns a walk over `count` places from `first`, wrapping past the end of the buffer to its start, as `walk`
+### does, counted with `U64`.
+### :param first: The place the walk starts at.
+### :param count: How many places the walk reads, at most `room()`.
+routine Buffer[T].walk_at!(first: U64, count: U64) -> BufferEmittable[T]
+    if count == 0_u64
+        return me.walking(first: 0_u64, count: 0_u64)
+    if count > me.room
+        throw IndexOutOfBoundsError(index: count, count: me.room)
+    return me.walking(first: me.checked(position: first), count: count)
 
 ### A walk over `count` places from `first`, both already checked.
 secret routine Buffer[T].walking(first: U64, count: U64) -> BufferEmittable[T]
@@ -586,25 +656,6 @@ secret routine Buffer[T].places_text(first: U64, count: U64) -> Text
 # Inside the buffer
 # ============================================================================
 
-### The position of `index` in this buffer, checked against its places.
-secret routine Buffer[T].position!(index: Integer) -> U64
-    if index.is_negative()
-        throw NegativeIndexError(index: index)
-    var position = U64(from: index)
-    if position >= me.room
-        throw IndexOutOfBoundsError(index: position, count: me.room)
-    return position
-
-### The position of `index`, checked against the places and, in a buffer of entities, against a place that holds
-### no entity yet (a zero place, which a read would hand out as no entity at all).
-secret routine Buffer[T].filled_position!(index: Integer) -> U64
-    var position = me.position(index: index)
-    if T.type_kind() == TypeKind.ENTITY
-        danger
-            if me.slot(position: position).peek_as[Address]() == 0_addr
-                throw EmptyPlaceError(index: index)
-    return position
-
 ### A position brought back into the buffer: one at or past the end wraps to the start.
 @inline
 secret routine Buffer[T].wrap(position: U64) -> U64
@@ -616,37 +667,22 @@ secret routine Buffer[T].read(position: U64) -> T
     danger
         return me.slot(position: position).peek()
 
-### What a place already checked holds, as a value of its own. The collections built on a buffer read their elements
-### through this: they count with `U64` inside and check positions themselves.
+### `position` checked against the places.
 @inline
-secret routine Buffer[T].at(position: U64) -> T
-    return me.read(position: position).assign()
+secret routine Buffer[T].checked!(position: U64) -> U64
+    if position >= me.room
+        throw IndexOutOfBoundsError(index: position, count: me.room)
+    return position
 
-### Replaces what a place already checked holds.
+### `position` checked against the places and, in a buffer of entities, against a place that holds no entity yet.
 @inline
-secret routine Buffer[T].put(position: U64, value: T)
-    danger
-        var slot = me.slot(position: position)
-        slot.peek().destroy()
-        slot.poke(value)
-    return
-
-### Hands out what a place already checked holds and leaves the place zero.
-secret routine Buffer[T].take_at(position: U64) -> T
-    var value = me.read(position: position)
-    me.clear_places(from: position, count: 1_u64)
-    return value
-
-### Tears down what a place already checked holds and leaves the place zero.
-secret routine Buffer[T].erase_at(position: U64)
-    danger
-        me.slot(position: position).peek().destroy()
-    me.clear_places(from: position, count: 1_u64)
-    return
-
-### A view of `room` places from `first`, both already checked: a buffer sharing this one's memory.
-secret routine Buffer[T].view(first: U64, room: U64) -> Buffer[T]
-    return Buffer[T](storage: me.storage, start: me.start + first, room: room)
+secret routine Buffer[T].filled!(position: U64) -> U64
+    var place = me.checked(position: position)
+    if T.type_kind() == TypeKind.ENTITY
+        danger
+            if me.slot(position: place).peek_as[Address]() == 0_addr
+                throw EmptyPlaceError(index: Integer(from: place))
+    return place
 
 ### The memory of the place at a position of this buffer.
 @inline

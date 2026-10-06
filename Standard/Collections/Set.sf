@@ -83,8 +83,8 @@ routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
         room = U64(from: capacity)
     return Set[T](
         index: new_hash_index(capacity: room),
-        values: new_buffer[T](room: room),
-        live: new_buffer[Bool](room: room),
+        values: Buffer[T](room: room),
+        live: Buffer[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,

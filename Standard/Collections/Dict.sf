@@ -95,9 +95,9 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, 
         room = U64(from: capacity)
     return Dict[TKey, TValue](
         index: new_hash_index(capacity: room),
-        keys: new_buffer[TKey](room: room),
-        vals: new_buffer[TValue](room: room),
-        live: new_buffer[Bool](room: room),
+        keys: Buffer[TKey](room: room),
+        vals: Buffer[TValue](room: room),
+        live: Buffer[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,

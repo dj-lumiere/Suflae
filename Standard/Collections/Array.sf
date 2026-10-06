@@ -15,15 +15,29 @@ routine Array[T, COUNT].count() -> Integer
 ### :param index: The position to read, from 0.
 routine Array[T, COUNT].getitem!(index: Integer) -> T
 needs T obeys Assignable
-    return me.read(position: me.filled_position(index: index)).assign()
+    return me.at(position: position_of(value: index))
+
+### Returns the element at `position`, counted with `U64`.
+### :param position: The position to read, from 0.
+@inline
+routine Array[T, COUNT].at!(position: U64) -> T
+needs T obeys Assignable
+    return me.read(position: me.filled(position: position)).assign()
 
 ### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
 ### :param index: The position to write, from 0.
 ### :param value: The new element.
 routine Array[T, COUNT].setitem!(index: Integer, value: T)
-    var position = me.position(index: index)
+    me.put(position: position_of(value: index), value: value)
+    return
+
+### Replaces the element at `position`, counted with `U64`. What the place held before is torn down.
+### :param position: The position to write, from 0.
+### :param value: The new element.
+@inline
+routine Array[T, COUNT].put!(position: U64, value: T)
     danger
-        var slot = me.slot(position: position)
+        var slot = me.slot(position: me.checked(position: position))
         slot.peek().destroy()
         slot.poke(value)
     return
@@ -31,10 +45,16 @@ routine Array[T, COUNT].setitem!(index: Integer, value: T)
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 routine Array[T, COUNT].erase!(index: Integer)
-    var position = me.position(index: index)
+    me.erase_at(position: position_of(value: index))
+    return
+
+### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+routine Array[T, COUNT].erase_at!(position: U64)
+    var place = me.checked(position: position)
     danger
-        me.slot(position: position).peek().destroy()
-    me.clear_places(from: position, count: 1_u64)
+        me.slot(position: place).peek().destroy()
+    me.clear_places(from: place, count: 1_u64)
     return
 
 ### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
@@ -48,8 +68,18 @@ routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
     var n = U64(from: count)
     if n == 0_u64
         return
-    var source = me.position(index: from)
-    var target = me.position(index: into)
+    me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
+    return
+
+### Carries what `count` places from `source` hold into the places from `target`, as `move` does, counted with
+### `U64`.
+### :param source: The first place to carry from.
+### :param target: The first place to carry into.
+### :param count: How many places to carry.
+routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
+    var n = count
+    if n == 0_u64
+        return
     if source + n > COUNT
         throw IndexOutOfBoundsError(index: source + n, count: COUNT)
     if target + n > COUNT
@@ -102,24 +132,23 @@ needs T obeys Equatable
 # Inside the array
 # ============================================================================
 
-### The position of `index`, checked against the places.
-secret routine Array[T, COUNT].position!(index: Integer) -> U64
-    if index.is_negative()
-        throw NegativeIndexError(index: index)
-    var position = U64(from: index)
+### `position` checked against the places.
+@inline
+secret routine Array[T, COUNT].checked!(position: U64) -> U64
     if position >= COUNT
         throw IndexOutOfBoundsError(index: position, count: COUNT)
     return position
 
-### The position of `index`, checked against the places and, in an array of entities, against a place that holds
-### no entity yet (a zero place, which a read would hand out as no entity at all).
-secret routine Array[T, COUNT].filled_position!(index: Integer) -> U64
-    var position = me.position(index: index)
+### `position` checked against the places and, in an array of entities, against a place that holds no entity yet (a
+### zero place, which a read would hand out as no entity at all).
+@inline
+secret routine Array[T, COUNT].filled!(position: U64) -> U64
+    var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if me.slot(position: position).peek_as[Address]() == 0_addr
-                throw EmptyPlaceError(index: index)
-    return position
+            if me.slot(position: place).peek_as[Address]() == 0_addr
+                throw EmptyPlaceError(index: Integer(from: place))
+    return place
 
 ### What a place already checked holds, as it sits in memory (no holder of its own).
 @inline

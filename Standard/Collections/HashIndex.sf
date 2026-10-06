@@ -21,7 +21,7 @@ entity HashIndex
 ### :param capacity: How many entries the table should hold before growing.
 secret routine new_hash_index(capacity: U64) -> HashIndex
     var slots = hash_index_slots(wanted: capacity)
-    return HashIndex(tags: new_buffer[U8](room: slots), entries: new_buffer[U64](room: slots), removed: 0)
+    return HashIndex(tags: Buffer[U8](room: slots), entries: Buffer[U64](room: slots), removed: 0)
 
 ### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
 secret routine hash_index_slots(wanted: U64) -> U64

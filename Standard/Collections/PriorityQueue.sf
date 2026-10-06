@@ -50,7 +50,7 @@ needs TPriority obeys Comparable
     ### The elements, at the same places as their priorities.
     secret elements: Buffer[TElement]
     ### How many entries there are: the first `count` places of both buffers.
-    secret count: Integer
+    secret count: U64
 
 ### Walks the heap's entries in storage order, which is heap order — NOT priority-sorted order.
 ### :typeparam TPriority: The priority type carried by yielded entries.
@@ -62,9 +62,9 @@ obeys Emittable[PQEntry[TPriority, TElement]]
     ### The walk over the elements.
     secret elements: BufferEmittable[TElement]
     ### How many entries the walk reads.
-    secret count: Integer
+    secret count: U64
     ### How many entries have been read.
-    secret index: Integer
+    secret index: U64
 
 # ============================================================================
 # Creators
@@ -103,7 +103,7 @@ routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[T
 
 ### Returns the number of entries currently stored in the pool.
 routine PriorityQueue[TPriority, TElement].count() -> Integer
-    return me.count
+    return Integer(from: me.count)
 
 ### Returns true if the pool holds no entries.
 routine PriorityQueue[TPriority, TElement].is_empty() -> Bool
@@ -111,10 +111,10 @@ routine PriorityQueue[TPriority, TElement].is_empty() -> Bool
 
 ### Removes every entry and keeps the room.
 routine PriorityQueue[TPriority, TElement].clear()
-    var i = 0
+    var i: U64 = 0
     while i < me.count
-        me.priorities.erase(index: i)
-        me.elements.erase(index: i)
+        me.priorities.erase_at(position: i)
+        me.elements.erase_at(position: i)
         i = i + 1
     me.count = 0
     return
@@ -123,8 +123,7 @@ routine PriorityQueue[TPriority, TElement].clear()
 ### :param new_capacity: The minimum entry count to guarantee.
 routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
     if new_capacity > me.priorities.capacity()
-        me.priorities.grow(capacity: new_capacity)
-        me.elements.grow(capacity: new_capacity)
+        me.make_room(room: U64(from: new_capacity))
     return
 
 # ============================================================================
@@ -136,11 +135,12 @@ routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
 ### :param element: The value to add.
 ### :param priority: The priority that determines removal order.
 routine PriorityQueue[TPriority, TElement].add(element: TElement, priority: TPriority)
-    var room = me.priorities.capacity()
+    var room = me.priorities.room()
     if me.count >= room
-        me.reserve(new_capacity: if room < 4 then 4 else room * 2)
-    me.priorities[me.count] = priority
-    me.elements[me.count] = element
+        var grown: U64 = if room < 4 then 4 else room * 2
+        me.make_room(room: grown)
+    me.priorities.put(position: me.count, value: priority)
+    me.elements.put(position: me.count, value: element)
     me.count = me.count + 1
     me.sift_up(index: me.count - 1)
     return
@@ -152,12 +152,12 @@ routine PriorityQueue[TPriority, TElement].add(element: TElement, priority: TPri
 routine PriorityQueue[TPriority, TElement].remove!() -> TElement
     if me.count == 0
         absent
-    var result = me.elements.take(index: 0)
-    me.priorities.erase(index: 0)
+    var result = me.elements.take_at(position: 0)
+    me.priorities.erase_at(position: 0)
     var last = me.count - 1
     if last > 0
-        me.priorities.move(from: last, into: 0, count: 1)
-        me.elements.move(from: last, into: 0, count: 1)
+        me.priorities.carry(source: last, target: 0, count: 1)
+        me.elements.carry(source: last, target: 0, count: 1)
     me.count = last
     if me.count > 1
         me.sift_down(index: 0)
@@ -169,7 +169,7 @@ routine PriorityQueue[TPriority, TElement].remove!() -> TElement
 routine PriorityQueue[TPriority, TElement].peek!() -> TElement
     if me.count == 0
         absent
-    return me.elements[0]
+    return me.elements.at(position: 0)
 
 ### Returns the smallest priority currently in the pool without removing its entry.
 ### :returns: The minimum priority value.
@@ -177,7 +177,7 @@ routine PriorityQueue[TPriority, TElement].peek!() -> TElement
 routine PriorityQueue[TPriority, TElement].peek_priority!() -> TPriority
     if me.count == 0
         absent
-    return me.priorities[0]
+    return me.priorities.at(position: 0)
 
 ### Returns the front entry as a `PQEntry` without removing it.
 ### :returns: The priority–element pair with the smallest priority.
@@ -185,7 +185,7 @@ routine PriorityQueue[TPriority, TElement].peek_priority!() -> TPriority
 routine PriorityQueue[TPriority, TElement].peek_entry!() -> PQEntry[TPriority, TElement]
     if me.count == 0
         absent
-    return PQEntry[TPriority, TElement](priority: me.priorities[0], element: me.elements[0])
+    return PQEntry[TPriority, TElement](priority: me.priorities.at(position: 0), element: me.elements.at(position: 0))
 
 # ============================================================================
 # Bulk Operations
@@ -206,7 +206,7 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
 ### Removes all entries and returns their elements in removal order (smallest priority first).
 ### :returns: A `List[TElement]` whose order matches repeated `remove()` calls.
 routine PriorityQueue[TPriority, TElement].drain() -> List[TElement]
-    var result = List[TElement](capacity: me.count)
+    var result = List[TElement](capacity: Integer(from: me.count))
     while me.count > 0
         result.add_last(value: me.remove())
     return result
@@ -219,9 +219,9 @@ routine PriorityQueue[TPriority, TElement].drain() -> List[TElement]
 ### :param element: The element value to search for.
 routine PriorityQueue[TPriority, TElement].contains(element: TElement) -> Bool
 needs TElement obeys Equatable
-    var i = 0
+    var i: U64 = 0
     while i < me.count
-        if me.elements[i] == element
+        if me.elements.at(position: i) == element
             return true
         i = i + 1
     return false
@@ -239,8 +239,8 @@ routine List[PQEntry[TPriority, TElement]](source: PriorityQueue[TPriority, TEle
 ### Returns a walk over the entries in heap order.
 routine PriorityQueue[TPriority, TElement].iter() -> PriorityQueueEmittable[TPriority, TElement]
     return PriorityQueueEmittable[TPriority, TElement](
-        priorities: me.priorities.walk(first: 0, count: me.count),
-        elements: me.elements.walk(first: 0, count: me.count),
+        priorities: me.priorities.walk_at(first: 0, count: me.count),
+        elements: me.elements.walk_at(first: 0, count: me.count),
         count: me.count,
         index: 0,
     )
@@ -267,35 +267,41 @@ routine PriorityQueue[TPriority, TElement].diagnose() -> Text
 # ============================================================================
 
 ### Moves the entry at `index` toward the root while its priority is smaller than its parent's.
-secret routine PriorityQueue[TPriority, TElement].sift_up(index: Integer)
+secret routine PriorityQueue[TPriority, TElement].sift_up(index: U64)
     var at = index
     while at > 0
         var parent = (at - 1) // 2
-        if me.priorities[at] >= me.priorities[parent]
+        if me.priorities.at(position: at) >= me.priorities.at(position: parent)
             return
         me.swap_entries(a: at, b: parent)
         at = parent
     return
 
 ### Moves the entry at `index` toward the leaves while a child has a smaller priority.
-secret routine PriorityQueue[TPriority, TElement].sift_down(index: Integer)
+secret routine PriorityQueue[TPriority, TElement].sift_down(index: U64)
     var at = index
     loop
         var child = 2 * at + 1
         if child >= me.count
             return
         var right = child + 1
-        if right < me.count and me.priorities[right] < me.priorities[child]
+        if right < me.count and me.priorities.at(position: right) < me.priorities.at(position: child)
             child = right
-        if me.priorities[child] >= me.priorities[at]
+        if me.priorities.at(position: child) >= me.priorities.at(position: at)
             return
         me.swap_entries(a: at, b: child)
         at = child
 
 ### Swaps the entries at `a` and `b`.
-secret routine PriorityQueue[TPriority, TElement].swap_entries(a: Integer, b: Integer)
-    me.priorities.swap(first: a, second: b)
-    me.elements.swap(first: a, second: b)
+secret routine PriorityQueue[TPriority, TElement].swap_entries(a: U64, b: U64)
+    me.priorities.swap_at(first: a, second: b)
+    me.elements.swap_at(first: a, second: b)
+    return
+
+### Moves both buffers into rows of `room` places.
+secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
+    me.priorities.grow_to(room: room)
+    me.elements.grow_to(room: room)
     return
 
 ### The entries as text, in heap order: `[1: "a", 3: "b"]`.

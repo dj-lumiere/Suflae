@@ -106,10 +106,8 @@ secret routine SortedNode[K, V].branch_size(at: U64) -> U64
 ### Opens a gap at entry `at` and puts `key` and `value` in it.
 secret routine SortedNode[K, V].insert_entry(at: U64, key: K, value: V)
     if at < me.count
-        var first = Integer(from: at)
-        var moved = Integer(from: me.count - at)
-        me.keys.move(from: first, into: first + 1, count: moved)
-        me.values.move(from: first, into: first + 1, count: moved)
+        me.keys.carry(source: at, target: at + 1u64, count: me.count - at)
+        me.values.carry(source: at, target: at + 1u64, count: me.count - at)
     me.keys[at] = key
     me.values[at] = value
     me.count = me.count + 1u64
@@ -117,39 +115,35 @@ secret routine SortedNode[K, V].insert_entry(at: U64, key: K, value: V)
 
 ### Replaces entry `at` with `key` and `value`.
 secret routine SortedNode[K, V].replace_entry(at: U64, key: K, value: V)
-    me.keys.erase(index: Integer(from: at))
-    me.values.erase(index: Integer(from: at))
+    me.keys.erase_at(position: at)
+    me.values.erase_at(position: at)
     me.keys[at] = key
     me.values[at] = value
     return
 
 ### Removes entry `at` and closes the gap.
 secret routine SortedNode[K, V].remove_entry(at: U64)
-    var first = Integer(from: at)
-    me.keys.erase(index: first)
-    me.values.erase(index: first)
+    me.keys.erase_at(position: at)
+    me.values.erase_at(position: at)
     if at + 1u64 < me.count
-        var moved = Integer(from: me.count - at - 1u64)
-        me.keys.move(from: first + 1, into: first, count: moved)
-        me.values.move(from: first + 1, into: first, count: moved)
+        me.keys.carry(source: at + 1u64, target: at, count: me.count - at - 1u64)
+        me.values.carry(source: at + 1u64, target: at, count: me.count - at - 1u64)
     me.count = me.count - 1u64
     return
 
 ### Opens a gap at branch `at` and puts `branch` in it.
 secret routine SortedNode[K, V].insert_branch(at: U64, branch: SortedNode[K, V])
     if at < me.fan
-        var first = Integer(from: at)
-        me.branches.move(from: first, into: first + 1, count: Integer(from: me.fan - at))
+        me.branches.carry(source: at, target: at + 1u64, count: me.fan - at)
     me.branches[at] = branch
     me.fan = me.fan + 1u64
     return
 
 ### Removes branch `at` and closes the gap.
 secret routine SortedNode[K, V].remove_branch(at: U64)
-    var first = Integer(from: at)
-    me.branches.erase(index: first)
+    me.branches.erase_at(position: at)
     if at + 1u64 < me.fan
-        me.branches.move(from: first + 1, into: first, count: Integer(from: me.fan - at - 1u64))
+        me.branches.carry(source: at + 1u64, target: at, count: me.fan - at - 1u64)
     me.fan = me.fan - 1u64
     return
 
@@ -159,8 +153,8 @@ secret routine SortedNode[K, V].take_entries(source: SortedNode[K, V], first: U6
     while i < source.count
         me.keys[me.count] = source.keys[i]
         me.values[me.count] = source.values[i]
-        source.keys.erase(index: Integer(from: i))
-        source.values.erase(index: Integer(from: i))
+        source.keys.erase_at(position: i)
+        source.values.erase_at(position: i)
         me.count = me.count + 1u64
         i = i + 1u64
     source.count = first
@@ -171,7 +165,7 @@ secret routine SortedNode[K, V].take_branches(source: SortedNode[K, V], first: U
     var i = first
     while i < source.fan
         me.branches[me.fan] = source.branches[i]
-        source.branches.erase(index: Integer(from: i))
+        source.branches.erase_at(position: i)
         me.fan = me.fan + 1u64
         i = i + 1u64
     source.fan = first
@@ -291,7 +285,7 @@ secret routine SortedTree[K, V].replace(key: K, value: V)
 secret routine SortedTree[K, V].replace_in(node: SortedNode[K, V], key: K, value: V)
     var i = node.lower(key: key)
     if node.holds(at: i, key: key)
-        node.values.erase(index: Integer(from: i))
+        node.values.erase_at(position: i)
         node.values[i] = value
         return
     me.replace_in(node: node.branches[i], key: key, value: value)
