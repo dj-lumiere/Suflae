@@ -1,0 +1,32 @@
+module Tests/StdlibSf/CreatorHandOffApi
+
+import IO/Console
+
+# A creator may hand back an entity a routine built for it: the caller makes the handle, so the creator takes the
+# entity out of the routine's handle instead of wrapping it twice.
+
+entity Box
+    n: S64
+
+routine make_box(n: S64) -> Box
+    return Box(n: n)
+
+routine Box() -> Box
+    return make_box(n: 42_s64)
+
+routine Box(half: S32) -> Box
+    var b = make_box(n: S64(half) * 2)
+    b.n = b.n + 1
+    return b
+
+routine start()
+    var a = Box()
+    show(f"returned: {a.n}")
+    var b = Box(half: 10_s32)
+    show(f"through a local: {b.n}")
+    var c = b
+    c.n = 5_s64
+    show(f"still one entity: {b.n}")
+    var d = Box(n: 7_s64)
+    show(f"memberwise: {d.n}")
+    return

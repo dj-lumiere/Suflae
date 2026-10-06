@@ -449,6 +449,20 @@ internal sealed class EntityLoweringPass
                 : ret with { Value = bareInner };
         }
 
+        // A creator that returns an entity already behind a handle (what a routine built, a local holding one, a
+        // parameter, a field) takes the entity out of that handle, since its caller makes the handle itself. A
+        // borrowed handle is shared first, so the hand-off finds a second holder and crashes: an entity that
+        // something else reaches is not new.
+        if (_inCreateRoutine && IsRoamedType(t: v.ResolvedType) && RoamedInnerEntity(t: v.ResolvedType) is { } handed)
+        {
+            if (v is IdentifierExpression bid && _borrowNames.Contains(item: bid.Name) || v is MemberExpression)
+            {
+                v = MaybeRoamCopy(expr: v);
+            }
+
+            return ret with { Value = ReleaseInner(handle: v, entity: handed) };
+        }
+
         // Returning a BORROW (`me` / a Roamed param) or a Roamed FIELD read hands a fresh
         // reference to the caller; retain so the caller owns its own count. The borrow itself is
         // not released at scope exit (teardown skips `me` + SF Roamed params), so without the
@@ -1115,6 +1129,23 @@ internal sealed class EntityLoweringPass
         }
 
         return WrapInRoam(inner: inner, entity: entity);
+    }
+
+    // `handle.release_inner()`: the entity taken out of its only handle, which ends (Roamed[T].release_inner).
+    private CallExpression ReleaseInner(Expression handle, EntityTypeSymbol entity)
+    {
+        return new CallExpression(
+            Callee: new MemberExpression(Object: handle,
+                MemberName: RuntimeContract.RoamedMemberRoutine.ReleaseInner,
+                Location: handle.Location) { ResolvedType = entity },
+            Arguments: new List<Expression>(),
+            Location: handle.Location)
+        {
+            ResolvedType = entity,
+            ResolvedRoutine = _registry.LookupMemberRoutineOverload(type: handle.ResolvedType!,
+                memberRoutineName: RuntimeContract.RoamedMemberRoutine.ReleaseInner,
+                argTypes: [])
+        };
     }
 
     private CallExpression WrapInRoam(Expression inner, EntityTypeSymbol entity)
