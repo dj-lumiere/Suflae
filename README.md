@@ -57,9 +57,13 @@ show(99999999999999999999 * 99999999999999999999)
 > them locked to produce the same output as their RazorForge twins. APIs will change, and you will
 > find bugs.
 
-## What it keeps
+## What we are trying to keep
 
-The joy of having made something.
+- **No ceremony.** Nothing you write is there only because the language asks for it.
+- **Code is the expression of intent.** What you write says what you mean.
+- **What should work, works.** If something ought to work, it does.
+
+And for Suflae, the joy of having made something.
 
 ## What it is like
 
