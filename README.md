@@ -87,10 +87,9 @@ mutable state. Globals initialize once, in dependency order, and every global is
 single-statement update such as `count = count + 1` is atomic across parallel tasks. (RazorForge has
 no module-level mutable state; this is a Suflae feature.)
 
-**Failure is loud, and recovery takes one keyword.** As in RazorForge, a routine that can `throw` or
-go `absent` carries `!` on its declaration. A bare call that fails crashes with a message (exit status
-82); `try`, `grab`, or `lookup` in front of the call recovers it as `Maybe[T]`, `Check[T]`, or
-`Lookup[T]`. Out of memory and runaway recursion are fatal and not recoverable.
+**Failure is loud, and recovery takes one keyword.** As in RazorForge, a routine that can `throw` carries
+`!` on its declaration. A bare call that fails crashes with a message (exit status 82); `try` or `check`
+in front of the call recovers it as `Maybe[T]` or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
 **Nothing unsafe is reachable.** `danger` blocks, `dangerous` routines, raw handles, and `steal` are
 not part of Suflae. Changing a list while an `each` loop walks it is stopped with a clear error: at
