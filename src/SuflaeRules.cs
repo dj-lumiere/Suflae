@@ -161,13 +161,6 @@ public sealed class SuflaeRules : LanguageRules
         return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report);
     }
 
-    /// <summary>The standard types a Suflae program never sees: the split (struct-of-arrays) collections choose a
-    /// memory layout, which a Suflae program does not, and RazorForge's `CircularList` is Suflae's `List`, which
-    /// adds and removes at both ends.</summary>
-    public override IReadOnlySet<string> HiddenStandardTypes { get; } =
-        new HashSet<string>(collection: ["Collections.SplitList", "Collections.SplitArray", "Collections.CircularList"],
-            comparer: StringComparer.Ordinal);
-
     public override void SynthesizeStandardLibrary(
         IReadOnlyList<(Program Program, string FilePath, string Module)> programs)
     {
