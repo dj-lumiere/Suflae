@@ -14,6 +14,7 @@
     <depends>org.jetbrains.plugins.textmate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <editorFactoryListener implementation="com.suflae.rider.SuflaeEditorListener"/>
         <textmate.bundleProvider implementation="com.suflae.rider.SuflaeBundleProvider"/>
         <lang.syntaxHighlighterFactory language="suflae" implementationClass="com.suflae.rider.SuflaeSyntaxHighlighterFactory"/>
         <fileIconProvider implementation="com.suflae.rider.SuflaeIconProvider"/>
