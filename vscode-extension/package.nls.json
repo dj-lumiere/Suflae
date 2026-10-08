@@ -1,0 +1,12 @@
+{
+  "displayName": "Suflae",
+  "description": "Suflae language support: highlighting, the language server (errors, colors, hover, completion, go to definition, rename, formatting).",
+  "setting.path": "Suflae.dll (run with dotnet) or a Suflae executable. Empty uses the dev build, <workspace>/Suflae/bin/Debug/net10.0/Suflae.dll.",
+  "command.restart": "Restart the language server",
+  "token.type": "Type",
+  "token.recordType": "Record type (a copied value)",
+  "token.entityType": "Entity type (a value with an identity)",
+  "token.constant": "Preset, global, or case",
+  "token.docTag": "Doc comment field (:param, :returns)",
+  "token.docValue": "Doc comment field name or reference"
+}
