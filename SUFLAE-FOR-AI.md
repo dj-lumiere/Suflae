@@ -338,6 +338,18 @@ var label = when
     else => "small"
 ```
 
+- In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
+  as in an `if` body. Keep a one-statement arm on one line.
+
+```suflae
+when terrain
+    == Terrain.SPIKE_TRAP =>
+        hero.position = cell
+        spring_trap()
+    == Terrain.MONSTER => battle(cell)
+    else => hero.position = cell
+```
+
 - An expression `when` takes one expression per arm after `=>`. Several statements in an arm are a build error
   (SF-S307): compute the value first, or write a `when` statement that sets a variable.
 - `if x is T name` tests and binds in one step; the binding exists only inside that branch.
