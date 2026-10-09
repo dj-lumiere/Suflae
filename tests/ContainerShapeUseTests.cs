@@ -24,7 +24,7 @@ public sealed class ContainerShapeUseTests
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Contains(expectedSubstring: "visiting 1", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "ReshapingWhileInUseError", actualString: stderr);
+        Assert.Contains(expectedSubstring: "Reshaping while in use error", actualString: stderr);
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public sealed class ContainerShapeUseTests
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Contains(expectedSubstring: "visiting 1", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "ReshapingWhileInUseError", actualString: stderr);
+        Assert.Contains(expectedSubstring: "Reshaping while in use error", actualString: stderr);
     }
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)

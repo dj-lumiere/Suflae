@@ -35,7 +35,7 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "value: 6", actualString: stdout);
         Assert.Contains(expectedSubstring: "piercing", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "BrokenInvariantError: the ledger no longer balances",
+        Assert.Contains(expectedSubstring: "Broken invariant error: the ledger no longer balances",
             actualString: stdout + stderr);
     }
 
@@ -53,7 +53,7 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "step 2", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "step 5", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "DivisionByZeroError", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "Division by zero error", actualString: stdout + stderr);
     }
 
     /// <summary>A <c>pierce</c> inside a lambda another routine calls still crashes with status 82 beneath
@@ -69,7 +69,7 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "value: 25", actualString: stdout);
         Assert.Contains(expectedSubstring: "piercing", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "BrokenInvariantError: the ledger no longer balances",
+        Assert.Contains(expectedSubstring: "Broken invariant error: the ledger no longer balances",
             actualString: stdout + stderr);
     }
 
@@ -85,7 +85,7 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "step 10", actualString: stdout);
         Assert.Contains(expectedSubstring: "step 1", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "RangeStepNotPositiveError", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "Range step not positive error", actualString: stdout + stderr);
     }
 
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)

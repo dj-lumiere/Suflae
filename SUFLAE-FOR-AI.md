@@ -548,7 +548,10 @@ routine start()
   other arms binds whatever is left. `x is NopeError` also works as an expression.
 - **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `!` routine
   as if `is Crashables e => throw e` were written (the caller receives it), anywhere else the program
-  crashes loudly. `throw e` on a caught `Crashables` rethrows the same error.
+  crashes loudly. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
+  its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
+  `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,
+  the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
 - `is None` is an arm of `Lookup` and `Maybe` only (and the success arm of `Check[None]`); a `Check` has no
   absent state.
 - Users never write `Maybe`/`Check`/`Lookup` as a return type (SF-S806); only a keyword produces one.
