@@ -24,6 +24,18 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
     public override IReadOnlyList<string> Keywords => SuflaeLexer.KeywordSpellings;
 
     /// <inheritdoc/>
+    /// <remarks>From the improvement plan: `agent` in front of a call, `until` loops, `becomes` in an expression `when`,
+    /// and the rename `grab` → `check`.</remarks>
+    public override IReadOnlyList<string> PlannedKeywords { get; } = ["agent", "until", "becomes", "check"];
+
+    /// <inheritdoc/>
+    /// <remarks>From the improvement plan: `absent` / `lookup` go with their failure kinds, `onlyif` becomes `when`,
+    /// `suspended` gives way to `agent` at the call, `unless` / `but` / `disobeys` / `discard` go (a result is
+    /// dropped without a marker), and `grab` is renamed `check`.</remarks>
+    public override IReadOnlyList<string> RetiredKeywords { get; } =
+        ["absent", "lookup", "onlyif", "suspended", "unless", "but", "disobeys", "discard", "grab"];
+
+    /// <inheritdoc/>
     public override string? Format(string text, string fileName)
     {
         return Builder.Formatting.SourceFormatter.Format(source: text, fileName: fileName, language: Language)
