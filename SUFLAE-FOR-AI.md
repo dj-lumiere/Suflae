@@ -884,6 +884,7 @@ routine start()
 ## 20. CLI and `config.toml`
 
 ```
+suflae new [folder]          # start a project: config.toml, main.sf, .gitignore, .vscode/ (keeps existing files)
 suflae run hello.sf          # build and run
 suflae build hello.sf        # build a native executable, don't run it
 suflae check hello.sf        # check the program without building it
