@@ -1098,6 +1098,9 @@ number). At most 20 are shown per batch.
 
 ## 22. Keywords
 
+A keyword can still be a name when written between backticks (`` `check` ``), and so can words with one space
+between them (`` `total count` ``); `` `count` `` and `count` are the same name.
+
 Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `class`, `struct`, `enum`,
 `match`, `trait`, `impl`, `async`, `await`, `spawn`, `external`, `null`, `self` or `this`.
 

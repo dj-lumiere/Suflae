@@ -49,6 +49,11 @@ public partial class SuflaeLexer
                 ScanComment();
                 break;
 
+            // A name between backticks: a keyword as a name (`check`), or words with spaces (`total count`)
+            case '`':
+                ScanBacktickName();
+                break;
+
             // String and character literals
             case '"':
                 ScanString();
