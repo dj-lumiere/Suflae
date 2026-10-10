@@ -1,4 +1,5 @@
 using Builder.Declaration;
+using Builder.Desugaring;
 using Builder.Diagnostics;
 using Builder.Tokenizer;
 using SyntaxTree;
@@ -37,50 +38,16 @@ internal static class ModuleGlobalsSynthesisPass
     internal static bool Run(List<(SyntaxTree.Program Program, string FilePath)> orderedFiles,
         Action<SemanticDiagnosticCode, string, SourceLocation> report)
     {
-        // 1) Collect globals (in encounter order) and strip their initializers off the declarations. The
-        //    (now init-less) declaration is kept so SA still registers the global for reference resolution.
-        var collected =
-            new List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)>();
-        foreach ((SyntaxTree.Program program, string _) in orderedFiles)
+        if (!ModuleGlobalOrder.TryOrder(orderedFiles: orderedFiles, report: report,
+                out List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals,
+                out List<HashSet<int>> deps, out List<int> order))
         {
-            List<ISyntaxTreeNode> decls = program.Declarations;
-            for (int i = 0; i < decls.Count; i++)
-            {
-                if (decls[index: i] is VariableDeclaration
-                    {
-                        IsGlobal: true, Initializer: not null, Type: not null
-                    } g)
-                {
-                    collected.Add(item: (g.Name, g.Type, g.Initializer, g.Location));
-                    decls[index: i] = g with { Initializer = null };
-                }
-            }
+            return false;
         }
 
-        if (collected.Count == 0)
+        if (globals.Count == 0)
         {
             return true;
-        }
-
-        List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals =
-            DeduplicateGlobals(collected: collected);
-        int n = globals.Count;
-        List<HashSet<int>> deps =
-            ComputeGlobalDependencies(orderedFiles: orderedFiles, globals: globals);
-        List<int> order = KahnOrder(deps: deps, n: n);
-
-        if (order.Count != n)
-        {
-            List<int> cyclic = Enumerable.Range(start: 0, count: n)
-                                         .Where(predicate: i => !order.Contains(value: i))
-                                         .ToList();
-            string names = string.Join(separator: ", ",
-                values: cyclic.Select(selector: i => $"'{globals[index: i].Name}'"));
-            report(SemanticDiagnosticCode.ModuleGlobalCircularInit,
-                $"The globals {names} read each other in their initializers, so none of them can be " +
-                "initialized first. Give one of them an initializer that does not read the others.",
-                globals[index: cyclic[index: 0]].Loc);
-            return false;
         }
 
         if (!TryBuildModuleGlobalsSynthesis(globals: globals,
@@ -99,33 +66,6 @@ internal static class ModuleGlobalsSynthesisPass
             entityDecl: entityDecl,
             singletonDecl: singletonDecl,
             initStmts: initStmts);
-    }
-
-    /// <summary>Deduplicates collected globals by name (last-write-wins) while preserving first-seen order
-    /// for a stable field layout.</summary>
-    private static List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)>
-        DeduplicateGlobals(
-            List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)>
-                collected)
-    {
-        var seenOrder = new List<string>();
-        var latest =
-            new Dictionary<string, (TypeExpression Type, Expression Init, SourceLocation Loc)>(
-                comparer: StringComparer.Ordinal);
-        foreach ((string name, TypeExpression type, Expression init, SourceLocation loc) in
-                 collected)
-        {
-            if (!latest.ContainsKey(key: name))
-            {
-                seenOrder.Add(item: name);
-            }
-
-            latest[key: name] = (type, init, loc);
-        }
-
-        return seenOrder.Select(selector: name => (Name: name, latest[key: name].Type,
-                             latest[key: name].Init, latest[key: name].Loc))
-                        .ToList();
     }
 
     /// <summary>Builds the synthesized entity declaration, singleton declaration, and the init-statement
@@ -237,164 +177,18 @@ internal static class ModuleGlobalsSynthesisPass
         List<(SyntaxTree.Program Program, string FilePath)> orderedFiles,
         Action<SemanticDiagnosticCode, string, SourceLocation> report, EntityDeclaration entityDecl, VariableDeclaration singletonDecl, List<Statement> initStmts)
     {
-        foreach ((SyntaxTree.Program program, string _) in orderedFiles)
+        if (ModuleGlobalOrder.FindStart(orderedFiles: orderedFiles, report: report, at: singletonDecl.Location) is not
+            ({ } program, { } startBlock))
         {
-            BlockStatement? startBlock = null;
-            foreach (ISyntaxTreeNode node in program.Declarations)
-            {
-                if (node is RoutineDeclaration { Name: "start", Body: BlockStatement block })
-                {
-                    startBlock = block;
-                    break;
-                }
-            }
-
-            if (startBlock == null)
-            {
-                continue;
-            }
-
-            // Append (NOT prepend) the synthesized declarations: imports must stay at the top of the
-            // file (RF-S114). Declaration order does not matter for type collection.
-            program.Declarations.Add(item: entityDecl);
-            program.Declarations.Add(item: singletonDecl);
-            startBlock.Statements.InsertRange(index: 0, collection: initStmts);
-            return true;
+            return false;
         }
 
-        report(SemanticDiagnosticCode.ModuleGlobalWithoutStart,
-            "Your globals are initialized when the program starts, but no file in the build has a " +
-            "'routine start()' or top-level statements. Add one to the program's entry file.",
-            singletonDecl.Location);
-        return false;
-    }
-
-    /// <summary>Computes, for each global, the set of OTHER globals it (transitively) depends on. A global's
-    /// initializer reading another global is a dependency; a free-routine call is followed once into the
-    /// callee's body so a hidden read (`global a = compute()` where `compute` reads `b`) counts too.
-    /// (Member-routine calls are not followed — a global read hidden behind `x.foo()` is the residual.)</summary>
-    private static List<HashSet<int>> ComputeGlobalDependencies(
-        List<(SyntaxTree.Program Program, string FilePath)> orderedFiles,
-        List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals)
-    {
-        int n = globals.Count;
-        var nameToIdx = new Dictionary<string, int>(comparer: StringComparer.Ordinal);
-        for (int i = 0; i < n; i++)
-        {
-            nameToIdx[key: globals[index: i].Name] = i; // last decl of a dup name wins
-        }
-
-        // Index every free routine's body by bare name so the dependency scan can follow calls.
-        var routineBodies = new Dictionary<string, Statement>(comparer: StringComparer.Ordinal);
-        foreach ((SyntaxTree.Program program, string _) in orderedFiles)
-        {
-            foreach (ISyntaxTreeNode node in program.Declarations)
-            {
-                if (node is RoutineDeclaration { Body: { } body } r)
-                {
-                    routineBodies[key: r.Name] = body;
-                }
-            }
-        }
-
-        var deps = new List<HashSet<int>>(capacity: n);
-        for (int i = 0; i < n; i++)
-        {
-            deps.Add(item: ComputeSingleGlobalDeps(init: globals[index: i].Init,
-                nameToIdx: nameToIdx,
-                routineBodies: routineBodies));
-        }
-
-        return deps;
-    }
-
-    /// <summary>BFS over AST expressions from the given initializer; collects indices of globals this
-    /// global directly or transitively depends on by following free-routine call bodies one level.</summary>
-    private static HashSet<int> ComputeSingleGlobalDeps(Expression init,
-        Dictionary<string, int> nameToIdx, Dictionary<string, Statement> routineBodies)
-    {
-        var d = new HashSet<int>();
-        var visitedRoutines = new HashSet<string>(comparer: StringComparer.Ordinal);
-        var toScan = new Queue<object>();
-        toScan.Enqueue(item: init);
-        while (toScan.Count > 0)
-        {
-            object root = toScan.Dequeue();
-            AstWalker.WalkExpressions(root: root,
-                visit: e =>
-                {
-                    if (e is IdentifierExpression id &&
-                        nameToIdx.TryGetValue(key: id.Name, value: out int j))
-                    {
-                        d.Add(item: j);
-                    }
-
-                    // Follow a call into the callee's body once (transitive hidden dependency).
-                    if (e is CallExpression { Callee: IdentifierExpression callee } &&
-                        routineBodies.TryGetValue(key: callee.Name,
-                            value: out Statement? calleeBody) &&
-                        visitedRoutines.Add(item: callee.Name))
-                    {
-                        toScan.Enqueue(item: calleeBody);
-                    }
-                });
-        }
-
-        return d;
-    }
-
-    /// <summary>Kahn's topological sort over the dependency edges (dependency j before dependent i), stable
-    /// in source order among ready nodes. A returned order shorter than <paramref name="n"/> signals a cycle
-    /// (the caller reports the un-ordered globals as RF-S436).</summary>
-    private static List<int> KahnOrder(List<HashSet<int>> deps, int n)
-    {
-        int[] indegree = new int[n];
-        for (int i = 0; i < n; i++)
-        {
-            indegree[i] += deps[index: i]
-               .Count(predicate: j => j != i); // edge j -> i (dependency j before dependent i)
-        }
-
-        var order = new List<int>(capacity: n);
-        bool ready;
-        do
-        {
-            ready = KahnSweep(deps: deps,
-                indegree: indegree,
-                n: n,
-                order: order);
-        } while (ready);
-
-        return order;
-    }
-
-    /// <summary>Single Kahn sweep: enqueues all zero-indegree nodes into <paramref name="order"/> and
-    /// decrements their dependents' indegrees. Returns true if at least one node was emitted.</summary>
-    private static bool KahnSweep(List<HashSet<int>> deps, int[] indegree, int n,
-        List<int> order)
-    {
-        bool any = false;
-        for (int i = 0; i < n; i++)
-        {
-            if (indegree[i] != 0)
-            {
-                continue;
-            }
-
-            indegree[i] = -1; // consumed
-            order.Add(item: i);
-            any = true;
-            for (int k = 0; k < n; k++)
-            {
-                if (k != i && deps[index: k]
-                       .Contains(item: i))
-                {
-                    indegree[k]--;
-                }
-            }
-        }
-
-        return any;
+        // Append (NOT prepend) the synthesized declarations: imports must stay at the top of the
+        // file (RF-S114). Declaration order does not matter for type collection.
+        program.Declarations.Add(item: entityDecl);
+        program.Declarations.Add(item: singletonDecl);
+        startBlock.Statements.InsertRange(index: 0, collection: initStmts);
+        return true;
     }
 
     /// <summary>A build-time default value for a <c>global</c> whose initializer depends on another
