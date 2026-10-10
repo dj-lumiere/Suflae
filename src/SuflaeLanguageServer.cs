@@ -28,10 +28,10 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
     public override IReadOnlyList<string> PlannedKeywords { get; } = ["agent", "until", "becomes"];
 
     /// <inheritdoc/>
-    /// <remarks>From the improvement plan: `absent` / `lookup` go with their failure kinds, `onlyif` becomes `when`,
+    /// <remarks>From the improvement plan: `absent` / `lookup` go with their failure kinds,
     /// `suspended` gives way to `agent` at the call, `unless` / `but` / `disobeys` go.</remarks>
     public override IReadOnlyList<string> RetiredKeywords { get; } =
-        ["absent", "lookup", "onlyif", "suspended", "unless", "but", "disobeys"];
+        ["absent", "lookup", "suspended", "unless", "but", "disobeys"];
 
     /// <inheritdoc/>
     public override string? Format(string text, string fileName)

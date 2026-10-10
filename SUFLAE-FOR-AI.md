@@ -940,7 +940,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Declarations**: `routine` `entity` `record` `choice` `flags` `crashable` `variant` `protocol`
 - **Bindings**: `var` `preset` `global` `lateinit`
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
-- **Protocols and constraints**: `obeys` `disobeys` `needs` `onlyif` `relates` `everywhere`
+- **Protocols and constraints**: `obeys` `disobeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `unless` `when` `is` `isnot` `loop` `while` `each`
   `break` `continue` `return` `throw` `pierce` `absent`
 - **Recovery**: `try` `check` `lookup`
