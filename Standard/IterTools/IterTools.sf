@@ -27,7 +27,7 @@ routine Iterable[T].get_count() -> Integer
 
 ### Returns how many values satisfy `predicate`.
 ### :param predicate: The test applied to each value.
-routine Iterable[T].get_count(predicate: Routine[(T,), Bool]) -> Integer
+routine Iterable[T].get_count(predicate: Callable[(T,), Bool]) -> Integer
     return Integer(from: me.get_count(predicate: predicate))
 
 ### Returns the values after the first `count`.

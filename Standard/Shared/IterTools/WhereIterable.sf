@@ -40,11 +40,11 @@ routine WhereEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
 ### :param predicate: The filter predicate.
 ### :returns: The resulting `WhereIterable[T, Me]` value.
 @rf("Iterable.where")
-routine Iterable[T].where(predicate: Routine[(T,), Bool]) -> WhereIterable[T, Me]
+routine Iterable[T].where(predicate: Callable[(T,), Bool]) -> WhereIterable[T, Me]
 
 ### Returns a lazy adapter that keeps only values for which `predicate` returns
 ### `false`.
 ### :param predicate: The filter predicate.
 ### :returns: The resulting `WhereIterable[T, Me]` value.
 @rf("Iterable.where_not")
-routine Iterable[T].where_not(predicate: Routine[(T,), Bool]) -> WhereIterable[T, Me]
+routine Iterable[T].where_not(predicate: Callable[(T,), Bool]) -> WhereIterable[T, Me]

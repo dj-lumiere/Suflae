@@ -78,10 +78,10 @@ routine SerialValue(from: SerialValue) -> SerialValue
 @rf("Byte")
 routine Byte!(from: SerialValue) -> Byte
 
-### Builds a `Character` from its serialized form (a one-character `Text`).
+### Builds a `Char` from its serialized form (a one-character `Text`).
 ### :throws: {SerialShapeError} when the value is not a one-character text.
-@rf("Character")
-routine Character!(from: SerialValue) -> Character
+@rf("Char")
+routine Char!(from: SerialValue) -> Char
 
 ### Builds an `S128` from its serialized text. :throws: {SerialShapeError} or a parse error.
 @rf("S128")

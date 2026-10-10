@@ -151,7 +151,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 | Binary floats           | `B16 B32 B64 B128` (`BF16` is a storage-only format)                       |
 | Decimal floats          | `D32 D64 D128`                                                             |
 | Complex / quaternion    | `C64 C128 C256`, `Q128 Q256`                                               |
-| Text and bytes          | `Text` (Unicode), `Character`, `Bytes`, `Byte`                             |
+| Text and bytes          | `Text` (Unicode), `Char`, `Bytes`, `Byte`                             |
 | Other                   | `Bool`, `Duration`, `ByteSize`, `Moment`/`LocalMoment`, tuples `(A, B)`    |
 
 - Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
@@ -292,7 +292,7 @@ loop
         break
 ```
 
-`each` works over ranges, collections, text (one `Character` at a time), dictionaries (each entry has
+`each` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry has
 `.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
@@ -380,7 +380,7 @@ routine Account.deposit(amount: Integer)                       # member routine,
 - A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
   `routine Point(from_text: Text) -> Point` (`routine Point!(...)` when it can fail).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
-  variables directly. Routine types are written `Routine[(Integer,), Integer]` (the parameter list is
+  variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
   `nums.select(transform: double)`.
 - `suspended routine` declares a coroutine (§16).
@@ -654,7 +654,7 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
   `ends_with(suffix:)`, `split(...)`, `words()`, `replace(old:, new:)`, `to_uppercase()`,
   `to_lowercase()`, `encode_as_utf8()`, and `+` to join. Substring test: `s have "ell"`. Slices take ranges:
   `s[0 til 3]`, `s[2 til ^0]` (to the end).
-- `Character` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
+- `Char` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
 - A binary float shows as the shortest decimal that reads back to the same value
   (`0.1_b64 + 0.2_b64` shows `0.30000000000000004`); a `Decimal` shows exactly (`0.1 + 0.2` shows `0.3`).
 

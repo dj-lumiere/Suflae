@@ -44,4 +44,4 @@ routine SelectEmittable[T, TResult, TSourceIter].emit!() -> TResult
 ### :param transform: The routine used to map each source value to a result value.
 ### :returns: The resulting `SelectIterable[T, TResult, Me]` value.
 @rf("Iterable.select")
-routine Iterable[T].select[TResult](transform: Routine[(T,), TResult]) -> SelectIterable[T, TResult, Me]
+routine Iterable[T].select[TResult](transform: Callable[(T,), TResult]) -> SelectIterable[T, TResult, Me]

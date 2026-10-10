@@ -20,14 +20,14 @@ routine Iterable[T].last!() -> T
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Iterable.any")
-routine Iterable[T].any(predicate: Routine[(T,), Bool]) -> Bool
+routine Iterable[T].any(predicate: Callable[(T,), Bool]) -> Bool
 
 ### Returns `true` when every produced value satisfies `predicate`.
 ### Iteration stops as soon as a failing value is found.
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Iterable.all")
-routine Iterable[T].all(predicate: Routine[(T,), Bool]) -> Bool
+routine Iterable[T].all(predicate: Callable[(T,), Bool]) -> Bool
 
 ### Folds this iterable into a single result value.
 ### The combiner receives the current accumulator and the next item in iteration
@@ -38,7 +38,7 @@ routine Iterable[T].all(predicate: Routine[(T,), Bool]) -> Bool
 @rf("Iterable.accumulate")
 routine Iterable[T].accumulate[TState](
     start: TState,
-    combiner: Routine[(TState, T), TState],
+    combiner: Callable[(TState, T), TState],
 ) -> TState
 
 ### Returns the sum of all values in this iterable.
@@ -64,14 +64,14 @@ needs T obeys Comparable
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.min_by")
-routine Iterable[T].min_by![TKey](selector: Routine[(T,), TKey]) -> T
+routine Iterable[T].min_by![TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the element for which `selector` returns the largest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.max_by")
-routine Iterable[T].max_by![TKey](selector: Routine[(T,), TKey]) -> T
+routine Iterable[T].max_by![TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the first value produced by this iterable, or `default` when the iterable is empty.

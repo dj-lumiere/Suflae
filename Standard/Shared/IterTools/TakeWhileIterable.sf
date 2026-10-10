@@ -43,4 +43,4 @@ routine TakeWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
 ### :param predicate: The predicate that controls when iteration stops.
 ### :returns: The resulting `TakeWhileIterable[T, Me]` value.
 @rf("Iterable.take_while")
-routine Iterable[T].take_while(predicate: Routine[(T,), Bool]) -> TakeWhileIterable[T, Me]
+routine Iterable[T].take_while(predicate: Callable[(T,), Bool]) -> TakeWhileIterable[T, Me]

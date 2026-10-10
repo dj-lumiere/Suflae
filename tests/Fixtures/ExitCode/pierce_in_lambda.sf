@@ -14,7 +14,7 @@ routine audit(total: Integer) -> Integer
         pierce BrokenInvariantError()
     return 100 // total
 
-routine apply(f: Routine[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: Callable[(Integer,), Integer], x: Integer) -> Integer
     return f(x)
 
 routine start()

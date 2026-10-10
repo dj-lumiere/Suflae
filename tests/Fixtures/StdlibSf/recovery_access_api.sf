@@ -18,7 +18,7 @@ routine pick!(items: List[Integer], i: Integer) -> Integer
     var v = items[i]
     return v
 
-routine letter!(t: Text, i: Integer) -> Character
+routine letter!(t: Text, i: Integer) -> Char
     if i < 0
         absent
     return t[i]

@@ -9,7 +9,7 @@ module Signals
 ### dedicated dispatch thread.
 ### :param handler: A `() -> None` routine to run on interrupt.
 @rf("when_interrupted")
-routine when_interrupted(handler: Routine[(), None])
+routine when_interrupted(handler: Callable[(), None])
 
 ### Registers a handler to run when the process is terminated (SIGTERM / console-close).
 ### Registering SUPPRESSES the default termination — the handler decides whether to
@@ -17,4 +17,4 @@ routine when_interrupted(handler: Routine[(), None])
 ### dedicated dispatch thread. A forced kill (SIGKILL / OOM-killer) cannot be caught.
 ### :param handler: A `() -> None` routine to run on termination.
 @rf("when_terminated")
-routine when_terminated(handler: Routine[(), None])
+routine when_terminated(handler: Callable[(), None])

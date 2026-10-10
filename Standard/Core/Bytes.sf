@@ -2,7 +2,7 @@ module Core
 
 import Numerics
 
-# Suflae's surface of `Bytes`, `Character` and `Byte`: the same values as RazorForge's, counted and indexed with
+# Suflae's surface of `Bytes`, `Char` and `Byte`: the same values as RazorForge's, counted and indexed with
 # `Integer`, and split into Suflae lists. A Suflae program calls these in place of the RazorForge routines of the
 # same names.
 
@@ -71,21 +71,21 @@ routine Text.encode_as_utf16() -> List[U16]
     return List[U16](from: me.encode_as_utf16())
 
 ### Returns the character's Unicode code point.
-routine Character.codepoint() -> Integer
+routine Char.codepoint() -> Integer
     return Integer(from: me.codepoint())
 
 ### Returns the value of a decimal digit character (`'7'` is 7), or -1 for any other character.
-routine Character.digit_value() -> Integer
+routine Char.digit_value() -> Integer
     return Integer(from: me.digit_value())
 
 ### Returns the character `delta` code points away (`'a'.offset(delta: 2)` is `'c'`). The result is not checked
 ### to be a valid Unicode scalar.
 ### :param delta: How far to move. A negative one moves back.
-routine Character.offset!(delta: Integer) -> Character
+routine Char.offset!(delta: Integer) -> Char
     return me.offset(delta: S64(from: delta))
 
 ### Returns the character's value as one byte, for a character that fits in one.
-routine Character.byte_value() -> Integer
+routine Char.byte_value() -> Integer
     return Integer(from: me.byte_value())
 
 ### Returns the byte's value as a code point.

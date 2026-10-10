@@ -39,4 +39,4 @@ routine SkipWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
 ### :param predicate: The predicate that controls the initial skipping phase.
 ### :returns: The resulting `SkipWhileIterable[T, Me]` value.
 @rf("Iterable.skip_while")
-routine Iterable[T].skip_while(predicate: Routine[(T,), Bool]) -> SkipWhileIterable[T, Me]
+routine Iterable[T].skip_while(predicate: Callable[(T,), Bool]) -> SkipWhileIterable[T, Me]

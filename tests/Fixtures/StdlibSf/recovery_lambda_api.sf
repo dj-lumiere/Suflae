@@ -7,10 +7,10 @@ import IterTools
 # that drive them, through `any`/`all`/`sort_by`, through a routine that calls the value it was handed, a value
 # passed down two levels, a value kept in a record, and an `each` loop over an adapter.
 
-routine apply(f: Routine[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: Callable[(Integer,), Integer], x: Integer) -> Integer
     return f(x)
 
-routine apply_twice(f: Routine[(Integer,), Integer], x: Integer) -> Integer
+routine apply_twice(f: Callable[(Integer,), Integer], x: Integer) -> Integer
     return apply(f: f, x: apply(f: f, x: x))
 
 routine sum_inverse(xs: List[Integer]) -> Integer
@@ -23,7 +23,7 @@ routine hundred_over(x: Integer) -> Integer
     return 100 // x
 
 record Holder
-    f: Routine[(Integer,), Integer]
+    f: Callable[(Integer,), Integer]
 
 routine run(holder: Holder, x: Integer) -> Integer
     return holder.f(x)
@@ -81,7 +81,7 @@ routine start()
     show(f"stored try: {try run(holder: holder, x: 0)}")
 
     # a local routine value called directly beneath the keyword
-    var g: Routine[(Integer,), Integer] = x => 10 // x
+    var g: Callable[(Integer,), Integer] = x => 10 // x
     show(f"local try: {try g(0)}")
     show(f"local ok: {try g(5)}")
     show("DONE")

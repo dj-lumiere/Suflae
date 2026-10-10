@@ -49,5 +49,5 @@ routine SelectManyEmittable[T, TResult, TInner, TSourceIter].emit!() -> TResult
 ### :param transform: The routine that maps each source element to an inner iterable.
 ### :returns: The resulting `SelectManyIterable[T, TResult, TInner, Me]` value.
 @rf("Iterable.select_many")
-routine Iterable[T].select_many[TResult, TInner](transform: Routine[(T,), TInner]) -> SelectManyIterable[T, TResult, TInner, Me]
+routine Iterable[T].select_many[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectManyIterable[T, TResult, TInner, Me]
 needs TInner obeys Iterable[TResult]

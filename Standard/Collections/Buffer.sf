@@ -346,7 +346,7 @@ secret preset BUFFER_SORT_MIN_RUN: U64 = 32u64
 
 ### Sorts what the places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
-routine Buffer[T].sort_by(compare: Routine[(T, T), Bool])
+routine Buffer[T].sort_by(compare: Callable[(T, T), Bool])
     var n = me.room
     if n <= 1_u64
         return
@@ -389,7 +389,7 @@ routine Buffer[T].sort_by(compare: Routine[(T, T), Bool])
 
 ### Insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
 ### element being placed.
-secret routine Buffer[T].insertion_sort(start: U64, end: U64, held: Hijacked[T], compare: Routine[(T, T), Bool])
+secret routine Buffer[T].insertion_sort(start: U64, end: U64, held: Hijacked[T], compare: Callable[(T, T), Bool])
     var size = T.data_size()
     var i = start + 1
     while i < end
@@ -405,12 +405,12 @@ secret routine Buffer[T].insertion_sort(start: U64, end: U64, held: Hijacked[T],
     return
 
 ### Whether the element kept in `held` goes before the element at `position`.
-secret routine Buffer[T].goes_before(held: Hijacked[T], position: U64, compare: Routine[(T, T), Bool]) -> Bool
+secret routine Buffer[T].goes_before(held: Hijacked[T], position: U64, compare: Callable[(T, T), Bool]) -> Bool
     danger
         return compare(held.peek(), me.slot(position: position).peek())
 
 ### Merges the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
-secret routine Buffer[T].merge(left: U64, mid: U64, right: U64, scratch: Hijacked[T], compare: Routine[(T, T), Bool])
+secret routine Buffer[T].merge(left: U64, mid: U64, right: U64, scratch: Hijacked[T], compare: Callable[(T, T), Bool])
     var size = T.data_size()
     danger
         rf_copy_bytes_at(

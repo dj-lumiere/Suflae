@@ -6,7 +6,7 @@ module Core
 ### Represents immutable UTF-32 text with constant-time character indexing.
 ###
 ### Layout:
-###   data:  Hijacked[Character]                    — shared immutable UTF-32 buffer
+###   data:  Hijacked[Char]                    — shared immutable UTF-32 buffer
 ###   count: U64                                    — number of code points in buffer
 ###   ctrl:  Hijacked[FrozenController]    — atomic strong-count cell (or null)
 ###
@@ -19,7 +19,7 @@ module Core
 @rf("Text")
 record Text
 relates TextEmittable as Iter
-obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Iterable[Character], Container
+obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Iterable[Char], Container
     pass
 
 ### Represents the iterator used to traverse a `Text` value.
@@ -61,9 +61,9 @@ routine Text.duplicate() -> Text
 routine text_alloc(count: U64) -> Text
 
 ### Renders an unsigned magnitude (with an optional leading `-`) as decimal `Text` through a STACK
-### buffer: digits are written back-to-front into a fixed `Array[Character, 21]` (max 20 digits + sign),
+### buffer: digits are written back-to-front into a fixed `Array[Char, 21]` (max 20 digits + sign),
 ### then copied out in ONE `Text` allocation. No `List`, no O(n) `add_first`, no `"-" +` concat — the
-### three heap allocations the old `List[Character]` + `Text(from_list:)` + sign-concat path did per call
+### three heap allocations the old `List[Char]` + `Text(from_list:)` + sign-concat path did per call
 ### collapse to the one Text buffer. `// 10` / `% 10` are scalar-by-constant (backend reciprocal multiply).
 ### Every fixed-width integer `represent` funnels through here.
 ### :param mag: The absolute value to render (0..2⁶⁴−1).
@@ -137,7 +137,7 @@ routine Text.hash(k0: U64, k1: U64) -> U64
 ### :param character: The character to test.
 ### :returns: The resulting `Bool` value.
 @rf("Text.contains")
-routine Text.contains(character: Character) -> Bool
+routine Text.contains(character: Char) -> Bool
 
 ### Returns `true` when this text contains `other` as a contiguous substring.
 ### An empty `other` value is always considered contained. Uses the
@@ -171,13 +171,13 @@ routine Text.ends_with(suffix: Text) -> Bool
 routine Text.split_once!(separator: Text) -> (Text, Text)
 
 ### Converts this value to uppercase.
-### Case conversion follows the behavior defined on `Character`.
+### Case conversion follows the behavior defined on `Char`.
 ### :returns: The resulting `Text` value.
 @rf("Text.to_uppercase")
 routine Text.to_uppercase() -> Text
 
 ### Converts this value to lowercase.
-### Case conversion follows the behavior defined on `Character`.
+### Case conversion follows the behavior defined on `Char`.
 ### :returns: The resulting `Text` value.
 @rf("Text.to_lowercase")
 routine Text.to_lowercase() -> Text
@@ -197,7 +197,7 @@ routine Text.capitalize() -> Text
 routine Text.eq_ignore_case(other: Text) -> Bool
 
 ### Returns a copy with leading and trailing whitespace removed.
-### Whitespace is identified using `Character.is_whitespace()`.
+### Whitespace is identified using `Char.is_whitespace()`.
 ### :returns: The resulting `Text` value.
 @rf("Text.trim")
 routine Text.trim() -> Text
@@ -270,7 +270,7 @@ routine Text.iter() -> TextEmittable
 
 ### Returns the next character from this iterator.
 ### Each successful call advances the iterator by one character.
-### :returns: The resulting `Character` value.
+### :returns: The resulting `Char` value.
 ### :absent: Returns absent when the requested value is unavailable.
 @rf("TextEmittable.emit")
-routine TextEmittable.emit!() -> Character
+routine TextEmittable.emit!() -> Char

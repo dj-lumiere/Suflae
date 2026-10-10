@@ -11,12 +11,12 @@ routine Text() -> Text
 
 ### Creates a text of the characters of `from_list`, in order.
 ### :param from_list: The characters.
-routine Text(from_list: List[Character]) -> Text
+routine Text(from_list: List[Char]) -> Text
     return Text(from_list: from_list.to_razorforge())
 
 ### Creates a text of one character.
 ### :param from_character: The character.
-routine Text(from_character: Character) -> Text
+routine Text(from_character: Char) -> Text
     return Text(from_character: from_character)
 
 ### Returns the number of characters.
@@ -25,7 +25,7 @@ routine Text.count() -> Integer
 
 ### Returns how many times `character` appears.
 ### :param character: The character to count.
-routine Text.count_of(character: Character) -> Integer
+routine Text.count_of(character: Char) -> Integer
     return Integer(from: me.count_of(character: character))
 
 ### Returns how many times `other` appears without overlapping (`"aaa".count_of("aa")` is 1). An empty `other`
@@ -36,7 +36,7 @@ routine Text.count_of(other: Text) -> Integer
 
 ### Returns the character at `index` (`text[i]`).
 ### :param index: The position, from 0.
-routine Text.getitem!(index: Integer) -> Character
+routine Text.getitem!(index: Integer) -> Char
     return me.getitem(index: position_of(value: index))
 
 ### Returns the characters at the positions in `range` (`text[a til b]`). Positions past the end are skipped,
@@ -48,7 +48,7 @@ routine Text.getitem(range: Range[Integer]) -> Text
 ### Returns the position of the first `letter`.
 ### :param letter: The character to look for.
 ### :absent: The text has no such character.
-routine Text.find!(letter: Character) -> Integer
+routine Text.find!(letter: Char) -> Integer
     return Integer(from: me.find(letter: letter))
 
 ### Returns the position where the first `other` starts.
@@ -60,7 +60,7 @@ routine Text.find!(other: Text) -> Integer
 ### Returns the position of the last `letter`.
 ### :param letter: The character to look for.
 ### :absent: The text has no such character.
-routine Text.find_last!(letter: Character) -> Integer
+routine Text.find_last!(letter: Char) -> Integer
     return Integer(from: me.find_last(letter: letter))
 
 ### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
@@ -78,21 +78,21 @@ routine Text.repeat(times: Integer) -> Text
 ### as it is.
 ### :param width: The width to reach.
 ### :param fill: The character to pad with.
-routine Text.pad_start(width: Integer, fill: Character = ' ') -> Text
+routine Text.pad_start(width: Integer, fill: Char = ' ') -> Text
     return me.pad_start(width: position_of(value: width), fill: fill)
 
 ### Returns the text padded on the right with `fill` to `width` characters. A text already that wide is returned
 ### as it is.
 ### :param width: The width to reach.
 ### :param fill: The character to pad with.
-routine Text.pad_end(width: Integer, fill: Character = ' ') -> Text
+routine Text.pad_end(width: Integer, fill: Char = ' ') -> Text
     return me.pad_end(width: position_of(value: width), fill: fill)
 
 ### Returns the text centered in `width` characters of `fill`, an odd extra one on the right. A text already that
 ### wide is returned as it is.
 ### :param width: The width to reach.
 ### :param fill: The character to pad with.
-routine Text.center(width: Integer, fill: Character = ' ') -> Text
+routine Text.center(width: Integer, fill: Char = ' ') -> Text
     return me.center(width: position_of(value: width), fill: fill)
 
 ### Returns the text padded on the left with `0` to `width`, a leading sign kept in front (`"-5".zero_pad(4)` is
@@ -103,7 +103,7 @@ routine Text.zero_pad(width: Integer) -> Text
 
 ### Returns the parts between the `separator` characters.
 ### :param separator: The character between parts.
-routine Text.split(separator: Character) -> List[Text]
+routine Text.split(separator: Char) -> List[Text]
     return List[Text](from: me.split(separator: separator))
 
 ### Returns the parts between the `separator` texts. An empty separator gives one part per character.
