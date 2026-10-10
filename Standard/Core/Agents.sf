@@ -2,16 +2,21 @@ module Core
 
 import Numerics
 
-# Suflae's own Agent: work an `agent` call has bound to its arguments, shared like any Suflae entity. It drives the work through the shared Core agent held inside, so every holder of the Agent sees
-# the same work: run once, consumed once. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
+# Suflae's own Agent: work an `agent` call has bound to its arguments, shared like any Suflae entity. It drives the
+# work held inside, so every holder of the Agent sees the same work: run once, consumed once. When the last holder lets
+# go of an Agent whose value nobody took, its work is cancelled and waited for. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
 # `cancel_all`) works on that list directly.
 
 ### Work an `agent` call has bound to its arguments. Nothing runs until a verb runs it: `start_now` starts it in
 ### the background, `retrieve` waits for its value (starting it first if nothing has).
 ### :typeparam T: The value the routine returns.
 entity Agent[T]
-    ### The shared Core agent that drives the work.
-    secret work: RF::Core.Agent[T]
+    ### The work: where it runs, its fiber or thread, and its result.
+    secret work: RF::Core.AgentWork[T]
+    ### The wait deadline of the next `retrieve`; only meaningful when `has_deadline` is true.
+    secret deadline: Duration
+    ### Whether `waitfor` gave the next `retrieve` a deadline.
+    secret has_deadline: Bool
 
 # ============================================================================
 # Builder plumbing
@@ -20,7 +25,8 @@ entity Agent[T]
 ### Builds the Agent of an `agent` call: the work that will run `entry(recipe)`, not started.
 routine agent_recipe[T](entry: CPtr, recipe: Address) -> Agent[T]
     danger
-        return Agent[T](work: agent_recipe[T](entry: entry, recipe: recipe))
+        return Agent[T](work: agent_work[T](entry: entry, recipe: recipe),
+            deadline: Duration(seconds: 0, nanoseconds: 0), has_deadline: false)
 
 # ============================================================================
 # Running one Agent
@@ -32,7 +38,10 @@ routine agent_recipe[T](entry: CPtr, recipe: Address) -> Agent[T]
 ### :throws: {TaskTimeoutError} if a deadline was set with `waitfor` and passed first.
 ### :returns: The value the routine returned.
 routine Agent[T].retrieve!() -> T
-    return me.work.retrieve()
+    # A deadline from `waitfor` is for this one retrieve.
+    var has_deadline = me.has_deadline
+    me.has_deadline = false
+    return me.work.retrieve(deadline: me.deadline, has_deadline: has_deadline)
 
 ### Starts the work now and returns at once. Collect its value later with `retrieve` or `gather`.
 ### :throws: {AgentStartError} if the work was started already.
@@ -41,12 +50,13 @@ routine Agent[T].start_now!()
     me.work.start_now()
     return
 
-### The same work with a deadline: its `retrieve` waits at most `deadline` and crashes with
-### {TaskTimeoutError} past it (`agent.waitfor(5s).retrieve()`).
+### The same work with a deadline: its `retrieve` waits at most `deadline` and crashes with {TaskTimeoutError} past
+### it (`agent.waitfor(5s).retrieve()`).
 ### :param deadline: The longest `retrieve` waits.
 ### :returns: An Agent over the same work, carrying the deadline.
 routine Agent[T].waitfor(deadline: Duration) -> Agent[T]
-    return Agent[T](work: me.work.waitfor(deadline: deadline))
+    danger
+        return Agent[T](work: me.work.add_holder(), deadline: deadline, has_deadline: true)
 
 ### Whether the work has finished, or was never started and cannot start.
 routine Agent[T].is_done() -> Bool
@@ -93,6 +103,13 @@ secret routine Agent[T].result!() -> T
 secret routine Agent[T].reap()
     danger
         me.work.reap()
+    return
+
+### Ends an Agent the last holder lets go of: work that still runs is cancelled and waited for, work nothing
+### started never runs.
+@override
+dangerous routine Agent[T].destruct()
+    me.work.dispose()
     return
 
 # ============================================================================

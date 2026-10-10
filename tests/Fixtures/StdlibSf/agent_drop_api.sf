@@ -1,0 +1,30 @@
+module Tests/StdlibSf/AgentDropApi
+
+# When the last holder of an agent lets go of it before anything retrieved it (the end of the routine that holds it,
+# or a list that is replaced), its running work is cancelled and waited for.
+
+import IO/Console
+
+routine spin(stopped: Atomic[S64]) -> Integer
+    var turns = 0
+    while not cancellation_requested()
+        waitfor(1ms)
+        turns += 1
+    stopped.fetch_add(delta: 1)
+    return turns
+
+routine leave_running(stopped: Atomic[S64])
+    var job = agent spin(stopped: stopped)
+    job.start_now()
+    waitfor(5ms)
+
+routine start()
+    var stopped = Atomic[S64](initial: 0)
+    leave_running(stopped: stopped)
+    show(f"after scope: {stopped.load()}")
+    var jobs = [agent spin(stopped: stopped), agent spin(stopped: stopped)]
+    jobs[0].start_now()
+    waitfor(5ms)
+    jobs = []
+    show(f"after list: {stopped.load()}")
+    show("DONE")

@@ -889,7 +889,8 @@ routine start()
   `List[Check[T]]`: each agent's value or failure, so one failure does not hide the others' results.
   `agents.take_finished()` takes the finished agents out of the list in place and returns them (a server
   collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
-- A dropped agent that was never retrieved is not cancelled for you. Collect what you start.
+- When the last holder of an agent lets go of it before anything retrieved it, its work is cancelled and waited
+  for (work nothing started never runs).
 - `agent.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
   `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
   one already started with `start_now()` is refused with `AgentStartError`.
