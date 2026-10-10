@@ -1,0 +1,15 @@
+module Core
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents the crashable raised when a range is iterated or tested with a step of zero. A step of zero never
+### moves, so the range would never reach its end. The sign of a step sets the direction: `by -1` counts down.
+@rf("RangeStepZeroError")
+crashable RangeStepZeroError
+    pass
+
+### Returns the default message for a range whose step is zero.
+### :returns: The resulting `Text` value.
+@rf("RangeStepZeroError.crash_message")
+routine RangeStepZeroError.crash_message() -> Text

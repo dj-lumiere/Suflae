@@ -12,14 +12,14 @@ routine position_of!(value: Integer) -> U64
     return U64(from: value)
 
 ### The buffer positions a collection keeps for `range`: the same range, counted with `U64`. A range that
-### runs downward keeps its direction, since a `Range` counts down from a higher start without a negative
-### step.
+### counts down keeps its direction: the positions count down by the step's magnitude.
 ### :param range: The positions, from 0.
 ### :throws: {NegativeIndexError} if the range starts or ends at a negative position.
 routine positions_of!(range: Range[Integer]) -> Range[U64]
     return Range[U64](
         start: position_of(value: range.start),
         end: position_of(value: range.end),
-        step: position_of(value: range.step.abs()),
+        step: position_of(value: range.stride()),
         inclusive: range.inclusive,
+        descending: not range.is_ascending(),
     )

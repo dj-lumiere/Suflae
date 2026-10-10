@@ -240,7 +240,7 @@ routine Buffer[T].swap_at!(first: U64, second: U64)
 ### inside the buffer.
 ### :param range: The positions to view.
 routine Buffer[T].getitem!(range: Range[Integer]) -> Buffer[T]
-    if range.step != 1
+    if range.step != 1 or not range.is_ascending()
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
     if range.start.is_negative()
         throw NegativeIndexError(index: range.start)

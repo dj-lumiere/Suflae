@@ -21,7 +21,7 @@ routine start()
 
     var t = "hello world"
     var n = t.count() + 1
-    show(f"count={t.count()} n={n} t[1]={t[1]} slice={t[0 til 5]} back={t[4 to 0]}")
+    show(f"count={t.count()} n={n} t[1]={t[1]} slice={t[0 til 5]} back={t[4 to 0 by -1]}")
     show(f"find={t.find(letter: 'o')} last={t.find_last(other: "o")} count_of={t.count_of(character: 'l')}")
     var parts = t.split(separator: ' ')
     show(f"parts={parts} count={parts.count()} first={parts[0]}")
