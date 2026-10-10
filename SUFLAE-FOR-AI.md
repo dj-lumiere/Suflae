@@ -431,7 +431,8 @@ routine Account.deposit(amount: Integer)                       # member routine,
     return
 ```
 
-- Call with named arguments in any order: `add(b: 2, a: 1)`, `greet(name: "Ada")`. A member routine is
+- Call with named arguments in any order: `add(b: 2, a: 1)`, `greet(name: "Ada")`. A variable named like its
+  parameter goes by its name alone, also beside written names: `area(width, height: 4)`. A member routine is
   called on its receiver: `acct.deposit(amount: 5)`.
 - Parameter and return types are always written. A routine with no `->` returns nothing. A variadic
   parameter is written `name...: Type`.
