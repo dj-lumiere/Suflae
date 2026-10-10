@@ -29,8 +29,8 @@ object: it has identity, compared with `===`.
 
 The second axis is **machine visibility**. Suflae hides the machine. Unsuffixed numbers are `Integer`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
-memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `suspended`
-coroutines on the runtime's scheduler, and shared entities are locked for you. Machine-level code is still
+memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `agent` calls
+whose work the runtime schedules, and shared entities are locked for you. Machine-level code is still
 available behind explicit markers: `danger` blocks, `dangerous` routines and foreign routines
 `routine C::name(...)`.
 
@@ -72,7 +72,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `suspended`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
+    `preset`, `each`, `when`, `agent`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -229,7 +229,7 @@ routine start()
   initializer reads another global must be a number, `Text` or `Bool` (SF-S437). A read hidden behind a
   member-routine call (`global a: Integer = x.foo()`) is not followed by this ordering.
 - A program with globals needs an entry point (an explicit `start()` or a script) (SF-S438).
-- **Every global is safe to use from concurrent coroutines.** A single-statement read-modify-write
+- **Every global is safe to use from concurrent agents.** A single-statement read-modify-write
   (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
   overflow** instead of crashing. Every other type (`Integer`, `Decimal`, `Text`, records, wider numbers)
@@ -383,7 +383,7 @@ routine Account.deposit(amount: Integer)                       # member routine,
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
   `nums.select(transform: double)`.
-- `suspended routine` declares a coroutine (§16).
+- Any routine can run concurrently: `agent f(...)` defers a call into an `Agent[T]` (§16).
 
 ## 10. Records, entities, choices, flags, variants
 
@@ -572,8 +572,8 @@ category: only a crashable can be thrown.
   error's own routines.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
-  `NumericDomainError`, `InvalidValueError`, `IOError`, `TaskTimeoutError`, `ChannelClosedError`,
-  `ReshapingWhileInUseError`. `stop()` and `breach()` crash on purpose (`UserTerminationError`,
+  `NumericDomainError`, `InvalidValueError`, `IOError`, `TaskTimeoutError`, `AgentStartError`,
+  `CancelRequested`, `ChannelClosedError`, `ReshapingWhileInUseError`. `stop()` and `breach()` crash on purpose (`UserTerminationError`,
   `LogicBreachedError`).
 
 **Fatal walls.** The line between recoverable and fatal is: a **data condition** the program can respond to
@@ -727,8 +727,8 @@ routine start()
   `ReshapingWhileInUseError`.
 - Changing the list after the loop, after `break`, or after a `return` out of the loop is fine. Changing an
   element's contents (`boxes[0].n = 5`) is not an add or remove and is always fine.
-- The check assumes a single coroutine; two coroutines changing and looping over the same list
-  concurrently are not protected.
+- The check assumes a single job; two agents changing and looping over the same list concurrently are
+  not protected.
 
 ## 15. Console, files and resources
 
@@ -741,7 +741,7 @@ routine start()
   that touch the disk and can fail (`size`, `delete`, `list`, …) are failable: recover with
   `try`/`check`. `current_dir()`, `home_dir()`, `temp_dir()` are free routines. Pure path-string helpers
   (`join_path(a:, b:)`, `file_name`, `extension`, …) live in `import IO/FileSystem`.
-- `read_text` / `write_text` are safe inside a coroutine: the coroutine waits while other coroutines run.
+- `read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
 - **`using`** binds a resource for a block and releases it at the block's end, however the block is left:
 
 ```suflae
@@ -754,47 +754,95 @@ using File(at: "out.txt").open_write() as sink
 
 ## 16. Concurrency
 
-Calling a `suspended routine` returns an `Agent[T]`: a recipe with its arguments bound. **Nothing runs until
-a verb runs it.**
+Any routine can run concurrently. The keyword **`agent`** before a call computes the call's arguments now
+(and a receiver that is a value, as in `agent list.sum()`), defers the call into an `Agent[T]`, and starts
+nothing. **Nothing runs until a verb starts it.** Where the work runs is the runtime's business.
 
 ```suflae
-suspended routine fetch(id: Integer) -> Integer
-    waitfor(50ms)            # this coroutine waits; others run meanwhile
+routine fetch(id: Integer) -> Integer
+    waitfor(50ms)            # this job waits, others run meanwhile
     return id * 10
 
 routine start()
-    var a = fetch(id: 1)                 # Agent[Integer], not started
-    show(f"one => {a.retrieve()}")       # run it and wait for the value
+    var a = agent fetch(id: 1)           # Agent[Integer], not started
+    a.start_now()                        # starts it now
+    show(f"one => {a.retrieve()}")       # wait for the value
 
-    var jobs = List[Agent[Integer]]()
-    jobs.add_last(value: fetch(id: 2))
-    jobs.add_last(value: fetch(id: 3))
-    var results = jobs.gather()          # run both at once, wait for all
+    var jobs = [agent fetch(id: 2), agent fetch(id: 3)]
+    var results = jobs.gather()          # start both, wait for all
     show(f"{results[0]} {results[1]}")
     return
 ```
 
-- `agent.retrieve()` runs the agent and waits for its value; inside a coroutine it parks (siblings keep
-  running). It is failable: a failure inside the routine crashes the caller unless recovered
-  (`try a.retrieve()`).
-- `agent.execute()` runs it in the background and returns at once; the value is discarded, and the work
-  still finishes.
-- `agents.gather()` runs a `List[Agent[T]]` concurrently and returns every result in input order;
-  `agents.race()` returns the first finisher's value; `agents.cancel_all()` asks every agent to stop and
-  returns their final values.
+- `agent` takes the whole call chain after it, like `try`: `agent f(x).retrieve()` defers `.retrieve()` too.
+  To start or collect at once, parenthesize: `(agent f(x)).retrieve()`, `(agent f(x)).start_now()`.
+- With a recovery keyword the recovery comes first and works inside the work: `try agent f()` is
+  `Agent[Maybe[T]]`, `check agent f()` is `Agent[Check[T]]`.
+- An agent of a routine that returns nothing is `Agent[None]`, and the type can be inferred:
+  `var jobs = [agent work(), agent work()]` then `jobs.gather()`.
+- `agent.start_now()` starts the work now. Collect it later with `retrieve()` or `gather()`.
+- `agent.retrieve()` waits for its value, starting it first if nothing has. Inside a job it parks (other
+  jobs keep running).
+- A failure stays in its agent. A failure inside the work does not end the program where the work runs,
+  and the other agents keep running. It surfaces where the agent is retrieved: `a.retrieve()` rethrows it
+  (bare, it crashes loudly there like any failure), `check a.retrieve()` / `try a.retrieve()` recover it
+  (or `try agent f()` up front).
+- `agent.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
+  at its next wait (`waitfor`, `retrieve`, a channel) or through `cancellation_requested()`, and stops
+  there. Retrieving a cancelled agent waits for it to stop, then crashes with `CancelRequested` (the name
+  carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
+- Starting an agent twice, or retrieving it twice, crashes with `AgentStartError`.
+- `agents.gather()` runs a `List[Agent[T]]` concurrently and returns every result in input order, and
+  throws the first failure it meets (in list order). `agents.race()` returns the first finisher's value,
+  and throws the winner's failure. `agents.cancel_all()` returns nothing: it cancels every agent and
+  waits until each has stopped, dropping what each came to. Work nothing started yet never runs.
+- A dropped agent that was never retrieved is not cancelled for you. Collect what you start.
 - `agent.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
-  `try job.waitfor(5s).retrieve()` gives `None` instead.
-- Free routines: `waitfor(duration)` pauses (parks a coroutine), `yield_now()` lets siblings run,
-  `cancellation_requested()` tells a long loop to stop early.
-- An agent that no verb runs never runs; dropping one is warning SF-W008.
-- Coroutines are cooperative: one that computes without ever waiting keeps the others from running.
-- Coroutines that talk to each other (over a channel) must all be started before you wait on one:
-  `producer(...).execute()` first, then `consumer(...).retrieve()`.
-- **Shared entities are safe to share between coroutines.** The runtime may run coroutines on several
-  cores. An entity that reaches another coroutine gets an atomic reference count and a lock taken around
-  each access, with no code from you. As with globals, one statement is atomic; a read-then-write spread
-  over several statements is not.
-- There is no `threaded` routine and no thread type in Suflae.
+  `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
+  one already started with `start_now()` is refused with `AgentStartError`.
+- `agent.is_done()` and `agent.is_running()` are snapshots for polling.
+- Free routines: `waitfor(duration)` pauses (parks a job), `yield_now()` lets other jobs run,
+  `cancellation_requested()` tells a long loop to stop early. Cancellation is cooperative.
+- An agent that nothing starts never runs. `agent f()` as a statement is warning
+  SF-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
+- Jobs that talk to each other (over a channel) must all be started before you wait on one:
+  `producer.start_now()` first, then `consumer.retrieve()`.
+- **Shared entities are safe to share between jobs.** The runtime may run jobs on several cores. An entity
+  that reaches another job gets an atomic reference count and a lock taken around each access, with no
+  code from you. As with globals, one statement is atomic; a read-then-write spread over several
+  statements is not.
+- There is no thread type in Suflae.
+
+```suflae
+routine checked!(n: Integer) -> Integer
+    if n < 0
+        throw VerificationFailedError()
+    return n
+
+routine slow(n: Integer) -> Integer
+    each i in 0 til 2000
+        if cancellation_requested()
+            return -1
+        waitfor(1ms)
+    return n
+
+routine start()
+    var bad = agent checked(n: -1)
+    var good = agent checked(n: 3)
+    bad.start_now()
+    good.start_now()
+    show(f"good: {good.retrieve()}")     # 3
+    when check bad.retrieve()
+        is Integer as v => show(f"bad: {v}")
+        is Crashables as e => show(f"bad failed: {e.crash_message()}")
+    var running = agent slow(n: 1)
+    running.start_now()
+    running.cancel()
+    when check running.retrieve()
+        is CancelRequested => show("cancelled")
+        else => show("finished")
+    return
+```
 
 **Channels** (always available):
 
@@ -847,8 +895,8 @@ Suflae is memory-safe without `danger`. When a library must manage memory itself
   `routine C::labs(n: S64) -> S64`. Calls use the same qualifier, with named arguments:
   `C::labs(n: x)`. LLVM intrinsics use `LLVM::`. There is no `external` keyword.
 - Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait) `@blocking`:
-  called from a `suspended` coroutine it runs on one of the runtime's I/O threads while the coroutine parks,
-  so other coroutines keep running; called anywhere else it is an ordinary call. Suflae has no OS threads of
+  called from an agent's work it runs on one of the runtime's I/O threads while the job parks, so other
+  jobs keep running, and called anywhere else it is an ordinary call. Suflae has no OS threads of
   its own, so this is how a blocking library call stays out of the scheduler's way.
 - Mark only what can actually corrupt memory. Arithmetic, collections and failable calls are never wrapped
   in `danger`.
@@ -933,7 +981,8 @@ number). At most 20 are shown per batch.
 | SF-S750       | `throw` in a routine without `!`                    | declare it `routine name!(...)`                   |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll have x`                                     |
-| SF-W008       | an agent that is never run                          | `.retrieve()` or `.execute()` it                  |
+| SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
+| SF-S642       | `agent` before a non-call, or over generic values   | put `agent` before a call with concrete types     |
 
 ## 22. Keywords
 
@@ -953,11 +1002,11 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
   does nothing)
 - **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`
-- **Concurrency**: `suspended`
+- **Concurrency**: `agent`
 - **Unsafe code**: `danger` `dangerous`
 
-`!` (failable, on declarations) is a mark on the name, not a keyword. `steal`, `threaded` and `expand` are
-not Suflae words.
+`!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
+words.
 
 ## 23. Relation to RazorForge and interop
 
@@ -986,8 +1035,8 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 ## 24. Status (do not generate as if shipped)
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
-nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, `suspended`
-coroutines and agents, the iterate-and-mutate checks, `danger`/`C::`, and the basic `ObjectHacker`
+nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, `agent`
+concurrency, the iterate-and-mutate checks, `danger`/`C::`, and the basic `ObjectHacker`
 surface. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:

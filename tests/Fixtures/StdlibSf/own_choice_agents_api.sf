@@ -38,6 +38,7 @@ routine start()
     var racers = [agent fetch(id: 4), agent fetch(id: 5)]
     show(f"race={racers.race() > 0}")
     var stoppers = [agent slow(id: 6), agent slow(id: 7)]
-    show(f"cancel={stoppers.cancel_all()}")
+    stoppers.cancel_all()
+    show(f"cancel={stoppers[0].is_done()} {stoppers[1].is_done()}")
     show("DONE")
     return

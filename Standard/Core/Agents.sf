@@ -2,15 +2,15 @@ module Core
 
 import Numerics
 
-# Suflae's own Agent: work an `agent` call has bound to its arguments, shared like any Suflae entity. It drives the work through RazorForge's agent, held inside, so every holder of the Agent sees the
-# same work: run once, consumed once. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
+# Suflae's own Agent: work an `agent` call has bound to its arguments, shared like any Suflae entity. It drives the work through the shared Core agent held inside, so every holder of the Agent sees
+# the same work: run once, consumed once. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
 # `cancel_all`) works on that list directly.
 
 ### Work an `agent` call has bound to its arguments. Nothing runs until a verb runs it: `start_now` starts it in
 ### the background, `retrieve` waits for its value (starting it first if nothing has).
 ### :typeparam T: The value the routine returns.
 entity Agent[T]
-    ### The RazorForge agent that drives the work.
+    ### The shared Core agent that drives the work.
     secret work: RF::Core.Agent[T]
 
 # ============================================================================
@@ -62,10 +62,17 @@ secret routine Agent[T].launch() -> Bool
     danger
         return me.work.launch()
 
-### Asks the work to stop. It sees the request at its next `waitfor`, or through `cancellation_requested()`.
-secret routine Agent[T].request_cancel()
+### Asks the work to stop. Work nothing started yet never runs. Running work sees the request at its next wait
+### (`waitfor`, `retrieve`) or through `cancellation_requested()`, and stops there. Retrieving a cancelled Agent waits
+### for it to stop, then throws {CancelRequested}.
+routine Agent[T].cancel()
+    me.work.cancel()
+    return
+
+### Waits for cancelled work to stop and frees what ran it, dropping what it came to.
+secret routine Agent[T].wind_down()
     danger
-        me.work.request_cancel()
+        me.work.wind_down()
     return
 
 ### Enters the work in a race.
@@ -77,13 +84,10 @@ secret routine Agent[T].join_race(race: CPtr)
             C::rf_race_add_task(race: race, task: me.work.task_handle())
     return
 
-### The value the finished work produced.
-secret routine Agent[T].result() -> T
-    danger
-        var payload = C::rf_task_result_payload(task: me.work.task_handle())
-        var value = Hijacked[T](from: payload).peek()
-        rf_invalidate(ptr: payload)
-        return value
+### The value the finished work produced, or its failure thrown here. A cancelled Agent throws
+### {CancelRequested}.
+secret routine Agent[T].result!() -> T
+    return me.work.settle()
 
 ### Frees the work once nothing will read it again.
 secret routine Agent[T].reap()
@@ -96,7 +100,7 @@ secret routine Agent[T].reap()
 # ============================================================================
 
 ### Races the Agents, driving them concurrently until the first one finishes, and returns that winner's
-### value. Every Agent of the list is freed afterwards, the losers too.
+### value, or throws its failure. Every Agent of the list is freed afterwards, the losers too.
 ### :throws: {TaskSpawnError} if the list is empty (there is nothing to race) or an Agent cannot be started.
 ### :returns: The value produced by the first Agent to finish.
 routine List[Agent[T]].race!() -> T
@@ -129,17 +133,11 @@ routine List[Agent[T]].gather!() -> List[T]
         results.add_last(value: job.retrieve())
     return results
 
-### Asks every Agent to stop, then waits for them to wind down, returning each one's final value in the
-### list's order. A cooperative Agent sees the request through `cancellation_requested()`.
-### :throws: {TaskSpawnError} if an Agent cannot be started.
-### :returns: Each Agent's final value, in the list's order.
-routine List[Agent[T]].cancel_all!() -> List[T]
+### Cancels every Agent and waits for each to stop, dropping what it came to. Work nothing started yet never
+### runs. Running work sees the request at its next wait or through `cancellation_requested()`.
+routine List[Agent[T]].cancel_all()
     each job in me
-        job.request_cancel()
+        job.cancel()
     each job in me
-        if not job.launch()
-            throw TaskSpawnError()
-    var results = List[T]()
-    each job in me
-        results.add_last(value: job.retrieve())
-    return results
+        job.wind_down()
+    return

@@ -34,7 +34,7 @@ crashable KeyNotFoundError
     ### Stores the key that could not be resolved.
     key: Text
 
-### Raised when a threaded task could not be spawned (thread or allocation failure).
+### Raised when an Agent's work could not be started (thread or allocation failure).
 @rf("TaskSpawnError")
 crashable TaskSpawnError
     pass
@@ -45,7 +45,12 @@ crashable AgentStartError
     ### What went wrong.
     reason: Text
 
-### Raised when a threaded task did not finish before its deadline.
+### Raised when an agent that was cancelled is retrieved: its work stopped, or never ran, so it has no value.
+@rf("CancelRequested")
+crashable CancelRequested
+    pass
+
+### Raised when an Agent's work did not finish before its `waitfor` deadline.
 @rf("TaskTimeoutError")
 crashable TaskTimeoutError
     pass
@@ -93,6 +98,11 @@ routine KeyNotFoundError.crash_message() -> Text
 ### :returns: The resulting `Text` value.
 @rf("TaskSpawnError.crash_message")
 routine TaskSpawnError.crash_message() -> Text
+
+### Returns the default message for a cancelled agent.
+### :returns: The resulting `Text` value.
+@rf("CancelRequested.crash_message")
+routine CancelRequested.crash_message() -> Text
 
 ### Returns the reason the Agent could not start.
 ### :returns: The resulting `Text` value.
