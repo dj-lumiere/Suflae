@@ -30,9 +30,9 @@ object: it has identity, compared with `===`.
 The second axis is **machine visibility**. Suflae hides the machine. Unsuffixed numbers are `Integer`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
 memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `agent` calls
-whose work the runtime schedules, and shared entities are locked for you. Machine-level code is still
-available behind explicit markers: `danger` blocks, `dangerous` routines and foreign routines
-`routine C::name(...)`.
+whose work the runtime schedules, and shared entities are locked for you. A Suflae program has no
+machine-level code at all: no `danger` blocks, no `dangerous` routines, no foreign `C::` routines. C is reached
+through a `.rf` module the program imports (section 18).
 
 ## 2. The rules most likely to break your assumptions
 
@@ -645,8 +645,8 @@ logic limit** is fatal and cannot be caught.
 - Out of memory is fatal, loud and uncatchable (a handler would itself need memory). Very deep recursion
   is the same wall: Suflae has no "stack" in its vocabulary, frames are memory, and running out of it is
   reported as out of memory.
-- A segmentation fault cannot happen in Suflae without `danger`. If one appears outside `danger` code, it
-  is a builder or runtime bug, not a language failure mode.
+- A segmentation fault cannot happen in Suflae code. If one appears, it is a builder or runtime bug, or it
+  comes from a `.rf` module the program imports, not a language failure mode.
 - Fatal messages describe what the program did, never the machine.
 
 **Exit status.** Every crash (an unrecovered `throw`, a checked-arithmetic failure, out of memory)
@@ -959,23 +959,36 @@ routine start()
     return
 ```
 
-## 18. Unsafe code and foreign routines
+## 18. C and other machine-level code
 
-Suflae is memory-safe without `danger`. When a library must manage memory itself or call C:
+A Suflae program never handles memory directly and never calls C directly. `danger` blocks (SF-S800),
+`dangerous` routines (SF-S800) and foreign `C::` / `LLVM::` routines (SF-S810) are build errors in a program's
+`.sf` files. The words `danger` and `dangerous` stay reserved.
 
-- `danger` opens a block where memory-unsafe operations are allowed: raw handles (`Hijacked[T]`),
-  addresses, `peek`/`poke` of raw memory, strides.
-- `dangerous routine name(...)` marks a routine whose signature exposes that unsafety; it can only be
-  called inside a `danger` block.
-- A foreign C function is declared as a routine qualified by its realm, with no body:
-  `routine C::labs(n: S64) -> S64`. Calls use the same qualifier, with named arguments:
-  `C::labs(n: x)`. LLVM intrinsics use `LLVM::`. There is no `external` keyword.
-- Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait) `@blocking`:
-  called from an agent's work it runs on one of the runtime's I/O threads while the job parks, so other
-  jobs keep running, and called anywhere else it is an ordinary call. Suflae has no OS threads of
-  its own, so this is how a blocking library call stays out of the scheduler's way.
-- Mark only what can actually corrupt memory. Arithmetic, collections and failable calls are never wrapped
-  in `danger`.
+To use a C library, write a small `.rf` module that declares and wraps it, and import that module:
+
+```razorforge
+# cmath.rf
+routine C::labs(n: S64) -> S64
+
+routine absolute(n: S64) -> S64
+    return C::labs(n: n)
+```
+
+```suflae
+# main.sf
+import Cmath
+
+routine start()
+    show(f"{absolute(n: -42)}")   # 42
+    return
+```
+
+The `.rf` module is checked by RazorForge's rules (section 23), and inside it `danger`, `dangerous` and `C::`
+are available. Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait)
+`@blocking` there: called from an agent's work it runs on one of the runtime's I/O threads while the job parks.
+
+The standard library uses `danger` internally; that is never visible to a program.
 
 ## 19. ObjectHacker (runtime reflection)
 
@@ -1081,7 +1094,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`
 - **Concurrency**: `agent`
-- **Unsafe code**: `danger` `dangerous`
+- **Reserved, not usable in a program**: `danger` `dangerous`
 
 `!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
 words.
@@ -1102,9 +1115,8 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
   member variable of a Suflae entity, it just works: construct it, call its routines (mutating ones
   included), and it is released once.
 - **A RazorForge entity may not cross a Suflae routine signature by value (SF-S439).** As a parameter or a
-  (non-constructor) return type it would be released more than once. Hand it across as `Retained[T]` (to
-  keep it), as `Consulting[T]` / `Amending[T]` (to read / write it during the call), or keep it in a member
-  variable of a Suflae entity.
+  (non-constructor) return type it would be released more than once. Keep it in a member variable of a
+  Suflae entity and pass that entity, or do the work on it inside the `.rf` module.
 - `RF::Name` and `SF::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Suflae's `List` is not RazorForge's (`RF::List`, counted with `U64`).
   Convert at the boundary: `List(from: rf_list)` makes a Suflae list from a RazorForge one, and
@@ -1114,7 +1126,7 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, `agent`
-concurrency, the iterate-and-mutate checks, `danger`/`C::`, and the basic `ObjectHacker`
+concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and the basic `ObjectHacker`
 surface. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:
