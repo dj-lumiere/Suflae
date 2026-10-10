@@ -10,7 +10,7 @@ entity Box
 
 routine start()
     var ages = {"ann": 31, "bob": 25}
-    ages.add(key: "cid", value: 40)
+    ages["cid"] = 40
     ages["bob"] = 26
     show(f"dict: {ages} count={ages.count()} have ann: {ages have "ann"}")
     ages.remove(key: "ann")
@@ -22,7 +22,7 @@ routine start()
     var squares = Dict[Integer, Integer]()
     var i = 0
     while i < 200
-        squares.add(key: i, value: i * i)
+        squares[i] = i * i
         if i % 3 == 0
             squares.remove(key: i // 2)
         i = i + 1
@@ -51,8 +51,8 @@ routine start()
     var box = Box(id: 1)
     var watched = watch(target: box)
     var by_name = Dict[Text, Box]()
-    by_name.add(key: "a", value: box)
-    by_name.add(key: "b", value: box)
+    by_name["a"] = box
+    by_name["b"] = box
     by_name["a"] = Box(id: 2)
     by_name.remove(key: "b")
     var boxes = Set[Integer]()

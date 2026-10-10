@@ -66,7 +66,7 @@ needs TKey obeys Comparable
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
-        result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
+        result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
         i = i +% 1u64
     return result
 
@@ -100,14 +100,11 @@ routine SortedDict[TKey, TValue].getitem!(key: TKey) -> TValue
         absent
     return me.tree.value_of(key: key)
 
-### Replaces the value of an existing `key` (`d[k] = v`).
+### Puts `value` at `key` (`d[k] = v`): replaces the value of a key that is there, and adds the key otherwise.
 ### :param key: The key.
-### :param value: The new value.
-### :absent: The key has no entry.
-routine SortedDict[TKey, TValue].setitem!(key: TKey, value: TValue)
-    if not me.tree.has(key: key)
-        absent
-    me.tree.replace(key: key, value: value)
+### :param value: The value.
+routine SortedDict[TKey, TValue].setitem(key: TKey, value: TValue)
+    me.put(key: key, value: value)
     return
 
 ### Returns the value for `key`, or `default` if the key is not present.
@@ -122,7 +119,7 @@ routine SortedDict[TKey, TValue].get_or(key: TKey, default: TValue) -> TValue
 ### :param key: The key.
 ### :param value: The value for `key`.
 ### :returns: `true` if a new key was added; `false` if an existing key's value was replaced.
-routine SortedDict[TKey, TValue].add(key: TKey, value: TValue) -> Bool
+secret routine SortedDict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
     if me.tree.has(key: key)
         me.tree.replace(key: key, value: value)
         return false
@@ -247,7 +244,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
     var result = Dict[Text, SerialValue]()
     each entry in me
-        result.add(key: entry.key.represent(), value: entry.value.serialize())
+        result[entry.key.represent()] = entry.value.serialize()
     return SerialValue(result.duplicate())
 
 # ============================================================================

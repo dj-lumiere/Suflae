@@ -73,7 +73,7 @@ needs TKey obeys Hashable, Equatable
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
-        result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
+        result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
         i = i +% 1u64
     return result
 
@@ -139,7 +139,7 @@ routine Dict[TKey, TValue].contains(key: TKey) -> Bool
 ### :param key: The key.
 ### :param value: The value.
 ### :returns: `true` when the key was new.
-routine Dict[TKey, TValue].add(key: TKey, value: TValue) -> Bool
+secret routine Dict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
     var slot = me.find_slot(key: key)
     if me.index.holds(slot: slot)
         me.vals.put(position: me.index.entry(slot: slot), value: value)
@@ -191,15 +191,11 @@ routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
         absent
     return me.vals.at(position: me.index.entry(slot: slot))
 
-### Replaces the value of an existing `key` (`d[k] = v`).
+### Puts `value` at `key` (`d[k] = v`): replaces the value of a key that is there, and adds the key otherwise.
 ### :param key: The key.
-### :param value: The new value.
-### :absent: The key has no entry.
-routine Dict[TKey, TValue].setitem!(key: TKey, value: TValue)
-    var slot = me.find_slot(key: key)
-    if not me.index.holds(slot: slot)
-        absent
-    me.vals.put(position: me.index.entry(slot: slot), value: value)
+### :param value: The value.
+routine Dict[TKey, TValue].setitem(key: TKey, value: TValue)
+    me.put(key: key, value: value)
     return
 
 # ============================================================================
@@ -269,7 +265,7 @@ routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: Integer(from: me.count))
     each entry in me
-        result.add(key: entry.key, value: entry.value)
+        result[entry.key] = entry.value
     return result
 
 # ============================================================================
@@ -309,7 +305,7 @@ needs TValue obeys Equatable
 routine Dict[TKey, TValue].serialize() -> SerialValue
     var result = RF::Core.Dict[Text, SerialValue]()
     each entry in me
-        result.add(key: entry.key.represent(), value: entry.value.serialize())
+        result[entry.key.represent()] = entry.value.serialize()
     return SerialValue(result.duplicate())
 
 # ============================================================================

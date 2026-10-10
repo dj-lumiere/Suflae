@@ -27,7 +27,7 @@ routine start()
     show(f"filled={filled} capacity_ok={List[Integer](capacity: 8).capacity() >= 8}")
 
     var d = {"a": 1, "b": 2}
-    d.add(key: "c", value: 3)
+    d["c"] = 3
     var sum = 0
     each e in d
         sum = sum + e.value

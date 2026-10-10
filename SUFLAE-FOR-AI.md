@@ -669,7 +669,7 @@ var empty = List[Text]()
 nums.add_last(value: 4)
 show(nums[0])                             # 3
 show(nums[^1])                            # 4, the last element
-ages.add(key: "grace", value: 85)
+ages["grace"] = 85
 show(ages["ada"])
 if ages have "alan"
     show("found")
@@ -695,7 +695,8 @@ each entry in ages
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
   `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
   same way.
-- `set.add(value:)`, `set.remove(value:)`, `dict.add(key:, value:)`, `dict.remove(key:)` return `Bool`:
+- `dict[k] = v` replaces the value of a key that is there and adds the key otherwise. `set.add(value:)`,
+  `set.remove(value:)`, `dict.remove(key:)` return `Bool`:
   a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
 - Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.

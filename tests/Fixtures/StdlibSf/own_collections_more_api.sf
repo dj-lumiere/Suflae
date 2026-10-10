@@ -49,8 +49,8 @@ routine start()
     ss.add(value: 3)
     show(f"ss={ss} count={ss.count()} rank0={ss.get_by_rank(rank: 0)}")
     var sd = SortedDict[Text, Integer]()
-    sd.add(key: "b", value: 2)
-    sd.add(key: "a", value: 1)
+    sd["b"] = 2
+    sd["a"] = 1
     show(f"sd={sd} count={sd.count()} rank0={sd.get_by_rank(i: 0)}")
     show("DONE")
     return

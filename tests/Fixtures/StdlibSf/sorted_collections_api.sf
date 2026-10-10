@@ -56,10 +56,10 @@ routine start()
     var names = SortedDict[Text, Integer]()
     i = 0
     while i < 500
-        names.add(key: f"k{i}", value: i)
+        names[f"k{i}"] = i
         i = i + 1
     names["k42"] = -42
-    names.add(key: "k7", value: 700)
+    names["k7"] = 700
     i = 0
     while i < 500
         if i % 5 != 0
@@ -77,13 +77,13 @@ routine start()
     var boxes = SortedDict[Integer, Box]()
     i = 0
     while i < 300
-        boxes.add(key: i, value: box)
+        boxes[i] = box
         i = i + 1
     i = 0
     while i < 300
         boxes.remove(key: i)
         i = i + 2
-    boxes.add(key: 1, value: Box(id: 2))
+    boxes[1] = Box(id: 2)
     show(f"boxes: count={boxes.count()} key 1 id={boxes[1].id} key 3 id={boxes[3].id}")
     box = Box(id: 0)
     boxes = SortedDict[Integer, Box]()

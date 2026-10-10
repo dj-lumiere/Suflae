@@ -10,9 +10,9 @@ entity Node
 
 routine start()
     var d = Dict[S64, Node]()
-    d.add(key: 1, value: Node(id: 10))
-    d.add(key: 2, value: Node(id: 20))
-    d.add(key: 3, value: Node(id: 30))
+    d[1] = Node(id: 10)
+    d[2] = Node(id: 20)
+    d[3] = Node(id: 30)
     show(f"count: {d.count()}")
     show(f"d[2].id: {d[2].id}")
 
