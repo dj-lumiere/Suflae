@@ -402,7 +402,8 @@ var label = when
 ```
 
 - In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
-  as in an `if` body. Keep a one-statement arm on one line.
+  as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
+  `becomes value`, the arm's value (without it, SF-S307).
 
 ```suflae
 when terrain
@@ -1111,7 +1112,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each`
-  `break` `continue` `return` `throw` `pierce` `todo`
+  `break` `continue` `return` `throw` `pierce` `todo` `becomes`
 - **Recovery**: `try` `check`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
