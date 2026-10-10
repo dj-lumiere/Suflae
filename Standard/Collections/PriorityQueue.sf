@@ -2,23 +2,15 @@ module Collections
 
 import Numerics
 import BuilderQuery
-### Pairs an element with the priority that determines its position in a {PriorityQueue}.
-### Used for iteration, bulk inspection, and conversion to list form.
-### :typeparam TPriority: The type used to order entries in the heap.
-### :typeparam TElement: The value carried by each entry.
-record PQEntry[TPriority, TElement]
-needs TPriority obeys Comparable
-    priority: TPriority
-    element: TElement
-
 ### A min-heap priority pool that always removes the entry with the smallest priority first.
 ###
 ### `PriorityQueue[TPriority, TElement]` keeps priorities and elements in two `Memory` rows laid out as one heap. The
 ### heap property guarantees that the minimum-priority entry is always at the front. When two entries have equal
 ### priority, no order guarantee is made between them.
 ###
-### Iteration visits entries in heap order, which is NOT globally sorted by priority.
-### Use `drain()` to consume all entries in removal order.
+### A queue is not walked directly: pick the order. `unordered()` copies the `(priority, element)` pairs in storage
+### order, `ordered()` copies them smallest priority first and leaves the queue as it is, and `drain()` empties the
+### queue into them smallest priority first.
 ###
 ### **When to use**
 ### - You need to process items by priority (e.g., Dijkstra's algorithm, task scheduling).
@@ -33,17 +25,16 @@ needs TPriority obeys Comparable
 ### | `remove!` | O(log n) |
 ### | `peek!` / `peek_priority!` / `peek_entry!` | O(1) |
 ### | `add_all` | O(k log n) |
-### | `drain` | O(n log n) |
+### | `unordered` | O(n) |
+### | `ordered` / `drain` | O(n log n) |
 ### | `contains` | O(n) |
-### | Iteration | O(n), heap order |
 ###
 ### :typeparam TPriority: The comparable type used for heap ordering. Smaller values rank higher.
 ### :typeparam TElement: The value type stored alongside each priority.
 ### :see: {SortedList[T]} for sorted traversal without removing elements.
 ### :see: {List[T]} for both-ended, rotatable sequencing without priority.
 entity PriorityQueue[TPriority, TElement]
-relates PriorityQueueEmittable[TPriority, TElement] as Iter
-obeys Iterable[PQEntry[TPriority, TElement]], DictLiteral[TPriority, TElement]
+obeys DictLiteral[TPriority, TElement]
 needs TPriority obeys Comparable
     ### The priorities, in heap order.
     secret priorities: Memory[TPriority]
@@ -51,20 +42,6 @@ needs TPriority obeys Comparable
     secret elements: Memory[TElement]
     ### How many entries there are: the first `count` places of both buffers.
     secret count: U64
-
-### Walks the heap's entries in storage order, which is heap order — NOT priority-sorted order.
-### :typeparam TPriority: The priority type carried by yielded entries.
-### :typeparam TElement: The element type carried by yielded entries.
-entity PriorityQueueEmittable[TPriority, TElement]
-obeys Emittable[PQEntry[TPriority, TElement]]
-    ### The walk over the priorities.
-    secret priorities: MemoryEmittable[TPriority]
-    ### The walk over the elements.
-    secret elements: MemoryEmittable[TElement]
-    ### How many entries the walk reads.
-    secret count: U64
-    ### How many entries have been read.
-    secret index: U64
 
 # ============================================================================
 # Creators
@@ -179,13 +156,13 @@ routine PriorityQueue[TPriority, TElement].peek_priority!() -> TPriority
         throw AbsentValueError()
     return me.priorities.at(position: 0)
 
-### Returns the front entry as a `PQEntry` without removing it.
-### :returns: The priority–element pair with the smallest priority.
+### Returns the front `(priority, element)` pair without removing it.
+### :returns: The pair with the smallest priority.
 ### :throws: {AbsentValueError} The pool is empty.
-routine PriorityQueue[TPriority, TElement].peek_entry!() -> PQEntry[TPriority, TElement]
+routine PriorityQueue[TPriority, TElement].peek_entry!() -> (TPriority, TElement)
     if me.count == 0
         throw AbsentValueError()
-    return PQEntry[TPriority, TElement](priority: me.priorities.at(position: 0), element: me.elements.at(position: 0))
+    return (me.priorities.at(position: 0), me.elements.at(position: 0))
 
 # ============================================================================
 # Bulk Operations
@@ -203,12 +180,37 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
         i = i + 1
     return
 
-### Removes all entries and returns their elements in removal order (smallest priority first).
-### :returns: A `List[TElement]` whose order matches repeated `remove()` calls.
-routine PriorityQueue[TPriority, TElement].drain() -> List[TElement]
-    var result = List[TElement](capacity: me.count.to[Integer]())
+### Empties the queue into its `(priority, element)` pairs, smallest priority first: the order repeated `remove()`
+### calls give (`each (priority, element) in pq.drain()`).
+### :returns: The pairs, in removal order.
+routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)]
+    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
     while me.count > 0
-        result.add_last(value: me.remove())
+        var priority = me.priorities.at(position: 0)
+        var element = me.remove()
+        result.add_last(value: (priority, element))
+    return result
+
+### Copies the `(priority, element)` pairs smallest priority first, leaving the queue as it is
+### (`each (priority, element) in pq.ordered()`).
+### :returns: The pairs, in removal order.
+routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElement)]
+    var copy = PriorityQueue[TPriority, TElement](capacity: me.count.to[Integer]())
+    var i: U64 = 0
+    while i < me.count
+        copy.add(element: me.elements.at(position: i), priority: me.priorities.at(position: i))
+        i = i + 1
+    return copy.drain()
+
+### Copies the `(priority, element)` pairs in storage order, which is NOT priority order: the cheap walk for when the
+### order does not matter (`each (priority, element) in pq.unordered()`).
+### :returns: The pairs, in heap storage order.
+routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElement)]
+    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
+    var i: U64 = 0
+    while i < me.count
+        result.add_last(value: (me.priorities.at(position: i), me.elements.at(position: i)))
+        i = i + 1
     return result
 
 # ============================================================================
@@ -225,34 +227,6 @@ needs TElement obeys Equatable
             return true
         i = i + 1
     return false
-
-### Creates a `List[PQEntry]` from the pool's entries in heap order, not sorted by priority.
-### Use `drain()` on a copy if you need priority order without consuming the pool.
-### :param source: The pool to copy entries from.
-### :returns: A `List[PQEntry[TPriority, TElement]]` in heap order.
-routine List[PQEntry[TPriority, TElement]](source: PriorityQueue[TPriority, TElement]) -> List[PQEntry[TPriority, TElement]]
-    var result = List[PQEntry[TPriority, TElement]](capacity: source.count())
-    each entry in source
-        result.add_last(value: entry)
-    return result
-
-### Returns a walk over the entries in heap order.
-routine PriorityQueue[TPriority, TElement].iter() -> PriorityQueueEmittable[TPriority, TElement]
-    return PriorityQueueEmittable[TPriority, TElement](
-        priorities: me.priorities.walk_at(first: 0, count: me.count),
-        elements: me.elements.walk_at(first: 0, count: me.count),
-        count: me.count,
-        index: 0,
-    )
-
-### Returns the next heap entry in storage order.
-### :returns: The next priority–element pair from the heap.
-### :throws: {AbsentValueError} All entries captured at iterator creation have been yielded.
-routine PriorityQueueEmittable[TPriority, TElement].emit!() -> PQEntry[TPriority, TElement]
-    if me.index >= me.count
-        throw AbsentValueError()
-    me.index = me.index + 1
-    return PQEntry[TPriority, TElement](priority: me.priorities.emit(), element: me.elements.emit())
 
 @override
 routine PriorityQueue[TPriority, TElement].represent() -> Text
@@ -307,10 +281,10 @@ secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
 ### The entries as text, in heap order: `[1: "a", 3: "b"]`.
 secret routine PriorityQueue[TPriority, TElement].entries_text() -> Text
     var result = "["
-    var first = true
-    each entry in me
-        if not first
+    var i: U64 = 0
+    while i < me.count
+        if i > 0
             result = f"{result}, "
-        result = f"{result}{nested_repr(entry.priority)}: {nested_repr(entry.element)}"
-        first = false
+        result = f"{result}{nested_repr(me.priorities.at(position: i))}: {nested_repr(me.elements.at(position: i))}"
+        i = i + 1
     return f"{result}]"

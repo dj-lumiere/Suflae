@@ -4,7 +4,8 @@ import IO/Console
 import Collections
 import ObjectHacker
 
-# Suflae's PriorityQueue keeps priorities and elements in two Memories laid out as one min-heap.
+# Suflae's PriorityQueue keeps priorities and elements in two Memories laid out as one min-heap. It is walked in a
+# chosen order: `unordered()`, `ordered()` (the queue stays), or `drain()` (the queue empties).
 
 entity Job
     name: Text
@@ -19,9 +20,9 @@ routine start()
     show(f"count={pq.count()} peek={pq.peek()} priority={pq.peek_priority()} have test: {pq.contains(element: "test")}")
     show(f"first={pq.remove()} then={pq.remove()} left={pq.count()}")
     var total = 0
-    each entry in pq
-        total = total + entry.priority
-    show(f"priority sum: {total}")
+    each (priority, element) in pq.unordered()
+        total = total + priority
+    show(f"priority sum: {total} front: {pq.peek_entry()} ordered: {pq.ordered()}")
     show(f"drained: {pq.drain()} empty={pq.is_empty()}")
     var empty_remove = try pq.remove()
     show(f"remove from empty: {empty_remove is None}")
