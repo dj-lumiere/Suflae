@@ -294,7 +294,7 @@ internal static class WrapperForwarderSynthesis
         string member = inner.MemberRoutineName!;
         // Lifecycle: destroy is a synthesized field-walk. (A constructor `routine X(...)` has no member
         // name and never reaches here.)
-        if (member is "destruct")
+        if (member is "destruct" or "dispose" or "roam_dispose")
         {
             return false;
         }

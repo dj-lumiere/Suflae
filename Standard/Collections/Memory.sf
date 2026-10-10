@@ -139,7 +139,7 @@ routine Memory[T].at!(position: U64) -> T
 routine Memory[T].put!(position: U64, value: T)
     danger
         var slot = me.slot(position: me.checked(position: position))
-        slot.peek().destruct()
+        slot.peek().dispose()
         slot.poke(value)
     return
 
@@ -156,7 +156,7 @@ routine Memory[T].take_at!(position: U64) -> T
 routine Memory[T].erase_at!(position: U64)
     var place = me.checked(position: position)
     danger
-        me.slot(position: place).peek().destruct()
+        me.slot(position: place).peek().dispose()
     me.clear_places(from: place, count: 1_u64)
     return
 
@@ -211,7 +211,7 @@ routine Memory[T].carry!(source: U64, target: U64, count: U64)
     while i < target + n
         if i < source or i >= source + n
             danger
-                me.slot(position: i).peek().destruct()
+                me.slot(position: i).peek().dispose()
         i = i +% 1
     me.move_places(target: target, source: source, count: n)
     i = source
@@ -259,7 +259,7 @@ routine Memory[T].fill(value: T)
     while i < me.room
         danger
             var slot = me.slot(position: i)
-            slot.peek().destruct()
+            slot.peek().dispose()
             slot.poke(value)
         i = i +% 1
     return
@@ -729,10 +729,9 @@ secret routine Memory[T].swap_places(a: U64, b: U64)
 dangerous routine MemoryStorage[T].destruct()
     var i: U64 = 0
     while i < me.room
-        me.data.offset(T.data_size() * i).peek().destruct()
+        me.data.offset(T.data_size() * i).peek().dispose()
         i = i +% 1
     me.data.invalidate()
-    me.hijack().invalidate()
     return
 
 ### Cycle-collector trace: reports what every place holds to the collector.
@@ -746,5 +745,4 @@ dangerous routine MemoryStorage[T].roam_trace()
 @override
 dangerous routine MemoryStorage[T].roam_free()
     me.data.invalidate()
-    me.hijack().invalidate()
     return

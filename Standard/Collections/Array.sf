@@ -38,7 +38,7 @@ routine Array[T, COUNT].setitem!(index: Integer, value: T)
 routine Array[T, COUNT].put!(position: U64, value: T)
     danger
         var slot = me.slot(position: me.checked(position: position))
-        slot.peek().destruct()
+        slot.peek().dispose()
         slot.poke(value)
     return
 
@@ -53,7 +53,7 @@ routine Array[T, COUNT].erase!(index: Integer)
 routine Array[T, COUNT].erase_at!(position: U64)
     var place = me.checked(position: position)
     danger
-        me.slot(position: place).peek().destruct()
+        me.slot(position: place).peek().dispose()
     me.clear_places(from: place, count: 1_u64)
     return
 
@@ -88,7 +88,7 @@ routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
     while i < target + n
         if i < source or i >= source + n
             danger
-                me.slot(position: i).peek().destruct()
+                me.slot(position: i).peek().dispose()
         i = i +% 1
     danger
         rf_copy_bytes_at(
