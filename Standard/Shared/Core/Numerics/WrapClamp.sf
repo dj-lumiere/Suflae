@@ -1,0 +1,874 @@
+module Core
+
+# Narrowing conversions that do not fail: `x.to_wrap[U8]()` keeps the low bits of the value, and `x.to_clamp[U8]()`
+# gives the nearest value the target holds. `x.to[U8]()` is the conversion that crashes when the value does not fit.
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S8.to_wrap")
+routine S8.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S8.to_clamp")
+routine S8.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[S8]() -> S8
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S16.to_wrap")
+routine S16.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S16.to_clamp")
+routine S16.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[S16]() -> S16
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S32.to_wrap")
+routine S32.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S32.to_clamp")
+routine S32.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[S32]() -> S32
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S64.to_wrap")
+routine S64.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S64.to_clamp")
+routine S64.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[S32]() -> S32
+
+### Converts to `S64` keeping the low 64 bits: a value outside the `S64` range wraps around.
+### :returns: The low 64 bits of this value as a `S64`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[S64]() -> S64
+
+### Converts to `S64`, giving the nearest `S64` when this value is outside its range.
+### :returns: This value, or `S64`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[S64]() -> S64
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S128.to_wrap")
+routine S128.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S128.to_clamp")
+routine S128.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[S32]() -> S32
+
+### Converts to `S64` keeping the low 64 bits: a value outside the `S64` range wraps around.
+### :returns: The low 64 bits of this value as a `S64`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[S64]() -> S64
+
+### Converts to `S64`, giving the nearest `S64` when this value is outside its range.
+### :returns: This value, or `S64`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[S64]() -> S64
+
+### Converts to `S128` keeping the low 128 bits: a value outside the `S128` range wraps around.
+### :returns: The low 128 bits of this value as a `S128`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[S128]() -> S128
+
+### Converts to `S128`, giving the nearest `S128` when this value is outside its range.
+### :returns: This value, or `S128`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[S128]() -> S128
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U128]() -> U128
+
+### Converts to `U256` keeping the low 256 bits: a value outside the `U256` range wraps around.
+### :returns: The low 256 bits of this value as a `U256`.
+@rf("S256.to_wrap")
+routine S256.to_wrap[U256]() -> U256
+
+### Converts to `U256`, giving the nearest `U256` when this value is outside its range.
+### :returns: This value, or `U256`'s bound on the side it lies past.
+@rf("S256.to_clamp")
+routine S256.to_clamp[U256]() -> U256
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U8.to_wrap")
+routine U8.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U8.to_clamp")
+routine U8.to_clamp[S8]() -> S8
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U16.to_wrap")
+routine U16.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U16.to_clamp")
+routine U16.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("U16.to_wrap")
+routine U16.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("U16.to_clamp")
+routine U16.to_clamp[S16]() -> S16
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("U16.to_wrap")
+routine U16.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("U16.to_clamp")
+routine U16.to_clamp[U8]() -> U8
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U32.to_wrap")
+routine U32.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U32.to_clamp")
+routine U32.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("U32.to_wrap")
+routine U32.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("U32.to_clamp")
+routine U32.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("U32.to_wrap")
+routine U32.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("U32.to_clamp")
+routine U32.to_clamp[S32]() -> S32
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("U32.to_wrap")
+routine U32.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("U32.to_clamp")
+routine U32.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("U32.to_wrap")
+routine U32.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("U32.to_clamp")
+routine U32.to_clamp[U16]() -> U16
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[S32]() -> S32
+
+### Converts to `S64` keeping the low 64 bits: a value outside the `S64` range wraps around.
+### :returns: The low 64 bits of this value as a `S64`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[S64]() -> S64
+
+### Converts to `S64`, giving the nearest `S64` when this value is outside its range.
+### :returns: This value, or `S64`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[S64]() -> S64
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("U64.to_wrap")
+routine U64.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("U64.to_clamp")
+routine U64.to_clamp[U32]() -> U32
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[S32]() -> S32
+
+### Converts to `S64` keeping the low 64 bits: a value outside the `S64` range wraps around.
+### :returns: The low 64 bits of this value as a `S64`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[S64]() -> S64
+
+### Converts to `S64`, giving the nearest `S64` when this value is outside its range.
+### :returns: This value, or `S64`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[S64]() -> S64
+
+### Converts to `S128` keeping the low 128 bits: a value outside the `S128` range wraps around.
+### :returns: The low 128 bits of this value as a `S128`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[S128]() -> S128
+
+### Converts to `S128`, giving the nearest `S128` when this value is outside its range.
+### :returns: This value, or `S128`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[S128]() -> S128
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("U128.to_wrap")
+routine U128.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("U128.to_clamp")
+routine U128.to_clamp[U64]() -> U64
+
+### Converts to `S8` keeping the low 8 bits: a value outside the `S8` range wraps around.
+### :returns: The low 8 bits of this value as a `S8`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S8]() -> S8
+
+### Converts to `S8`, giving the nearest `S8` when this value is outside its range.
+### :returns: This value, or `S8`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S8]() -> S8
+
+### Converts to `S16` keeping the low 16 bits: a value outside the `S16` range wraps around.
+### :returns: The low 16 bits of this value as a `S16`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S16]() -> S16
+
+### Converts to `S16`, giving the nearest `S16` when this value is outside its range.
+### :returns: This value, or `S16`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S16]() -> S16
+
+### Converts to `S32` keeping the low 32 bits: a value outside the `S32` range wraps around.
+### :returns: The low 32 bits of this value as a `S32`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S32]() -> S32
+
+### Converts to `S32`, giving the nearest `S32` when this value is outside its range.
+### :returns: This value, or `S32`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S32]() -> S32
+
+### Converts to `S64` keeping the low 64 bits: a value outside the `S64` range wraps around.
+### :returns: The low 64 bits of this value as a `S64`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S64]() -> S64
+
+### Converts to `S64`, giving the nearest `S64` when this value is outside its range.
+### :returns: This value, or `S64`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S64]() -> S64
+
+### Converts to `S128` keeping the low 128 bits: a value outside the `S128` range wraps around.
+### :returns: The low 128 bits of this value as a `S128`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S128]() -> S128
+
+### Converts to `S128`, giving the nearest `S128` when this value is outside its range.
+### :returns: This value, or `S128`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S128]() -> S128
+
+### Converts to `S256` keeping the low 256 bits: a value outside the `S256` range wraps around.
+### :returns: The low 256 bits of this value as a `S256`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[S256]() -> S256
+
+### Converts to `S256`, giving the nearest `S256` when this value is outside its range.
+### :returns: This value, or `S256`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[S256]() -> S256
+
+### Converts to `U8` keeping the low 8 bits: a value outside the `U8` range wraps around.
+### :returns: The low 8 bits of this value as a `U8`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[U8]() -> U8
+
+### Converts to `U8`, giving the nearest `U8` when this value is outside its range.
+### :returns: This value, or `U8`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[U8]() -> U8
+
+### Converts to `U16` keeping the low 16 bits: a value outside the `U16` range wraps around.
+### :returns: The low 16 bits of this value as a `U16`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[U16]() -> U16
+
+### Converts to `U16`, giving the nearest `U16` when this value is outside its range.
+### :returns: This value, or `U16`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[U16]() -> U16
+
+### Converts to `U32` keeping the low 32 bits: a value outside the `U32` range wraps around.
+### :returns: The low 32 bits of this value as a `U32`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[U32]() -> U32
+
+### Converts to `U32`, giving the nearest `U32` when this value is outside its range.
+### :returns: This value, or `U32`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[U32]() -> U32
+
+### Converts to `U64` keeping the low 64 bits: a value outside the `U64` range wraps around.
+### :returns: The low 64 bits of this value as a `U64`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[U64]() -> U64
+
+### Converts to `U64`, giving the nearest `U64` when this value is outside its range.
+### :returns: This value, or `U64`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[U64]() -> U64
+
+### Converts to `U128` keeping the low 128 bits: a value outside the `U128` range wraps around.
+### :returns: The low 128 bits of this value as a `U128`.
+@rf("U256.to_wrap")
+routine U256.to_wrap[U128]() -> U128
+
+### Converts to `U128`, giving the nearest `U128` when this value is outside its range.
+### :returns: This value, or `U128`'s bound on the side it lies past.
+@rf("U256.to_clamp")
+routine U256.to_clamp[U128]() -> U128
