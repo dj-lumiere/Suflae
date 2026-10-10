@@ -873,7 +873,8 @@ routine start()
 - A failure stays in its agent. A failure inside the work does not end the program where the work runs,
   and the other agents keep running. It surfaces where the agent is retrieved: `a.retrieve()` rethrows it
   (bare, it crashes loudly there like any failure), `check a.retrieve()` / `try a.retrieve()` recover it
-  (or `try agent f()` up front).
+  (or `try agent f()` up front). The crash report's trace ends with `agent in start()` (the line of the
+  `agent` call) and `Thrown again at` names the `retrieve()` line.
 - `agent.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
   at its next wait (`waitfor`, `retrieve`, a channel) or through `cancellation_requested()`, and stops
   there. Retrieving a cancelled agent waits for it to stop, then crashes with `CancelRequested` (the name
