@@ -8,9 +8,10 @@ module Numerics
 ### It preserves exact integer semantics across arithmetic, parsing, and formatting operations.
 ###
 ### `Integer` is a record (value semantics from the user's view). A magnitude below 2^64 is held in the value
-### itself, so small numbers need no heap and are computed without calling the engine. A bigger magnitude lives in
-### a heap buffer of 64-bit limbs shared by copies under an atomic refcount: copying bumps the refcount (no number
-### data is copied), and the last drop frees the buffer + controller. Division is Euclidean: `a // b` and `a % b`
+### itself (`small`), so small numbers need no heap and are computed without calling the engine. A bigger magnitude
+### is a read-only list of 64-bit limbs shared by copies (`owner`, with `data`/`count` caching its buffer): copying
+### shares the list (no number data is copied), and the last copy to go ends it. A literal's limbs are constant data
+### with no owner. Division is Euclidean: `a // b` and `a % b`
 ### satisfy `a == b * (a // b) + a % b` with `0 <= a % b < |b|`. The bitwise operators act on the two's-complement
 ### form. There is no `/`: an integer quotient is `//`, and a fractional one is computed in `Decimal`.
 ### :see: {Decimal}, {Numeric-Types}
@@ -39,12 +40,6 @@ routine integer_of_u64(v: U64) -> Integer
 ### :returns: The resulting `Integer` value.
 @rf("Integer.from_literal")
 common routine Integer.from_literal(text: Text) -> Integer
-
-### Returns a copy of this value. A value below 2^64 is copied as it is. A bigger one shares its limb buffer
-### with the copy and bumps its refcount: no big-integer data is copied.
-### :returns: The resulting `Integer` value.
-@rf("Integer.share")
-secret routine Integer.share() -> Integer
 
 ### Adds `other` to this value using exact integer arithmetic.
 ### No overflow occurs; the storage grows as needed.

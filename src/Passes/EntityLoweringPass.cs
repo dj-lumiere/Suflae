@@ -907,7 +907,11 @@ internal sealed class EntityLoweringPass
             ParamInfo? param = ResolveArgParam(a: a, nonMe: nonMe, posIdx: ref posIdx);
             if (BareEntityOf(type: param?.Type) is { } entity)
             {
-                Expression projected = ProjectRawInner(arg: a, targetEntity: entity);
+                // A bare entity parameter takes the entity over (a RazorForge routine's consuming parameter), so the
+                // handle hands it over instead of lending it. A token parameter only borrows it.
+                Expression projected = param!.Type is EntityTypeSymbol
+                    ? HandOverInner(arg: a, targetEntity: entity)
+                    : ProjectRawInner(arg: a, targetEntity: entity);
                 newArgs.Add(item: projected);
                 if (!ReferenceEquals(objA: projected, objB: a))
                 {
@@ -984,6 +988,38 @@ internal sealed class EntityLoweringPass
     // bare entity, or a non-entity value) is returned unchanged. The access lock is applied around the
     // enclosing statement by RoamedLockBracketLoweringPass, which recognizes this control() coercion —
     // so reaching the inner through it stays serialized (unlike the old raw_inner, which was unlocked).
+    // An argument for a parameter that takes the entity over: a handle made just for this call (`Roamed(from: x)`) is
+    // not made at all and `x` goes in, and an existing handle gives its entity up (`release_inner`, which crashes
+    // when another name still holds it). Lending the entity instead would let the handle free what the callee keeps.
+    private static Expression HandOverInner(Expression arg, EntityTypeSymbol targetEntity)
+    {
+        Expression val = arg is NamedArgumentExpression na
+            ? na.Value
+            : arg;
+        Expression handedOver;
+        if (TryUnwrapRoamConstruction(expr: val, inner: out Expression? fresh) && fresh != null)
+        {
+            handedOver = fresh;
+        }
+        else if (IsRoamedType(t: val.ResolvedType))
+        {
+            handedOver = new CallExpression(
+                Callee: new MemberExpression(Object: val,
+                    MemberName: RuntimeContract.RoamedMemberRoutine.ReleaseInner,
+                    Location: val.Location) { ResolvedType = targetEntity },
+                Arguments: new List<Expression>(),
+                Location: val.Location) { ResolvedType = targetEntity };
+        }
+        else
+        {
+            return arg;
+        }
+
+        return arg is NamedArgumentExpression named
+            ? named with { Value = handedOver }
+            : handedOver;
+    }
+
     private static Expression ProjectRawInner(Expression arg, EntityTypeSymbol targetEntity)
     {
         Expression val = arg is NamedArgumentExpression na

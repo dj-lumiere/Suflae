@@ -6,16 +6,14 @@ module Core
 ### Represents an immutable byte sequence with value semantics.
 ###
 ### Layout:
-###   data:  Hijacked[Byte]                          — shared immutable byte buffer
-###   count: U64                                     — number of bytes in buffer
-###   ctrl:  Hijacked[FrozenController]     — atomic strong-count cell (or null)
+###   data:  Hijacked[Byte]                 — the owner list's buffer, read directly
+###   count: U64                            — number of bytes
+###   owner: Guarded[List[Byte], ReadOnly]  — the list holding the bytes (null for an empty or literal sequence)
 ###
-### `Bytes` is a record (value semantics from the user's view) backed by an
-### atomic-refcounted handle to an immutable byte buffer. Copying a `Bytes`
-### bumps the underlying refcount via SeqCst atomic; the last drop frees the
-### buffer + controller. When `ctrl` is null (`hijacked_none[...]()`), the
-### value represents an empty or static-literal sequence and `store`/`destruct`
-### are no-ops.
+### `Bytes` is a record (value semantics from the user's view) over a shared, read-only list of bytes. Copying a
+### `Bytes` shares the list (its `Guarded` owner counts one more holder) and copies the `data`/`count` cache, so a
+### read never goes through the owner. The last copy to go ends the list. An empty sequence and a bytes literal have
+### no owner: nothing is counted or freed.
 @rf("Bytes")
 record Bytes
 relates BytesEmittable as Iter
@@ -58,19 +56,7 @@ entity BytesUtf8LossyEmittable
     ### Stores the index.
     index: U64
 
-### Returns a copy of this value with the underlying refcount bumped.
-### The buffer is shared; no byte data is copied. For values with a null
-### controller (empty or static literals) the copy is a bitwise duplicate
-### with no atomic op.
-### :returns: The resulting `Bytes` value.
-@rf("Bytes.share")
-secret routine Bytes.share() -> Bytes
-
-### Copy (Copyable): for a managed Bytes this is the same reference-share as `assign` (the buffer is a
-### co-owned managed resource behind a ptr, so a co-owning ref-bump is the copy). Defined explicitly —
-### Bytes is a managed leaf (its logical value is the buffer behind a Hijacked ptr, not a field tuple), so
-### the field-walk auto-derive does not apply (its Hijacked fields don't obey Copyable); it declares
-### `obeys Copyable` and implements `copy` here, mirroring Text.copy.
+### Copy (Copyable): a `Bytes` is immutable, so a copy shares the same bytes.
 @rf("Bytes.duplicate")
 routine Bytes.duplicate() -> Bytes
 
