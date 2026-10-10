@@ -2,13 +2,12 @@ module Core
 
 import Numerics
 
-# Suflae's own Agent: work a `suspended` or `threaded` routine call has bound to its arguments, shared like any
-# Suflae entity. It drives the work through RazorForge's agent, held inside, so every holder of the Agent sees the
+# Suflae's own Agent: work an `agent` call has bound to its arguments, shared like any Suflae entity. It drives the work through RazorForge's agent, held inside, so every holder of the Agent sees the
 # same work: run once, consumed once. Structured concurrency over Suflae's own list of Agents (`race`, `gather`,
 # `cancel_all`) works on that list directly.
 
-### Work a `suspended` or `threaded` routine call has bound to its arguments. Nothing runs until a verb runs it:
-### `retrieve` runs it and waits for its value, `execute` runs it in the background.
+### Work an `agent` call has bound to its arguments. Nothing runs until a verb runs it: `start_now` starts it in
+### the background, `retrieve` waits for its value (starting it first if nothing has).
 ### :typeparam T: The value the routine returns.
 entity Agent[T]
     ### The RazorForge agent that drives the work.
@@ -18,31 +17,28 @@ entity Agent[T]
 # Builder plumbing
 # ============================================================================
 
-### Builds the Agent of a `suspended` call: the coroutine that will run `entry(recipe)`, not started.
-routine agent_suspended[T](entry: CPtr, recipe: Address) -> Agent[T]
+### Builds the Agent of an `agent` call: the work that will run `entry(recipe)`, not started.
+routine agent_recipe[T](entry: CPtr, recipe: Address) -> Agent[T]
     danger
-        return Agent[T](work: agent_suspended[T](entry: entry, recipe: recipe))
-
-### Builds the Agent of a `threaded` call: the work a thread will run, not started.
-routine agent_threaded[T](entry: CPtr, recipe: Address) -> Agent[T]
-    danger
-        return Agent[T](work: agent_threaded[T](entry: entry, recipe: recipe))
+        return Agent[T](work: agent_recipe[T](entry: entry, recipe: recipe))
 
 # ============================================================================
 # Running one Agent
 # ============================================================================
 
-### Runs the work and waits for its value. Inside a coroutine it parks, so other coroutines keep running.
+### Waits for the work's value, starting it first if nothing has. Inside another agent it parks, so other agents
+### keep running.
 ### :throws: {TaskSpawnError} if the work could not be started.
 ### :throws: {TaskTimeoutError} if a deadline was set with `waitfor` and passed first.
 ### :returns: The value the routine returned.
 routine Agent[T].retrieve!() -> T
     return me.work.retrieve()
 
-### Runs the work in the background and returns at once. The value is thrown away, the work still finishes.
+### Starts the work now and returns at once. Collect its value later with `retrieve` or `gather`.
+### :throws: {AgentStartError} if the work was started already.
 ### :throws: {TaskSpawnError} if the work could not be started.
-routine Agent[T].execute!()
-    me.work.execute()
+routine Agent[T].start_now!()
+    me.work.start_now()
     return
 
 ### The same work with a deadline: its `retrieve` waits at most `deadline` and crashes with
@@ -66,7 +62,7 @@ secret routine Agent[T].launch() -> Bool
     danger
         return me.work.launch()
 
-### Asks the work to stop. A coroutine sees it at its next `waitfor`, any work through `cancellation_requested()`.
+### Asks the work to stop. It sees the request at its next `waitfor`, or through `cancellation_requested()`.
 secret routine Agent[T].request_cancel()
     danger
         me.work.request_cancel()

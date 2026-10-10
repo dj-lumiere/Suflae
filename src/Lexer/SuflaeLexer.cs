@@ -244,9 +244,6 @@ public partial class SuflaeLexer
             // Associated types
             [key: "relates"] = TokenType.Relates,
 
-            // Concurrency (SF has cooperative coroutines; `threaded` stays RF-only)
-            [key: "suspended"] = TokenType.Suspended,
-
             // Unsafe code: the same `danger` blocks and `dangerous` routines as RazorForge (Hijacked,
             // peek/poke, addresses), so a Suflae library can manage its own memory.
             [key: "danger"] = TokenType.Danger,
@@ -262,7 +259,7 @@ public partial class SuflaeLexer
             // Reserved for keywords a later release uses: none of them can name anything now.
             [key: "until"] = TokenType.ReservedWord,
             [key: "becomes"] = TokenType.ReservedWord,
-            [key: "agent"] = TokenType.ReservedWord
+            [key: "agent"] = TokenType.Agent
         };
 
         // The standard library's own Suflae files are builder-internal code, analyzed as RazorForge: they write

@@ -39,6 +39,12 @@ crashable KeyNotFoundError
 crashable TaskSpawnError
     pass
 
+### Raised when an Agent is started a second time.
+@rf("AgentStartError")
+crashable AgentStartError
+    ### What went wrong.
+    reason: Text
+
 ### Raised when a threaded task did not finish before its deadline.
 @rf("TaskTimeoutError")
 crashable TaskTimeoutError
@@ -87,6 +93,11 @@ routine KeyNotFoundError.crash_message() -> Text
 ### :returns: The resulting `Text` value.
 @rf("TaskSpawnError.crash_message")
 routine TaskSpawnError.crash_message() -> Text
+
+### Returns the reason the Agent could not start.
+### :returns: The resulting `Text` value.
+@rf("AgentStartError.crash_message")
+routine AgentStartError.crash_message() -> Text
 
 ### Returns the default message for task-timeout failures.
 ### :returns: The resulting `Text` value.

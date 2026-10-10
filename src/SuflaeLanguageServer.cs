@@ -24,11 +24,11 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
     public override IReadOnlyList<string> Keywords => SuflaeLexer.KeywordSpellings;
 
     /// <inheritdoc/>
-    /// <remarks>From the improvement plan: `agent` in front of a call, `until` loops, `becomes` in an expression `when`.</remarks>
-    public override IReadOnlyList<string> PlannedKeywords { get; } = ["agent", "until", "becomes"];
+    /// <remarks>From the improvement plan: `until` loops, `becomes` in an expression `when`.</remarks>
+    public override IReadOnlyList<string> PlannedKeywords { get; } = ["until", "becomes"];
 
     /// <inheritdoc/>
-    /// <remarks>From the improvement plan: `suspended` gives way to `agent` at the call.</remarks>
+    /// <remarks>`suspended` gave way to `agent` at the call.</remarks>
     public override IReadOnlyList<string> RetiredKeywords { get; } =
         ["suspended"];
 

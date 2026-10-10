@@ -63,7 +63,6 @@ public sealed class SuflaeRules : LanguageRules
 
     public override bool AllowsUnsafeCode => true;
     public override bool HasPassStatement => false;
-    public override bool HasThreadedRoutines => false;
     public override bool HasModuleGlobals => true;
     public override bool HasTargetDirectives => false;
     public override bool DefaultsToArbitraryPrecision => true;

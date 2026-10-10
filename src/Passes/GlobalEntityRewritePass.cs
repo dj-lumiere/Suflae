@@ -343,20 +343,6 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
                             })
                            .ToList()
             },
-            WaitforExpression x => x with
-            {
-                Operand = RW(e: x.Operand),
-                Timeout = x.Timeout is null
-                    ? null
-                    : RW(e: x.Timeout)
-            },
-            DependentWaitforExpression x => x with
-            {
-                Operand = RW(e: x.Operand),
-                Timeout = x.Timeout is null
-                    ? null
-                    : RW(e: x.Timeout)
-            },
             BackIndexExpression x => x with { Operand = RW(e: x.Operand) },
             CarrierPayloadExpression x => x with { Carrier = RW(e: x.Carrier) },
             BlockExpression x => x with { Value = RW(e: x.Value) },

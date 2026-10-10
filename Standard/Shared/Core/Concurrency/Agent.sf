@@ -3,14 +3,19 @@ module Core
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
-### Which substrate runs an `Agent[T]`. One concrete handle backs both so a heterogeneous set can be
-### raced from a single `List[Agent[T]]`.
-@rf("AgentKind")
-choice AgentKind
-    ### Backed by a stackful coroutine on this thread's implicit scheduler (a `suspended routine`).
-    CORO
-    ### Backed by an OS worker thread (a `threaded routine`).
-    THREAD
+### Where an `Agent[T]` runs, chosen by the verb that starts it.
+@rf("AgentPlace")
+choice AgentPlace
+    ### Not started yet.
+    WAITING
+    ### Started with `start_now()`.
+    NOW
+    ### Started on this thread beside its other jobs.
+    HERE
+    ### Started on a thread of its own.
+    APART
+    ### Consumed: its value was taken.
+    DONE
 
 ### Waits for `duration` to elapse. UNCOLORED: inside a scheduler-driven coroutine it PARKS — the
 ### scheduler runs other coroutines meanwhile and resumes this one when the timer fires — so it
@@ -30,8 +35,8 @@ routine waitfor(duration: Duration)
 @rf("yield_now")
 routine yield_now()
 
-### Whether cooperative cancellation has been requested for the currently-running agent — a
-### `suspended` coroutine or a `threaded` worker. An agent body polls this and returns early to stop
+### Whether cooperative cancellation has been requested for the currently-running agent, a fiber or a thread
+### of its own. An agent body polls this and returns early to stop
 ### cooperatively; this is the ONLY way to halt a CPU-bound worker thread (a thread cannot be killed).
 ### A coroutine's `waitfor` also honors the request by returning early. Outside any agent it is always
 ### false. :returns: true if cancellation was requested for this agent.
