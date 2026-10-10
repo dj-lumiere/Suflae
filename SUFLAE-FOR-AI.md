@@ -40,8 +40,8 @@ through a `.rf` module the program imports (section 18).
    `gcd(a: 252, b: 105)` is right. Single-argument calls may be positional. Routines annotated
    `@positional` accept all-positional calls. Mixing named and positional in one call is always an error
    (SF-S512).
-2. **Every routine you write ends with an explicit `return`**, even one that returns nothing. A failable
-   routine may also end with `throw`. Script-mode top-level code (rule 6) needs none.
+2. **A routine that returns a value returns it on every path** (`return x`). A routine that returns nothing
+   needs no closing `return`: it ends where its body ends. `return` still leaves one early.
 3. **Entities are shared; records are copied.** `var b = a` on an entity gives a second name for the same
    object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
@@ -1112,6 +1112,12 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 `!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
 words.
 
+The word operators `to` `til` `by` `have` `lack` `is` `isnot` `in` `as` `and` `or` are keywords only where an
+operator stands, right after something that ends an expression (`0 to 10`, `xs have v`, `each x in xs`). Anywhere
+else they are names: `var to = 3`, `routine step(by: Integer, to: Integer)`, `by + to`. Two places keep them
+keywords: a `when` arm that starts with `is`/`isnot`, and `else as p`. `not` starts an expression, so it is always a
+keyword.
+
 ## 23. Relation to RazorForge and interop
 
 RazorForge is the same object model with the ownership dial at one name per entity (a single owner,
@@ -1148,5 +1154,5 @@ Not built yet:
 - stronger runtime reflection in `ObjectHacker` beyond reading, writing and watching member variables.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every
-argument, end every routine with `return`, use bare `Integer`/`Decimal` numbers, and prefer `when` over
-nested conditionals.
+argument, return a value on every path of a routine that has one, use bare `Integer`/`Decimal` numbers, and
+prefer `when` over nested conditionals.
