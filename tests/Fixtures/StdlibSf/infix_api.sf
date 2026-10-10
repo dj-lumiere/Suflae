@@ -1,7 +1,6 @@
 module Tests/StdlibSf/InfixApi
 
 import IO/Console
-
 # A routine marked `@infix` is written between its operands.
 
 record Vec

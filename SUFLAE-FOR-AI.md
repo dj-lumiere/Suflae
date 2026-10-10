@@ -536,7 +536,10 @@ variant Number
   `have` / `lack` / `==` (`perms have Permission.WRITE`), and taken off with `without` (`perms.without(WRITE)`: where a
   value of the flags type goes, its members are named bare).
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
-  `var d: Number = none`) and take it apart with `when` / `is T as name`.
+  `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Integer | Text`,
+  `List[Circle | Square]` (same types in any order = one type; a smaller one goes where a larger one is expected;
+  `define Circle | Square as Shape` names it). A value of a member goes in as an argument, initializer, `return` or
+  new value.
 - **crashable**: an error type (§11).
 
 ## 11. Errors and failure
