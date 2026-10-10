@@ -522,7 +522,7 @@ internal sealed class EntityLoweringPass
             MemberExpression m => LowerMemberExpression(m: m),
             // `d[i]` on a Roamed container: recurse into the receiver so its identifier retypes to
             // Roamed[E] (else the getitem receiver stays bare-typed and OperatorLoweringPass lowers it
-            // to `Dict.getitem` with the raw RoamController handle — RoamedProjectionLoweringPass then
+            // to `Dict.getitem` with the raw RoamManager handle — RoamedProjectionLoweringPass then
             // can't see it's Roamed and skips the `raw_inner()` projection, crashing at runtime).
             IndexExpression ix => LowerIndexExpression(ix: ix),
             // `x is None` / `x isnot None` on a nullable entity reference (`E?` = Roamed[E]): rewrite
@@ -547,12 +547,12 @@ internal sealed class EntityLoweringPass
             CallExpression call => LowerCallExpression(call: call),
             // A generic-instance construction like `List[Node]()` stays a GenericMemberRoutineCallExpression
             // through codegen (the explicit `[T]` args keep it out of CallExpression form), so it must
-            // be promoted here too — else a bare SF container never gets a RoamController and cycle
+            // be promoted here too — else a bare SF container never gets a RoamManager and cycle
             // collection reads its raw buffer as a controller and crashes. Mirror the CallExpression
             // construction path: recurse args, retain Roamed-field args, then `.roam()` (promote).
             GenericMemberRoutineCallExpression gmce => LowerGenericMemberRoutineCall(gmce: gmce),
             // f-string: recurse into each embedded `{ expr }` so entity references inside it retype
-            // (else e.g. `f"{b.size}"` reads `b` as a bare entity — actually the RoamController — and
+            // (else e.g. `f"{b.size}"` reads `b` as a bare entity — actually the RoamManager — and
             // returns the refcount instead of the field).
             InsertedTextExpression fstr => LowerInsertedText(fstr: fstr),
             BinaryExpression bin => LowerBinaryExpression(bin: bin),
@@ -640,7 +640,7 @@ internal sealed class EntityLoweringPass
     }
 
     // f-string: recurse into each embedded `{ expr }` so entity references inside it retype
-    // (else e.g. `f"{b.size}"` reads `b` as a bare entity — actually the RoamController — and
+    // (else e.g. `f"{b.size}"` reads `b` as a bare entity — actually the RoamManager — and
     // returns the refcount instead of the field).
     private InsertedTextExpression LowerInsertedText(InsertedTextExpression fstr)
     {
@@ -742,7 +742,7 @@ internal sealed class EntityLoweringPass
 
         // Project each Roamed argument that flows into a BARE-entity parameter through
         // `.raw_inner()`. SF routine/memberRoutine parameters are NOT Roamed-substituted, so their slot
-        // is a bare `E` and must receive the real entity pointer — passing the RoamController
+        // is a bare `E` and must receive the real entity pointer — passing the RoamManager
         // handle makes the callee read the controller as the entity (`x.field` → crash). Borrow
         // semantics: no retain, the caller keeps ownership. Skips construction, whose args are field
         // stores needing a retained Roamed (handled above). Mirrors the memberRoutine-receiver `raw_inner`
@@ -763,9 +763,9 @@ internal sealed class EntityLoweringPass
     // Receiver projection: a Roamed handle flowing as the RECEIVER into a BARE-`me` memberRoutine
     // must be projected through `.raw_inner()` to the real entity pointer. Stdlib entities
     // (analyzed in RF mode — e.g. an iterator's `emit!`/`emit`'s try variant) have a bare `me`
-    // (MeType is NOT Roamed), so passing the RoamController handle makes the callee read the
+    // (MeType is NOT Roamed), so passing the RoamManager handle makes the callee read the
     // controller as the entity and crash. USER SF entity memberRoutines have MeType=Roamed and
-    // correctly take the handle; memberRoutines declared on Roamed/RoamController itself
+    // correctly take the handle; memberRoutines declared on Roamed/RoamManager itself
     // (roam/raw_inner/is_none) own the handle too. Gate on the resolved routine owning a
     // bare entity with a non-Roamed MeType. Mirrors the argument projection.
     private static Expression ProjectRoamedReceiverIntoBareMe(CallExpression call,
@@ -824,7 +824,7 @@ internal sealed class EntityLoweringPass
 
     // A generic-instance construction like `List[Node]()` stays a GenericMemberRoutineCallExpression
     // through codegen (the explicit `[T]` args keep it out of CallExpression form), so it must be
-    // promoted here too — else a bare SF container never gets a RoamController and cycle collection
+    // promoted here too — else a bare SF container never gets a RoamManager and cycle collection
     // reads its raw buffer as a controller and crashes. Mirror the CallExpression construction path:
     // recurse args, retain Roamed-field args, then `.roam()` (promote).
     private Expression LowerGenericMemberRoutineCall(GenericMemberRoutineCallExpression gmce)

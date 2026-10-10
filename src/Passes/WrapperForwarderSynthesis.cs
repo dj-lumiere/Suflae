@@ -20,7 +20,7 @@ namespace Suflae.Passes;
 /// the inner container type itself (a <c>RF::Y -&gt; SF Y</c> return re-wrap is not built yet, so
 /// container-returning methods like <c>copy</c>/<c>sorted</c> are skipped for now). Constructors and
 /// <c>destruct</c> are excluded — the wrapper hand-writes its constructor and gets a synthesized field-walk
-/// <c>destruct</c> (called by RoamController).
+/// <c>destruct</c> (called by RoamManager).
 /// </summary>
 internal static class WrapperForwarderSynthesis
 {
