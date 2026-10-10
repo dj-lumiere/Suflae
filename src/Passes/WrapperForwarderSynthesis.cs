@@ -64,7 +64,7 @@ internal static class WrapperForwarderSynthesis
     /// (never an approachable SF surface). The read-index token <c>Accessing</c> is deliberately excluded —
     /// it is the operator-lowering target of <c>getitem</c>/<c>setitem</c>.</summary>
     private static readonly HashSet<string> InternalBorrowTokens = new(collection:
-        ["Controlling", "Receiving", "Watching", "Enterable"],
+        ["Controlling", "Receiving", "Watched", "Enterable"],
         comparer: StringComparer.Ordinal);
 
     /// <summary>Whether <paramref name="type"/> is (or is a generic over) an internal borrow token — the
@@ -324,7 +324,7 @@ internal static class WrapperForwarderSynthesis
         }
 
         // Internal borrow-token surface: a method taking a mutable/lifecycle access token
-        // (`Controlling`/`Receiving`/`Watching`/`Enterable`) over an internal node type is an
+        // (`Controlling`/`Receiving`/`Watched`/`Enterable`) over an internal node type is an
         // implementation helper (`insert_non_full(node: Controlling[BTreeListNode[T]], ..)`), never
         // an approachable SF surface method — and forwarding it over-prunes at codegen. The
         // read-index token `Accessing` (used by `getitem`/`setitem` operator lowering) is KEPT.

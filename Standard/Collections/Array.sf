@@ -14,15 +14,15 @@ routine Array[T, COUNT].count() -> Integer
 ### Returns the element at `index` (`a[i]`).
 ### :param index: The position to read, from 0.
 routine Array[T, COUNT].getitem!(index: Integer) -> T
-needs T obeys Assignable
+needs RecordType T
     return me.at(position: position_of(value: index))
 
 ### Returns the element at `position`, counted with `U64`.
 ### :param position: The position to read, from 0.
 @inline
 routine Array[T, COUNT].at!(position: U64) -> T
-needs T obeys Assignable
-    return me.read(position: me.filled(position: position)).assign()
+needs RecordType T
+    return me.read(position: me.filled(position: position)).share()
 
 ### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
 ### :param index: The position to write, from 0.
@@ -107,13 +107,13 @@ routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
 ### skipped.
 ### :param range: The positions to copy.
 routine Array[T, COUNT].getitem(range: Range[Integer]) -> List[T]
-needs T obeys Assignable
+needs RecordType T
     var result = List[T]()
     var n: U64 = COUNT
     var count = Integer(from: n)
     each i in range
         if not i.is_negative() and i < count
-            result.add_last(value: me.get_raw(index: U64(from: i)).assign())
+            result.add_last(value: me.get_raw(index: U64(from: i)).share())
     return result
 
 ### Returns the position of the first element equal to `value`.

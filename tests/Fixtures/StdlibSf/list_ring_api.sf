@@ -47,7 +47,7 @@ routine start()
     while i < 10
         queue.add_last(value: i)
         if i % 3 == 2
-            discard queue.remove_first()
+            queue.remove_first()
         i = i + 1
     var total = 0
     each n in queue
@@ -62,7 +62,7 @@ routine start()
     boxes.add_first(value: box)
     boxes.add_at(index: 1, value: box)
     boxes.rotate_left(n: 1)
-    discard boxes.remove_first()
+    boxes.remove_first()
     boxes.truncate(new_count: 1)
     box = Box(id: 0)
     boxes = List[Box]()

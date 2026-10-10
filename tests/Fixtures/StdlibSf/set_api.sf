@@ -8,17 +8,17 @@ routine start()
     show(f"new size: {s.count()}")
     show(f"is_empty (new): {s.is_empty()}")
 
-    discard s.add(value: 10)
-    discard s.add(value: 20)
-    discard s.add(value: 30)
-    discard s.add(value: 20)  # duplicate, no-op
+    s.add(value: 10)
+    s.add(value: 20)
+    s.add(value: 30)
+    s.add(value: 20)  # duplicate, no-op
     show(f"size after add 10/20/30/20: {s.count()}")
     show(f"contents: {s}")
 
     show(f"contains 20: {s have 20}")
     show(f"contains 99: {s have 99}")
 
-    discard s.remove(value: 10)
+    s.remove(value: 10)
     show(f"size after remove(10): {s.count()}")
     show(f"contents after remove: {s}")
     show(f"contains 10: {s have 10}")

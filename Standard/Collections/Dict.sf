@@ -73,7 +73,7 @@ needs TKey obeys Hashable, Equatable
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
-        discard result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
+        result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
         i = i +% 1u64
     return result
 
@@ -269,7 +269,7 @@ routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: Integer(from: me.count))
     each entry in me
-        discard result.add(key: entry.key, value: entry.value)
+        result.add(key: entry.key, value: entry.value)
     return result
 
 # ============================================================================
@@ -309,7 +309,7 @@ needs TValue obeys Equatable
 routine Dict[TKey, TValue].serialize() -> SerialValue
     var result = RF::Core.Dict[Text, SerialValue]()
     each entry in me
-        discard result.add(key: entry.key.represent(), value: entry.value.serialize())
+        result.add(key: entry.key.represent(), value: entry.value.serialize())
     return SerialValue(result.duplicate())
 
 # ============================================================================

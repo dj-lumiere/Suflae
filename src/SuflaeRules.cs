@@ -73,6 +73,7 @@ public sealed class SuflaeRules : LanguageRules
     public override bool ChecksOwnership => false;
     public override bool ChecksAccessTokens => false;
     public override bool ChecksReadonly => false;
+    public override bool MarksDroppedResults => false;
     public override bool ChecksShapeAtRunTime => true;
     public override bool ZeroIsEmptyPlace => true;
 

@@ -63,8 +63,8 @@ entity BytesUtf8LossyEmittable
 ### controller (empty or static literals) the copy is a bitwise duplicate
 ### with no atomic op.
 ### :returns: The resulting `Bytes` value.
-@rf("Bytes.assign")
-routine Bytes.assign() -> Bytes
+@rf("Bytes.share")
+secret routine Bytes.share() -> Bytes
 
 ### Copy (Copyable): for a managed Bytes this is the same reference-share as `assign` (the buffer is a
 ### co-owned managed resource behind a ptr, so a co-owning ref-bump is the copy). Defined explicitly —

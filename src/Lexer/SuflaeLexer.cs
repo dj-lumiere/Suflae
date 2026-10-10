@@ -210,7 +210,7 @@ public partial class SuflaeLexer
             // Recovery prefix keywords: wrap a failable call into a carrier (Maybe/Check/Lookup).
             // Bare words only — `try_foo`/`check_foo`/`lookup_foo` tokenize as single identifiers, untouched.
             [key: "try"] = TokenType.Try,
-            [key: "grab"] = TokenType.Grab,
+            [key: "check"] = TokenType.Check,
             [key: "lookup"] = TokenType.Lookup,
             // Module system
             [key: "import"] = TokenType.Import,
@@ -230,7 +230,6 @@ public partial class SuflaeLexer
             [key: "to"] = TokenType.To,
             [key: "til"] = TokenType.Til,
             [key: "by"] = TokenType.By,
-            [key: "discard"] = TokenType.Discard,
 
             // Logical operators
             [key: "and"] = TokenType.And,

@@ -194,7 +194,7 @@ routine List[T].remove_first!() -> T
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
 routine List[T].remove_at!(index: Integer) -> T
-    var at = me.check(index: index)
+    var at = me.checked_position(index: index)
     me.straighten()
     var value = me.items.take_at(position: at)
     me.items.carry(source: at + 1, target: at, count: me.count - at - 1)
@@ -300,13 +300,13 @@ routine List[T].last_or_default(default_value: T) -> T
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
 routine List[T].getitem!(index: Integer) -> T
-    return me.items.at(position: me.place(index: me.check(index: index)))
+    return me.items.at(position: me.place(index: me.checked_position(index: index)))
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
 routine List[T].setitem!(index: Integer, value: T)
-    me.items.put(position: me.place(index: me.check(index: index)), value: value)
+    me.items.put(position: me.place(index: me.checked_position(index: index)), value: value)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
@@ -430,7 +430,7 @@ routine List[T].sorted_by(compare: Routine[(T, T), Bool]) -> List[T]
 ### :param first: One position.
 ### :param second: The other position.
 routine List[T].swap!(first: Integer, second: Integer)
-    me.items.swap_at(first: me.place(index: me.check(index: first)), second: me.place(index: me.check(index: second)))
+    me.items.swap_at(first: me.place(index: me.checked_position(index: first)), second: me.place(index: me.checked_position(index: second)))
     return
 
 ### Reverses the order of the elements.
@@ -451,7 +451,7 @@ secret routine List[T].place(index: U64) -> U64
     return if place >= room then place - room else place
 
 ### The position `index` names, crashing unless it is the position of an element.
-secret routine List[T].check!(index: Integer) -> U64
+secret routine List[T].checked_position!(index: Integer) -> U64
     var at = position_of(value: index)
     if at >= me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)

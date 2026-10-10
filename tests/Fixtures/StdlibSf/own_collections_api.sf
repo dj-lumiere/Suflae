@@ -27,12 +27,12 @@ routine start()
     show(f"filled={filled} capacity_ok={List[Integer](capacity: 8).capacity() >= 8}")
 
     var d = {"a": 1, "b": 2}
-    discard d.add(key: "c", value: 3)
+    d.add(key: "c", value: 3)
     var sum = 0
     each e in d
         sum = sum + e.value
     show(f"d={d} count={d.count()} d[a]={d["a"]} sum={sum} keys={d.keys()} keys_count={d.keys().count()}")
-    discard d.remove(key: "a")
+    d.remove(key: "a")
     show(f"after remove={d} count={d.count()} has_a={d have "a"}")
 
     var s = {1, 2, 3}

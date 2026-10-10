@@ -114,7 +114,7 @@ routine start()
     boxes[2] = lone
     boxes.move(from: 2, into: 1, count: 1)
     lone = Box(holder: none, id: 0)
-    discard boxes.take(index: 0)
+    boxes.take(index: 0)
     boxes = Buffer[Box](capacity: 0)
     show(f"released: {not lone_seen.is_alive()}")
     show("DONE")

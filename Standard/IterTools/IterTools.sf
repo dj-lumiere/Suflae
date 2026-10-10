@@ -18,7 +18,7 @@ routine Iterable[T].Set() -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T]()
     each item in me
-        discard result.add(value: item)
+        result.add(value: item)
     return result
 
 ### Returns how many values there are.

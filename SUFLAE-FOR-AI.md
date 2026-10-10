@@ -54,7 +54,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **Failable routines carry `!` on the DECLARATION only** (`routine parse!(...)`); call sites never write
-   it. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `grab` / `lookup` and
+   it. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` / `lookup` and
    take the result apart with `when`. There is no try/catch and no `try_parse` name form (§11).
 8. **Conditional expressions are top-level only.** `return if c then a else b` works;
    `f(x: if c then a else b)` and `(if c then a else b) + 1` are parse errors by design. Use `when` or a
@@ -62,7 +62,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
 9. **Changing a collection while `each`-looping it is banned.** `each x in xs` with `xs.add_last(...)` in the
    body is a build error (SF-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
-10. **Ignored `Bool` results need `discard`**: `discard seen.add(value: v)` (SF-W007).
+10. **A result you do not need takes no marker**: `seen.add(value: v)` on its own line simply drops the `Bool`.
 11. **A module-level `var` is an error (SF-S435).** Module-level mutable state is `global name: Type = init`
     (§6). Constants are `preset`.
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
@@ -72,7 +72,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `suspended`, `retrieve()`, `try`/`grab`/`lookup`, `none`, `show`, `start`.
+    `preset`, `each`, `when`, `suspended`, `retrieve()`, `try`/`check`/`lookup`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -497,12 +497,12 @@ routine find!(items: List[Text], name: Text) -> Integer
 | Keyword       | Result                           | Holds                                      |
 |---------------|----------------------------------|--------------------------------------------|
 | `try EXPR`    | `Maybe[T]`, written `T?`         | the value, or `None` (error or absence)    |
-| `grab EXPR`   | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
+| `check EXPR`   | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
 | `lookup EXPR` | `Lookup[T]` = `None \| T \| Crashables` | the value, `None` (absent), or the error |
 
 ```suflae
 routine start()
-    when grab parse(n: -1)
+    when check parse(n: -1)
         is Integer v => show(f"ok {v}")
         is NopeError e => show(f"caught: {e.what}")
         is Crashables e => show(f"{e.crash_title()}: {e.crash_message()}")
@@ -520,13 +520,13 @@ routine start()
 - **With a keyword in front, every failure beneath it is recovered, at any depth; only `pierce` still
   crashes.** That covers a `throw`/`absent` in the called routine and in every routine it calls, bare calls
   included (failable or not: `try f()` also recovers a division by zero inside a plain helper `f` calls), a
-  checked operation (`try a + b` recovers a fixed-width overflow, `grab a // b` a division by zero,
+  checked operation (`try a + b` recovers a fixed-width overflow, `check a // b` a division by zero,
   `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
-  (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `grab`: the
+  (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `check`: the
   error, an absence as `AbsentValueError`; `lookup`: the error or `None`), and evaluation stops at the first
   one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
   inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).List()`,
-  `grab items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
+  `check items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
   several levels or kept in a record) is recovered by the keyword above the call that reaches it, at any
   depth. A routine value called with no keyword above that call still crashes on failure. An `each` loop over
   an adapter holding a lambda ends only when its source ends: a failure inside the lambda is the loop's
@@ -535,12 +535,12 @@ routine start()
   fatal walls below stay fatal.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
 - **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
-  `throw` (status 82), and it crashes the same way under `try`/`grab`/`lookup` at any depth. Use it for a
+  `throw` (status 82), and it crashes the same way under `try`/`check`/`lookup` at any depth. Use it for a
   broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
   does not make a routine failable (no `!` needed for it).
-- Typical use: `try` when only absence matters, `grab` for a routine that throws, `lookup` for one that can
+- Typical use: `try` when only absence matters, `check` for a routine that throws, `lookup` for one that can
   both throw and be absent.
-- A routine that returns nothing gives `Check[None]` under `grab` (its success arm is `is None`) and `Bool`
+- A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
   under `try` (`true` when it succeeded).
 - A `when` on a `Check` or `Lookup` **must** have the success arm (`is T v` or `else v`); leaving it out is
   a build error. `is NopeError e` takes only that error and binds it as a `NopeError` (its member variables
@@ -669,7 +669,7 @@ var empty = List[Text]()
 nums.add_last(value: 4)
 show(nums[0])                             # 3
 show(nums[^1])                            # 4, the last element
-discard ages.add(key: "grace", value: 85)
+ages.add(key: "grace", value: 85)
 show(ages["ada"])
 if ages have "alan"
     show("found")
@@ -696,7 +696,7 @@ each entry in ages
   `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
   same way.
 - `set.add(value:)`, `set.remove(value:)`, `dict.add(key:, value:)`, `dict.remove(key:)` return `Bool`:
-  `discard` it when unused (SF-W007). `Dict` and `Set` iterate in insertion order.
+  a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
 - Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
 - Iterator adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
@@ -736,14 +736,14 @@ routine start()
   `copy_to(...)`, `move_to(...)`, `delete()`, `touch()`; `Directory(at: "data")` with `exists()`,
   `create()`, `create_all()`, `list()`, `entries()`, `walk()`, `file(name:)`, `subdir(name:)`. Routines
   that touch the disk and can fail (`size`, `delete`, `list`, …) are failable: recover with
-  `try`/`grab`. `current_dir()`, `home_dir()`, `temp_dir()` are free routines. Pure path-string helpers
+  `try`/`check`. `current_dir()`, `home_dir()`, `temp_dir()` are free routines. Pure path-string helpers
   (`join_path(a:, b:)`, `file_name`, `extension`, …) live in `import IO/FileSystem`.
 - `read_text` / `write_text` are safe inside a coroutine: the coroutine waits while other coroutines run.
 - **`using`** binds a resource for a block and releases it at the block's end, however the block is left:
 
 ```suflae
 using File(at: "out.txt").open_write() as sink
-    discard sink.store(data: "hello\n".encode_as_utf8())
+    sink.store(data: "hello\n".encode_as_utf8())
 ```
 
   A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
@@ -922,14 +922,13 @@ number). At most 20 are shown per batch.
 |---------------|-----------------------------------------------------|---------------------------------------------------|
 | SF-S510/S512  | positional arguments in a multi-parameter call      | name every argument                               |
 | SF-S010       | literal out of range for its type                   | use the right constant (`U8_MAX`)                 |
-| SF-W007       | ignored `Bool` result                               | `discard expr`                                    |
 | SF-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
 | SF-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
 | SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | SF-S750/S751  | `throw`/`absent` in a routine without `!`           | declare it `routine name!(...)`                   |
-| SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`grab`/`lookup`       |
+| SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`/`lookup`       |
 | SF-G212       | `x in coll` as a test                               | `coll have x`                                     |
 | SF-W008       | an agent that is never run                          | `.retrieve()` or `.execute()` it                  |
 
@@ -944,10 +943,10 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Protocols and constraints**: `obeys` `disobeys` `needs` `onlyif` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `unless` `when` `is` `isnot` `loop` `while` `each`
   `break` `continue` `return` `throw` `pierce` `absent`
-- **Recovery**: `try` `grab` `lookup`
+- **Recovery**: `try` `check` `lookup`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
-- **Other**: `using` `as` `define` `given` `discard` `pass` (an empty body: a type's, or a block's that
+- **Other**: `using` `as` `define` `given` `pass` (an empty body: a type's, or a block's that
   does nothing)
 - **Logic**: `and` `or` `not` `but`
 - **Literals**: `true` `false` `None` `none`

@@ -24,13 +24,13 @@ routine inner!(n: Integer) -> Integer
 
 # No error arm: the error passes on to the caller.
 routine passes!(n: Integer) -> Integer
-    when grab inner(n: n)
+    when check inner(n: n)
         is Integer v =>
             return v + 1
 
 # Rethrows the caught error: it moves to this routine's carrier.
 routine rethrows!(n: Integer) -> Integer
-    when grab inner(n: n)
+    when check inner(n: n)
         is Integer v =>
             return v + 2
         is Crashables e =>
@@ -39,24 +39,24 @@ routine rethrows!(n: Integer) -> Integer
 routine start()
     var i = 2
     while i < 5
-        when grab inner(n: i)
+        when check inner(n: i)
             is Integer v =>
                 show(f"ok {v}")
             is NopeError e =>
                 show(f"nope arm: {e.what}")
             is Crashables e =>
                 show(f"other arm: {e.crash_title()} / {e}")
-        when grab passes(n: i)
+        when check passes(n: i)
             is Integer v =>
                 show(f"passes ok {v}")
             is Crashables e =>
                 show(f"passes caught {e.crash_message()}")
-        when grab rethrows(n: i)
+        when check rethrows(n: i)
             is Integer v =>
                 show(f"rethrows ok {v}")
             is Crashables e =>
                 show(f"rethrows caught {e.crash_message()}")
-        var c = grab inner(n: i)
+        var c = check inner(n: i)
         if c is NopeError
             show("is NopeError")
         when c
@@ -77,7 +77,7 @@ routine start()
     var total = 0
     var k = 0
     while k < 20000
-        when grab rethrows(n: 3 + k % 2)
+        when check rethrows(n: 3 + k % 2)
             is Integer v =>
                 total += v
             is Crashables e =>

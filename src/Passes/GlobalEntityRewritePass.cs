@@ -142,7 +142,7 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
         return stmt switch
         {
             ExpressionStatement s => s with { Expression = RW(e: s.Expression) },
-            DiscardStatement s => s with { Expression = RW(e: s.Expression) },
+            DropStatement s => s with { Expression = RW(e: s.Expression) },
             AssignmentStatement s => s with { Target = RW(e: s.Target), Value = RW(e: s.Value) },
             ReturnStatement { Value: not null } s => s with { Value = RW(e: s.Value) },
             VariantReturnStatement { Value: not null } s => s with { Value = RW(e: s.Value) },

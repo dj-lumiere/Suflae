@@ -96,6 +96,6 @@ needs EntityType T
 ### keep it alive.
 ### :param target: The entity.
 ### :returns: The observation.
-routine watch(target: Roamed[T]) -> Watching[T]
+routine watch(target: Roamed[T]) -> Watched[T]
 needs EntityType T
     return target.watch()

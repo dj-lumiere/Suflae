@@ -228,7 +228,7 @@ internal sealed class EntityLoweringPass
                 Expression: BinaryExpression { Operator: BinaryOperator.Assign } bin
             } es => LowerBinaryAssignStatement(stmt: stmt, es: es, bin: bin),
             ExpressionStatement es => LowerExpressionStatement(stmt: stmt, es: es),
-            DiscardStatement dis => LowerDiscardStatement(stmt: stmt, dis: dis),
+            DropStatement dis => LowerDropStatement(stmt: stmt, dis: dis),
             IfStatement ifs => LowerIfStatement(stmt: stmt, ifs: ifs),
             WhileStatement w => LowerWhileStatement(stmt: stmt, w: w),
             LoopStatement loop => LowerLoopStatement(stmt: stmt, loop: loop),
@@ -248,7 +248,7 @@ internal sealed class EntityLoweringPass
             : es with { Expression = e };
     }
 
-    private Statement LowerDiscardStatement(Statement stmt, DiscardStatement dis)
+    private Statement LowerDropStatement(Statement stmt, DropStatement dis)
     {
         Expression e = LowerExpression(expr: dis.Expression);
         return ReferenceEquals(objA: e, objB: dis.Expression)
@@ -558,7 +558,7 @@ internal sealed class EntityLoweringPass
             BinaryExpression bin => LowerBinaryExpression(bin: bin),
             UnaryExpression un => LowerUnaryExpression(un: un),
             NamedArgumentExpression namedArg => LowerNamedArgumentExpression(namedArg: namedArg),
-            // An analyzed `try`/`grab`/`lookup` is its recovery-variant call: lower that call in its place
+            // An analyzed `try`/`check`/`lookup` is its recovery-variant call: lower that call in its place
             // (as AstRewriter splices it) so a Roamed receiver inside it retypes.
             RecoveryExpression recovery => recovery.LoweredCall is { } lowered
                 ? LowerExpression(expr: lowered)

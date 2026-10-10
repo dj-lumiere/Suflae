@@ -96,8 +96,8 @@ common routine Integer.from_literal(text: Text) -> Integer
 ### Returns a copy of this value. A value below 2^64 is copied as it is. A bigger one shares its limb buffer
 ### with the copy and bumps its refcount: no big-integer data is copied.
 ### :returns: The resulting `Integer` value.
-@rf("Integer.assign")
-routine Integer.assign() -> Integer
+@rf("Integer.share")
+secret routine Integer.share() -> Integer
 
 ### Adds `other` to this value using exact integer arithmetic.
 ### No overflow occurs; the storage grows as needed.

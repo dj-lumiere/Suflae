@@ -130,7 +130,7 @@ routine Buffer[T].setitem!(index: Integer, value: T)
 ### :param position: The position to read.
 @inline
 routine Buffer[T].at!(position: U64) -> T
-    return me.read(position: me.filled(position: position)).assign()
+    return me.read(position: me.filled(position: position)).share()
 
 ### Replaces what the place at `position` holds, counted with `U64`.
 ### :param position: The position to write.

@@ -37,8 +37,8 @@ entity TextEmittable
 ### controller (empty or static literals) the copy is a bitwise duplicate with
 ### no atomic op.
 ### :returns: The resulting `Text` value.
-@rf("Text.assign")
-routine Text.assign() -> Text
+@rf("Text.share")
+secret routine Text.share() -> Text
 
 ### Copy (Copyable): for an IMMUTABLE Text this is the same reference-share as `assign` (the buffer is
 ### never mutated, so a deep byte-copy would be wasteful). Defined explicitly — Text is a managed leaf

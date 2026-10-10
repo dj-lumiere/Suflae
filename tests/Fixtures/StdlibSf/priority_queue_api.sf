@@ -38,7 +38,7 @@ routine start()
         if p < last
             ordered = false
         last = p
-        discard nums.remove()
+        nums.remove()
     show(f"removal order sorted: {ordered}")
 
     var job = Job(name: "deploy")
@@ -47,7 +47,7 @@ routine start()
     jobs.add(element: job, priority: 2)
     jobs.add(element: job, priority: 1)
     show(f"front job: {jobs.peek().name}")
-    discard jobs.remove()
+    jobs.remove()
     jobs.clear()
     job = Job(name: "other")
     show(f"released: {not seen.is_alive()}")

@@ -66,7 +66,7 @@ needs TKey obeys Comparable
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
-        discard result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
+        result.add(key: pairs.get_raw(index: i).key, value: pairs.get_raw(index: i).value)
         i = i +% 1u64
     return result
 
@@ -247,7 +247,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
     var result = Dict[Text, SerialValue]()
     each entry in me
-        discard result.add(key: entry.key.represent(), value: entry.value.serialize())
+        result.add(key: entry.key.represent(), value: entry.value.serialize())
     return SerialValue(result.duplicate())
 
 # ============================================================================
