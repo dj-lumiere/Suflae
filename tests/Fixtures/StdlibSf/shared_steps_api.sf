@@ -3,7 +3,7 @@ module Tests/StdlibSf/SharedStepsApi
 import IO/Console
 
 # One-statement steps for state that several agents share: `set_if_absent` adds a key only when it is missing,
-# `items()` walks a copy, `put_if_room` never waits on a full queue, and `take_finished` collects finished work in
+# `items()` walks a copy, `add_last_if_room` never waits on a full mailbox, and `take_finished` collects finished work in
 # place, `next_finished` hands Agents over as they finish, and `gather_all` keeps every result and failure.
 routine double(n: Integer) -> Integer
     return n * 2
@@ -25,10 +25,10 @@ routine start()
         seats[f"{name}2"] = seat + 10
     show(f"seats: {seats.count()} ada={seats["ada"]} ada2={seats["ada2"]} bob2={seats["bob2"]}")
 
-    var q = Queue[Integer](capacity: 2)
-    show(f"room: {q.put_if_room(item: 1)} {q.put_if_room(item: 2)} {q.put_if_room(item: 3)} count={q.count()}")
+    var q = Mailbox[Integer](capacity: 2)
+    show(f"room: {q.add_last_if_room(value: 1)} {q.add_last_if_room(value: 2)} {q.add_last_if_room(value: 3)} count={q.count()}")
     q.close()
-    var closed = try q.put_if_room(item: 4)
+    var closed = try q.add_last_if_room(value: 4)
     show(f"after close: {closed is None}")
 
     var jobs = List[Agent[Integer]]()

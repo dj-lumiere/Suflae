@@ -1,0 +1,75 @@
+module Core
+
+import Numerics
+
+### A mailbox that agents pass values through, in order: `Mailbox[T](capacity: 8)`, then `m.add_last(value: x)` on
+### one side and `each x in m` (or `m.remove_first()`) on the other. Hand the same mailbox to every agent that adds or
+### takes.
+###
+### `add_last` waits while the mailbox is full, `each` and `remove_first` wait while it is empty. `close()` ends it,
+### from either side: a later `add_last` crashes with `ChannelClosedError`, and `each` takes what is left and then
+### ends. Nothing closes a mailbox by itself, so the side that is done calls `close()`. A mailbox nobody closes leaves
+### its readers waiting, which the runtime reports as a deadlock instead of hanging quietly.
+###
+### Several agents can take from one mailbox: each value goes to one of them.
+### :typeparam T: The values the mailbox carries.
+@self_locking
+entity Mailbox[T]
+relates RF::Core.ChannelDrain[T] as Iter
+obeys Iterable[T]
+    ### The sending side, kept open until `close()`.
+    secret sender: RF::Core.Sender[T]
+    ### The taking side, shared by every reader.
+    secret receiver: RF::Core.SharedReceiver[T]
+
+### Makes an empty mailbox that holds up to `capacity` values before `add_last` waits (0: each `add_last` waits for
+### a taker).
+### :param capacity: How many values it holds.
+### :returns: The new mailbox.
+routine Mailbox[T](capacity: Integer) -> Mailbox[T]
+    var (sender, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
+    return Mailbox[T](sender: sender, receiver: receiver)
+
+### Adds `value` at the end, waiting while the mailbox is full.
+### :param value: The value that goes in.
+### :throws: {ChannelClosedError} when the mailbox was closed.
+routine Mailbox[T].add_last!(value: T)
+    me.sender.send(item: value)
+    return
+
+### Adds `value` at the end only when the mailbox has room for it now, never waiting: the step a broadcast takes per
+### subscriber, where waiting on one full mailbox would hold up the rest. A mailbox of capacity 0 has room while no
+### value waits in it.
+### :param value: The value that goes in.
+### :returns: `true` when it went in, `false` when the mailbox was full.
+### :throws: {ChannelClosedError} when the mailbox was closed.
+routine Mailbox[T].add_last_if_room!(value: T) -> Bool
+    return me.sender.send_if_room(item: value)
+
+### Takes the first value out, waiting while the mailbox is empty.
+### :returns: The value that was first.
+### :throws: Crashes when the mailbox is closed and empty.
+routine Mailbox[T].remove_first!() -> T
+    var drain = me.receiver.iter()
+    return drain.emit()
+
+### Ends the mailbox: a later `add_last` crashes, and `each` takes what is left and then ends.
+routine Mailbox[T].close()
+    me.sender.close()
+    return
+
+### Whether the mailbox was closed.
+### :returns: `true` once `close()` ran.
+routine Mailbox[T].is_closed() -> Bool
+    return me.sender.is_closed()
+
+### How many values wait in the mailbox right now. Another agent can change it at once, so it is for showing, not
+### for deciding.
+### :returns: The number of values waiting.
+routine Mailbox[T].count() -> Integer
+    return me.receiver.count().to[Integer]()
+
+### Takes values in order (`each x in m`), waiting while the mailbox is empty, until it is closed and empty.
+### :returns: The walk over the mailbox.
+routine Mailbox[T].iter() -> RF::Core.ChannelDrain[T]
+    return me.receiver.iter()

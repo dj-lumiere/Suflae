@@ -1,7 +1,7 @@
 module Core
 
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
-# checks that the two still match. They are the library's own: a program passes values through a `Queue[T]`.
+# checks that the two still match. They are the library's own: a program passes values through a `Mailbox[T]`.
 
 ### The sending end of a channel. Clone it for multiple producers; the last one dropping (or an
 ### explicit `close`) closes the channel.

@@ -113,7 +113,7 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
 `preset` or `global`) of module `Foo`. Always available without an import: `Core` (the basic types,
-`List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, `Queue`), `Integer`, console output and input
+`List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, `Mailbox`), `Integer`, console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
 `PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`, `IO/FileSystem`
 (path strings), `Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
@@ -603,6 +603,10 @@ routine start()
   `throw` (status 82), and it crashes the same way under `try`/`check` at any depth. Use it for a
   broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
   does not make a routine failable (no `!` needed for it).
+- **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
+  running it crashes with `NotImplementedError` naming the routine, like `pierce`. It does not make the routine
+  failable and ends its path, so a body that is only `todo` needs no `return`. The build warns once per routine
+  that still has one (SF-W303). `pass` is an empty body on purpose, a different thing.
 - Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
   the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
@@ -914,35 +918,37 @@ routine start()
     return
 ```
 
-**Queues** (always available): one `Queue[T]` that every agent that puts or takes holds.
+**Mailboxes** (always available): one `Mailbox[T]` that every agent that adds or takes holds.
 
 ```suflae
-routine produce(q: Queue[Integer], n: Integer) -> Integer
+routine produce(m: Mailbox[Integer], n: Integer) -> Integer
     var i = 1
     while i <= n
-        q.put(item: i)
+        m.add_last(value: i)
         i = i + 1
-    q.close()
+    m.close()
     return n
 
 routine start()
-    var q = Queue[Integer](capacity: 2)
-    var job = agent produce(q: q, n: 5)
+    var m = Mailbox[Integer](capacity: 2)
+    var job = agent produce(m: m, n: 5)
     job.start_now()
-    var total = 0
-    each x in q
+    var first = m.remove_first()
+    var total = first
+    each x in m
         total = total + x
     show(f"total: {total}")
     return
 ```
 
-`put` waits while the queue is full (`capacity: 0`: each `put` waits for a taker) and crashes with
-`ChannelClosedError` once the queue is closed. `each x in q` waits while it is empty and ends when it is closed and
-empty. Nothing closes a queue by itself: the side that is done calls `close()`. Several agents taking from one
-queue each get different values. `q.count()` and `q.is_closed()` are snapshots another agent can change at once.
-`q.put_if_room(item: x)` never waits: it puts and returns `true` when there is room, returns `false` when the queue
-is full, and crashes with `ChannelClosedError` once it is closed (a broadcast over subscribers' queues uses it, so one
-full subscriber does not hold up the rest).
+`add_last` waits while the mailbox is full (`capacity: 0`: each `add_last` waits for a taker) and crashes with
+`ChannelClosedError` once the mailbox is closed. `remove_first()` takes one value, waiting while it is empty, and
+crashes once it is closed and empty. `each x in m` waits while it is empty and ends when it is closed and empty.
+Nothing closes a mailbox by itself: the side that is done calls `close()`. Several agents taking from one mailbox
+each get different values. `m.count()` and `m.is_closed()` are snapshots another agent can change at once.
+`m.add_last_if_room(value: x)` never waits: it adds and returns `true` when there is room, returns `false` when the
+mailbox is full, and crashes with `ChannelClosedError` once it is closed (a broadcast over subscribers' mailboxes uses
+it, so one full subscriber does not hold up the rest).
 
 A statement is one step for the agents that share an entity, so two statements can be split by another agent. A
 shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
@@ -1099,7 +1105,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each`
-  `break` `continue` `return` `throw` `pierce`
+  `break` `continue` `return` `throw` `pierce` `todo`
 - **Recovery**: `try` `check`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
