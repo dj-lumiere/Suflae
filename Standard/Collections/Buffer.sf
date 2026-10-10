@@ -71,7 +71,7 @@ obeys Emittable[T]
 ### Creates a buffer of `capacity` places, all zero.
 ### :param capacity: How many places it has.
 routine Buffer[T](capacity: Integer) -> Buffer[T]
-    return Buffer[T](room: U64(from: capacity))
+    return Buffer[T](room: capacity.to[U64]())
 
 ### Creates a buffer of `room` places, all zero, counted with `U64`.
 ### :param room: How many places it has.
@@ -104,7 +104,7 @@ secret routine new_buffer_storage[T](room: U64) -> BufferStorage[T]
 
 ### Returns how many places the buffer has.
 routine Buffer[T].capacity() -> Integer
-    return Integer(from: me.room)
+    return me.room.to[Integer]()
 
 ### Returns how many places the buffer has, as a `U64`.
 routine Buffer[T].room() -> U64
@@ -188,7 +188,7 @@ routine Buffer[T].erase!(index: Integer)
 routine Buffer[T].move!(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    var n = U64(from: count)
+    var n = count.to[U64]()
     if n == 0_u64
         return
     me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
@@ -244,8 +244,8 @@ routine Buffer[T].getitem!(range: Range[Integer]) -> Buffer[T]
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
     if range.start.is_negative()
         throw NegativeIndexError(index: range.start)
-    var first = U64(from: range.start)
-    var last = if range.inclusive then U64(from: range.end) + 1_u64 else U64(from: range.end)
+    var first = range.start.to[U64]()
+    var last = if range.inclusive then range.end.to[U64]() + 1_u64 else range.end.to[U64]()
     if last < first
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
     if last > me.room
@@ -272,7 +272,7 @@ routine Buffer[T].fill(value: T)
 ### zero. Views made before keep the old memory, which is left all zero. Only a whole buffer grows, not a view.
 ### :param capacity: How many places the new row has, at least `capacity()`.
 routine Buffer[T].grow!(capacity: Integer)
-    me.grow_to(room: U64(from: capacity))
+    me.grow_to(room: capacity.to[U64]())
     return
 
 ### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.
@@ -300,7 +300,7 @@ routine Buffer[T].grow_to!(room: U64)
 routine Buffer[T].rotate_left!(count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    me.turn(count: U64(from: count))
+    me.turn(count: count.to[U64]())
     return
 
 ### Moves every place `count` positions toward the front, as `rotate_left` does, counted with `U64`.
@@ -584,7 +584,7 @@ routine Buffer[T].walk!(first: Integer, count: Integer) -> BufferEmittable[T]
         throw NegativeIndexError(index: count)
     if count == 0
         return me.walking(first: 0_u64, count: 0_u64)
-    return me.walk_at(first: position_of(value: first), count: U64(from: count))
+    return me.walk_at(first: position_of(value: first), count: count.to[U64]())
 
 ### Returns a walk over `count` places from `first`, wrapping past the end of the buffer to its start, as `walk`
 ### does, counted with `U64`.
@@ -680,7 +680,7 @@ secret routine Buffer[T].filled!(position: U64) -> U64
     if T.type_kind() == TypeKind.ENTITY
         danger
             if me.slot(position: place).peek_as[Address]() == 0_addr
-                throw EmptyPlaceError(index: Integer(from: place))
+                throw EmptyPlaceError(index: place.to[Integer]())
     return place
 
 ### The memory of the place at a position of this buffer.

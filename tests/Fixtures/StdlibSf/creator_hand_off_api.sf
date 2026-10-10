@@ -15,7 +15,7 @@ routine Box() -> Box
     return make_box(n: 42_s64)
 
 routine Box(half: S32) -> Box
-    var b = make_box(n: S64(half) * 2)
+    var b = make_box(n: half.to[S64]() * 2)
     b.n = b.n + 1
     return b
 

@@ -36,7 +36,7 @@ secret routine HashIndex.home(hash: U64) -> U64
 
 ### The tag a used slot of this hash carries.
 secret routine HashIndex.tag_of(hash: U64) -> U8
-    return U8(hash & 127u64) +% 2u8
+    return (hash & 127u64).to[U8]() +% 2u8
 
 ### The tag of `slot`: 0 never used, 1 removed, else used.
 secret routine HashIndex.tag(slot: U64) -> U8

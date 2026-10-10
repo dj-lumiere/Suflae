@@ -68,7 +68,7 @@ obeys Emittable[DictEntry[TKey, TValue]]
 ### :returns: A dict of the given pairs.
 common routine Dict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> Dict[TKey, TValue]
 needs TKey obeys Hashable, Equatable
-    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: Integer(from: pairs.count()))
+    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: pairs.count().to[Integer]())
     var i = 0u64
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
@@ -92,7 +92,7 @@ routine Dict[TKey, TValue](key: SecureHashKey) -> Dict[TKey, TValue]
 routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, TValue]
     var room: U64 = 16
     if capacity > 16
-        room = U64(from: capacity)
+        room = capacity.to[U64]()
     return Dict[TKey, TValue](
         index: new_hash_index(capacity: room),
         keys: Buffer[TKey](room: room),
@@ -110,7 +110,7 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, 
 
 ### Returns the number of entries.
 routine Dict[TKey, TValue].count() -> Integer
-    return Integer(from: me.count)
+    return me.count.to[Integer]()
 
 ### Returns whether the dictionary has no entries.
 routine Dict[TKey, TValue].is_empty() -> Bool
@@ -204,7 +204,7 @@ routine Dict[TKey, TValue].setitem(key: TKey, value: TValue)
 
 ### Returns all keys in insertion order.
 routine Dict[TKey, TValue].keys() -> List[TKey]
-    var result = List[TKey](capacity: Integer(from: me.count))
+    var result = List[TKey](capacity: me.count.to[Integer]())
     var i: U64 = 0
     while i < me.used
         if me.live.at(position: i)
@@ -214,7 +214,7 @@ routine Dict[TKey, TValue].keys() -> List[TKey]
 
 ### Returns all values in insertion order, matching `keys()`.
 routine Dict[TKey, TValue].values() -> List[TValue]
-    var result = List[TValue](capacity: Integer(from: me.count))
+    var result = List[TValue](capacity: me.count.to[Integer]())
     var i: U64 = 0
     while i < me.used
         if me.live.at(position: i)
@@ -224,7 +224,7 @@ routine Dict[TKey, TValue].values() -> List[TValue]
 
 ### Returns all entries in insertion order.
 routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
-    var result = List[DictEntry[TKey, TValue]](capacity: Integer(from: me.count))
+    var result = List[DictEntry[TKey, TValue]](capacity: me.count.to[Integer]())
     var i: U64 = 0
     while i < me.used
         if me.live.at(position: i)
@@ -263,7 +263,7 @@ routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
 ### Returns an independent copy of this dictionary: its own entries, each key and value copied (a record is
 ### copied, an entity is shared).
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
-    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: Integer(from: me.count))
+    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count.to[Integer]())
     each entry in me
         result[entry.key] = entry.value
     return result

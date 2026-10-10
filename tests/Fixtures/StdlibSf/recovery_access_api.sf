@@ -31,13 +31,13 @@ routine score!(ages: Dict[Text, Integer], name: Text) -> Integer
 routine narrow!(n: S64) -> S8
     if n < 0
         throw AbsentValueError()
-    var b = S8(from: n)
+    var b = n.to[S8]()
     return b
 
 routine parsed!(t: Text) -> Integer
     if t == ""
         throw AbsentValueError()
-    return Integer(text: t)
+    return t.to[Integer]()
 
 # a routine that is not failable, with a subscript, called bare by a failable one
 routine last_of(items: List[Integer]) -> Integer

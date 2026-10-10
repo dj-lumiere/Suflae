@@ -77,7 +77,7 @@ needs T obeys Comparable
 
 ### Returns the number of elements.
 routine SortedSet[T].count() -> Integer
-    return Integer(from: me.tree.count())
+    return me.tree.count().to[Integer]()
 
 ### Returns true if this set contains no elements.
 routine SortedSet[T].is_empty() -> Bool

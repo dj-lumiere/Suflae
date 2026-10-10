@@ -76,7 +76,7 @@ needs TKey obeys Comparable
 
 ### Returns the number of key-value pairs in this dictionary.
 routine SortedDict[TKey, TValue].count() -> Integer
-    return Integer(from: me.tree.count())
+    return me.tree.count().to[Integer]()
 
 ### Returns true if this dictionary contains no entries.
 routine SortedDict[TKey, TValue].is_empty() -> Bool
@@ -183,7 +183,7 @@ routine SortedDict[TKey, TValue].last!() -> DictEntry[TKey, TValue]
 ### Returns all keys in ascending order.
 routine SortedDict[TKey, TValue].keys() -> List[TKey]
     var count = me.tree.count()
-    var result = List[TKey](capacity: Integer(from: count))
+    var result = List[TKey](capacity: count.to[Integer]())
     var i = 0u64
     while i < count
         result.add_last(value: me.tree.key_at(rank: i))
@@ -193,7 +193,7 @@ routine SortedDict[TKey, TValue].keys() -> List[TKey]
 ### Returns all values in key-ascending order.
 routine SortedDict[TKey, TValue].values() -> List[TValue]
     var count = me.tree.count()
-    var result = List[TValue](capacity: Integer(from: count))
+    var result = List[TValue](capacity: count.to[Integer]())
     var i = 0u64
     while i < count
         result.add_last(value: me.tree.value_at(rank: i))

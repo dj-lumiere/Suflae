@@ -57,7 +57,7 @@ routine start()
     show(f"each_over_call: {total} {words}")
 
     # `??` takes the fallback for every arm that is not the value.
-    var a = check Integer(text: "x") ?? 7
+    var a = check "x".to[Integer]() ?? 7
     var b = check look(n: -1) ?? 1
     var c = check look(n: 0) ?? 2
     var d = check look(n: 5) ?? 3

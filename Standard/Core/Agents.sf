@@ -112,7 +112,7 @@ routine List[Agent[T]].race!() -> T
             if not job.launch()
                 throw TaskSpawnError()
             job.join_race(race: race)
-        var winner = Integer(from: C::rf_race_wait(race: race))
+        var winner = (C::rf_race_wait(race: race)).to[Integer]()
         C::rf_race_end(race: race)
         var value = me[winner].result()
         each job in me

@@ -17,120 +17,6 @@ record B64
 obeys Numeric, Comparable, Copyable
     pass
 
-### Converts an `S8` to `B64`. The result is exact for all values.
-### :param from: The signed 8-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: S8) -> B64
-
-### Converts an `S16` to `B64`. The result is exact for all values.
-### :param from: The signed 16-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: S16) -> B64
-
-### Converts an `S32` to `B64`. The result is exact for all values.
-### :param from: The signed 32-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: S32) -> B64
-
-### Converts an `S64` to `B64`.
-### Values with magnitude larger than 2⁵³ may be rounded to the nearest
-### representable double.
-### :param from: The signed 64-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: S64) -> B64
-
-### Converts an `S128` to `B64`.
-### Precision is limited to approximately 53 bits of significand.
-### :param from: The signed 128-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: S128) -> B64
-
-### Converts a `U8` to `B64`. The result is exact for all values.
-### :param from: The unsigned 8-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: U8) -> B64
-
-### Converts a `U16` to `B64`. The result is exact for all values.
-### :param from: The unsigned 16-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: U16) -> B64
-
-### Converts a `U32` to `B64`. The result is exact for all values.
-### :param from: The unsigned 32-bit integer to convert.
-### :returns: The corresponding `B64` value.
-@rf("B64")
-routine B64(from: U32) -> B64
-
-### Converts a `U64` to `B64`.
-### Values larger than 2⁵³ may be rounded to the nearest representable double.
-### :param from: The unsigned 64-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: U64) -> B64
-
-### Converts a `U128` to `B64`.
-### Precision is limited to approximately 53 bits of significand.
-### :param from: The unsigned 128-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: U128) -> B64
-
-### Converts an `S256` to `B64` (precision limited to ~53 bits of significand).
-### :param from: The signed 256-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: S256) -> B64
-
-### Converts a `U256` to `B64` (precision limited to ~53 bits of significand).
-### :param from: The unsigned 256-bit integer to convert.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: U256) -> B64
-
-### Widens a half-precision float to double precision.
-### :param from: The `B16` value to widen.
-### :returns: An `B64` carrying the same numeric value.
-@rf("B64")
-routine B64(from: B16) -> B64
-
-### Widens a bfloat16 value to double precision (exact: bfloat16 is the top half of a `B32`).
-### :param from: The `BF16` value to convert.
-### :returns: The same value as a `B64`.
-@rf("B64")
-routine B64(from: BF16) -> B64
-
-### Widens a single-precision float to double precision.
-### :param from: The `B32` value to widen.
-### :returns: An `B64` carrying the same numeric value.
-@rf("B64")
-routine B64(from: B32) -> B64
-
-### Returns an existing `B64` unchanged.
-### :param from: The double-precision value to forward.
-### :returns: `from`.
-@rf("B64")
-routine B64(from: B64) -> B64
-
-### Converts a decimal64 value to double-precision binary floating point.
-### :param from: The decimal floating-point input value.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: D64) -> B64
-
-### Converts a decimal128 value to double-precision binary floating point, correctly rounded in one step (see
-### B128(from: D128)).
-### :param from: The decimal floating-point input value.
-### :returns: The closest representable `B64` value.
-@rf("B64")
-routine B64(from: D128) -> B64
-
 ### Returns `me + you`. Checked: crashes if the IEEE result is ±infinity (overflow) or NaN
 ### (domain). Use `add_unchecked` for raw IEEE 754 propagation.
 ### :param you: The addend.
@@ -401,15 +287,6 @@ routine B64.represent() -> Text
 ### :returns: The resulting `Text` value.
 @rf("B64.diagnose")
 routine B64.diagnose() -> Text
-
-### Parses a decimal float literal into an `B64`.
-### :param from_text: The text to parse. Accepts standard decimal notation and
-###   the special values `nan`, `inf`, and `infinity` (case-insensitive, with
-###   optional leading sign).
-### :returns: The `B64` value parsed from the input.
-### :throws: {InvalidValueError} if the text is not a valid float literal.
-@rf("B64")
-routine B64!(from_text: Text) -> B64
 
 ### Returns the raw bytes of this value in little-endian order.
 ### :returns: The resulting `Array[Byte, 8]` value.

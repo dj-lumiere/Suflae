@@ -11,11 +11,11 @@ import Numerics
 ### :param places: The number of digits after the point.
 ### :returns: The resulting `Text` value.
 routine Q128.fixed(places: Integer) -> Text
-    return me.fixed(places: U64(from: places))
+    return me.fixed(places: places.to[U64]())
 
 ### Formats this quaternion as `w+xi+yj+zk` with exactly `places` digits after the point in each part
 ### (see `B64.fixed`).
 ### :param places: The number of digits after the point.
 ### :returns: The resulting `Text` value.
 routine Q256.fixed(places: Integer) -> Text
-    return me.fixed(places: U64(from: places))
+    return me.fixed(places: places.to[U64]())

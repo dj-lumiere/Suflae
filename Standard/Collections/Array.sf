@@ -9,7 +9,7 @@ import Numerics
 ### Returns the number of elements, `COUNT`.
 routine Array[T, COUNT].count() -> Integer
     var n: U64 = COUNT
-    return Integer(from: n)
+    return n.to[Integer]()
 
 ### Returns the element at `index` (`a[i]`).
 ### :param index: The position to read, from 0.
@@ -65,7 +65,7 @@ routine Array[T, COUNT].erase_at!(position: U64)
 routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    var n = U64(from: count)
+    var n = count.to[U64]()
     if n == 0_u64
         return
     me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
@@ -110,10 +110,10 @@ routine Array[T, COUNT].getitem(range: Range[Integer]) -> List[T]
 needs RecordType T
     var result = List[T]()
     var n: U64 = COUNT
-    var count = Integer(from: n)
+    var count = n.to[Integer]()
     each i in range
         if not i.is_negative() and i < count
-            result.add_last(value: me.get_raw(index: U64(from: i)).share())
+            result.add_last(value: me.get_raw(index: i.to[U64]()).share())
     return result
 
 ### Returns the position of the first element equal to `value`.
@@ -124,7 +124,7 @@ needs T obeys Equatable
     var i = 0u64
     while i < COUNT
         if me.get_raw(index: i) == value
-            return Integer(from: i)
+            return i.to[Integer]()
         i = i +% 1u64
     throw AbsentValueError()
 
@@ -147,7 +147,7 @@ secret routine Array[T, COUNT].filled!(position: U64) -> U64
     if T.type_kind() == TypeKind.ENTITY
         danger
             if me.slot(position: place).peek_as[Address]() == 0_addr
-                throw EmptyPlaceError(index: Integer(from: place))
+                throw EmptyPlaceError(index: place.to[Integer]())
     return place
 
 ### What a place already checked holds, as it sits in memory (no holder of its own).

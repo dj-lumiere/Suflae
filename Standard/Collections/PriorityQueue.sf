@@ -77,7 +77,7 @@ obeys Emittable[PQEntry[TPriority, TElement]]
 ### :returns: A priority pool of the given pairs.
 common routine PriorityQueue[TPriority, TElement].from_literal(pairs...: DictEntry[TPriority, TElement]) -> PriorityQueue[TPriority, TElement]
 needs TPriority obeys Comparable
-    var result = PriorityQueue[TPriority, TElement](capacity: Integer(from: pairs.count()))
+    var result = PriorityQueue[TPriority, TElement](capacity: pairs.count().to[Integer]())
     var i = 0u64
     while i < pairs.count()
         result.add(element: pairs.get_raw(index: i).value, priority: pairs.get_raw(index: i).key)
@@ -103,7 +103,7 @@ routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[T
 
 ### Returns the number of entries currently stored in the pool.
 routine PriorityQueue[TPriority, TElement].count() -> Integer
-    return Integer(from: me.count)
+    return me.count.to[Integer]()
 
 ### Returns true if the pool holds no entries.
 routine PriorityQueue[TPriority, TElement].is_empty() -> Bool
@@ -123,7 +123,7 @@ routine PriorityQueue[TPriority, TElement].clear()
 ### :param new_capacity: The minimum entry count to guarantee.
 routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
     if new_capacity > me.priorities.capacity()
-        me.make_room(room: U64(from: new_capacity))
+        me.make_room(room: new_capacity.to[U64]())
     return
 
 # ============================================================================
@@ -206,7 +206,7 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
 ### Removes all entries and returns their elements in removal order (smallest priority first).
 ### :returns: A `List[TElement]` whose order matches repeated `remove()` calls.
 routine PriorityQueue[TPriority, TElement].drain() -> List[TElement]
-    var result = List[TElement](capacity: Integer(from: me.count))
+    var result = List[TElement](capacity: me.count.to[Integer]())
     while me.count > 0
         result.add_last(value: me.remove())
     return result

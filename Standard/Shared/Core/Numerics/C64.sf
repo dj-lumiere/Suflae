@@ -27,114 +27,6 @@ common routine C64.one() -> C64
 @rf("C64.i")
 common routine C64.i() -> C64
 
-### Constructs a `C64` with the given real component and zero imaginary part.
-### :param from: The real-axis value.
-### :returns: The corresponding `C64` value.
-@rf("C64")
-routine C64(from: B32) -> C64
-
-### Narrows a `C128` to `C64` by truncating each component to `B32`.
-### :param from: The double-precision complex value to narrow.
-### :returns: The nearest representable `C64`.
-@rf("C64")
-routine C64(from: C128) -> C64
-
-### Narrows a `C256` to `C64` by truncating each component to `B32`.
-### :param from: The quadruple-precision complex value to narrow.
-### :returns: The nearest representable `C64`.
-@rf("C64")
-routine C64(from: C256) -> C64
-
-### Real scalar -> `C64` (imaginary part 0), routing the value through `B32`.
-### :param from: A real integer or float value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S8) -> C64
-
-### Real `S16` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S16) -> C64
-
-### Real `S32` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S32) -> C64
-
-### Real `S64` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S64) -> C64
-
-### Real `S128` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S128) -> C64
-
-### Real `S256` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: S256) -> C64
-
-### Real `U8` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U8) -> C64
-
-### Real `U16` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U16) -> C64
-
-### Real `U32` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U32) -> C64
-
-### Real `U64` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U64) -> C64
-
-### Real `U128` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U128) -> C64
-
-### Real `U256` scalar -> `C64` (imaginary part 0), value routed through `B32`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: U256) -> C64
-
-### Real `B16` scalar -> `C64` (imaginary part 0), value widened to `B32`.
-### :param from: A real float value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: B16) -> C64
-
-### Real `B64` scalar -> `C64` (imaginary part 0), value narrowed to `B32`.
-### :param from: A real float value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: B64) -> C64
-
-### Real `B128` scalar -> `C64` (imaginary part 0), value narrowed to `B32`.
-### :param from: A real float value.
-### :returns: `from + 0i` in single precision.
-@rf("C64")
-routine C64(from: B128) -> C64
-
 ### Constructs a `C64` from polar coordinates: `r·cos(θ) + r·sin(θ)·i`.
 ### :param r: The modulus (distance from origin).
 ### :param theta: The argument (angle in radians).
@@ -397,14 +289,6 @@ routine C64.is_finite() -> Bool
 ### :returns: The resulting `Text` value.
 @rf("C64.represent")
 routine C64.represent() -> Text
-
-### Parses `a`, `bi`, `a+bi` or `a-bi` (a bare `i` / `-i` is a unit imaginary part), the form
-### `represent` writes. Each part uses `B32`'s own number syntax.
-### :param from_text: The text to parse.
-### :returns: The parsed value.
-### :throws: {InvalidValueError} if the text is not a complex number.
-@rf("C64")
-routine C64!(from_text: Text) -> C64
 
 ### Returns the real component (the `real` field is also public).
 ### :returns: The real part as `B32`.

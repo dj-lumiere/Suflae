@@ -54,7 +54,7 @@ obeys Parsable
 routine Digit!(text: Text) -> Digit
     if text == "" or text.count() > 1
         throw BadNumberError(text: text)
-    return Digit(value: Integer(text: text))
+    return Digit(value: text.to[Integer]())
 
 routine Box.size() -> Integer
     return me.n
@@ -119,7 +119,7 @@ routine start()
 
     # An Integer converted to a Decimal.
     var seven = 7
-    var exact = Decimal(seven)
+    var exact = seven.to[Decimal]()
     show(exact / 2.0)
 
     # A member variable left out takes its default.

@@ -12,48 +12,48 @@ module Numerics
 ### :returns: The resulting `Integer` value.
 ### :throws: {ValueError} if `text` is not a valid integer in `radix`.
 routine Integer!(text: Text, radix: Integer = 10) -> Integer
-    return Integer(text: text, radix: S32(from: S64(from: radix)))
+    return Integer(text: text, radix: radix.to[S64]().to[S32]())
 
 ### Shifts this value left by `bits` positions (a negative count shifts right).
 ### Positive left shifts are equivalent to multiplication by powers of two.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
 routine Integer.shl(bits: Integer) -> Integer
-    return me.shl(bits: S32(from: S64(from: bits)))
+    return me.shl(bits: bits.to[S64]().to[S32]())
 
 ### Shifts this value right by `bits` positions: `floor(me / 2^bits)`, the arithmetic shift of the
 ### two's-complement form (so `-5 >> 1` is `-3`). A negative count shifts left.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
 routine Integer.shr(bits: Integer) -> Integer
-    return me.shr(bits: S32(from: S64(from: bits)))
+    return me.shr(bits: bits.to[S64]().to[S32]())
 
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Integer` value.
 routine Integer.pow(exp: Integer) -> Integer
-    return me.pow(exp: U32(from: U64(from: exp)))
+    return me.pow(exp: exp.to[U64]().to[U32]())
 
 ### Returns the sign of this value as `-1`, `0`, or `1`.
 ### :returns: The resulting `Integer` value.
 routine Integer.signum() -> Integer
-    return Integer(from: me.signum())
+    return me.signum().to[Integer]()
 
 ### Returns the number of bits in the magnitude of this value (0 for zero).
 ### :returns: The resulting `Integer` value.
 routine Integer.bit_length() -> Integer
-    return Integer(from: me.bit_length())
+    return me.bit_length().to[Integer]()
 
 ### Formats this value as text in the requested radix (2 to 64; digits past 9 are uppercase
 ### letters up to base 36). An out-of-range radix renders an empty text.
 ### :param radix: The numeric base to use.
 ### :returns: The resulting `Text` value.
 routine Integer.represent_radix(radix: Integer) -> Text
-    return me.represent_radix(radix: S32(from: S64(from: radix)))
+    return me.represent_radix(radix: radix.to[S64]().to[S32]())
 
 ### Renders this value in base `radix` (2 to 36), digits past 9 as lowercase letters, with a leading `-`
 ### when negative. Crashes on any other radix (unlike `represent_radix`, which renders an empty text).
 ### :param radix: The numeric base.
 ### :returns: The rendered `Text`.
 routine Integer.to_text(radix: Integer) -> Text
-    return me.to_text(radix: S32(from: S64(from: radix)))
+    return me.to_text(radix: radix.to[S64]().to[S32]())

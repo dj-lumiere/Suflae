@@ -39,90 +39,9 @@ routine Decimal.to_bytes_le() -> Array[Byte, 16]
 @rf("Decimal.to_bytes_be")
 routine Decimal.to_bytes_be() -> Array[Byte, 16]
 
-### Parses a decimal literal into a Decimal.
-### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
-@rf("Decimal")
-routine Decimal!(from_text: Text) -> Decimal
-
 ### Builds a Decimal from a sign + U128 coefficient at the given exponent (rounds to <= 34 digits).
 @rf("Decimal.from_components")
 common routine Decimal.from_components(sign: Bool, coeff: U128, exp: S64) -> Decimal
-
-### S8 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: S8) -> Decimal
-
-### S16 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: S16) -> Decimal
-
-### S32 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: S32) -> Decimal
-
-### S64 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: S64) -> Decimal
-
-### S128 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: S128) -> Decimal
-
-### S256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
-@rf("Decimal")
-routine Decimal(from: S256) -> Decimal
-
-### U8 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: U8) -> Decimal
-
-### U16 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: U16) -> Decimal
-
-### U32 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: U32) -> Decimal
-
-### U64 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: U64) -> Decimal
-
-### U128 -> Decimal.
-@rf("Decimal")
-routine Decimal(from: U128) -> Decimal
-
-### U256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
-@rf("Decimal")
-routine Decimal(from: U256) -> Decimal
-
-### B16 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: B16) -> Decimal
-
-### B32 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: B32) -> Decimal
-
-### B64 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: B64) -> Decimal
-
-### B128 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: B128) -> Decimal
-
-### D32 -> Decimal (exact widen; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: D32) -> Decimal
-
-### D64 -> Decimal (exact widen; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: D64) -> Decimal
-
-### D128 -> Decimal (bit-for-bit; crashes if the value is non-finite).
-@rf("Decimal")
-routine Decimal(from: D128) -> Decimal
 
 ### True when this is a finite value (always true for a Decimal built through the normal paths).
 @rf("Decimal.is_finite")

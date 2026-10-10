@@ -9,7 +9,7 @@ import Numerics
 routine position_of!(value: Integer) -> U64
     if value.is_negative()
         throw NegativeIndexError(index: value)
-    return U64(from: value)
+    return value.to[U64]()
 
 ### The buffer positions a collection keeps for `range`: the same range, counted with `U64`. A range that
 ### counts down keeps its direction: the positions count down by the step's magnitude.

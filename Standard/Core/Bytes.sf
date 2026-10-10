@@ -22,12 +22,12 @@ routine Bytes(from_byte: Byte) -> Bytes
 
 ### Returns the number of bytes.
 routine Bytes.count() -> Integer
-    return Integer(from: me.count())
+    return me.count().to[Integer]()
 
 ### Returns how many times `byte` appears.
 ### :param byte: The byte to count.
 routine Bytes.count_of(byte: Byte) -> Integer
-    return Integer(from: me.count_of(byte: byte))
+    return me.count_of(byte: byte).to[Integer]()
 
 ### Returns the byte at `index` (`bytes[i]`).
 ### :param index: The position, from 0.
@@ -43,13 +43,13 @@ routine Bytes.getitem(range: Range[Integer]) -> Bytes
 ### :param byte: The byte to look for.
 ### :throws: {AbsentValueError} There is no such byte.
 routine Bytes.find!(byte: Byte) -> Integer
-    return Integer(from: me.find(byte: byte))
+    return me.find(byte: byte).to[Integer]()
 
 ### Returns the position where the first `other` starts.
 ### :param other: The bytes to look for.
 ### :throws: {AbsentValueError} The bytes do not contain `other`.
 routine Bytes.find!(other: Bytes) -> Integer
-    return Integer(from: me.find(other: other))
+    return me.find(other: other).to[Integer]()
 
 ### Returns the parts between the `separator` bytes.
 ### :param separator: The byte between parts.
@@ -72,32 +72,32 @@ routine Text.encode_as_utf16() -> List[U16]
 
 ### Returns the character's Unicode code point.
 routine Char.codepoint() -> Integer
-    return Integer(from: me.codepoint())
+    return me.codepoint().to[Integer]()
 
 ### Returns the value of a decimal digit character (`'7'` is 7), or -1 for any other character.
 routine Char.digit_value() -> Integer
-    return Integer(from: me.digit_value())
+    return me.digit_value().to[Integer]()
 
 ### Returns the character `delta` code points away (`'a'.offset(delta: 2)` is `'c'`). The result is not checked
 ### to be a valid Unicode scalar.
 ### :param delta: How far to move. A negative one moves back.
 routine Char.offset!(delta: Integer) -> Char
-    return me.offset(delta: S64(from: delta))
+    return me.offset(delta: delta.to[S64]())
 
 ### Returns the character's value as one byte, for a character that fits in one.
 routine Char.byte_value() -> Integer
-    return Integer(from: me.byte_value())
+    return me.byte_value().to[Integer]()
 
 ### Returns the byte's value as a code point.
 routine Byte.codepoint() -> Integer
-    return Integer(from: me.codepoint())
+    return me.codepoint().to[Integer]()
 
 ### Returns the value of an ASCII decimal digit byte.
 ### :throws: {InvalidDigitError} if the byte is not a digit.
 routine Byte.digit_value!() -> Integer
-    return Integer(from: me.digit_value())
+    return me.digit_value().to[Integer]()
 
 ### Returns the value of an ASCII hexadecimal digit byte.
 ### :throws: {InvalidHexDigitError} if the byte is not a hexadecimal digit.
 routine Byte.hex_value!() -> Integer
-    return Integer(from: me.hex_value())
+    return me.hex_value().to[Integer]()

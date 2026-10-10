@@ -16,7 +16,7 @@ routine start()
     show(f"dfixed={d.fixed(places: 3)}")
 
     var big = Integer(text: "ff", radix: 16)
-    var plain = Integer(text: "12")
+    var plain = "12".to[Integer]()
     show(f"big={big} plain={plain} shl={big.shl(bits: 4)} pow={big.pow(exp: 2)} sign={(0 - big).signum()}")
     show(f"bits={big.bit_length() + 0} hex={big.to_text(radix: 16)}")
     var x = 2.5

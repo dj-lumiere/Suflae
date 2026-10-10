@@ -58,7 +58,7 @@ obeys Emittable[T]
 ### :returns: A set of the distinct given elements.
 common routine Set[T].from_literal(elements...: T) -> Set[T]
 needs T obeys Hashable, Equatable
-    var result = Set[T](key: SecureHashKey.random(), capacity: Integer(from: elements.count()))
+    var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Integer]())
     var i = 0u64
     while i < elements.count()
         result.add(value: elements.get_raw(index: i))
@@ -80,7 +80,7 @@ routine Set[T](key: SecureHashKey) -> Set[T]
 routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
     var room: U64 = 16
     if capacity > 16
-        room = U64(from: capacity)
+        room = capacity.to[U64]()
     return Set[T](
         index: new_hash_index(capacity: room),
         values: Buffer[T](room: room),
@@ -97,7 +97,7 @@ routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
 
 ### Returns the number of values.
 routine Set[T].count() -> Integer
-    return Integer(from: me.count)
+    return me.count.to[Integer]()
 
 ### Returns whether the set has no values.
 routine Set[T].is_empty() -> Bool
@@ -177,7 +177,7 @@ routine SetEmittable[T].emit!() -> T
 # ============================================================================
 
 routine Set[T].union(other: Set[T]) -> Set[T]
-    var result = Set[T](key: SecureHashKey.random(), capacity: Integer(from: me.count + other.count))
+    var result = Set[T](key: SecureHashKey.random(), capacity: (me.count + other.count).to[Integer]())
     each val in me
         result.add(value: val)
     each val in other

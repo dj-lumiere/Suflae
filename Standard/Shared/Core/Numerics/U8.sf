@@ -12,138 +12,6 @@ record U8
 obeys UnsignedIntegral, Comparable, Copyable
     pass
 
-### Converts a signed 8-bit integer to `U8`, throwing if the value is negative.
-### :param from: The `S8` value to convert.
-### :returns: A `U8` with the same bit pattern as `from`.
-### :throws: {IntegerOverflowError} if `from < 0`.
-@rf("U8")
-routine U8!(from: S8) -> U8
-
-### Converts an `S16` to `U8`, throwing if the value is outside 0..255.
-### :param from: The `S16` value to convert.
-### :returns: The `U8` representation of `from`.
-### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
-@rf("U8")
-routine U8!(from: S16) -> U8
-
-### Converts an `S32` to `U8`, throwing if the value is outside 0..255.
-### :param from: The `S32` value to convert.
-### :returns: The `U8` representation of `from`.
-### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
-@rf("U8")
-routine U8!(from: S32) -> U8
-
-### Converts an `S64` to `U8`, throwing if the value is outside 0..255.
-### :param from: The `S64` value to convert.
-### :returns: The `U8` representation of `from`.
-### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
-@rf("U8")
-routine U8!(from: S64) -> U8
-
-### Converts an `S128` to `U8`, throwing if the value is outside 0..255.
-### :param from: The `S128` value to convert.
-### :returns: The `U8` representation of `from`.
-### :throws: {IntegerOverflowError} if `from` is not in `0..=255`.
-@rf("U8")
-routine U8!(from: S128) -> U8
-
-### Identity conversion — returns `from` unchanged.
-### :param from: The `U8` value to return.
-### :returns: `from` unchanged.
-@rf("U8")
-routine U8(from: U8) -> U8
-
-### Converts a `U16` to `U8`, throwing if the value exceeds 255.
-### :param from: The `U16` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from > 255`.
-@rf("U8")
-routine U8!(from: U16) -> U8
-
-### Converts a `U32` to `U8`, throwing if the value exceeds 255.
-### :param from: The `U32` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from > 255`.
-@rf("U8")
-routine U8!(from: U32) -> U8
-
-### Converts a `U64` to `U8`, throwing if the value exceeds 255.
-### :param from: The `U64` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from > 255`.
-@rf("U8")
-routine U8!(from: U64) -> U8
-
-### Converts a `U128` to `U8`, throwing if the value exceeds 255.
-### :param from: The `U128` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from > 255`.
-@rf("U8")
-routine U8!(from: U128) -> U8
-
-### Converts an `S256` to `U8`, throwing if the value is negative or exceeds 255.
-### :param from: The `S256` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from` is outside 0..255.
-@rf("U8")
-routine U8!(from: S256) -> U8
-
-### Converts a `U256` to `U8`, throwing if the value exceeds 255.
-### :param from: The `U256` value to convert.
-### :returns: The lower 8 bits of `from`.
-### :throws: {IntegerOverflowError} if `from > 255`.
-@rf("U8")
-routine U8!(from: U256) -> U8
-
-### Converts an `B16` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `B16` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: B16) -> U8
-
-### Converts an `B32` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `B32` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: B32) -> U8
-
-### Converts an `B64` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `B64` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: B64) -> U8
-
-### Converts an `B128` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `B128` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: B128) -> U8
-
-### Converts a `D32` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `D32` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: D32) -> U8
-
-### Converts a `D64` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `D64` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: D64) -> U8
-
-### Converts a `D128` to `U8` by first converting to `U32`, then truncating.
-### :param from: The `D128` value to convert.
-### :returns: The integer part of `from` as a `U8`.
-### :throws: {IntegerOverflowError} if the integer part exceeds 255.
-@rf("U8")
-routine U8!(from: D128) -> U8
-
 ### Returns the sum and a flag indicating whether the result wrapped around.
 ### :param you: The right operand.
 ### :returns: A tuple of `(wrapped_sum, overflowed)`.
@@ -439,42 +307,6 @@ common routine U8.from_bytes_le(bytes: Array[Byte, 1]) -> U8
 @rf("U8.from_bytes_be")
 common routine U8.from_bytes_be(bytes: Array[Byte, 1]) -> U8
 
-### Zero-extends `from` to a 16-bit `U16`.
-### :param from: The `U8` value to widen.
-### :returns: A `U16` equal in value to `from`.
-@rf("U16")
-routine U16(from: U8) -> U16
-
-### Zero-extends `from` to a 32-bit `U32`.
-### :param from: The `U8` value to widen.
-### :returns: A `U32` equal in value to `from`.
-@rf("U32")
-routine U32(from: U8) -> U32
-
-### Zero-extends `from` to a 64-bit `U64`.
-### :param from: The `U8` value to widen.
-### :returns: A `U64` equal in value to `from`.
-@rf("U64")
-routine U64(from: U8) -> U64
-
-### Zero-extends `from` to a 128-bit `U128`.
-### :param from: The `U8` value to widen.
-### :returns: A `U128` equal in value to `from`.
-@rf("U128")
-routine U128(from: U8) -> U128
-
-### Converts `from` to the nearest representable `B32`.
-### :param from: The `U8` value to convert.
-### :returns: An `B32` with the same numeric value as `from`.
-@rf("B32")
-routine B32(from: U8) -> B32
-
-### Converts `from` to the nearest representable `B64`.
-### :param from: The `U8` value to convert.
-### :returns: An `B64` with the same numeric value as `from`.
-@rf("B64")
-routine B64(from: U8) -> B64
-
 ### Returns `false` if `from` is `0`; `true` for any other value.
 ### :param from: The `U8` value to convert.
 ### :returns: `true` if `from != 0`.
@@ -505,14 +337,6 @@ routine U8.represent() -> Text
 ### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
 @rf("U8.diagnose")
 routine U8.diagnose() -> Text
-
-### Parses a decimal string into a `U8`.
-### :param from_text: The decimal string to parse (no sign, no prefix).
-### :returns: The parsed `U8` value.
-### :throws: {InvalidValueError} if `from_text` is empty or contains non-digit characters.
-### :throws: {IntegerOverflowError} if the value does not fit in `U8`.
-@rf("U8")
-routine U8!(from_text: Text) -> U8
 
 ### Returns a SipHash-2-4 keyed hash of this value.
 ### :param k0: The first 64-bit key word.

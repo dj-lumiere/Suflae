@@ -9,4 +9,4 @@ import Numerics
 ### :returns: The forward position.
 ### :throws: {IndexOutOfBoundsError} when `offset` is larger than `count`.
 routine back_resolve(count: Integer, offset: Integer) -> Integer
-    return Integer(from: back_resolve(count: U64(from: count), offset: U64(from: offset)))
+    return back_resolve(count: count.to[U64](), offset: offset.to[U64]()).to[Integer]()

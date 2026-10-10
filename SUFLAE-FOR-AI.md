@@ -47,7 +47,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
 4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`), but variables of different
-   number types never mix without an explicit conversion.
+   number types never mix without an explicit conversion (`n.to[S64]()`, §5).
 5. **`//` is floor division, `/` is true division, and `Integer` has no `/`.** `7 // 2` is `3`. For a
    fractional result, compute with `Decimal` values, and write the literals as decimals: `1.0 / 3.0`
    (`1.0 / 3` is an error, SF-S502: a whole-number literal is an `Integer`, not a `Decimal`).
@@ -176,6 +176,40 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
 - Tuples: `(1, "a")` has type `(Integer, Text)`; read `t.item0`, `t.item1`; destructure with
   `var (q, r) = pair`.
+
+**Conversions: `x.to[T]()`, the one way to convert.**
+
+```suflae
+var small = count.to[U8]()        # Integer to U8 (a bare literal is an Integer: 200.to[U8]())
+var n = "42".to[S64]()             # text parsing (also Integer, Decimal, B64, ...)
+var code = 'A'.to[U32]()           # a Char's codepoint (b.to[U8]() for a Byte)
+var letter = 65u8.to[Char]()       # 'A', and 'x'.to[Text]() makes one-character text
+var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
+var wide: U64 = count.to()         # T left out: the declared type gives it
+var fits: U8? = try count.to()     # none when it does not fit
+var why: Check[S64] = check line.to()
+```
+
+- `Integer` converts to every fixed-width integer (`S8..S256`, `U8..U256`), to `Decimal`, and to
+  `B32`/`B64` (the nearest value, as does `Decimal`). Widening
+  never fails. A value that does not fit `T`, or text that does not read as a `T`, crashes loudly
+  (`IntegerOverflowError`, `InvalidValueError`, ...). Recover with `try` (gives `T?`) or `check` (gives
+  `Check[T]`, holding the error).
+- `[T]` may be left out where the surrounding code says the type: a declared variable type, the routine's
+  return type (`return count.to()`), a parameter (`takes(n: x.to())`), and through `try`/`check`. Where
+  nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is SF-S645: write
+  `.to[S64]()`.
+- A pair with no conversion is SF-S150 at the call ("There is no conversion from 'Text' to 'Bool'.").
+- Building a number type from one value (`S64(from: x)`, `S64(x)`, `S64(from: status)`) is SF-S403
+  ("You built a 'S64' from a value. To convert a value, write 'value.to[S64]()'"). The member form
+  (`x.S32()`, `f.Celsius()`, `'x'.Text()`) is SF-S646 ("A conversion is written '.to[S32]()'"). Taking
+  a variant's arm out (`sv.Dict()`) is not a conversion and stays. Constructors build a value from its
+  parts (`Point(x: 1, y: 2)`). Building a `Char` or `Byte` from a number stays a constructor too:
+  `Char(0x41u32)`.
+- `to` is an ordinary Core routine: `routine N.to![T]() -> T` with `needs T obeys ConvertibleFrom[N]`.
+  `protocol ConvertibleFrom[S]` requires one creator, `routine Me!(from: S) -> Me`. A type of yours gets
+  `to` by declaring one: with `routine Celsius(from: Fahrenheit) -> Celsius`, `f.to[Celsius]()` and
+  `var c: Celsius = f.to()` work.
 
 **Optionals and `none`.**
 
@@ -399,7 +433,8 @@ routine Account.deposit(amount: Integer)                       # member routine,
   `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
   type-level routine with no `me`, called as `Type.name(...)`.
 - A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
-  `routine Point(from_text: Text) -> Point` (`routine Point!(...)` when it can fail).
+  `routine Celsius(from: Fahrenheit) -> Celsius` (`routine Celsius!(...)` when it can fail). A creator
+  taking `from:` also gives the conversion `f.to[Celsius]()` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
@@ -546,7 +581,7 @@ routine start()
   included (failable or not: `try f()` also recovers a division by zero inside a plain helper `f` calls), a
   checked operation (`try a + b` recovers a fixed-width overflow, `check a // b` a division by zero,
   `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
-  (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `check`: the
+  (`300.to[S8]()`, `"x".to[Integer]()`). Each becomes the result's failure (`try`: `None`, `check`: the
   error), and evaluation stops at the first one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
   inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).List()`,
   `check items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down

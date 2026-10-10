@@ -12,7 +12,7 @@ import Numerics
 ### :param n: The integer exponent.
 ### :returns: `me ** n`.
 routine Decimal.powi(n: Integer) -> Decimal
-    return me.powi(n: S32(from: S64(from: n)))
+    return me.powi(n: n.to[S64]().to[S32]())
 
 ### Renders this value with exactly `places` digits after the point, rounded half to even from its
 ### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
@@ -20,8 +20,8 @@ routine Decimal.powi(n: Integer) -> Decimal
 ### :param places: The number of digits after the point (0 for none).
 ### :returns: The rendered `Text`.
 routine Decimal.fixed(places: Integer) -> Text
-    return me.fixed(places: U64(from: places))
+    return me.fixed(places: places.to[U64]())
 
 ### me * 10^n (the decimal analog of ldexp).
 routine Decimal.scaleb!(n: Integer) -> Decimal
-    return me.scaleb(n: S64(from: n))
+    return me.scaleb(n: n.to[S64]())

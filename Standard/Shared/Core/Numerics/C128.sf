@@ -26,114 +26,6 @@ common routine C128.one() -> C128
 @rf("C128.i")
 common routine C128.i() -> C128
 
-### Constructs a `C128` with the given real component and zero imaginary part.
-### :param from: The real-axis value.
-### :returns: The corresponding `C128` value.
-@rf("C128")
-routine C128(from: B64) -> C128
-
-### Widens a `C64` to `C128` by extending each component to `B64`.
-### :param from: The single-precision complex value to widen.
-### :returns: A `C128` carrying the same numeric value.
-@rf("C128")
-routine C128(from: C64) -> C128
-
-### Narrows a `C256` to `C128` by truncating each component to `B64`.
-### :param from: The quadruple-precision complex value to narrow.
-### :returns: The nearest representable `C128`.
-@rf("C128")
-routine C128(from: C256) -> C128
-
-### Real scalar -> `C128` (imaginary part 0), routing the value through `B64`.
-### :param from: A real integer or float value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S8) -> C128
-
-### Real `S16` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S16) -> C128
-
-### Real `S32` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S32) -> C128
-
-### Real `S64` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S64) -> C128
-
-### Real `S128` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S128) -> C128
-
-### Real `S256` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: S256) -> C128
-
-### Real `U8` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U8) -> C128
-
-### Real `U16` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U16) -> C128
-
-### Real `U32` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U32) -> C128
-
-### Real `U64` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U64) -> C128
-
-### Real `U128` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U128) -> C128
-
-### Real `U256` scalar -> `C128` (imaginary part 0), value routed through `B64`.
-### :param from: A real integer value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: U256) -> C128
-
-### Real `B16` scalar -> `C128` (imaginary part 0), value widened to `B64`.
-### :param from: A real float value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: B16) -> C128
-
-### Real `B32` scalar -> `C128` (imaginary part 0), value widened to `B64`.
-### :param from: A real float value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: B32) -> C128
-
-### Real `B128` scalar -> `C128` (imaginary part 0), value narrowed to `B64`.
-### :param from: A real float value.
-### :returns: `from + 0i` in double precision.
-@rf("C128")
-routine C128(from: B128) -> C128
-
 ### Constructs a `C128` from polar coordinates: `r·cos(θ) + r·sin(θ)·i`.
 ### :param r: The modulus (distance from origin).
 ### :param theta: The argument (angle in radians).
@@ -396,14 +288,6 @@ routine C128.is_finite() -> Bool
 ### :returns: The resulting `Text` value.
 @rf("C128.represent")
 routine C128.represent() -> Text
-
-### Parses `a`, `bi`, `a+bi` or `a-bi` (a bare `i` / `-i` is a unit imaginary part), the form
-### `represent` writes. Each part uses `B64`'s own number syntax.
-### :param from_text: The text to parse.
-### :returns: The parsed value.
-### :throws: {InvalidValueError} if the text is not a complex number.
-@rf("C128")
-routine C128!(from_text: Text) -> C128
 
 ### Returns the real component (the `real` field is also public).
 ### :returns: The real part as `B64`.

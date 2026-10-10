@@ -19,16 +19,6 @@ obeys Equatable, Copyable
 @rf("Bool.eq")
 routine Bool.eq(you: Bool) -> Bool
 
-### Converts this boolean to an `S32` integer.
-### :returns: `1` if `me` is `true`; `0` if `me` is `false`.
-@rf("S32")
-routine S32(from: Bool) -> S32
-
-### Converts this boolean to a `U8` byte.
-### :returns: `1u8` if `me` is `true`; `0u8` if `me` is `false`.
-@rf("U8")
-routine U8(from: Bool) -> U8
-
 ### Returns a type-tagged debug rendering of this value.
 ### :returns: A diagnostic `Text` rendering, e.g. `Type(value)`.
 @rf("Bool.diagnose")

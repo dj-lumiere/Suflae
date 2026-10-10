@@ -74,7 +74,7 @@ needs T obeys Comparable
 
 ### Returns the total number of elements in this list, counting duplicates separately.
 routine SortedList[T].count() -> Integer
-    return Integer(from: me.tree.count())
+    return me.tree.count().to[Integer]()
 
 ### Returns true if this list contains no elements.
 routine SortedList[T].is_empty() -> Bool
@@ -95,7 +95,7 @@ routine SortedList[T].contains(value: T) -> Bool
 ### :returns: The occurrence count; zero if the value is not present.
 routine SortedList[T].count_of(value: T) -> Integer
     var after = me.tree.rank(key: value, after: true)
-    return Integer(from: after - me.tree.rank(key: value, after: false))
+    return (after - me.tree.rank(key: value, after: false)).to[Integer]()
 
 ### Inserts `value` in its sorted position, after any equal elements.
 ### :param value: The value to insert.

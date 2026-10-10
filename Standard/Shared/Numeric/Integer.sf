@@ -26,64 +26,11 @@ obeys Copyable, Integral, Negatable, Comparable, Hashable
 @rf("Integer")
 routine Integer() -> Integer
 
-### Creates an `Integer` from a signed 64-bit source value.
-### The numeric payload is copied into the arbitrary-precision representation,
-### so the result is no longer limited by `S64` range after construction.
-### :param from: The initial signed value.
-### :returns: The resulting `Integer` value.
-@rf("Integer")
-routine Integer(from: S64) -> Integer
-
-### Creates an `Integer` from an unsigned 64-bit source value.
-### This is the direct widening entry point for exact conversion from native
-### unsigned integer data.
-### :param from: The initial unsigned value.
-### :returns: The resulting `Integer` value.
-@rf("Integer")
-routine Integer(from: U64) -> Integer
-
 @rf("integer_of_s64")
 routine integer_of_s64(v: S64) -> Integer
 
 @rf("integer_of_u64")
 routine integer_of_u64(v: U64) -> Integer
-
-### Widens a fixed-width integer into an `Integer` (exact). 64-bit limbs go through the
-### base builders; wider widths compose them with shift+add.
-### :param from: The signed source value.
-### :returns: The equal `Integer` value.
-@rf("Integer")
-routine Integer(from: S8) -> Integer
-
-@rf("Integer")
-routine Integer(from: S16) -> Integer
-
-@rf("Integer")
-routine Integer(from: S32) -> Integer
-
-@rf("Integer")
-routine Integer(from: S128) -> Integer
-
-@rf("Integer")
-routine Integer(from: S256) -> Integer
-
-### Widens an unsigned fixed-width integer into an `Integer` (exact).
-### :param from: The unsigned source value.
-### :returns: The equal `Integer` value.
-@rf("Integer")
-routine Integer(from: U8) -> Integer
-
-@rf("Integer")
-routine Integer(from: U16) -> Integer
-
-@rf("Integer")
-routine Integer(from: U32) -> Integer
-
-@rf("Integer")
-routine Integer(from: U128) -> Integer
-
-@rf("Integer")
-routine Integer(from: U256) -> Integer
 
 ### Materializes an `Integer` from a decimal digit string its caller has already validated.
 ### The float conversions call it on the digits they collected. An `n` literal never does: the builder
@@ -288,27 +235,6 @@ routine Integer.divmod!(other: Integer) -> (Integer, Integer)
 @rf("Integer.modpow")
 routine Integer.modpow!(exp: Integer, modulus: Integer) -> Integer
 
-### Converts an arbitrary-precision integer to `S64`.
-### :param from: The source value to convert.
-### :returns: The resulting `S64` value.
-### :throws: {IntegerOverflowError} if `from` is outside `S64_MIN..S64_MAX`.
-@rf("S64")
-routine S64!(from: Integer) -> S64
-
-### Converts an arbitrary-precision integer to `U64`.
-### :param from: The source value to convert.
-### :returns: The resulting `U64` value.
-### :throws: {IntegerOverflowError} if `from` is negative or exceeds `U64_MAX`.
-@rf("U64")
-routine U64!(from: Integer) -> U64
-
-### Converts an arbitrary-precision integer to `Decimal`, rounding half-even to its 34 significant digits.
-### :param from: The source value to convert.
-### :returns: The resulting `Decimal` value.
-### :throws: {NumericOverflowError} if `from` is beyond the range of `Decimal` (about `1e6144`).
-@rf("Decimal")
-routine Decimal!(from: Integer) -> Decimal
-
 ### Formats this value as base-10 text. Standard `represent` shape (no args)
 ### so the f-string machinery can dispatch without supplying a radix.
 ### :returns: The resulting `Text` value.
@@ -320,13 +246,6 @@ routine Integer.represent() -> Text
 @rf("Integer.serialize")
 routine Integer.serialize() -> SerialValue
 
-### Builds an `Integer` from its serialized base-10 text.
-### :param from: The serialized value.
-### :returns: The parsed value.
-### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
-@rf("Integer")
-routine Integer!(from: SerialValue) -> Integer
-
 ### Returns a SipHash-2-4 keyed hash of this value: of the magnitude word (with the key changed for a negative
 ### value) below 2^64, of the base-10 text above. A value has one form only, so equal values hash equal.
 ### :param k0: The first 64-bit key word.
@@ -334,15 +253,6 @@ routine Integer!(from: SerialValue) -> Integer
 ### :returns: The 64-bit keyed hash.
 @rf("Integer.hash")
 routine Integer.hash(k0: U64, k1: U64) -> U64
-
-### Parses a base-10 integer from text.
-### This is the canonical text-to-`Integer` conversion used by generic parsing
-### surfaces.
-### :param text: The text to parse.
-### :returns: The resulting `Integer` value.
-### :throws: May throw {ParseError}.
-@rf("Integer")
-routine Integer!(text: Text) -> Integer
 
 ### Parses a base-2 integer from text.
 ### :param text: The binary digits to parse.

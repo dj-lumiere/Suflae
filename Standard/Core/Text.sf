@@ -21,18 +21,18 @@ routine Text(from_character: Char) -> Text
 
 ### Returns the number of characters.
 routine Text.count() -> Integer
-    return Integer(from: me.count())
+    return me.count().to[Integer]()
 
 ### Returns how many times `character` appears.
 ### :param character: The character to count.
 routine Text.count_of(character: Char) -> Integer
-    return Integer(from: me.count_of(character: character))
+    return me.count_of(character: character).to[Integer]()
 
 ### Returns how many times `other` appears without overlapping (`"aaa".count_of("aa")` is 1). An empty `other`
 ### appears 0 times.
 ### :param other: The text to count.
 routine Text.count_of(other: Text) -> Integer
-    return Integer(from: me.count_of(other: other))
+    return me.count_of(other: other).to[Integer]()
 
 ### Returns the character at `index` (`text[i]`).
 ### :param index: The position, from 0.
@@ -49,25 +49,25 @@ routine Text.getitem(range: Range[Integer]) -> Text
 ### :param letter: The character to look for.
 ### :throws: {AbsentValueError} The text has no such character.
 routine Text.find!(letter: Char) -> Integer
-    return Integer(from: me.find(letter: letter))
+    return me.find(letter: letter).to[Integer]()
 
 ### Returns the position where the first `other` starts.
 ### :param other: The text to look for.
 ### :throws: {AbsentValueError} The text does not contain `other`.
 routine Text.find!(other: Text) -> Integer
-    return Integer(from: me.find(other: other))
+    return me.find(other: other).to[Integer]()
 
 ### Returns the position of the last `letter`.
 ### :param letter: The character to look for.
 ### :throws: {AbsentValueError} The text has no such character.
 routine Text.find_last!(letter: Char) -> Integer
-    return Integer(from: me.find_last(letter: letter))
+    return me.find_last(letter: letter).to[Integer]()
 
 ### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
 ### :param other: The text to look for.
 ### :throws: {AbsentValueError} The text does not contain `other`.
 routine Text.find_last!(other: Text) -> Integer
-    return Integer(from: me.find_last(other: other))
+    return me.find_last(other: other).to[Integer]()
 
 ### Returns the text written `times` times in a row.
 ### :param times: How many copies.

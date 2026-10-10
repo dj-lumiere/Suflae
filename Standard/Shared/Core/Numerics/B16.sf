@@ -12,120 +12,6 @@ record B16
 obeys Numeric, Comparable, Copyable
     pass
 
-### Converts an `S8` into half-precision floating-point form.
-### :param from: The signed 8-bit integer to convert.
-### :returns: The corresponding `B16` value.
-@rf("B16")
-routine B16(from: S8) -> B16
-
-### Converts an `S16` into half-precision floating-point form.
-### :param from: The signed 16-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16(from: S16) -> B16
-
-### Converts an `S32` into half-precision floating-point form.
-### :param from: The signed 32-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: S32) -> B16
-
-### Converts an `S64` into half-precision floating-point form.
-### :param from: The signed 64-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: S64) -> B16
-
-### Converts an `S128` into half-precision floating-point form.
-### :param from: The signed 128-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: S128) -> B16
-
-### Converts a `U8` into half-precision floating-point form.
-### :param from: The unsigned 8-bit integer to convert.
-### :returns: The corresponding `B16` value.
-@rf("B16")
-routine B16(from: U8) -> B16
-
-### Converts a `U16` into half-precision floating-point form.
-### :param from: The unsigned 16-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: U16) -> B16
-
-### Converts a `U32` into half-precision floating-point form.
-### :param from: The unsigned 32-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: U32) -> B16
-
-### Converts a `U64` into half-precision floating-point form.
-### :param from: The unsigned 64-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: U64) -> B16
-
-### Converts a `U128` into half-precision floating-point form.
-### :param from: The unsigned 128-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: U128) -> B16
-
-### Converts an `S256` into half-precision floating-point form.
-### :param from: The signed 256-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: S256) -> B16
-
-### Converts a `U256` into half-precision floating-point form.
-### :param from: The unsigned 256-bit integer to convert.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16!(from: U256) -> B16
-
-### Returns an existing `B16` unchanged.
-### :param from: The half-precision value to forward.
-### :returns: `from`.
-@rf("B16")
-routine B16(from: B16) -> B16
-
-### Narrows a single-precision float to half precision.
-### :param from: The `B32` value to convert.
-### :returns: The nearest representable `B16` value.
-@rf("B16")
-routine B16(from: B32) -> B16
-
-### Narrows a double-precision float to half precision.
-### :param from: The `B64` value to convert.
-### :returns: The nearest representable `B16` value.
-@rf("B16")
-routine B16(from: B64) -> B16
-
-### Narrows a quadruple-precision float to half precision.
-### :param from: The `B128` value to convert.
-### :returns: The nearest representable `B16` value.
-@rf("B16")
-routine B16(from: B128) -> B16
-
-### Converts a decimal32 value to half-precision binary floating point.
-### :param from: The decimal floating-point input value.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16(from: D32) -> B16
-
-### Converts a decimal64 value to half-precision binary floating point.
-### :param from: The decimal floating-point input value.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16(from: D64) -> B16
-
-### Converts a decimal128 value to half-precision binary floating point.
-### :param from: The decimal floating-point input value.
-### :returns: The closest representable `B16` value.
-@rf("B16")
-routine B16(from: D128) -> B16
-
 ### Returns `me + you`. Checked: crashes if the IEEE result is non-finite. Use `add_unchecked` for
 ### raw IEEE.
 ### :param you: The addend.
@@ -347,13 +233,6 @@ routine B16.represent() -> Text
 ### :returns: The resulting `Text` value.
 @rf("B16.diagnose")
 routine B16.diagnose() -> Text
-
-### Implements the wired routine behavior for this value.
-### :param from_text: The `from_text` value.
-### :returns: The resulting `B16` value.
-### :throws: May throw {InvalidValueError}.
-@rf("B16")
-routine B16!(from_text: Text) -> B16
 
 ### Returns the raw bytes of this value in little-endian order.
 ### :returns: The resulting `Array[Byte, 2]` value.

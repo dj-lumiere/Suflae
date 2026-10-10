@@ -58,12 +58,12 @@ routine List[T](capacity: Integer) -> List[T]
 ### :param count: The number of elements.
 ### :param fill_value: The value every element starts as.
 routine List[T](count: Integer, fill_value: T) -> List[T]
-    return List[T](items: Buffer[T](count: count, fill: fill_value), head: 0, count: U64(from: count))
+    return List[T](items: Buffer[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
 
 ### Makes a Suflae list of the elements of a list from RazorForge code (a RazorForge library routine's result).
 ### :param from: The RazorForge list.
 routine List[T](from: RF::Core.List[T]) -> List[T]
-    var result = List[T](capacity: Integer(from: from.count()))
+    var result = List[T](capacity: from.count().to[Integer]())
     each element in from
         result.add_last(value: element)
     return result
@@ -90,7 +90,7 @@ routine List[T]!(from: SerialValue) -> List[T]
 ### Builds the list a `[a, b, c]` literal writes.
 ### :param elements: The elements, in order.
 common routine List[T].from_literal(elements...: T) -> List[T]
-    var result = List[T](capacity: Integer(from: elements.count()))
+    var result = List[T](capacity: elements.count().to[Integer]())
     var i: U64 = 0
     # Each element moves into the list: `add_last` makes the list's holder, and the caller releases the
     # literal's own afterwards.
@@ -105,11 +105,11 @@ common routine List[T].from_literal(elements...: T) -> List[T]
 
 ### Returns the number of elements.
 routine List[T].count() -> Integer
-    return Integer(from: me.count)
+    return me.count.to[Integer]()
 
 ### Returns the number of elements the list holds without growing.
 routine List[T].capacity() -> Integer
-    return Integer(from: me.items.room)
+    return me.items.room.to[Integer]()
 
 ### Returns whether the list has no elements.
 routine List[T].is_empty() -> Bool
@@ -226,7 +226,7 @@ routine List[T].keep_last!(n: Integer)
 ### count, nothing changes.
 ### :param n: The maximum number of oldest elements to keep.
 routine List[T].keep_first(n: Integer)
-    if n < Integer(from: me.count)
+    if n < me.count.to[Integer]()
         me.truncate(new_count: n)
     return
 
@@ -260,9 +260,9 @@ routine List[T].add_first_keeping!(value: T, keeping: Integer)
 ### Makes room for at least `new_capacity` elements without growing again.
 ### :param new_capacity: The number of elements to make room for.
 routine List[T].reserve(new_capacity: Integer)
-    if new_capacity > Integer(from: me.items.room)
+    if new_capacity > me.items.room.to[Integer]()
         me.straighten()
-        me.items.grow_to(room: U64(from: new_capacity))
+        me.items.grow_to(room: new_capacity.to[U64]())
     return
 
 # ============================================================================
@@ -314,10 +314,10 @@ routine List[T].setitem!(index: Integer, value: T)
 ### :param range: The positions to copy.
 routine List[T].getitem(range: Range[Integer]) -> List[T]
     var result = List[T]()
-    var count = Integer(from: me.count)
+    var count = me.count.to[Integer]()
     each i in range
         if not i.is_negative() and i < count
-            result.add_last(value: me.items.at(position: me.place(index: U64(from: i))))
+            result.add_last(value: me.items.at(position: me.place(index: i.to[U64]())))
     return result
 
 # ============================================================================
@@ -381,7 +381,7 @@ routine List[T].diagnose() -> Text
 
 ### Returns a new list holding copies of the elements.
 routine List[T].duplicate() -> List[T]
-    var result = List[T](capacity: Integer(from: me.count))
+    var result = List[T](capacity: me.count.to[Integer]())
     each element in me
         result.add_last(value: element)
     return result

@@ -27,6 +27,6 @@ needs AnyType T
             name: info.name,
             type_name: info.type_name,
             is_secret: info.is_secret,
-            order: Integer(from: info.order),
+            order: info.order.to[Integer](),
         ))
     return found
