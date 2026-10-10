@@ -144,6 +144,23 @@ secret routine Dict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
     if me.index.holds(slot: slot)
         me.vals.put(position: me.index.entry(slot: slot), value: value)
         return false
+    me.add_new(key: key, value: value)
+    return true
+
+### Adds `key` with `value` only when `key` has no entry, in one step: `d[k] = v` replaces a value that is there,
+### this keeps it. Another agent sharing the dict cannot slip an entry in between the check and the adding, as it
+### could between `if d lack k` and `d[k] = v`.
+### :param key: The key.
+### :param value: The value for a new key.
+### :returns: `true` when the key was new and went in, `false` when it had an entry (left as it was).
+routine Dict[TKey, TValue].set_if_absent(key: TKey, value: TValue) -> Bool
+    if me.index.holds(slot: me.find_slot(key: key))
+        return false
+    me.add_new(key: key, value: value)
+    return true
+
+### Adds `key`, which has no entry, with `value`.
+secret routine Dict[TKey, TValue].add_new(key: TKey, value: TValue)
     me.make_room()
     var at = me.used
     me.keys.put(position: at, value: key)
@@ -152,7 +169,7 @@ secret routine Dict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
     me.used = at + 1
     me.index.place(hash: key.hash(k0: me.k0, k1: me.k1), entry: at)
     me.count = me.count + 1
-    return true
+    return
 
 ### Removes the entry of `key`.
 ### :param key: The key to remove.
@@ -222,8 +239,10 @@ routine Dict[TKey, TValue].values() -> List[TValue]
         i = i + 1
     return result
 
-### Returns all entries in insertion order.
-routine Dict[TKey, TValue].entries() -> List[DictEntry[TKey, TValue]]
+### Returns a copy of the entries as they are now, in insertion order (`each e in d.items()`). `each e in d` walks
+### the dict itself and is faster, but crashes when another agent adds or removes an entry during the walk. Walk
+### `items()` instead over a dict other agents may change: the copy does not change under the loop.
+routine Dict[TKey, TValue].items() -> List[DictEntry[TKey, TValue]]
     var result = List[DictEntry[TKey, TValue]](capacity: me.count.to[Integer]())
     var i: U64 = 0
     while i < me.used

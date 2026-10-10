@@ -1,0 +1,7 @@
+first: true again: false
+seats: 4 ada=1 ada2=11 bob2=12
+room: true true false count=2
+after close: true
+taken: 1 left: 2 value: 4
+rest: [2, 6]
+DONE

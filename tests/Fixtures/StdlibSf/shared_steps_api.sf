@@ -1,0 +1,34 @@
+module Tests/StdlibSf/SharedStepsApi
+
+import IO/Console
+
+# One-statement steps for state that several agents share: `set_if_absent` adds a key only when it is missing,
+# `items()` walks a copy, `put_if_room` never waits on a full queue, and `take_finished` collects finished work in
+# place.
+routine double(n: Integer) -> Integer
+    return n * 2
+
+routine start()
+    var seats = Dict[Text, Integer]()
+    show(f"first: {seats.set_if_absent(key: "ada", value: 1)} again: {seats.set_if_absent(key: "ada", value: 9)}")
+    seats["bob"] = 2
+    each e in seats.items()
+        seats[f"{e.key}2"] = e.value + 10
+    show(f"seats: {seats.count()} ada={seats["ada"]} ada2={seats["ada2"]} bob2={seats["bob2"]}")
+
+    var q = Queue[Integer](capacity: 2)
+    show(f"room: {q.put_if_room(item: 1)} {q.put_if_room(item: 2)} {q.put_if_room(item: 3)} count={q.count()}")
+    q.close()
+    var closed = try q.put_if_room(item: 4)
+    show(f"after close: {closed is None}")
+
+    var jobs = List[Agent[Integer]]()
+    jobs.add_last(value: agent double(n: 1))
+    jobs.add_last(value: agent double(n: 2))
+    jobs.add_last(value: agent double(n: 3))
+    var two = jobs[1].retrieve()
+    var done = jobs.take_finished()
+    show(f"taken: {done.count()} left: {jobs.count()} value: {two}")
+    show(f"rest: {jobs.gather()}")
+    show("DONE")
+    return

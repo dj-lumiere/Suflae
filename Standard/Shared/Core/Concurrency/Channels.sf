@@ -57,6 +57,12 @@ secret routine make_shared_channel[T](capacity: U64) -> (Sender[T], SharedReceiv
 @rf("Sender.send")
 secret routine Sender[T].send!(item: T)
 
+### Sends one item only when the channel has room for it now, never waiting.
+### :param item: The value to send.
+### :returns: `true` when it went in, `false` when the channel was full.
+@rf("Sender.send_if_room")
+secret routine Sender[T].send_if_room!(item: T) -> Bool
+
 ### Produces another sending handle on the same channel (fan-in: more producers).
 ### :returns: A new `Sender[T]` on the same channel.
 @rf("Sender.duplicate")

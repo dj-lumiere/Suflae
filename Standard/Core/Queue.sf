@@ -34,6 +34,15 @@ routine Queue[T].put!(item: T)
     me.sender.send(item: item)
     return
 
+### Puts `item` at the end only when the queue has room for it now, never waiting: the step a broadcast takes per
+### subscriber, where waiting on one full queue would hold up the rest. A queue of capacity 0 has room while no value
+### waits in it.
+### :param item: The value that goes in.
+### :returns: `true` when it went in, `false` when the queue was full.
+### :throws: {ChannelClosedError} when the queue was closed.
+routine Queue[T].put_if_room!(item: T) -> Bool
+    return me.sender.send_if_room(item: item)
+
 ### Ends the queue: a later `put` crashes, and `each` takes what is left and then ends.
 routine Queue[T].close()
     me.sender.close()
