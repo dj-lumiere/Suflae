@@ -29,9 +29,9 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
 
     /// <inheritdoc/>
     /// <remarks>From the improvement plan: `absent` / `lookup` go with their failure kinds,
-    /// `suspended` gives way to `agent` at the call, `unless` / `but` / `disobeys` go.</remarks>
+    /// `suspended` gives way to `agent` at the call.</remarks>
     public override IReadOnlyList<string> RetiredKeywords { get; } =
-        ["absent", "lookup", "suspended", "unless", "but", "disobeys"];
+        ["absent", "lookup", "suspended"];
 
     /// <inheritdoc/>
     public override string? Format(string text, string fileName)

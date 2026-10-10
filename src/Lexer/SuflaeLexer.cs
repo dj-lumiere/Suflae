@@ -188,14 +188,12 @@ public partial class SuflaeLexer
 
             // Protocol implementation (renamed keywords, old TokenType names)
             [key: "obeys"] = TokenType.Obeys,
-            [key: "disobeys"] = TokenType.Disobeys,
 
             // Control flow
             [key: "if"] = TokenType.If,
             [key: "elseif"] = TokenType.Elseif,
             [key: "else"] = TokenType.Else,
             [key: "then"] = TokenType.Then,
-            [key: "unless"] = TokenType.Unless,
             [key: "when"] = TokenType.When,
             [key: "is"] = TokenType.Is,
             [key: "loop"] = TokenType.Loop,
@@ -235,7 +233,6 @@ public partial class SuflaeLexer
             [key: "and"] = TokenType.And,
             [key: "or"] = TokenType.Or,
             [key: "not"] = TokenType.Not,
-            [key: "but"] = TokenType.But,
 
             // Literals
             [key: "true"] = TokenType.True,

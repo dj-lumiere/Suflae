@@ -270,7 +270,7 @@ elseif x > 3
 else
     show("small")
 
-unless list.is_empty()
+if not (list.is_empty())
     show("has items")
 
 each x in 1 to 5
@@ -940,15 +940,15 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Declarations**: `routine` `entity` `record` `choice` `flags` `crashable` `variant` `protocol`
 - **Bindings**: `var` `preset` `global` `lateinit`
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
-- **Protocols and constraints**: `obeys` `disobeys` `needs` `relates` `everywhere`
-- **Control flow**: `if` `elseif` `else` `then` `unless` `when` `is` `isnot` `loop` `while` `each`
+- **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
+- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each`
   `break` `continue` `return` `throw` `pierce` `absent`
 - **Recovery**: `try` `check` `lookup`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
 - **Other**: `using` `as` `define` `given` `pass` (an empty body: a type's, or a block's that
   does nothing)
-- **Logic**: `and` `or` `not` `but`
+- **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`
 - **Concurrency**: `suspended`
 - **Unsafe code**: `danger` `dangerous`
