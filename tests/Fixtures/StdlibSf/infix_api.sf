@@ -1,0 +1,19 @@
+module Tests/StdlibSf/InfixApi
+
+import IO/Console
+
+# A routine marked `@infix` is written between its operands.
+
+record Vec
+    x: Integer
+    y: Integer
+
+@infix
+routine Vec.dot(you: Vec) -> Integer
+    return me.x * you.x + me.y * you.y
+
+routine start()
+    var a = Vec(x: 1, y: 2)
+    var b = Vec(x: 3, y: 4)
+    show(f"{a dot b}")
+    show("DONE")

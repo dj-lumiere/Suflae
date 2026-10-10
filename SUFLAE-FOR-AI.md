@@ -295,6 +295,9 @@ routine start()
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
   sign fill for `>>`).
+- Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
+  (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
+  (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: SF-S706.
 - Containment: `coll have x`, `coll lack x`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
   `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
   (`2 to 1` yields nothing, `2 to 1 have 1` is `false`). A negative step counts down: `10 to 1 by -1`,
