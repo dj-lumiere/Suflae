@@ -15,4 +15,5 @@ copy equal: true slice: [4, 5]
 released: true
 empty remove: true
 swap: ["alpha", "gamma", "beta"]
+list: [3, 9, 4, 5] front=2 removed=3 left [9, 4, 5] capacity=4
 DONE

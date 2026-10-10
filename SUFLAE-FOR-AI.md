@@ -752,8 +752,10 @@ each entry in ages
   `xs.enumerate()` (pairs `(Integer, T)`). A negative index crashes with `NegativeIndexError`; count from the
   end with `^` (`xs[^1]`).
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
-  `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`. A `List` is also the stack, queue and deque: it adds and
-  removes at both ends in O(1) and rotates. `Array[T, COUNT]` is RazorForge's
+  `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`, `CircularList`. A `List` keeps its elements from the first
+  place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
+  `CircularList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
+  and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Array[T, COUNT]` is RazorForge's
   fixed-size record, counted and indexed with `Integer` too. RazorForge's `SplitList` / `SplitArray`
   (structure-of-arrays layouts) are not available in Suflae.
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /

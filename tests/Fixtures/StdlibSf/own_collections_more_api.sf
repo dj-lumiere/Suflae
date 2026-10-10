@@ -4,9 +4,9 @@ import IO/Console
 import Collections
 
 # Suflae's own BitList, BitArray, PriorityQueue and sorted collections count and index with Integer, like List,
-# Dict and Set. A List is also a deque: it adds and removes at both ends and rotates.
+# Dict and Set. A CircularList is a deque: it adds and removes at both ends and rotates.
 routine start()
-    var q = List[Integer]()
+    var q = CircularList[Integer]()
     q.add_last(value: 1)
     q.add_last(value: 2)
     q.add_first(value: 0)

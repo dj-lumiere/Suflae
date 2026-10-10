@@ -1,16 +1,17 @@
-module Tests/StdlibSf/ListRingApi
+module Tests/StdlibSf/CircularListApi
 
 import IO/Console
+import Collections
 import ObjectHacker
 
-# Suflae's List keeps its elements in a ring: it is a stack, a queue and a deque, rotates, and keeps a fixed-size
-# latest-N history.
+# A CircularList keeps its elements in a ring: it is a queue and a deque, rotates, and keeps a fixed-size latest-N
+# history. A List keeps them from the first place on, so it adds and removes at its front by moving the rest.
 
 entity Box
     id: Integer
 
 routine start()
-    var xs = List[Integer](capacity: 4)
+    var xs = CircularList[Integer](capacity: 4)
     xs.add_last(value: 2)
     xs.add_last(value: 3)
     xs.add_first(value: 1)
@@ -33,7 +34,7 @@ routine start()
     xs.reverse_in_place()
     show(f"reversed: {xs}")
 
-    var history = List[Text](capacity: 3)
+    var history = CircularList[Text](capacity: 3)
     each word in ["a", "b", "c", "d", "e"]
         history.add_last_keeping(value: word, keeping: 3)
     show(f"history: {history} capacity={history.capacity()}")
@@ -42,7 +43,7 @@ routine start()
     history.clear()
     show(f"cleared: {history} empty={history.is_empty()}")
 
-    var queue = List[Integer]()
+    var queue = CircularList[Integer]()
     var i = 0
     while i < 10
         queue.add_last(value: i)
@@ -57,7 +58,7 @@ routine start()
 
     var box = Box(id: 1)
     var seen = watch(target: box)
-    var boxes = List[Box]()
+    var boxes = CircularList[Box]()
     boxes.add_last(value: box)
     boxes.add_first(value: box)
     boxes.add_at(index: 1, value: box)
@@ -65,16 +66,21 @@ routine start()
     boxes.remove_first()
     boxes.truncate(new_count: 1)
     box = Box(id: 0)
-    boxes = List[Box]()
+    boxes = CircularList[Box]()
     show(f"released: {not seen.is_alive()}")
 
-    var empty = List[Integer]()
+    var empty = CircularList[Integer]()
     var nothing = try empty.remove_first()
     show(f"empty remove: {nothing is None}")
 
-    var words = ["alpha", "beta", "gamma"]
+    var words: CircularList[Text] = ["alpha", "beta", "gamma"]
     words.rotate_left(n: 1)
     words.swap(first: 0, second: 2)
     show(f"swap: {words}")
+    var plain = [3, 4, 5]
+    plain.add_first(value: 2)
+    var front = plain.remove_first()
+    plain.add_at(index: 1, value: 9)
+    show(f"list: {plain} front={front} removed={plain.remove_at(index: 0)} left {plain} capacity={plain.capacity()}")
     show("DONE")
     return

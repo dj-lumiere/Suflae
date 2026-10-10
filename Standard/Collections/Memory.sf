@@ -580,8 +580,6 @@ routine Memory[T].iter() -> MemoryEmittable[T]
 routine Memory[T].walk!(first: Integer, count: Integer) -> MemoryEmittable[T]
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    if count.is_negative()
-        throw NegativeIndexError(index: count)
     if count == 0
         return me.walking(first: 0_u64, count: 0_u64)
     return me.walk_at(first: position_of(value: first), count: count.to[U64]())
