@@ -1,9 +1,9 @@
-module Tests/StdlibSf/BufferApi
+module Tests/StdlibSf/MemoryApi
 
 import IO/Console
 import ObjectHacker
 
-# Suflae's Buffer: a fixed row of places that start as zero, and ranges that are views sharing the same memory.
+# Suflae's Memory: a fixed row of places that start as zero, and ranges that are views sharing the same memory.
 
 entity Counter
     hits: Integer
@@ -13,18 +13,18 @@ entity Box
     id: Integer
 
 entity Holder
-    kids: Buffer[Box]
+    kids: Memory[Box]
 
-routine keep_view() -> Buffer[Integer]
-    var whole = Buffer[Integer](count: 6, fill: 0)
+routine keep_view() -> Memory[Integer]
+    var whole = Memory[Integer](count: 6, fill: 0)
     whole[4] = 40
     # The view outlives the name `whole`: it keeps the memory alive.
     return whole[3 til 6]
 
 routine start()
-    var buf = Buffer[Integer](count: 5, fill: 7)
+    var buf = Memory[Integer](count: 5, fill: 7)
     show(f"made: {buf} capacity={buf.capacity()}")
-    var empty = Buffer[Text](capacity: 3)
+    var empty = Memory[Text](capacity: 3)
     show(f"zero places: {empty} first is empty: {empty[0] == ""}")
 
     buf[0] = 1
@@ -33,7 +33,7 @@ routine start()
 
     var part = buf[1 til 4]
     part[0] = 20
-    show(f"view: {part} buffer: {buf}")
+    show(f"view: {part} memory: {buf}")
 
     var kept = keep_view()
     show(f"kept view: {kept}")
@@ -43,18 +43,18 @@ routine start()
     show(f"after loop: {buf}")
     show(f"have 20: {buf have 20} have 3: {buf have 3}")
 
-    var words = Buffer[Text](count: 3, fill: "a")
+    var words = Memory[Text](count: 3, fill: "a")
     words[1] = "b" + "c"
     show(f"took: {words.take(index: 1)} left: {words}")
     words.erase(index: 0)
     show(f"erased: {words}")
 
     var shared = Counter(hits: 0)
-    var counters = Buffer[Counter](count: 2, fill: shared)
+    var counters = Memory[Counter](count: 2, fill: shared)
     counters[1].hits = 5
     show(f"shared: {shared.hits} {counters[0].hits}")
 
-    var unfilled = Buffer[Counter](capacity: 2)
+    var unfilled = Memory[Counter](capacity: 2)
     var empty_entity = try unfilled[0]
     show(f"empty entity place: {empty_entity is None}")
 
@@ -63,7 +63,7 @@ routine start()
     var negative = try buf[-1]
     show(f"negative: {negative is None}")
 
-    var row = Buffer[Text](capacity: 5)
+    var row = Memory[Text](capacity: 5)
     row[0] = "a"
     row[1] = "b"
     row[2] = "c"
@@ -76,7 +76,7 @@ routine start()
     var grow_view = try part.grow(capacity: 10)
     show(f"grow a view: {not grow_view}")
 
-    var nums = Buffer[Integer](capacity: 40)
+    var nums = Memory[Integer](capacity: 40)
     var k = 0
     while k < 40
         nums[k] = (k * 17) % 40
@@ -89,33 +89,33 @@ routine start()
     nums.swap(first: 0, second: 39)
     show(f"part reversed and swapped: {nums[0]} {nums[9]} {nums[39]}")
 
-    var names = Buffer[Text](count: 4, fill: "m")
+    var names = Memory[Text](count: 4, fill: "m")
     names[1] = "c"
     names[2] = "a"
     names[1 til 3].sort()
     show(f"sorted part: {names}")
 
-    # What the places hold goes away with the buffer, and a cycle through a buffer is reaped.
+    # What the places hold goes away with the memory, and a cycle through a memory is reaped.
     var box = Box(holder: none, id: 1)
     var seen = watch(target: box)
-    var holder = Holder(kids: Buffer[Box](count: 2, fill: box))
+    var holder = Holder(kids: Memory[Box](count: 2, fill: box))
     show(f"read through a field: {holder.kids[1].id}")
     holder.kids[0] = box
     box.holder = holder
     box = Box(holder: none, id: 0)
-    holder = Holder(kids: Buffer[Box](count: 1, fill: box))
+    holder = Holder(kids: Memory[Box](count: 1, fill: box))
     show(f"cycle alive: {seen.is_alive()}")
     show(f"collected: {cyclic_collect()} alive: {seen.is_alive()}")
 
     var lone = Box(holder: none, id: 2)
     var lone_seen = watch(target: lone)
-    var boxes = Buffer[Box](capacity: 3)
+    var boxes = Memory[Box](capacity: 3)
     boxes[0] = lone
     boxes[2] = lone
     boxes.move(from: 2, into: 1, count: 1)
     lone = Box(holder: none, id: 0)
     boxes.take(index: 0)
-    boxes = Buffer[Box](capacity: 0)
+    boxes = Memory[Box](capacity: 0)
     show(f"released: {not lone_seen.is_alive()}")
     show("DONE")
     return

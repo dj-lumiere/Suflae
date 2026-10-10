@@ -4,7 +4,7 @@ import IO/Console
 import Collections
 import ObjectHacker
 
-# Suflae's PriorityQueue keeps priorities and elements in two Buffers laid out as one min-heap.
+# Suflae's PriorityQueue keeps priorities and elements in two Memories laid out as one min-heap.
 
 entity Job
     name: Text

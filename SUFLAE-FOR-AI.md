@@ -48,9 +48,10 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
 4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`), but variables of different
    number types never mix without an explicit conversion (`n.to[S64]()`, §5).
-5. **`//` is floor division, `/` is true division, and `Integer` has no `/`.** `7 // 2` is `3`. For a
-   fractional result, compute with `Decimal` values, and write the literals as decimals: `1.0 / 3.0`
-   (`1.0 / 3` is an error, SF-S502: a whole-number literal is an `Integer`, not a `Decimal`).
+5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
+   significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Integer` values turns each into a `Decimal`
+   first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
+   Mixing an `Integer` and a `Decimal` operand (`1.0 / 3`) is still an error, SF-S502.
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **Failable routines carry `!` on the DECLARATION only** (`routine parse!(...)`); call sites never write
@@ -905,20 +906,32 @@ routine start()
     return
 ```
 
-**Channels** (always available):
+**Queues** (always available): one `Queue[T]` that every agent that puts or takes holds.
 
 ```suflae
-var (tx, rx) = make_channel[Integer](capacity: 4)
-tx.send(item: 10)
-tx.send(item: 20)
-tx.close()
-each n in rx
-    show(f"{n}")
+routine produce(q: Queue[Integer], n: Integer) -> Integer
+    var i = 1
+    while i <= n
+        q.put(item: i)
+        i = i + 1
+    q.close()
+    return n
+
+routine start()
+    var q = Queue[Integer](capacity: 2)
+    var job = agent produce(q: q, n: 5)
+    job.start_now()
+    var total = 0
+    each x in q
+        total = total + x
+    show(f"total: {total}")
+    return
 ```
 
-`make_channel[T](capacity:)` has one consumer (`capacity: 0` makes each send wait for a taker);
-`make_shared_channel[T](capacity:)` lets several consumers compete for items. `send` is failable
-(`ChannelClosedError`).
+`put` waits while the queue is full (`capacity: 0`: each `put` waits for a taker) and crashes with
+`ChannelClosedError` once the queue is closed. `each x in q` waits while it is empty and ends when it is closed and
+empty. Nothing closes a queue by itself: the side that is done calls `close()`. Several agents taking from one
+queue each get different values. `q.count()` and `q.is_closed()` are snapshots another agent can change at once.
 
 ## 17. Process signals
 

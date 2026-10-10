@@ -1,0 +1,28 @@
+module Tests/StdlibSf/QueueApi
+
+import IO/Console
+
+# A queue carries values from one agent to another in order: `put` waits while it is full, `each` waits while it is
+# empty and ends once it is closed and empty.
+routine produce(q: Queue[Integer], n: Integer) -> Integer
+    var i = 1
+    while i <= n
+        q.put(item: i)
+        i = i + 1
+    q.close()
+    return n
+
+routine start()
+    var q = Queue[Integer](capacity: 2)
+    var job = agent produce(q: q, n: 5)
+    job.start_now()
+    var total = 0
+    var seen = List[Integer]()
+    each x in q
+        total = total + x
+        seen.add_last(value: x)
+    show(f"total: {total} order: {seen}")
+    show(f"sent: {job.retrieve()}")
+    show(f"closed: {q.is_closed()} left: {q.count()}")
+    show("DONE")
+    return

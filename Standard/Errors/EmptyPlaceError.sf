@@ -2,7 +2,7 @@ module Core
 
 import Numerics
 
-### Raised when a place of a buffer of entities is read before anything was written there: the place holds no
+### Raised when a place of a memory of entities is read before anything was written there: the place holds no
 ### entity yet.
 crashable EmptyPlaceError
     ### The position that was read.

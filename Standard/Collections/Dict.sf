@@ -6,7 +6,7 @@ import Core.SecureHashKey
 
 ### A hash-flooding-resistant insertion-ordered key-value dictionary.
 ###
-### `Dict[TKey, TValue]` keeps its keys and values in `Buffer`s in insertion order, with a `HashIndex` probe table
+### `Dict[TKey, TValue]` keeps its keys and values in `Memory` rows in insertion order, with a `HashIndex` probe table
 ### over them. It hashes with SipHash-2-4 keyed by a per-instance secret, so the probe sequence is unpredictable to
 ### external attackers. Iteration order follows insertion order; the secret key only affects the probe table.
 ###
@@ -32,11 +32,11 @@ needs TKey obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
     ### The keys, in insertion order. A removed entry's place is empty until the entries are packed again.
-    secret keys: Buffer[TKey]
+    secret keys: Memory[TKey]
     ### The values, at the same places as their keys.
-    secret vals: Buffer[TValue]
+    secret vals: Memory[TValue]
     ### Whether each entry place holds a live entry.
-    secret live: Buffer[Bool]
+    secret live: Memory[Bool]
     ### How many live entries there are.
     secret count: U64
     ### How many entry places, from the front, have been used.
@@ -50,11 +50,11 @@ needs TKey obeys Hashable, Equatable
 entity DictEmittable[TKey, TValue]
 obeys Emittable[DictEntry[TKey, TValue]]
     ### The walk over which entry places are live.
-    secret live: BufferEmittable[Bool]
+    secret live: MemoryEmittable[Bool]
     ### The walk over the keys.
-    secret keys: BufferEmittable[TKey]
+    secret keys: MemoryEmittable[TKey]
     ### The walk over the values.
-    secret vals: BufferEmittable[TValue]
+    secret vals: MemoryEmittable[TValue]
     ### How many entry places are left to walk.
     secret left: U64
 
@@ -95,9 +95,9 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, 
         room = capacity.to[U64]()
     return Dict[TKey, TValue](
         index: new_hash_index(capacity: room),
-        keys: Buffer[TKey](room: room),
-        vals: Buffer[TValue](room: room),
-        live: Buffer[Bool](room: room),
+        keys: Memory[TKey](room: room),
+        vals: Memory[TValue](room: room),
+        live: Memory[Bool](room: room),
         count: 0,
         used: 0,
         k0: key.k0,

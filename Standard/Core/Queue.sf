@@ -1,0 +1,56 @@
+module Core
+
+import Numerics
+
+### A queue that agents pass values through, in order: `Queue[T](capacity: 8)`, then `q.put(x)` on one side and
+### `each x in q` on the other. Hand the same queue to every agent that puts or takes.
+###
+### `put` waits while the queue is full, `each` waits while it is empty. `close()` ends it, from either side: a
+### later `put` crashes with `ChannelClosedError`, and `each` takes what is left and then ends. Nothing closes a
+### queue by itself, so the side that is done calls `close()`. A queue nobody closes leaves its readers waiting,
+### which the runtime reports as a deadlock instead of hanging quietly.
+###
+### Several agents can take from one queue: each value goes to one of them.
+### :typeparam T: The values the queue carries.
+entity Queue[T]
+relates RF::Core.ChannelDrain[T] as Iter
+obeys Iterable[T]
+    ### The sending side, kept open until `close()`.
+    secret sender: RF::Core.Sender[T]
+    ### The taking side, shared by every reader.
+    secret receiver: RF::Core.SharedReceiver[T]
+
+### Makes an empty queue that holds up to `capacity` values before `put` waits (0: each `put` waits for a taker).
+### :param capacity: How many values it holds.
+### :returns: The new queue.
+routine Queue[T](capacity: Integer) -> Queue[T]
+    var (sender, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
+    return Queue[T](sender: sender, receiver: receiver)
+
+### Puts `item` at the end, waiting while the queue is full.
+### :param item: The value that goes in.
+### :throws: {ChannelClosedError} when the queue was closed.
+routine Queue[T].put!(item: T)
+    me.sender.send(item: item)
+    return
+
+### Ends the queue: a later `put` crashes, and `each` takes what is left and then ends.
+routine Queue[T].close()
+    me.sender.close()
+    return
+
+### Whether the queue was closed.
+### :returns: `true` once `close()` ran.
+routine Queue[T].is_closed() -> Bool
+    return me.sender.is_closed()
+
+### How many values wait in the queue right now. Another agent can change it at once, so it is for showing, not
+### for deciding.
+### :returns: The number of values waiting.
+routine Queue[T].count() -> Integer
+    return me.receiver.count().to[Integer]()
+
+### Takes values in order (`each x in q`), waiting while the queue is empty, until it is closed and empty.
+### :returns: The walk over the queue.
+routine Queue[T].iter() -> RF::Core.ChannelDrain[T]
+    return me.receiver.iter()

@@ -13,7 +13,7 @@ needs TPriority obeys Comparable
 
 ### A min-heap priority pool that always removes the entry with the smallest priority first.
 ###
-### `PriorityQueue[TPriority, TElement]` keeps priorities and elements in two `Buffer`s laid out as one heap. The
+### `PriorityQueue[TPriority, TElement]` keeps priorities and elements in two `Memory` rows laid out as one heap. The
 ### heap property guarantees that the minimum-priority entry is always at the front. When two entries have equal
 ### priority, no order guarantee is made between them.
 ###
@@ -46,9 +46,9 @@ relates PriorityQueueEmittable[TPriority, TElement] as Iter
 obeys Iterable[PQEntry[TPriority, TElement]], DictLiteral[TPriority, TElement]
 needs TPriority obeys Comparable
     ### The priorities, in heap order.
-    secret priorities: Buffer[TPriority]
+    secret priorities: Memory[TPriority]
     ### The elements, at the same places as their priorities.
-    secret elements: Buffer[TElement]
+    secret elements: Memory[TElement]
     ### How many entries there are: the first `count` places of both buffers.
     secret count: U64
 
@@ -58,9 +58,9 @@ needs TPriority obeys Comparable
 entity PriorityQueueEmittable[TPriority, TElement]
 obeys Emittable[PQEntry[TPriority, TElement]]
     ### The walk over the priorities.
-    secret priorities: BufferEmittable[TPriority]
+    secret priorities: MemoryEmittable[TPriority]
     ### The walk over the elements.
-    secret elements: BufferEmittable[TElement]
+    secret elements: MemoryEmittable[TElement]
     ### How many entries the walk reads.
     secret count: U64
     ### How many entries have been read.
@@ -92,8 +92,8 @@ routine PriorityQueue[TPriority, TElement]() -> PriorityQueue[TPriority, TElemen
 ### :param capacity: The number of entries to make room for.
 routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[TPriority, TElement]
     return PriorityQueue[TPriority, TElement](
-        priorities: Buffer[TPriority](capacity: capacity),
-        elements: Buffer[TElement](capacity: capacity),
+        priorities: Memory[TPriority](capacity: capacity),
+        elements: Memory[TElement](capacity: capacity),
         count: 0,
     )
 

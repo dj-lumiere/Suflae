@@ -3,7 +3,7 @@ module Tests/StdlibSf/HashCollectionsApi
 import IO/Console
 import ObjectHacker
 
-# Suflae's Dict and Set keep their entries in Buffers in insertion order, over one HashIndex probe table.
+# Suflae's Dict and Set keep their entries in Memories in insertion order, over one HashIndex probe table.
 
 entity Box
     id: Integer

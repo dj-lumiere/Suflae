@@ -20,5 +20,10 @@ routine start()
     var b: B64 = 12345678901234567890.to()
     show(f"float: {b}")
     show(f"wrap: {count.to_wrap[U8]()} {(-1).to_wrap[U16]()} clamp: {count.to_clamp[U8]()} {(-5).to_clamp[U32]()}")
+    show(f"divide: {7 / 2} {1 / 3} {6 / 3} {7 // 2} {7 % 2}")
+    var huge = 1000000000000000000000000000000000000001
+    var wide: Decimal? = try huge / 3
+    var round: Decimal? = try 1000000000000000000000000000000000000000 / 8
+    show(f"too wide: {wide} round: {round}")
     show("DONE")
     return

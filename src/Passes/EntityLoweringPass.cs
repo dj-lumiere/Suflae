@@ -868,7 +868,7 @@ internal sealed class EntityLoweringPass
             return WrapInRoam(inner: loweredG, entity: gEntity);
         }
 
-        // A written creator called with explicit type arguments (`Buffer[T](capacity: n)`) is typed by its
+        // A written creator called with explicit type arguments (`Memory[T](capacity: n)`) is typed by its
         // declared `Roamed[E]` return, but its body hands back the bare entity: wrap it once here, as the
         // CallExpression form does (WrapCallResultInRoam).
         if (gmce.ResolvedRoutine is { IsCreator: true } &&

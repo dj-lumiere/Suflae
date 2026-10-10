@@ -1,0 +1,26 @@
+made: Memory([7, 7, 7, 7, 7]) capacity=5
+zero places: Memory(["", "", ""]) first is empty: true
+written: 1 9
+view: Memory([20, 7, 7]) memory: Memory([1, 20, 7, 7, 9])
+kept view: Memory([0, 40, 0])
+after loop: Memory([9, 20, 7, 7, 9])
+have 20: true have 3: false
+took: bc left: Memory(["a", "", "a"])
+erased: Memory(["", "", "a"])
+shared: 5 5
+empty entity place: true
+out of range: true
+negative: true
+moved: Memory(["", "", "a", "b", "c"])
+rotated: Memory(["a", "b", "c", "", ""])
+grown: Memory(["a", "b", "c", "", "", "", ""]) capacity=7
+grow a view: true
+sorted: 0 1 20 39
+sorted down: 39 0
+part reversed and swapped: 0 39 30
+sorted part: Memory(["m", "a", "c", "m"])
+read through a field: 1
+cycle alive: true
+collected: 4 alive: false
+released: true
+DONE
