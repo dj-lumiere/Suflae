@@ -2,8 +2,8 @@ module Core
 
 import Numerics
 
-### A queue that agents pass values through, in order: `Queue[T](capacity: 8)`, then `q.put(x)` on one side and
-### `each x in q` on the other. Hand the same queue to every agent that puts or takes.
+### A queue that agents pass values through, in order: `Queue[T](capacity: 8)`, then `q.put(item: x)` on one side
+### and `each x in q` on the other. Hand the same queue to every agent that puts or takes.
 ###
 ### `put` waits while the queue is full, `each` waits while it is empty. `close()` ends it, from either side: a
 ### later `put` crashes with `ChannelClosedError`, and `each` takes what is left and then ends. Nothing closes a
