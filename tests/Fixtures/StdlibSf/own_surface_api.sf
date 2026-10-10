@@ -28,7 +28,7 @@ routine start()
     show(f"pad=[{"7".zero_pad(width: 3)}] [{"ab".pad_start(width: 4)}] [{"ab".center(width: 6, fill: '*')}]")
     show(f"words={"a  b c".words()} lines={"x\ny".lines().count()} rep={"ab".repeat(times: 3)}")
     var built = Text(from_list: ['h', 'i'])
-    show(f"built={built} empty=[{Text()}] one={Text(from_character: 'x')}")
+    show(f"built={built} empty=[{Text()}] one={'x'.to[Text]()}")
 
     var b = "a,b,c".encode_as_utf8()
     show(f"bytes={b.count() + 1} b0={b[0]} find={b.find(byte: b[1])} parts={b.split(separator: b[1]).count()}")

@@ -12,3 +12,21 @@ module Core
 @rf("nested_repr")
 routine nested_repr(value: T) -> Text
 needs AnyType T
+
+### Returns this choice's discriminant: `status.to[S32]()`.
+### :returns: The discriminant.
+@rf("T.to")
+routine T.to[S32]() -> S32
+needs ChoiceType T
+
+### Returns this choice's discriminant widened to `S64`: `status.to[S64]()`.
+### :returns: The discriminant.
+@rf("T.to")
+routine T.to[S64]() -> S64
+needs ChoiceType T
+
+### Returns this flags value's bitmask: `perms.to[U64]()`.
+### :returns: The bitmask.
+@rf("T.to")
+routine T.to[U64]() -> U64
+needs FlagsType T

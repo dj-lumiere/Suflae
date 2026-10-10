@@ -11,19 +11,10 @@ record Byte
 obeys Copyable
     pass
 
-### Returns the same byte value.
-### This overload exists so generic creator-based code can normalize on the
-### standard construction surface.
-### :param from: The source value to convert.
-### :returns: The resulting `Byte` value.
-@rf("Byte")
-routine Byte(from: Byte) -> Byte
-
-### Reinterprets an unsigned 8-bit integer as `Byte`.
-### :param from: The source value to convert.
-### :returns: The resulting `Byte` value.
-@rf("Byte")
-routine Byte(from: U8) -> Byte
+### Reads an unsigned 8-bit integer as a `Byte` with the same bits: `0x41u8.to[Byte]()`.
+### :returns: The byte.
+@rf("U8.to")
+routine U8.to[Byte]() -> Byte
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
@@ -81,3 +72,23 @@ routine Byte.diagnose() -> Text
 ### :returns: The resulting `U64` value.
 @rf("Byte.hash")
 routine Byte.hash(k0: U64, k1: U64) -> U64
+
+### Reads this byte's bits as a `U8`: `b.to[U8]()`.
+### :returns: The same bits as a `U8`.
+@rf("Byte.to")
+routine Byte.to[U8]() -> U8
+
+### Widens this byte to a `U32`: `b.to[U32]()`.
+### :returns: The byte's value as a `U32`.
+@rf("Byte.to")
+routine Byte.to[U32]() -> U32
+
+### Widens this byte to a `U16`: `b.to[U16]()`.
+### :returns: The byte's value as a `U16`.
+@rf("Byte.to")
+routine Byte.to[U16]() -> U16
+
+### Widens this byte to a `U64`: `b.to[U64]()`.
+### :returns: The byte's value as a `U64`.
+@rf("Byte.to")
+routine Byte.to[U64]() -> U64

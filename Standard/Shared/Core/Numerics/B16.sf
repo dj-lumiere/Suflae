@@ -693,3 +693,104 @@ routine B16.tanpi() -> B16
 ### :returns: The correctly rounded gamma function.
 @rf("B16.tgamma_unchecked")
 routine B16.tgamma_unchecked() -> B16
+
+### Converts an `S8` into half-precision floating-point form.
+### :returns: The corresponding `B16` value.
+@rf("S8.to")
+routine S8.to[B16]() -> B16
+
+### Converts an `S16` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("S16.to")
+routine S16.to[B16]() -> B16
+
+### Converts an `S32` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("S32.to")
+routine S32.to![B16]() -> B16
+
+### Converts an `S64` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("S64.to")
+routine S64.to![B16]() -> B16
+
+### Converts an `S128` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("S128.to")
+routine S128.to![B16]() -> B16
+
+### Converts a `U8` into half-precision floating-point form.
+### :returns: The corresponding `B16` value.
+@rf("U8.to")
+routine U8.to[B16]() -> B16
+
+### Converts a `U16` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("U16.to")
+routine U16.to![B16]() -> B16
+
+### Converts a `U32` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("U32.to")
+routine U32.to![B16]() -> B16
+
+### Converts a `U64` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("U64.to")
+routine U64.to![B16]() -> B16
+
+### Converts a `U128` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("U128.to")
+routine U128.to![B16]() -> B16
+
+### Converts an `S256` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("S256.to")
+routine S256.to![B16]() -> B16
+
+### Converts a `U256` into half-precision floating-point form.
+### :returns: The closest representable `B16` value.
+@rf("U256.to")
+routine U256.to![B16]() -> B16
+
+### Returns an existing `B16` unchanged.
+### :returns: this value.
+@rf("B16.to")
+routine B16.to[B16]() -> B16
+
+### Narrows a single-precision float to half precision.
+### :returns: The nearest representable `B16` value.
+@rf("B32.to")
+routine B32.to[B16]() -> B16
+
+### Narrows a double-precision float to half precision.
+### :returns: The nearest representable `B16` value.
+@rf("B64.to")
+routine B64.to[B16]() -> B16
+
+### Narrows a quadruple-precision float to half precision.
+### :returns: The nearest representable `B16` value.
+@rf("B128.to")
+routine B128.to[B16]() -> B16
+
+### Converts a decimal32 value to half-precision binary floating point.
+### :returns: The closest representable `B16` value.
+@rf("D32.to")
+routine D32.to[B16]() -> B16
+
+### Converts a decimal64 value to half-precision binary floating point.
+### :returns: The closest representable `B16` value.
+@rf("D64.to")
+routine D64.to[B16]() -> B16
+
+### Converts a decimal128 value to half-precision binary floating point.
+### :returns: The closest representable `B16` value.
+@rf("D128.to")
+routine D128.to[B16]() -> B16
+
+### Implements the wired routine behavior for this value.
+### :returns: The resulting `B16` value.
+### :throws: May throw {InvalidValueError}.
+@rf("Text.to")
+routine Text.to![B16]() -> B16

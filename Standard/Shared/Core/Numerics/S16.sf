@@ -381,3 +381,121 @@ routine S16.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("S16.hash")
 routine S16.hash(k0: U64, k1: U64) -> U64
+
+### Sign-extends an `S8` to `S16`.
+### :returns: An `S16` with the same signed value as this value.
+@rf("S8.to")
+routine S8.to[S16]() -> S16
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("S16.to")
+routine S16.to[S16]() -> S16
+
+### Converts an `S32` to `S16`, throwing if the value is outside −32768..32767.
+### :returns: The lower 16 bits of this value interpreted as signed.
+### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
+@rf("S32.to")
+routine S32.to![S16]() -> S16
+
+### Converts an `S64` to `S16`, throwing if the value is outside −32768..32767.
+### :returns: The lower 16 bits of this value interpreted as signed.
+### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
+@rf("S64.to")
+routine S64.to![S16]() -> S16
+
+### Converts an `S128` to `S16`, throwing if the value is outside −32768..32767.
+### :returns: The lower 16 bits of this value interpreted as signed.
+### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
+@rf("S128.to")
+routine S128.to![S16]() -> S16
+
+### Zero-extends a `U8` to `S16` (always succeeds — `U8` max 255 fits in S16).
+### :returns: An `S16` equal in value to this value.
+@rf("U8.to")
+routine U8.to[S16]() -> S16
+
+### Reinterprets a `U16` as `S16` using two's complement, throwing if the value exceeds 32767.
+### :returns: The same bit pattern interpreted as `S16`.
+### :throws: {IntegerOverflowError} if `me > 32767`.
+@rf("U16.to")
+routine U16.to![S16]() -> S16
+
+### Converts a `U32` to `S16`, throwing if the value exceeds 32767.
+### :returns: The lower 16 bits interpreted as a signed `S16`.
+### :throws: {IntegerOverflowError} if `me > 32767`.
+@rf("U32.to")
+routine U32.to![S16]() -> S16
+
+### Converts a `U64` to `S16`, throwing if the value exceeds 32767.
+### :returns: The lower 16 bits interpreted as a signed `S16`.
+### :throws: {IntegerOverflowError} if `me > 32767`.
+@rf("U64.to")
+routine U64.to![S16]() -> S16
+
+### Converts a `U128` to `S16`, throwing if the value exceeds 32767.
+### :returns: The lower 16 bits interpreted as a signed `S16`.
+### :throws: {IntegerOverflowError} if `me > 32767`.
+@rf("U128.to")
+routine U128.to![S16]() -> S16
+
+### Converts an `S256` to `S16`, throwing if outside −32768..32767.
+### :returns: The lower 16 bits reinterpreted as an `S16`.
+### :throws: {IntegerOverflowError} if this value is outside −32768..32767.
+@rf("S256.to")
+routine S256.to![S16]() -> S16
+
+### Converts a `U256` to `S16`, throwing if the value exceeds 32767.
+### :returns: The lower 16 bits reinterpreted as an `S16`.
+### :throws: {IntegerOverflowError} if `me > 32767`.
+@rf("U256.to")
+routine U256.to![S16]() -> S16
+
+### Converts an `B16` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("B16.to")
+routine B16.to![S16]() -> S16
+
+### Converts an `B32` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("B32.to")
+routine B32.to![S16]() -> S16
+
+### Converts an `B64` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("B64.to")
+routine B64.to![S16]() -> S16
+
+### Converts an `B128` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("B128.to")
+routine B128.to![S16]() -> S16
+
+### Converts a `D32` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("D32.to")
+routine D32.to![S16]() -> S16
+
+### Converts a `D64` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("D64.to")
+routine D64.to![S16]() -> S16
+
+### Converts a `D128` to `S16` by first converting to `S32`, then truncating.
+### :returns: The integer part of this value as an `S16`.
+### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
+@rf("D128.to")
+routine D128.to![S16]() -> S16
+
+### Parses a decimal string into an `S16`, accepting an optional leading `+` or `−` sign.
+### :returns: The parsed `S16` value.
+### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `S16`.
+@rf("Text.to")
+routine Text.to![S16]() -> S16

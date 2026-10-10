@@ -589,3 +589,125 @@ routine B128.to_bytes_be() -> Array[Byte, 16]
 ### :returns: The resulting `U64` value.
 @rf("B128.hash")
 routine B128.hash(k0: U64, k1: U64) -> U64
+
+### Converts an `S8` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("S8.to")
+routine S8.to[B128]() -> B128
+
+### Converts an `S16` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("S16.to")
+routine S16.to[B128]() -> B128
+
+### Converts an `S32` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("S32.to")
+routine S32.to[B128]() -> B128
+
+### Converts an `S64` into quadruple-precision floating-point form.
+### :returns: The closest representable `B128` value.
+@rf("S64.to")
+routine S64.to[B128]() -> B128
+
+### Converts an `S128` into quadruple-precision floating-point form.
+### :returns: The closest representable `B128` value.
+@rf("S128.to")
+routine S128.to[B128]() -> B128
+
+### Converts an `S256` into quadruple-precision floating-point form.
+### :returns: The closest representable `B128` value.
+@rf("S256.to")
+routine S256.to[B128]() -> B128
+
+### Converts a `U8` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("U8.to")
+routine U8.to[B128]() -> B128
+
+### Converts a `U16` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("U16.to")
+routine U16.to[B128]() -> B128
+
+### Converts a `U32` into quadruple-precision floating-point form.
+### :returns: The corresponding `B128` value.
+@rf("U32.to")
+routine U32.to[B128]() -> B128
+
+### Converts a `U64` into quadruple-precision floating-point form.
+### :returns: The closest representable `B128` value.
+@rf("U64.to")
+routine U64.to[B128]() -> B128
+
+### Converts a `U128` into quadruple-precision floating-point form.
+### :returns: The closest representable `B128` value.
+@rf("U128.to")
+routine U128.to[B128]() -> B128
+
+### Converts a `U256` into quadruple-precision floating-point form.
+### value = hi * 2^128 + lo, evaluated in correctly-rounded B128 arithmetic (2^256 is
+### far inside B128's range, so the checked `*`/`+` never overflow).
+### :returns: The closest representable `B128` value.
+@rf("U256.to")
+routine U256.to[B128]() -> B128
+
+### Widens a half-precision float to quadruple precision.
+### :returns: An `B128` carrying the same numeric value when representable.
+@rf("B16.to")
+routine B16.to[B128]() -> B128
+
+### Widens a single-precision float to quadruple precision.
+### :returns: An `B128` carrying the same numeric value when representable.
+@rf("B32.to")
+routine B32.to[B128]() -> B128
+
+### Widens a double-precision float to quadruple precision (exact, pure bit surgery).
+### B64 (1+11+52, bias 1023) re-encodes into B128 (1+15+112, bias 16383). Widening is
+### always exact; B64 subnormals normalize into the vast B128 normal range.
+### :returns: An `B128` carrying the same numeric value.
+@rf("B64.to")
+routine B64.to[B128]() -> B128
+
+### Returns an existing `B128` unchanged.
+### :returns: this value.
+@rf("B128.to")
+routine B128.to[B128]() -> B128
+
+### Converts a decimal32 value to quadruple-precision binary floating point.
+### :returns: The closest representable `B128` value.
+@rf("D32.to")
+routine D32.to[B128]() -> B128
+
+### Converts a decimal64 value to quadruple-precision binary floating point.
+### :returns: The closest representable `B128` value.
+@rf("D64.to")
+routine D64.to[B128]() -> B128
+
+### Converts a decimal128 value to quadruple-precision binary floating point, correctly rounded: the exact
+### value when c * 10^q is an integer below 2^384 or a binary fraction (the only cases that can be exact or
+### halfway), else within about 2^-372 of it.
+### :returns: The closest representable `B128` value.
+@rf("D128.to")
+routine D128.to[B128]() -> B128
+
+### Narrows this quadruple-precision value to single precision.
+### :returns: The nearest representable `B32` value.
+@rf("B128.to")
+routine B128.to[B32]() -> B32
+
+### Narrows this quadruple-precision value to double precision (correctly rounded,
+### pure bit surgery — B128 is an i128 carrier, so no LLVM `fptrunc` is available).
+### Handles inf/NaN, overflow to ±inf, the B64 subnormal range, and underflow to ±0.
+### :returns: The nearest representable `B64` value (round-to-nearest-ties-to-even).
+@rf("B128.to")
+routine B128.to[B64]() -> B64
+
+### Parses decimal text into the correctly-rounded `B128` (round-to-nearest-even). Accepts standard
+### decimal notation and the special values `nan`, `inf`, and `infinity` (case-insensitive, with
+### optional leading sign). The value is built as an exact rational and rounded once, straight to
+### binary128 (`b128_from_ratio`, the same path B16/B32/B64 use).
+### :returns: The correctly-rounded `B128` value.
+### :throws: {InvalidValueError} on malformed input.
+@rf("Text.to")
+routine Text.to![B128]() -> B128

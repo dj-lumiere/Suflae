@@ -30,7 +30,7 @@ needs ChoiceType T
     var n = 0u64
     expand c in caseof(T)
         n = n +% 1u64
-    return Integer(from: n)
+    return n.to()
 
 ### The number of declared members.
 @overridable
@@ -39,4 +39,4 @@ needs FlagsType T
     var n = 0u64
     expand c in caseof(T)
         n = n +% 1u64
-    return Integer(from: n)
+    return n.to()

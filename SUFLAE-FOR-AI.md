@@ -183,7 +183,8 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 var small = count.to[U8]()        # Integer to U8 (a bare literal is an Integer: 200.to[U8]())
 var n = "42".to[S64]()             # text parsing (also Integer, Decimal, B64, ...)
 var code = 'A'.to[U32]()           # a Char's codepoint (b.to[U8]() for a Byte)
-var letter = 65u8.to[Char]()       # 'A', and 'x'.to[Text]() makes one-character text
+var letter = 65u8.to[Char]()       # 'A' (also 0x41u32.to[Char]()), and 'x'.to[Text]() makes one-character text
+var byte = 0x41u8.to[Byte]()       # the same bits as a Byte
 var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
 var wide: U64 = count.to()         # T left out: the declared type gives it
 var fits: U8? = try count.to()     # none when it does not fit
@@ -199,17 +200,19 @@ var why: Check[S64] = check line.to()
   return type (`return count.to()`), a parameter (`takes(n: x.to())`), and through `try`/`check`. Where
   nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is SF-S645: write
   `.to[S64]()`.
-- A pair with no conversion is SF-S150 at the call ("There is no conversion from 'Text' to 'Bool'.").
-- Building a number type from one value (`S64(from: x)`, `S64(x)`, `S64(from: status)`) is SF-S403
-  ("You built a 'S64' from a value. To convert a value, write 'value.to[S64]()'"). The member form
-  (`x.S32()`, `f.Celsius()`, `'x'.Text()`) is SF-S646 ("A conversion is written '.to[S32]()'"). Taking
-  a variant's arm out (`sv.Dict()`) is not a conversion and stays. Constructors build a value from its
-  parts (`Point(x: 1, y: 2)`). Building a `Char` or `Byte` from a number stays a constructor too:
-  `Char(0x41u32)`.
-- `to` is an ordinary Core routine: `routine N.to![T]() -> T` with `needs T obeys ConvertibleFrom[N]`.
-  `protocol ConvertibleFrom[S]` requires one creator, `routine Me!(from: S) -> Me`. A type of yours gets
-  `to` by declaring one: with `routine Celsius(from: Fahrenheit) -> Celsius`, `f.to[Celsius]()` and
-  `var c: Celsius = f.to()` work.
+- A pair with no conversion is SF-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
+  Converting a value to its own type is SF-S646 too (use the value as it is).
+- There are no conversion constructors: `S64(from: x)` is not a routine. Constructors build a value from
+  its parts (`Point(x: 1, y: 2)`). Taking a variant's arm out (`sv.Dict()`) is not a conversion and stays.
+- Each conversion is its own routine, written with the target type in the bracket:
+
+  ```suflae
+  routine Fahrenheit.to[Celsius]() -> Celsius
+      return Celsius(degrees: (me.degrees - 32.0) * 5.0 / 9.0)
+  ```
+
+  A call picks the one whose bracket matches (`f.to[Celsius]()`, or `var c: Celsius = f.to()`). A
+  conversion that can fail is declared `routine Text.to![S64]() -> S64`.
 
 **Optionals and `none`.**
 
@@ -433,8 +436,8 @@ routine Account.deposit(amount: Integer)                       # member routine,
   `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
   type-level routine with no `me`, called as `Type.name(...)`.
 - A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
-  `routine Celsius(from: Fahrenheit) -> Celsius` (`routine Celsius!(...)` when it can fail). A creator
-  taking `from:` also gives the conversion `f.to[Celsius]()` (§5).
+  `routine Celsius(degrees: B64) -> Celsius` (`routine Celsius!(...)` when it can fail). A conversion is
+  a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:

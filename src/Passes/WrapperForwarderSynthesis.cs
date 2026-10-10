@@ -60,11 +60,11 @@ internal static class WrapperForwarderSynthesis
             a.GenericArguments is null or { Count: 0 } && ownerParams.Contains(item: a.Name));
     }
 
-    /// <summary>The mutable/lifecycle access tokens that only appear in builder-internal helper signatures
-    /// (never an approachable SF surface). The read-index token <c>Accessing</c> is deliberately excluded —
-    /// it is the operator-lowering target of <c>getitem</c>/<c>setitem</c>.</summary>
+    /// <summary>The lifecycle access tokens that only appear in builder-internal helper signatures (never an
+    /// approachable SF surface). The read and write tokens <c>Viewing</c>/<c>Modifying</c> are not among them: a
+    /// call converts a value to them, and the library's internal helpers that take them are secret.</summary>
     private static readonly HashSet<string> InternalBorrowTokens = new(collection:
-        ["Controlling", "Receiving", "Watched", "Enterable"],
+        ["Receiving", "Watched", "Enterable"],
         comparer: StringComparer.Ordinal);
 
     /// <summary>Whether <paramref name="type"/> is (or is a generic over) an internal borrow token — the
@@ -323,11 +323,9 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
-        // Internal borrow-token surface: a method taking a mutable/lifecycle access token
-        // (`Controlling`/`Receiving`/`Watched`/`Enterable`) over an internal node type is an
-        // implementation helper (`insert_non_full(node: Controlling[BTreeListNode[T]], ..)`), never
-        // an approachable SF surface method — and forwarding it over-prunes at codegen. The
-        // read-index token `Accessing` (used by `getitem`/`setitem` operator lowering) is KEPT.
+        // Internal borrow-token surface: a method taking a lifecycle access token
+        // (`Receiving`/`Watched`/`Enterable`) is an implementation helper, never an approachable SF
+        // surface method, and forwarding it over-prunes at codegen.
         if (inner.Parameters.Any(predicate: p => TakesInternalBorrowToken(type: p.Type)))
         {
             return false;

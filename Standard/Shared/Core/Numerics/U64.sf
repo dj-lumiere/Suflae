@@ -337,3 +337,113 @@ routine U64.diagnose() -> Text
 ### :returns: The 64-bit keyed hash.
 @rf("U64.hash")
 routine U64.hash(k0: U64, k1: U64) -> U64
+
+### Converts a signed 8-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+### :throws: {IntegerOverflowError} if this value is negative.
+@rf("S8.to")
+routine S8.to![U64]() -> U64
+
+### Converts a signed 16-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+### :throws: {IntegerOverflowError} if this value is negative.
+@rf("S16.to")
+routine S16.to![U64]() -> U64
+
+### Converts a signed 32-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+### :throws: {IntegerOverflowError} if this value is negative.
+@rf("S32.to")
+routine S32.to![U64]() -> U64
+
+### Converts a signed 64-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+### :throws: {IntegerOverflowError} if this value is negative.
+@rf("S64.to")
+routine S64.to![U64]() -> U64
+
+### Converts a signed 128-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+### :throws: {IntegerOverflowError} if this value is outside the `U64` range.
+@rf("S128.to")
+routine S128.to![U64]() -> U64
+
+### Zero-extends an unsigned 8-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+@rf("U8.to")
+routine U8.to[U64]() -> U64
+
+### Zero-extends an unsigned 16-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+@rf("U16.to")
+routine U16.to[U64]() -> U64
+
+### Zero-extends an unsigned 32-bit integer to `U64`.
+### :returns: The `U64` representation of this value.
+@rf("U32.to")
+routine U32.to[U64]() -> U64
+
+### Returns this value unchanged (identity conversion).
+### :returns: this value.
+@rf("U64.to")
+routine U64.to[U64]() -> U64
+
+### Truncates an unsigned 128-bit integer to `U64`.
+### :returns: The lower 64 bits of this value.
+### :throws: {IntegerOverflowError} if this value exceeds `U64_MAX`.
+@rf("U128.to")
+routine U128.to![U64]() -> U64
+
+### Converts an `S256` to `U64`, throwing if the value is negative or exceeds U64_MAX.
+### :returns: The lower 64 bits of this value.
+### :throws: {IntegerOverflowError} if this value is outside 0..18446744073709551615.
+@rf("S256.to")
+routine S256.to![U64]() -> U64
+
+### Converts a `U256` to `U64`, throwing if the value exceeds U64_MAX.
+### :returns: The lower 64 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 18446744073709551615`.
+@rf("U256.to")
+routine U256.to![U64]() -> U64
+
+### Truncates a 16-bit float to `U64` by first widening to `B32`.
+### :returns: The truncated `U64` representation.
+@rf("B16.to")
+routine B16.to![U64]() -> U64
+
+### Truncates a 32-bit float to `U64`, rounding toward zero.
+### :returns: The truncated `U64` representation.
+@rf("B32.to")
+routine B32.to![U64]() -> U64
+
+### Truncates a 64-bit float to `U64`, rounding toward zero.
+### :returns: The truncated `U64` representation.
+@rf("B64.to")
+routine B64.to![U64]() -> U64
+
+### Truncates a 128-bit float to `U64` by narrowing to `B64` first.
+### :returns: The truncated `U64` representation.
+@rf("B128.to")
+routine B128.to![U64]() -> U64
+
+### Converts a 32-bit decimal float to `U64` via `S64`.
+### :returns: The truncated `U64` representation.
+@rf("D32.to")
+routine D32.to![U64]() -> U64
+
+### Converts a 64-bit decimal float to `U64` via `S64`.
+### :returns: The truncated `U64` representation.
+@rf("D64.to")
+routine D64.to![U64]() -> U64
+
+### Converts a 128-bit decimal float to `U64` via `S64`.
+### :returns: The truncated `U64` representation.
+@rf("D128.to")
+routine D128.to![U64]() -> U64
+
+### Parses a decimal text representation of a `U64`.
+### :returns: The parsed `U64` value.
+### :throws: {InvalidValueError} if the text is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U64`.
+@rf("Text.to")
+routine Text.to![U64]() -> U64

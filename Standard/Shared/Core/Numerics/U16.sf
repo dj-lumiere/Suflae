@@ -337,3 +337,122 @@ routine U16.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("U16.hash")
 routine U16.hash(k0: U64, k1: U64) -> U64
+
+### Converts an `S8` to `U16`, throwing if the value is negative.
+### :returns: A `U16` with the same unsigned value as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S8.to")
+routine S8.to![U16]() -> U16
+
+### Converts an `S16` to `U16`, throwing if the value is negative.
+### :returns: The same bit pattern reinterpreted as an unsigned value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S16.to")
+routine S16.to![U16]() -> U16
+
+### Converts an `S32` to `U16`, throwing if the value is outside 0..65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=65535`.
+@rf("S32.to")
+routine S32.to![U16]() -> U16
+
+### Converts an `S64` to `U16`, throwing if the value is outside 0..65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=65535`.
+@rf("S64.to")
+routine S64.to![U16]() -> U16
+
+### Converts an `S128` to `U16`, throwing if the value is outside 0..65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=65535`.
+@rf("S128.to")
+routine S128.to![U16]() -> U16
+
+### Zero-extends a `U8` to `U16`.
+### :returns: A `U16` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U16]() -> U16
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("U16.to")
+routine U16.to[U16]() -> U16
+
+### Converts a `U32` to `U16`, throwing if the value exceeds 65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 65535`.
+@rf("U32.to")
+routine U32.to![U16]() -> U16
+
+### Converts a `U64` to `U16`, throwing if the value exceeds 65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 65535`.
+@rf("U64.to")
+routine U64.to![U16]() -> U16
+
+### Converts a `U128` to `U16`, throwing if the value exceeds 65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 65535`.
+@rf("U128.to")
+routine U128.to![U16]() -> U16
+
+### Converts an `S256` to `U16`, throwing if the value is negative or exceeds 65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if this value is outside 0..65535.
+@rf("S256.to")
+routine S256.to![U16]() -> U16
+
+### Converts a `U256` to `U16`, throwing if the value exceeds 65535.
+### :returns: The lower 16 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 65535`.
+@rf("U256.to")
+routine U256.to![U16]() -> U16
+
+### Converts an `B16` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("B16.to")
+routine B16.to![U16]() -> U16
+
+### Converts an `B32` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("B32.to")
+routine B32.to![U16]() -> U16
+
+### Converts an `B64` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("B64.to")
+routine B64.to![U16]() -> U16
+
+### Converts an `B128` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("B128.to")
+routine B128.to![U16]() -> U16
+
+### Converts a `D32` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("D32.to")
+routine D32.to![U16]() -> U16
+
+### Converts a `D64` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("D64.to")
+routine D64.to![U16]() -> U16
+
+### Converts a `D128` to `U16` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U16`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 65535.
+@rf("D128.to")
+routine D128.to![U16]() -> U16
+
+### Parses a decimal string into a `U16`.
+### :returns: The parsed `U16` value.
+### :throws: {InvalidValueError} if this value is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U16`.
+@rf("Text.to")
+routine Text.to![U16]() -> U16

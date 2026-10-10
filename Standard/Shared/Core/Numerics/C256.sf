@@ -312,3 +312,100 @@ routine C256.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("C256.hash")
 routine C256.hash(k0: U64, k1: U64) -> U64
+
+### Constructs a `C256` with the given real component and zero imaginary part.
+### :returns: The corresponding `C256` value.
+@rf("B128.to")
+routine B128.to[C256]() -> C256
+
+### Widens a `C64` to `C256` by extending each component to `B128`.
+### :returns: A `C256` carrying the same numeric value.
+@rf("C64.to")
+routine C64.to[C256]() -> C256
+
+### Widens a `C128` to `C256` by extending each component to `B128`.
+### :returns: A `C256` carrying the same numeric value.
+@rf("C128.to")
+routine C128.to[C256]() -> C256
+
+### Real scalar -> `C256` (imaginary part 0), routing the value through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S8.to")
+routine S8.to[C256]() -> C256
+
+### Real `S16` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S16.to")
+routine S16.to[C256]() -> C256
+
+### Real `S32` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S32.to")
+routine S32.to[C256]() -> C256
+
+### Real `S64` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S64.to")
+routine S64.to[C256]() -> C256
+
+### Real `S128` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S128.to")
+routine S128.to[C256]() -> C256
+
+### Real `S256` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("S256.to")
+routine S256.to[C256]() -> C256
+
+### Real `U8` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U8.to")
+routine U8.to[C256]() -> C256
+
+### Real `U16` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U16.to")
+routine U16.to[C256]() -> C256
+
+### Real `U32` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U32.to")
+routine U32.to[C256]() -> C256
+
+### Real `U64` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U64.to")
+routine U64.to[C256]() -> C256
+
+### Real `U128` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U128.to")
+routine U128.to[C256]() -> C256
+
+### Real `U256` scalar -> `C256` (imaginary part 0), value routed through `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("U256.to")
+routine U256.to[C256]() -> C256
+
+### Real `B16` scalar -> `C256` (imaginary part 0), value widened to `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("B16.to")
+routine B16.to[C256]() -> C256
+
+### Real `B32` scalar -> `C256` (imaginary part 0), value widened to `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("B32.to")
+routine B32.to[C256]() -> C256
+
+### Real `B64` scalar -> `C256` (imaginary part 0), value widened to `B128`.
+### :returns: `me + 0i` in quadruple precision.
+@rf("B64.to")
+routine B64.to[C256]() -> C256
+
+### Parses `a`, `bi`, `a+bi` or `a-bi` (a bare `i` / `-i` is a unit imaginary part), the form
+### `represent` writes. Each part uses `B128`'s own number syntax.
+### :returns: The parsed value.
+### :throws: {InvalidValueError} if the text is not a complex number.
+@rf("Text.to")
+routine Text.to![C256]() -> C256

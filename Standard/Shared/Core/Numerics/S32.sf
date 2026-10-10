@@ -380,3 +380,119 @@ routine S32.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("S32.hash")
 routine S32.hash(k0: U64, k1: U64) -> U64
+
+### Sign-extends an `S8` to `S32`.
+### :returns: An `S32` with the same signed value as this value.
+@rf("S8.to")
+routine S8.to[S32]() -> S32
+
+### Sign-extends an `S16` to `S32`.
+### :returns: An `S32` with the same signed value as this value.
+@rf("S16.to")
+routine S16.to[S32]() -> S32
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("S32.to")
+routine S32.to[S32]() -> S32
+
+### Converts an `S64` to `S32`, throwing if the value is outside the S32 range.
+### :returns: The lower 32 bits of this value interpreted as signed.
+### :throws: {IntegerOverflowError} if this value is not in `-2147483648..=2147483647`.
+@rf("S64.to")
+routine S64.to![S32]() -> S32
+
+### Converts an `S128` to `S32`, throwing if the value is outside the S32 range.
+### :returns: The lower 32 bits of this value interpreted as signed.
+### :throws: {IntegerOverflowError} if this value is not in `-2147483648..=2147483647`.
+@rf("S128.to")
+routine S128.to![S32]() -> S32
+
+### Zero-extends a `U8` to `S32` (always succeeds — `U8` max 255 fits in S32).
+### :returns: An `S32` equal in value to this value.
+@rf("U8.to")
+routine U8.to[S32]() -> S32
+
+### Zero-extends a `U16` to `S32` (always succeeds — `U16` max 65535 fits in S32).
+### :returns: An `S32` equal in value to this value.
+@rf("U16.to")
+routine U16.to[S32]() -> S32
+
+### Reinterprets a `U32` as `S32` using two's complement, throwing if the value exceeds S32_MAX.
+### :returns: The same bit pattern interpreted as `S32`.
+### :throws: {IntegerOverflowError} if `me > 2147483647`.
+@rf("U32.to")
+routine U32.to![S32]() -> S32
+
+### Converts a `U64` to `S32`, throwing if the value exceeds S32_MAX.
+### :returns: The lower 32 bits interpreted as a signed `S32`.
+### :throws: {IntegerOverflowError} if `me > 2147483647`.
+@rf("U64.to")
+routine U64.to![S32]() -> S32
+
+### Converts a `U128` to `S32`, throwing if the value exceeds S32_MAX.
+### :returns: The lower 32 bits interpreted as a signed `S32`.
+### :throws: {IntegerOverflowError} if `me > 2147483647`.
+@rf("U128.to")
+routine U128.to![S32]() -> S32
+
+### Converts an `S256` to `S32`, throwing if outside −2147483648..2147483647.
+### :returns: The lower 32 bits reinterpreted as an `S32`.
+### :throws: {IntegerOverflowError} if this value is outside −2147483648..2147483647.
+@rf("S256.to")
+routine S256.to![S32]() -> S32
+
+### Converts a `U256` to `S32`, throwing if the value exceeds 2147483647.
+### :returns: The lower 32 bits reinterpreted as an `S32`.
+### :throws: {IntegerOverflowError} if `me > 2147483647`.
+@rf("U256.to")
+routine U256.to![S32]() -> S32
+
+### Converts an `B16` to `S32` by widening to `B32` first, then truncating toward zero.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
+@rf("B16.to")
+routine B16.to![S32]() -> S32
+
+### Converts an `B32` to `S32`, truncating toward zero.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the value is outside the S32 range.
+@rf("B32.to")
+routine B32.to![S32]() -> S32
+
+### Converts an `B64` to `S32`, truncating toward zero.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the value is outside the S32 range.
+@rf("B64.to")
+routine B64.to![S32]() -> S32
+
+### Converts an `B128` to `S32` by narrowing to `B64` first, then truncating.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
+@rf("B128.to")
+routine B128.to![S32]() -> S32
+
+### Converts a `D32` decimal to `S32` via its packed bit representation.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
+@rf("D32.to")
+routine D32.to![S32]() -> S32
+
+### Converts a `D64` decimal to `S32` via its packed bit representation.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
+@rf("D64.to")
+routine D64.to![S32]() -> S32
+
+### Converts a `D128` decimal to `S32` via its low/high 64-bit halves.
+### :returns: The integer part of this value as an `S32`.
+### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
+@rf("D128.to")
+routine D128.to![S32]() -> S32
+
+### Parses a decimal string into an `S32`, accepting an optional leading `+` or `−` sign.
+### :returns: The parsed `S32` value.
+### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `S32`.
+@rf("Text.to")
+routine Text.to![S32]() -> S32

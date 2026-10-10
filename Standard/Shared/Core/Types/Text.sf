@@ -106,8 +106,7 @@ routine Text.add(other: Text) -> Text
 ### :param count: The number of repetitions to produce.
 ### :returns: The resulting `Text` value.
 @rf("Text.mul")
-routine Text.mul[TCount](count: TCount) -> Text
-needs TCount obeys Integral
+routine Text.mul(count: U64) -> Text
 
 ### Returns whether both values are equal.
 ### Equality requires the same length and the same character at each position.

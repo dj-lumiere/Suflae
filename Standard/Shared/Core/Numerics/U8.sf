@@ -344,3 +344,153 @@ routine U8.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("U8.hash")
 routine U8.hash(k0: U64, k1: U64) -> U64
+
+### Converts a signed 8-bit integer to `U8`, throwing if the value is negative.
+### :returns: A `U8` with the same bit pattern as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S8.to")
+routine S8.to![U8]() -> U8
+
+### Converts an `S16` to `U8`, throwing if the value is outside 0..255.
+### :returns: The `U8` representation of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=255`.
+@rf("S16.to")
+routine S16.to![U8]() -> U8
+
+### Converts an `S32` to `U8`, throwing if the value is outside 0..255.
+### :returns: The `U8` representation of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=255`.
+@rf("S32.to")
+routine S32.to![U8]() -> U8
+
+### Converts an `S64` to `U8`, throwing if the value is outside 0..255.
+### :returns: The `U8` representation of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=255`.
+@rf("S64.to")
+routine S64.to![U8]() -> U8
+
+### Converts an `S128` to `U8`, throwing if the value is outside 0..255.
+### :returns: The `U8` representation of this value.
+### :throws: {IntegerOverflowError} if this value is not in `0..=255`.
+@rf("S128.to")
+routine S128.to![U8]() -> U8
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("U8.to")
+routine U8.to[U8]() -> U8
+
+### Converts a `U16` to `U8`, throwing if the value exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 255`.
+@rf("U16.to")
+routine U16.to![U8]() -> U8
+
+### Converts a `U32` to `U8`, throwing if the value exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 255`.
+@rf("U32.to")
+routine U32.to![U8]() -> U8
+
+### Converts a `U64` to `U8`, throwing if the value exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 255`.
+@rf("U64.to")
+routine U64.to![U8]() -> U8
+
+### Converts a `U128` to `U8`, throwing if the value exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 255`.
+@rf("U128.to")
+routine U128.to![U8]() -> U8
+
+### Converts an `S256` to `U8`, throwing if the value is negative or exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if this value is outside 0..255.
+@rf("S256.to")
+routine S256.to![U8]() -> U8
+
+### Converts a `U256` to `U8`, throwing if the value exceeds 255.
+### :returns: The lower 8 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 255`.
+@rf("U256.to")
+routine U256.to![U8]() -> U8
+
+### Converts an `B16` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("B16.to")
+routine B16.to![U8]() -> U8
+
+### Converts an `B32` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("B32.to")
+routine B32.to![U8]() -> U8
+
+### Converts an `B64` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("B64.to")
+routine B64.to![U8]() -> U8
+
+### Converts an `B128` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("B128.to")
+routine B128.to![U8]() -> U8
+
+### Converts a `D32` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("D32.to")
+routine D32.to![U8]() -> U8
+
+### Converts a `D64` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("D64.to")
+routine D64.to![U8]() -> U8
+
+### Converts a `D128` to `U8` by first converting to `U32`, then truncating.
+### :returns: The integer part of this value as a `U8`.
+### :throws: {IntegerOverflowError} if the integer part exceeds 255.
+@rf("D128.to")
+routine D128.to![U8]() -> U8
+
+### Zero-extends this value to a 16-bit `U16`.
+### :returns: A `U16` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U16]() -> U16
+
+### Zero-extends this value to a 32-bit `U32`.
+### :returns: A `U32` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U32]() -> U32
+
+### Zero-extends this value to a 64-bit `U64`.
+### :returns: A `U64` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U64]() -> U64
+
+### Zero-extends this value to a 128-bit `U128`.
+### :returns: A `U128` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U128]() -> U128
+
+### Converts this value to the nearest representable `B32`.
+### :returns: An `B32` with the same numeric value as this value.
+@rf("U8.to")
+routine U8.to[B32]() -> B32
+
+### Converts this value to the nearest representable `B64`.
+### :returns: An `B64` with the same numeric value as this value.
+@rf("U8.to")
+routine U8.to[B64]() -> B64
+
+### Parses a decimal string into a `U8`.
+### :returns: The parsed `U8` value.
+### :throws: {InvalidValueError} if this value is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U8`.
+@rf("Text.to")
+routine Text.to![U8]() -> U8

@@ -372,3 +372,107 @@ routine S256.isqrt() -> S256
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S256.sqrtrem")
 routine S256.sqrtrem!() -> (S256, S256)
+
+### Sign-extends an `S8` to `S256` (always succeeds).
+### :returns: An `S256` with the same signed value as this value.
+@rf("S8.to")
+routine S8.to[S256]() -> S256
+
+### Sign-extends an `S16` to `S256` (always succeeds).
+### :returns: An `S256` with the same signed value as this value.
+@rf("S16.to")
+routine S16.to[S256]() -> S256
+
+### Sign-extends an `S32` to `S256` (always succeeds).
+### :returns: An `S256` with the same signed value as this value.
+@rf("S32.to")
+routine S32.to[S256]() -> S256
+
+### Sign-extends an `S64` to `S256` (always succeeds).
+### :returns: An `S256` with the same signed value as this value.
+@rf("S64.to")
+routine S64.to[S256]() -> S256
+
+### Sign-extends an `S128` to `S256` (always succeeds).
+### :returns: An `S256` with the same signed value as this value.
+@rf("S128.to")
+routine S128.to[S256]() -> S256
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("S256.to")
+routine S256.to[S256]() -> S256
+
+### Zero-extends a `U8` to `S256` (always succeeds — positive values fit).
+### :returns: An `S256` equal in value to this value.
+@rf("U8.to")
+routine U8.to[S256]() -> S256
+
+### Zero-extends a `U16` to `S256` (always succeeds — positive values fit).
+### :returns: An `S256` equal in value to this value.
+@rf("U16.to")
+routine U16.to[S256]() -> S256
+
+### Zero-extends a `U32` to `S256` (always succeeds — positive values fit).
+### :returns: An `S256` equal in value to this value.
+@rf("U32.to")
+routine U32.to[S256]() -> S256
+
+### Zero-extends a `U64` to `S256` (always succeeds — positive values fit).
+### :returns: An `S256` equal in value to this value.
+@rf("U64.to")
+routine U64.to[S256]() -> S256
+
+### Zero-extends a `U128` to `S256` (always succeeds — positive values fit).
+### :returns: An `S256` equal in value to this value.
+@rf("U128.to")
+routine U128.to[S256]() -> S256
+
+### Reinterprets a `U256` as `S256` using two's complement, throwing if the value exceeds S256_MAX.
+### :returns: The same bit pattern interpreted as `S256`.
+### :throws: {IntegerOverflowError} if `me > S256_MAX`.
+@rf("U256.to")
+routine U256.to![S256]() -> S256
+
+### Converts an `B16` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {IntegerOverflowError} if this value is NaN or infinite.
+@rf("B16.to")
+routine B16.to![S256]() -> S256
+
+### Converts an `B32` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {IntegerOverflowError} if this value is NaN or infinite.
+@rf("B32.to")
+routine B32.to![S256]() -> S256
+
+### Converts an `B64` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^255, 2^255-1].
+@rf("B64.to")
+routine B64.to![S256]() -> S256
+
+### Converts an `B128` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {NumericOverflowError} if out of range; {NumericDomainError} if NaN.
+@rf("B128.to")
+routine B128.to![S256]() -> S256
+
+### Converts a `D32` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {NumericOverflowError} if the integer part overflows S256.
+@rf("D32.to")
+routine D32.to![S256]() -> S256
+
+### Converts a `D64` to `S256`, truncating toward zero.
+### :returns: The integer part of this value as an `S256`.
+### :throws: {NumericOverflowError} if the integer part overflows S256.
+@rf("D64.to")
+routine D64.to![S256]() -> S256
+
+### Parses a decimal string into an `S256`, accepting an optional leading `+` or `−` sign.
+### :returns: The parsed `S256` value.
+### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `S256`.
+@rf("Text.to")
+routine Text.to![S256]() -> S256

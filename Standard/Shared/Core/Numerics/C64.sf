@@ -312,3 +312,100 @@ routine C64.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("C64.hash")
 routine C64.hash(k0: U64, k1: U64) -> U64
+
+### Constructs a `C64` with the given real component and zero imaginary part.
+### :returns: The corresponding `C64` value.
+@rf("B32.to")
+routine B32.to[C64]() -> C64
+
+### Narrows a `C128` to `C64` by truncating each component to `B32`.
+### :returns: The nearest representable `C64`.
+@rf("C128.to")
+routine C128.to[C64]() -> C64
+
+### Narrows a `C256` to `C64` by truncating each component to `B32`.
+### :returns: The nearest representable `C64`.
+@rf("C256.to")
+routine C256.to[C64]() -> C64
+
+### Real scalar -> `C64` (imaginary part 0), routing the value through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S8.to")
+routine S8.to[C64]() -> C64
+
+### Real `S16` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S16.to")
+routine S16.to[C64]() -> C64
+
+### Real `S32` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S32.to")
+routine S32.to[C64]() -> C64
+
+### Real `S64` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S64.to")
+routine S64.to[C64]() -> C64
+
+### Real `S128` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S128.to")
+routine S128.to[C64]() -> C64
+
+### Real `S256` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("S256.to")
+routine S256.to[C64]() -> C64
+
+### Real `U8` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U8.to")
+routine U8.to[C64]() -> C64
+
+### Real `U16` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U16.to")
+routine U16.to[C64]() -> C64
+
+### Real `U32` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U32.to")
+routine U32.to[C64]() -> C64
+
+### Real `U64` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U64.to")
+routine U64.to[C64]() -> C64
+
+### Real `U128` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U128.to")
+routine U128.to[C64]() -> C64
+
+### Real `U256` scalar -> `C64` (imaginary part 0), value routed through `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("U256.to")
+routine U256.to[C64]() -> C64
+
+### Real `B16` scalar -> `C64` (imaginary part 0), value widened to `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("B16.to")
+routine B16.to[C64]() -> C64
+
+### Real `B64` scalar -> `C64` (imaginary part 0), value narrowed to `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("B64.to")
+routine B64.to[C64]() -> C64
+
+### Real `B128` scalar -> `C64` (imaginary part 0), value narrowed to `B32`.
+### :returns: `me + 0i` in single precision.
+@rf("B128.to")
+routine B128.to[C64]() -> C64
+
+### Parses `a`, `bi`, `a+bi` or `a-bi` (a bare `i` / `-i` is a unit imaginary part), the form
+### `represent` writes. Each part uses `B32`'s own number syntax.
+### :returns: The parsed value.
+### :throws: {InvalidValueError} if the text is not a complex number.
+@rf("Text.to")
+routine Text.to![C64]() -> C64

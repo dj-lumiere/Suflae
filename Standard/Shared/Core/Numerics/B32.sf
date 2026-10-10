@@ -708,3 +708,109 @@ routine B32.tanpi() -> B32
 ### :returns: The correctly rounded gamma function.
 @rf("B32.tgamma_unchecked")
 routine B32.tgamma_unchecked() -> B32
+
+### Converts an `S8` into single-precision floating-point form.
+### :returns: The corresponding `B32` value.
+@rf("S8.to")
+routine S8.to[B32]() -> B32
+
+### Converts an `S16` into single-precision floating-point form.
+### :returns: The corresponding `B32` value.
+@rf("S16.to")
+routine S16.to[B32]() -> B32
+
+### Converts an `S32` into single-precision floating-point form.
+### :returns: The closest representable `B32` value.
+@rf("S32.to")
+routine S32.to[B32]() -> B32
+
+### Converts an `S64` into single-precision floating-point form.
+### Precision may be rounded when the integer cannot be represented exactly.
+### :returns: The closest representable `B32` value.
+@rf("S64.to")
+routine S64.to[B32]() -> B32
+
+### Converts an `S128` into single-precision floating-point form.
+### :returns: The closest representable `B32` value under the target rounding rules.
+@rf("S128.to")
+routine S128.to[B32]() -> B32
+
+### Converts a `U8` into single-precision floating-point form.
+### :returns: The corresponding `B32` value.
+@rf("U8.to")
+routine U8.to[B32]() -> B32
+
+### Converts a `U16` into single-precision floating-point form.
+### :returns: The corresponding `B32` value.
+@rf("U16.to")
+routine U16.to[B32]() -> B32
+
+### Converts a `U32` into single-precision floating-point form.
+### :returns: The closest representable `B32` value.
+@rf("U32.to")
+routine U32.to[B32]() -> B32
+
+### Converts a `U64` into single-precision floating-point form.
+### :returns: The closest representable `B32` value.
+@rf("U64.to")
+routine U64.to[B32]() -> B32
+
+### Converts a `U128` into single-precision floating-point form. Failable: throws when the
+### value exceeds the B32 range (overflow to +inf) — handle with `B32!`/`when`/`try_`.
+### :returns: The closest representable `B32` value (finite).
+### :throws: {NumericOverflowError} if the value is out of the B32 range.
+@rf("U128.to")
+routine U128.to![B32]() -> B32
+
+### Converts an `S256` to `B32`. Failable: throws if the value exceeds the B32 range.
+### :returns: The closest representable `B32` value (finite).
+### :throws: {NumericOverflowError} if the value is out of the B32 range.
+@rf("S256.to")
+routine S256.to![B32]() -> B32
+
+### Converts a `U256` to `B32`. Failable: throws if the value exceeds the B32 range.
+### :returns: The closest representable `B32` value (finite).
+### :throws: {NumericOverflowError} if the value is out of the B32 range.
+@rf("U256.to")
+routine U256.to![B32]() -> B32
+
+### Widens a half-precision float to single precision.
+### :returns: An `B32` carrying the same numeric value when representable.
+@rf("B16.to")
+routine B16.to[B32]() -> B32
+
+### Widens a bfloat16 value to single precision (exact: bfloat16 is the top half of a `B32`).
+### :returns: The same value as a `B32`.
+@rf("BF16.to")
+routine BF16.to[B32]() -> B32
+
+### Returns an existing `B32` unchanged.
+### :returns: this value.
+@rf("B32.to")
+routine B32.to[B32]() -> B32
+
+### Narrows a double-precision float to single precision.
+### :returns: The nearest representable `B32` value.
+@rf("B64.to")
+routine B64.to[B32]() -> B32
+
+### Converts a decimal32 value to single-precision binary floating point.
+### :returns: The closest representable `B32` value.
+@rf("D32.to")
+routine D32.to[B32]() -> B32
+
+### Converts a decimal64 value to single-precision binary floating point.
+### :returns: The closest representable `B32` value.
+@rf("D64.to")
+routine D64.to[B32]() -> B32
+
+### Converts a decimal128 value to single-precision binary floating point.
+### :returns: The closest representable `B32` value.
+@rf("D128.to")
+routine D128.to[B32]() -> B32
+
+### Implements the wired routine behavior for this value.
+### :returns: The resulting `B32` value.
+### :throws: May throw {InvalidValueError}.
+@rf("Text.to")
+routine Text.to![B32]() -> B32

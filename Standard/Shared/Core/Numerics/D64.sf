@@ -182,3 +182,84 @@ routine D64.to_bytes_le() -> Array[Byte, 8]
 ### Returns the raw bytes of this value in big-endian order.
 @rf("D64.to_bytes_be")
 routine D64.to_bytes_be() -> Array[Byte, 8]
+
+### Converts an S8 into decimal64 (exponent 0).
+@rf("S8.to")
+routine S8.to[D64]() -> D64
+
+### Converts an S16 into decimal64 (exponent 0).
+@rf("S16.to")
+routine S16.to[D64]() -> D64
+
+### Converts an S32 into decimal64 (exponent 0).
+@rf("S32.to")
+routine S32.to[D64]() -> D64
+
+### Converts an S64 into decimal64 (exponent 0).
+@rf("S64.to")
+routine S64.to[D64]() -> D64
+
+### Converts an S128 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("S128.to")
+routine S128.to[D64]() -> D64
+
+### Converts an S256 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("S256.to")
+routine S256.to[D64]() -> D64
+
+### Converts a U8 into decimal64 (exponent 0).
+@rf("U8.to")
+routine U8.to[D64]() -> D64
+
+### Converts a U16 into decimal64 (exponent 0).
+@rf("U16.to")
+routine U16.to[D64]() -> D64
+
+### Converts a U32 into decimal64 (exponent 0).
+@rf("U32.to")
+routine U32.to[D64]() -> D64
+
+### Converts a U64 into decimal64 (exponent 0).
+@rf("U64.to")
+routine U64.to[D64]() -> D64
+
+### Converts a U128 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("U128.to")
+routine U128.to[D64]() -> D64
+
+### Converts a U256 into decimal64 (exponent 0, rounded half to even when it has more than 16 digits).
+@rf("U256.to")
+routine U256.to[D64]() -> D64
+
+### Converts a B16 to decimal64, correctly rounded.
+@rf("B16.to")
+routine B16.to[D64]() -> D64
+
+### Converts a B32 to decimal64, correctly rounded.
+@rf("B32.to")
+routine B32.to[D64]() -> D64
+
+### Converts a B64 to decimal64, correctly rounded.
+@rf("B64.to")
+routine B64.to[D64]() -> D64
+
+### Converts a B128 to decimal64, correctly rounded.
+@rf("B128.to")
+routine B128.to[D64]() -> D64
+
+### Converts a D32 to D64 (exact: every decimal32 is a decimal64).
+@rf("D32.to")
+routine D32.to[D64]() -> D64
+
+### Identity conversion (D64 -> D64).
+@rf("D64.to")
+routine D64.to[D64]() -> D64
+
+### Converts a D128 to D64 (rounded half to even to 16 digits, the exponent kept where it fits).
+@rf("D128.to")
+routine D128.to[D64]() -> D64
+
+### Parses a decimal literal into a `D64` (the scanned value rounded once to 16 digits).
+### :throws: {InvalidValueError} if the text is not a valid decimal literal.
+@rf("Text.to")
+routine Text.to![D64]() -> D64

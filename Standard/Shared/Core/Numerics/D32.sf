@@ -182,3 +182,88 @@ routine D32.to_bytes_le() -> Array[Byte, 4]
 ### Returns the raw bytes of this value in big-endian order.
 @rf("D32.to_bytes_be")
 routine D32.to_bytes_be() -> Array[Byte, 4]
+
+### Converts an S8 into decimal32 (exponent 0).
+@rf("S8.to")
+routine S8.to[D32]() -> D32
+
+### Converts an S16 into decimal32 (exponent 0).
+@rf("S16.to")
+routine S16.to[D32]() -> D32
+
+### Converts an S32 into decimal32 (exponent 0).
+@rf("S32.to")
+routine S32.to[D32]() -> D32
+
+### Converts an S64 into decimal32 (exponent 0).
+@rf("S64.to")
+routine S64.to[D32]() -> D32
+
+### Converts an S128 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("S128.to")
+routine S128.to[D32]() -> D32
+
+### Converts an S256 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("S256.to")
+routine S256.to[D32]() -> D32
+
+### Converts a U8 into decimal32 (exponent 0).
+@rf("U8.to")
+routine U8.to[D32]() -> D32
+
+### Converts a U16 into decimal32 (exponent 0).
+@rf("U16.to")
+routine U16.to[D32]() -> D32
+
+### Converts a U32 into decimal32 (exponent 0).
+@rf("U32.to")
+routine U32.to[D32]() -> D32
+
+### Converts a U64 into decimal32 (exponent 0).
+@rf("U64.to")
+routine U64.to[D32]() -> D32
+
+### Converts a U128 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("U128.to")
+routine U128.to[D32]() -> D32
+
+### Converts a U256 into decimal32 (exponent 0, rounded half to even when it has more than 7 digits).
+@rf("U256.to")
+routine U256.to[D32]() -> D32
+
+### Converts a B16 to decimal32, correctly rounded.
+@rf("B16.to")
+routine B16.to[D32]() -> D32
+
+### Converts a B32 to decimal32, correctly rounded.
+@rf("B32.to")
+routine B32.to[D32]() -> D32
+
+### Converts a B128 to decimal32, correctly rounded.
+@rf("B128.to")
+routine B128.to[D32]() -> D32
+
+### Converts a B64 to decimal32, correctly rounded.
+@rf("B64.to")
+routine B64.to[D32]() -> D32
+
+### The D32 value as a B64, correctly rounded.
+@rf("D32.to")
+routine D32.to[B64]() -> B64
+
+### Identity conversion (D32 -> D32).
+@rf("D32.to")
+routine D32.to[D32]() -> D32
+
+### Converts a D64 to D32 (rounded half to even to 7 digits, then reduced).
+@rf("D64.to")
+routine D64.to[D32]() -> D32
+
+### Converts a D128 to D32 (rounded half to even to 7 digits, then reduced).
+@rf("D128.to")
+routine D128.to[D32]() -> D32
+
+### Parses a decimal literal into a `D32` (the scanned value rounded once to 7 digits).
+### :throws: {InvalidValueError} if the text is not a valid decimal literal.
+@rf("Text.to")
+routine Text.to![D32]() -> D32

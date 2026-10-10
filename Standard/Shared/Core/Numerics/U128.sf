@@ -378,3 +378,113 @@ routine U128.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("U128.hash")
 routine U128.hash(k0: U64, k1: U64) -> U64
+
+### Converts an `S8` to `U128`, throwing if the value is negative.
+### :returns: A `U128` with the same unsigned value as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S8.to")
+routine S8.to![U128]() -> U128
+
+### Converts an `S16` to `U128`, throwing if the value is negative.
+### :returns: A `U128` with the same unsigned value as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S16.to")
+routine S16.to![U128]() -> U128
+
+### Converts an `S32` to `U128`, throwing if the value is negative.
+### :returns: A `U128` with the same unsigned value as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S32.to")
+routine S32.to![U128]() -> U128
+
+### Converts an `S64` to `U128`, throwing if the value is negative.
+### :returns: A `U128` with the same unsigned value as this value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S64.to")
+routine S64.to![U128]() -> U128
+
+### Converts an `S128` to `U128`, throwing if the value is negative.
+### :returns: The same bit pattern reinterpreted as an unsigned value.
+### :throws: {IntegerOverflowError} if `me < 0`.
+@rf("S128.to")
+routine S128.to![U128]() -> U128
+
+### Zero-extends a `U8` to `U128`.
+### :returns: A `U128` equal in value to this value.
+@rf("U8.to")
+routine U8.to[U128]() -> U128
+
+### Zero-extends a `U16` to `U128`.
+### :returns: A `U128` equal in value to this value.
+@rf("U16.to")
+routine U16.to[U128]() -> U128
+
+### Zero-extends a `U32` to `U128`.
+### :returns: A `U128` equal in value to this value.
+@rf("U32.to")
+routine U32.to[U128]() -> U128
+
+### Zero-extends a `U64` to `U128`.
+### :returns: A `U128` equal in value to this value.
+@rf("U64.to")
+routine U64.to[U128]() -> U128
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("U128.to")
+routine U128.to[U128]() -> U128
+
+### Converts an `S256` to `U128`, throwing if the value is negative or exceeds U128_MAX.
+### :returns: The lower 128 bits of this value.
+### :throws: {IntegerOverflowError} if this value is outside 0..340282366920938463463374607431768211455.
+@rf("S256.to")
+routine S256.to![U128]() -> U128
+
+### Converts a `U256` to `U128`, throwing if the value exceeds U128_MAX.
+### :returns: The lower 128 bits of this value.
+### :throws: {IntegerOverflowError} if `me > 340282366920938463463374607431768211455`.
+@rf("U256.to")
+routine U256.to![U128]() -> U128
+
+### Converts an `B16` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
+@rf("B16.to")
+routine B16.to![U128]() -> U128
+
+### Converts an `B32` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
+@rf("B32.to")
+routine B32.to![U128]() -> U128
+
+### Converts an `B64` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, negative, or >= 2^128.
+@rf("B64.to")
+routine B64.to![U128]() -> U128
+
+### Converts an `B128` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {NumericOverflowError} if negative or >= 2^128; {NumericDomainError} if NaN.
+@rf("B128.to")
+routine B128.to![U128]() -> U128
+
+### Converts a `D32` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {NumericOverflowError} if the integer part overflows U128.
+@rf("D32.to")
+routine D32.to![U128]() -> U128
+
+### Converts a `D64` to `U128`, truncating toward zero.
+### :returns: The integer part of this value as a `U128`.
+### :throws: {NumericOverflowError} if the integer part overflows U128.
+@rf("D64.to")
+routine D64.to![U128]() -> U128
+
+### Parses a decimal string into a `U128`.
+### :returns: The parsed `U128` value.
+### :throws: {InvalidValueError} if this value is empty or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `U128`.
+@rf("Text.to")
+routine Text.to![U128]() -> U128

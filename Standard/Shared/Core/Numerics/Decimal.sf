@@ -120,3 +120,96 @@ routine Decimal.represent() -> Text
 ### Returns a debug rendering of this value, e.g. `Decimal(3.5)`. Mirrors the D32/D64/D128 surface.
 @rf("Decimal.diagnose")
 routine Decimal.diagnose() -> Text
+
+### Parses a decimal literal into a Decimal.
+### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
+@rf("Text.to")
+routine Text.to![Decimal]() -> Decimal
+
+### S8 -> Decimal.
+@rf("S8.to")
+routine S8.to[Decimal]() -> Decimal
+
+### S16 -> Decimal.
+@rf("S16.to")
+routine S16.to[Decimal]() -> Decimal
+
+### S32 -> Decimal.
+@rf("S32.to")
+routine S32.to[Decimal]() -> Decimal
+
+### S64 -> Decimal.
+@rf("S64.to")
+routine S64.to[Decimal]() -> Decimal
+
+### S128 -> Decimal.
+@rf("S128.to")
+routine S128.to[Decimal]() -> Decimal
+
+### S256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+@rf("S256.to")
+routine S256.to[Decimal]() -> Decimal
+
+### U8 -> Decimal.
+@rf("U8.to")
+routine U8.to[Decimal]() -> Decimal
+
+### U16 -> Decimal.
+@rf("U16.to")
+routine U16.to[Decimal]() -> Decimal
+
+### U32 -> Decimal.
+@rf("U32.to")
+routine U32.to[Decimal]() -> Decimal
+
+### U64 -> Decimal.
+@rf("U64.to")
+routine U64.to[Decimal]() -> Decimal
+
+### U128 -> Decimal.
+@rf("U128.to")
+routine U128.to[Decimal]() -> Decimal
+
+### U256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+@rf("U256.to")
+routine U256.to[Decimal]() -> Decimal
+
+### B16 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("B16.to")
+routine B16.to[Decimal]() -> Decimal
+
+### B32 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("B32.to")
+routine B32.to[Decimal]() -> Decimal
+
+### B64 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("B64.to")
+routine B64.to[Decimal]() -> Decimal
+
+### Converts a `Decimal` to the nearest `B32`.
+### :returns: The `B32` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
+@rf("Decimal.to")
+routine Decimal.to![B32]() -> B32
+
+### Converts a `Decimal` to the nearest `B64`.
+### :returns: The `B64` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
+@rf("Decimal.to")
+routine Decimal.to![B64]() -> B64
+
+### B128 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+@rf("B128.to")
+routine B128.to[Decimal]() -> Decimal
+
+### D32 -> Decimal (exact widen; crashes if the value is non-finite).
+@rf("D32.to")
+routine D32.to[Decimal]() -> Decimal
+
+### D64 -> Decimal (exact widen; crashes if the value is non-finite).
+@rf("D64.to")
+routine D64.to[Decimal]() -> Decimal
+
+### D128 -> Decimal (bit-for-bit; crashes if the value is non-finite).
+@rf("D128.to")
+routine D128.to[Decimal]() -> Decimal

@@ -749,3 +749,107 @@ routine B64.tanpi() -> B64
 ### :returns: The correctly rounded gamma function, possibly ±infinity or NaN.
 @rf("B64.tgamma_unchecked")
 routine B64.tgamma_unchecked() -> B64
+
+### Converts an `S8` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("S8.to")
+routine S8.to[B64]() -> B64
+
+### Converts an `S16` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("S16.to")
+routine S16.to[B64]() -> B64
+
+### Converts an `S32` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("S32.to")
+routine S32.to[B64]() -> B64
+
+### Converts an `S64` to `B64`.
+### Values with magnitude larger than 2⁵³ may be rounded to the nearest
+### representable double.
+### :returns: The closest representable `B64` value.
+@rf("S64.to")
+routine S64.to[B64]() -> B64
+
+### Converts an `S128` to `B64`.
+### Precision is limited to approximately 53 bits of significand.
+### :returns: The closest representable `B64` value.
+@rf("S128.to")
+routine S128.to[B64]() -> B64
+
+### Converts a `U8` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("U8.to")
+routine U8.to[B64]() -> B64
+
+### Converts a `U16` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("U16.to")
+routine U16.to[B64]() -> B64
+
+### Converts a `U32` to `B64`. The result is exact for all values.
+### :returns: The corresponding `B64` value.
+@rf("U32.to")
+routine U32.to[B64]() -> B64
+
+### Converts a `U64` to `B64`.
+### Values larger than 2⁵³ may be rounded to the nearest representable double.
+### :returns: The closest representable `B64` value.
+@rf("U64.to")
+routine U64.to[B64]() -> B64
+
+### Converts a `U128` to `B64`.
+### Precision is limited to approximately 53 bits of significand.
+### :returns: The closest representable `B64` value.
+@rf("U128.to")
+routine U128.to[B64]() -> B64
+
+### Converts an `S256` to `B64` (precision limited to ~53 bits of significand).
+### :returns: The closest representable `B64` value.
+@rf("S256.to")
+routine S256.to[B64]() -> B64
+
+### Converts a `U256` to `B64` (precision limited to ~53 bits of significand).
+### :returns: The closest representable `B64` value.
+@rf("U256.to")
+routine U256.to[B64]() -> B64
+
+### Widens a half-precision float to double precision.
+### :returns: An `B64` carrying the same numeric value.
+@rf("B16.to")
+routine B16.to[B64]() -> B64
+
+### Widens a bfloat16 value to double precision (exact: bfloat16 is the top half of a `B32`).
+### :returns: The same value as a `B64`.
+@rf("BF16.to")
+routine BF16.to[B64]() -> B64
+
+### Widens a single-precision float to double precision.
+### :returns: An `B64` carrying the same numeric value.
+@rf("B32.to")
+routine B32.to[B64]() -> B64
+
+### Returns an existing `B64` unchanged.
+### :returns: this value.
+@rf("B64.to")
+routine B64.to[B64]() -> B64
+
+### Converts a decimal64 value to double-precision binary floating point.
+### :returns: The closest representable `B64` value.
+@rf("D64.to")
+routine D64.to[B64]() -> B64
+
+### Converts a decimal128 value to double-precision binary floating point, correctly rounded in one step (see
+### B128(from: D128)).
+### :returns: The closest representable `B64` value.
+@rf("D128.to")
+routine D128.to[B64]() -> B64
+
+### Parses a decimal float literal into an `B64`.
+###   the special values `nan`, `inf`, and `infinity` (case-insensitive, with
+###   optional leading sign).
+### :returns: The `B64` value parsed from the input.
+### :throws: {InvalidValueError} if the text is not a valid float literal.
+@rf("Text.to")
+routine Text.to![B64]() -> B64

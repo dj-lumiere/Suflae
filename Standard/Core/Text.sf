@@ -14,11 +14,6 @@ routine Text() -> Text
 routine Text(from_list: List[Char]) -> Text
     return Text(from_list: from_list.to_razorforge())
 
-### Creates a text of one character.
-### :param from_character: The character.
-routine Text(from_character: Char) -> Text
-    return Text(from_character: from_character)
-
 ### Returns the number of characters.
 routine Text.count() -> Integer
     return me.count().to[Integer]()

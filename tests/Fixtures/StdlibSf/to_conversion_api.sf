@@ -1,0 +1,23 @@
+module Tests/StdlibSf/ToConversionApi
+
+import IO/Console
+
+# Conversions are `x.to[T]()`: the type argument picks the conversion, or the type the result goes to does.
+routine start()
+    var count = 300
+    var a: U8? = try count.to()
+    show(f"try: {a}")
+    show(f"explicit: {200.to[U8]()}")
+    var n: S64 = "42".to()
+    show(f"parse: {n + 1}")
+    var bad: S64? = try "4x".to()
+    show(f"parse bad: {bad}")
+    var big = 170141183460469231731687303715884105727
+    var s: S128 = big.to()
+    show(f"s128: {s}")
+    var over: S128? = try (big + 1).to()
+    show(f"over: {over}")
+    var b: B64 = 12345678901234567890.to()
+    show(f"float: {b}")
+    show("DONE")
+    return

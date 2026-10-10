@@ -9,7 +9,7 @@ module Core
 ### :typeparam T: The element type yielded by the iterator.
 @rf("Emittable")
 protocol Emittable[T]
-relates Item obeys Accessing[T]
+relates Item
     ### Returns the next value from this iterator.
     ### Implementations should throw `AbsentValueError` once the iterator is exhausted. What an iterator hands out is
     ### its `Item`, which reads as a `T`: a token on an element stored in a container (`Modifying[T]`, or

@@ -401,3 +401,109 @@ routine S128.diagnose() -> Text
 ### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
 @rf("S128.hash")
 routine S128.hash(k0: U64, k1: U64) -> U64
+
+### Sign-extends an `S8` to `S128` (always succeeds).
+### :returns: An `S128` with the same signed value as this value.
+@rf("S8.to")
+routine S8.to[S128]() -> S128
+
+### Sign-extends an `S16` to `S128` (always succeeds).
+### :returns: An `S128` with the same signed value as this value.
+@rf("S16.to")
+routine S16.to[S128]() -> S128
+
+### Sign-extends an `S32` to `S128` (always succeeds).
+### :returns: An `S128` with the same signed value as this value.
+@rf("S32.to")
+routine S32.to[S128]() -> S128
+
+### Sign-extends an `S64` to `S128` (always succeeds).
+### :returns: An `S128` with the same signed value as this value.
+@rf("S64.to")
+routine S64.to[S128]() -> S128
+
+### Identity conversion — returns this value unchanged.
+### :returns: this value unchanged.
+@rf("S128.to")
+routine S128.to[S128]() -> S128
+
+### Zero-extends a `U8` to `S128` (always succeeds — positive values fit).
+### :returns: An `S128` equal in value to this value.
+@rf("U8.to")
+routine U8.to[S128]() -> S128
+
+### Zero-extends a `U16` to `S128` (always succeeds — positive values fit).
+### :returns: An `S128` equal in value to this value.
+@rf("U16.to")
+routine U16.to[S128]() -> S128
+
+### Zero-extends a `U32` to `S128` (always succeeds — positive values fit).
+### :returns: An `S128` equal in value to this value.
+@rf("U32.to")
+routine U32.to[S128]() -> S128
+
+### Zero-extends a `U64` to `S128` (always succeeds — positive values fit).
+### :returns: An `S128` equal in value to this value.
+@rf("U64.to")
+routine U64.to[S128]() -> S128
+
+### Reinterprets a `U128` as `S128` using two's complement, throwing if the value exceeds S128_MAX.
+### :returns: The same bit pattern interpreted as `S128`.
+### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
+@rf("U128.to")
+routine U128.to![S128]() -> S128
+
+### Converts an `S256` to `S128`, throwing if outside the S128 range.
+### :returns: The lower 128 bits reinterpreted as an `S128`.
+### :throws: {IntegerOverflowError} if this value is outside the S128 range.
+@rf("S256.to")
+routine S256.to![S128]() -> S128
+
+### Converts a `U256` to `S128`, throwing if the value exceeds S128_MAX.
+### :returns: The lower 128 bits reinterpreted as an `S128`.
+### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
+@rf("U256.to")
+routine U256.to![S128]() -> S128
+
+### Converts an `B16` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {IntegerOverflowError} if this value is NaN or infinite.
+@rf("B16.to")
+routine B16.to![S128]() -> S128
+
+### Converts an `B32` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
+@rf("B32.to")
+routine B32.to![S128]() -> S128
+
+### Converts an `B64` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
+@rf("B64.to")
+routine B64.to![S128]() -> S128
+
+### Converts an `B128` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {NumericOverflowError} if out of range; {NumericDomainError} if NaN.
+@rf("B128.to")
+routine B128.to![S128]() -> S128
+
+### Converts a `D32` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {NumericOverflowError} if the integer part overflows S128.
+@rf("D32.to")
+routine D32.to![S128]() -> S128
+
+### Converts a `D64` to `S128`, truncating toward zero.
+### :returns: The integer part of this value as an `S128`.
+### :throws: {NumericOverflowError} if the integer part overflows S128.
+@rf("D64.to")
+routine D64.to![S128]() -> S128
+
+### Parses a decimal string into an `S128`, accepting an optional leading `+` or `−` sign.
+### :returns: The parsed `S128` value.
+### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
+### :throws: {IntegerOverflowError} if the value does not fit in `S128`.
+@rf("Text.to")
+routine Text.to![S128]() -> S128

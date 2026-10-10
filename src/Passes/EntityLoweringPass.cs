@@ -925,16 +925,16 @@ internal sealed class EntityLoweringPass
             : null;
     }
 
-    // The bare entity a parameter takes: its own type, or the entity an `Accessing`/`Controlling` token over one
-    // stands for (`eq(you: Accessing[List[T]])` reads the other list itself, not its handle).
+    // The bare entity a parameter takes: its own type, or the entity a `Viewing`/`Modifying` token over one
+    // stands for (`eq(you: Viewing[List[T]])` reads the other list itself, not its handle).
     private static EntityTypeSymbol? BareEntityOf(TypeSymbol? type)
     {
         return type switch
         {
             EntityTypeSymbol entity => entity,
-            ProtocolTypeSymbol { TypeArguments: [EntityTypeSymbol tokenEntity] } token
-                when (token.GenericDefinition ?? token).BareName is RuntimeContract.Accessing
-                    or RuntimeContract.Controlling => tokenEntity,
+            RecordTypeSymbol { TypeArguments: [EntityTypeSymbol tokenEntity] } token
+                when (token.GenericDefinition ?? token).BareName is RuntimeContract.Viewing
+                    or RuntimeContract.Modifying => tokenEntity,
             _ => null
         };
     }

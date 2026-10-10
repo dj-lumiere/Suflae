@@ -291,3 +291,157 @@ routine factorial(n: Integer) -> Integer
 ### :returns: The resulting `Integer` value.
 @rf("fibonacci_big")
 routine fibonacci_big(n: S64) -> Integer
+
+### Creates an `Integer` from a signed 64-bit source value.
+### The numeric payload is copied into the arbitrary-precision representation,
+### so the result is no longer limited by `S64` range after construction.
+### :returns: The resulting `Integer` value.
+@rf("S64.to")
+routine S64.to[Integer]() -> Integer
+
+### Creates an `Integer` from an unsigned 64-bit source value.
+### This is the direct widening entry point for exact conversion from native
+### unsigned integer data.
+### :returns: The resulting `Integer` value.
+@rf("U64.to")
+routine U64.to[Integer]() -> Integer
+
+### Widens a fixed-width integer into an `Integer` (exact). 64-bit limbs go through the
+### base builders; wider widths compose them with shift+add.
+### :returns: The equal `Integer` value.
+@rf("S8.to")
+routine S8.to[Integer]() -> Integer
+
+@rf("S16.to")
+routine S16.to[Integer]() -> Integer
+
+@rf("S32.to")
+routine S32.to[Integer]() -> Integer
+
+@rf("S128.to")
+routine S128.to[Integer]() -> Integer
+
+@rf("S256.to")
+routine S256.to[Integer]() -> Integer
+
+### Widens an unsigned fixed-width integer into an `Integer` (exact).
+### :returns: The equal `Integer` value.
+@rf("U8.to")
+routine U8.to[Integer]() -> Integer
+
+@rf("U16.to")
+routine U16.to[Integer]() -> Integer
+
+@rf("U32.to")
+routine U32.to[Integer]() -> Integer
+
+@rf("U128.to")
+routine U128.to[Integer]() -> Integer
+
+@rf("U256.to")
+routine U256.to[Integer]() -> Integer
+
+### Converts an arbitrary-precision integer to `S64`.
+### :returns: The resulting `S64` value.
+### :throws: {IntegerOverflowError} if this value is outside `S64_MIN..S64_MAX`.
+@rf("Integer.to")
+routine Integer.to![S64]() -> S64
+
+### Converts an arbitrary-precision integer to `U64`.
+### :returns: The resulting `U64` value.
+### :throws: {IntegerOverflowError} if this value is negative or exceeds `U64_MAX`.
+@rf("Integer.to")
+routine Integer.to![U64]() -> U64
+
+### Converts an arbitrary-precision integer to `S8`.
+### :returns: The resulting `S8` value.
+### :throws: {IntegerOverflowError} if this value is outside the `S8` range.
+@rf("Integer.to")
+routine Integer.to![S8]() -> S8
+
+### Converts an arbitrary-precision integer to `S16`.
+### :returns: The resulting `S16` value.
+### :throws: {IntegerOverflowError} if this value is outside the `S16` range.
+@rf("Integer.to")
+routine Integer.to![S16]() -> S16
+
+### Converts an arbitrary-precision integer to `S32`.
+### :returns: The resulting `S32` value.
+### :throws: {IntegerOverflowError} if this value is outside the `S32` range.
+@rf("Integer.to")
+routine Integer.to![S32]() -> S32
+
+### Converts an arbitrary-precision integer to `U8`.
+### :returns: The resulting `U8` value.
+### :throws: {IntegerOverflowError} if this value is outside the `U8` range.
+@rf("Integer.to")
+routine Integer.to![U8]() -> U8
+
+### Converts an arbitrary-precision integer to `U16`.
+### :returns: The resulting `U16` value.
+### :throws: {IntegerOverflowError} if this value is outside the `U16` range.
+@rf("Integer.to")
+routine Integer.to![U16]() -> U16
+
+### Converts an arbitrary-precision integer to `U32`.
+### :returns: The resulting `U32` value.
+### :throws: {IntegerOverflowError} if this value is outside the `U32` range.
+@rf("Integer.to")
+routine Integer.to![U32]() -> U32
+
+### Converts an arbitrary-precision integer to `U128`.
+### :returns: The resulting `U128` value.
+### :throws: {IntegerOverflowError} if this value is negative or exceeds `U128_MAX`.
+@rf("Integer.to")
+routine Integer.to![U128]() -> U128
+
+### Converts an arbitrary-precision integer to `U256`.
+### :returns: The resulting `U256` value.
+### :throws: {IntegerOverflowError} if this value is negative or exceeds `U256_MAX`.
+@rf("Integer.to")
+routine Integer.to![U256]() -> U256
+
+### Converts an arbitrary-precision integer to `S128`.
+### :returns: The resulting `S128` value.
+### :throws: {IntegerOverflowError} if this value is outside `S128_MIN..S128_MAX`.
+@rf("Integer.to")
+routine Integer.to![S128]() -> S128
+
+### Converts an arbitrary-precision integer to `S256`.
+### :returns: The resulting `S256` value.
+### :throws: {IntegerOverflowError} if this value is outside `S256_MIN..S256_MAX`.
+@rf("Integer.to")
+routine Integer.to![S256]() -> S256
+
+### Converts an arbitrary-precision integer to the nearest `B32`.
+### :returns: The `B32` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
+@rf("Integer.to")
+routine Integer.to![B32]() -> B32
+
+### Converts an arbitrary-precision integer to the nearest `B64`.
+### :returns: The `B64` closest to this value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
+@rf("Integer.to")
+routine Integer.to![B64]() -> B64
+
+### Converts an arbitrary-precision integer to `Decimal`, rounding half-even to its 34 significant digits.
+### :returns: The resulting `Decimal` value.
+### :throws: {NumericOverflowError} if this value is beyond the range of `Decimal` (about `1e6144`).
+@rf("Integer.to")
+routine Integer.to![Decimal]() -> Decimal
+
+### Builds an `Integer` from its serialized base-10 text.
+### :param from: The serialized value.
+### :returns: The parsed value.
+### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
+@rf("Integer")
+routine Integer!(from: SerialValue) -> Integer
+
+### Parses a base-10 integer from text.
+### This is the canonical text-to-`Integer` conversion used by generic parsing
+### surfaces.
+### :returns: The resulting `Integer` value.
+### :throws: May throw {ParseError}.
+@rf("Text.to")
+routine Text.to![Integer]() -> Integer
