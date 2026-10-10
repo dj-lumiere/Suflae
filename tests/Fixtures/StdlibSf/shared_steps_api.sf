@@ -4,9 +4,18 @@ import IO/Console
 
 # One-statement steps for state that several agents share: `set_if_absent` adds a key only when it is missing,
 # `items()` walks a copy, `put_if_room` never waits on a full queue, and `take_finished` collects finished work in
-# place.
+# place, `next_finished` hands Agents over as they finish, and `gather_all` keeps every result and failure.
 routine double(n: Integer) -> Integer
     return n * 2
+
+routine slow(n: Integer, wait: Duration) -> Integer
+    waitfor(duration: wait)
+    return n
+
+routine risky!(n: Integer) -> Integer
+    if n == 2
+        throw VerificationFailedError()
+    return n * 10
 
 routine start()
     var seats = Dict[Text, Integer]()
@@ -30,5 +39,15 @@ routine start()
     var done = jobs.take_finished()
     show(f"taken: {done.count()} left: {jobs.count()} value: {two}")
     show(f"rest: {jobs.gather()}")
+
+    var racers = [agent slow(n: 1, wait: 60ms), agent slow(n: 2, wait: 5ms), agent slow(n: 3, wait: 30ms)]
+    var order = List[Integer]()
+    while not racers.is_empty()
+        order.add_last(value: racers.next_finished().retrieve())
+    show(f"finish order: {order}")
+
+    var tries = [agent risky(n: 1), agent risky(n: 2), agent risky(n: 3)]
+    var outcomes = tries.gather_all()
+    show(f"all: {outcomes.count()} first: {outcomes[0]} third: {outcomes[2]}")
     show("DONE")
     return
