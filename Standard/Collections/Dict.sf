@@ -239,15 +239,16 @@ routine Dict[TKey, TValue].values() -> List[TValue]
         i = i + 1
     return result
 
-### Returns a copy of the entries as they are now, in insertion order (`each e in d.items()`). `each e in d` walks
-### the dict itself and is faster, but crashes when another agent adds or removes an entry during the walk. Walk
-### `items()` instead over a dict other agents may change: the copy does not change under the loop.
-routine Dict[TKey, TValue].items() -> List[DictEntry[TKey, TValue]]
-    var result = List[DictEntry[TKey, TValue]](capacity: me.count.to[Integer]())
+### Returns a copy of the keys and values as they are now, in insertion order, as pairs:
+### `each (k, v) in d.items()`. `each e in d` walks the dict itself and is faster, but crashes when another agent
+### adds or removes an entry during the walk. Walk `items()` instead over a dict other agents may change: the copy
+### does not change under the loop.
+routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
+    var result = List[Tuple[TKey, TValue]](capacity: me.count.to[Integer]())
     var i: U64 = 0
     while i < me.used
         if me.live.at(position: i)
-            result.add_last(value: DictEntry[TKey, TValue](key: me.keys.at(position: i), value: me.vals.at(position: i)))
+            result.add_last(value: (me.keys.at(position: i), me.vals.at(position: i)))
         i = i + 1
     return result
 

@@ -946,7 +946,7 @@ full subscriber does not hold up the rest).
 A statement is one step for the agents that share an entity, so two statements can be split by another agent. A
 shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
 and says whether it did (`if d lack k` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
-of the entries to walk (`each e in d` crashes when another agent adds or removes an entry during the walk).
+of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another agent adds or removes an entry during the walk).
 
 ## 17. Process signals
 
