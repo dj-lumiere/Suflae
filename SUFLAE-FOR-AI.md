@@ -398,6 +398,9 @@ One arm takes several values after `==`: `== 4, 6, 9, 11 => return 30`.
 - Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T as name`), a guard after a
   binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
   `else as name` last. A failed guard falls through to the next arm.
+- Record patterns, written like construction: `is Monster(hp: 0) as m`, `is Monster(hp: < 5, name)`,
+  `is Chest(item: is Weapon as w)`, `is Monster(hp: as health)`. `field` alone names it; a value equals; an arm
+  that tests a member variable does not cover its type. Also after `if`: `if c is Monster(hp: 0) as m`.
 - Without a subject, `when` picks the first true condition:
 
 ```suflae
