@@ -387,6 +387,8 @@ routine describe(v: Number) -> Text
         else => return "other"
 ```
 
+One arm takes several values after `==`: `== 4, 6, 9, 11 => return 30`.
+
 - Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T as name`), a guard after a
   binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
   `else as name` last. A failed guard falls through to the next arm.
