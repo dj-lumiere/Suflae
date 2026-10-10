@@ -131,6 +131,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 - Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
 - Types and protocols are `PascalCase`; routines, variables and member variables `snake_case`; `choice` /
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
+- No kind or scope prefixes on names (`m_pos`, `_count`, `p_node`, `bDone`, `IComparable`): `lint` hints them.
 - Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
   (`List[T]`, `Set[T]`, `Agent[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
   `select[TResult]`, `zip[TFirst, TSecond, ...]`), never another single letter (`K`, `V`, `U`, ...). A const generic
