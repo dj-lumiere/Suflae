@@ -27,3 +27,8 @@ obeys Hashable
     ### This is the zero-bitmask identity for the flag type.
     ### :returns: The resulting `Me` value.
     routine Me.all_off() -> Me
+    ### Returns the value with the flags of `you` taken off: `perms.without(WRITE)`.
+    ### Flags `you` has and this value lacks change nothing.
+    ### :param you: The flags to take off.
+    ### :returns: The resulting `Me` value.
+    routine Me.without(you: Me) -> Me

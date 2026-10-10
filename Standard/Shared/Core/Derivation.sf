@@ -30,3 +30,10 @@ needs ChoiceType T
 @rf("T.to")
 routine T.to[U64]() -> U64
 needs FlagsType T
+
+### The flags of `me` with the members of `you` taken off: `perms.without(WRITE)`.
+### :param you: The members to take off.
+### :returns: `me` without those members.
+@rf("T.without")
+routine T.without(you: T) -> T
+needs FlagsType T

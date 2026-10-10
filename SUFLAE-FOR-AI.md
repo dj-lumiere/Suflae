@@ -520,7 +520,8 @@ variant Number
   `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
   `Integer`); flags have the same two for their members.
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
-  `have` / `lack` / `==` (`perms have Permission.WRITE`).
+  `have` / `lack` / `==` (`perms have Permission.WRITE`), and taken off with `without` (`perms.without(WRITE)`: where a
+  value of the flags type goes, its members are named bare).
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
   `var d: Number = none`) and take it apart with `when` / `is T as name`.
 - **crashable**: an error type (§11).
