@@ -59,6 +59,15 @@ routine alert[T](value: T, end: Text = "\n")
 @rf("ask_line")
 routine ask_line() -> Text
 
+### Reads one line of standard input as a `T`: `var n: Integer = ask()` (the type the value goes to), or
+### `ask[Integer]()`. The line becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like
+### that does.
+### :typeparam T: The type the line becomes.
+### :returns: The line as a `T`.
+### :throws: {InvalidValueError} or what else `to[T]()` throws when the line isn't a `T`.
+@rf("ask")
+routine ask![T]() -> T
+
 ### Reads one whitespace-delimited word from standard input.
 ### :returns: The resulting `Text` value.
 @rf("ask_word")

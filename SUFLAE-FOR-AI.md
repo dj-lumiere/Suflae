@@ -808,7 +808,8 @@ routine start()
 
 ## 15. Console, files and resources
 
-- Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask_word()`, `ask_all()`,
+- Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Integer = ask()`,
+  failing like `to[T]()`), `ask_word()`, `ask_all()`,
   `ask_lines()`, `ask_words()`.
 - Files are values that name a path (no I/O happens at construction): `File(at: "notes.txt")` with
   `exists()`, `read_text()`, `write_text(content:)`, `size()`, `extension()` (no leading dot), `parent()`,
