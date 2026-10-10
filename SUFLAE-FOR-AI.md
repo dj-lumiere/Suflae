@@ -860,6 +860,9 @@ routine start()
   throws the first failure it meets (in list order). `agents.race()` returns the first finisher's value,
   and throws the winner's failure. `agents.cancel_all()` returns nothing: it cancels every agent and
   waits until each has stopped, dropping what each came to. Work nothing started yet never runs.
+  `agents.next_finished()` waits for the first agent to finish, takes it out of the list and returns it (call it
+  in a loop to handle results in finishing order). `agents.gather_all()` waits for all and returns a
+  `List[Check[T]]`: each agent's value or failure, so one failure does not hide the others' results.
   `agents.take_finished()` takes the finished agents out of the list in place and returns them (a server
   collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
 - A dropped agent that was never retrieved is not cancelled for you. Collect what you start.
