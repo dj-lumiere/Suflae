@@ -113,7 +113,7 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
 `preset` or `global`) of module `Foo`. Always available without an import: `Core` (the basic types,
-`List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, channels), `Integer`, console output and input
+`List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, `Queue`), `Integer`, console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
 `PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`, `IO/FileSystem`
 (path strings), `Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
@@ -860,6 +860,8 @@ routine start()
   throws the first failure it meets (in list order). `agents.race()` returns the first finisher's value,
   and throws the winner's failure. `agents.cancel_all()` returns nothing: it cancels every agent and
   waits until each has stopped, dropping what each came to. Work nothing started yet never runs.
+  `agents.take_finished()` takes the finished agents out of the list in place and returns them (a server
+  collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
 - A dropped agent that was never retrieved is not cancelled for you. Collect what you start.
 - `agent.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
   `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
@@ -934,6 +936,14 @@ routine start()
 `ChannelClosedError` once the queue is closed. `each x in q` waits while it is empty and ends when it is closed and
 empty. Nothing closes a queue by itself: the side that is done calls `close()`. Several agents taking from one
 queue each get different values. `q.count()` and `q.is_closed()` are snapshots another agent can change at once.
+`q.put_if_room(item: x)` never waits: it puts and returns `true` when there is room, returns `false` when the queue
+is full, and crashes with `ChannelClosedError` once it is closed (a broadcast over subscribers' queues uses it, so one
+full subscriber does not hold up the rest).
+
+A statement is one step for the agents that share an entity, so two statements can be split by another agent. A
+shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
+and says whether it did (`if d lack k` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
+of the entries to walk (`each e in d` crashes when another agent adds or removes an entry during the walk).
 
 ## 17. Process signals
 
