@@ -255,10 +255,31 @@ routine start()
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
   sign fill for `>>`).
 - Containment: `coll have x`, `coll lack x`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
-  `1 to 10 by 2` (step); `10 to 1` counts down (the direction comes from the endpoints, `by` is always
-  positive: a literal step that is zero or negative is SF-S516, and a step held in a variable crashes with
-  `RangeStepNotPositiveError` when the range is iterated if it is not positive). `0 to 10 have 10` is `true`.
+  `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
+  (`2 to 1` yields nothing, `2 to 1 have 1` is `false`). A negative step counts down: `10 to 1 by -1`,
+  `10 to 0 by -2`, also on unsigned types (`3u64 to 0u64 by -1` yields 3 2 1 0). A step held in a variable
+  decides the direction by its sign. A literal `by 0` is SF-S516, and a zero step held in a variable crashes
+  with `RangeStepZeroError` when the range is iterated. `0 to 10 have 10` is `true`, and `have` follows the
+  step (`10 to 0 by -2 have 4` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
 - Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
+
+**Precedence**, tightest first:
+
+1. indexing, member access, calls
+2. `**` (right-associative, the exponent may carry a sign: `2 ** -1`)
+3. unary `-`, `not`, `~` (`-x ** 2` is `-(x ** 2)`)
+4. `* / // %` (and their `%`/`^`/`!` variants)
+5. `+ -` (and their variants)
+6. bitwise `<< >> >>> & ^ |`, one level: different bitwise operators side by side need parentheses
+   (`(a & b) | c`, `(a >>> 58) << 2`), a chain of one does not (`a | b | c`). Shifts are looser than
+   arithmetic: `1 << n + 1` shifts by `n + 1`.
+7. ranges `to` / `til` / `by` (`0 to n - 1`, `0 to 10 have x` read as written)
+8. comparisons `== != < <= > >= <=>` (chained), `have` `lack` `is` `isnot` `obeys` (`x & 1 == 0` is
+   `(x & 1) == 0`)
+9. `and` / `or`, one level: mixing them needs parentheses (`a or (b and c)`), a chain of one does not
+10. `??`
+
+Mixing `and` with `or`, or two different bitwise operators, without parentheses is SF-G216.
 
 ## 8. Control flow
 
@@ -981,6 +1002,8 @@ number). At most 20 are shown per batch.
 | SF-S750       | `throw` in a routine without `!`                    | declare it `routine name!(...)`                   |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll have x`                                     |
+| SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
+| SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `agent` before a non-call, or over generic values   | put `agent` before a call with concrete types     |
 

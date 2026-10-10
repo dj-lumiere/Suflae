@@ -310,7 +310,7 @@ routine List[T].setitem!(index: Integer, value: T)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
-### list are skipped, and a descending range gives the elements in reverse.
+### list are skipped, and a range that counts down (`by -1`) gives the elements in reverse.
 ### :param range: The positions to copy.
 routine List[T].getitem(range: Range[Integer]) -> List[T]
     var result = List[T]()
