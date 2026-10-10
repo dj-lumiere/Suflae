@@ -176,7 +176,8 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
   `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
 - Tuples: `(1, "a")` has type `(Integer, Text)`; read `t.item0`, `t.item1`; destructure with
-  `var (q, r) = pair`.
+  `var (q, r) = pair`. `(a, b) = (b, a)` swaps places (locals, member variables); any other tuple on the left is
+  a build error.
 
 **Conversions: `x.to[T]()`, the one way to convert.**
 

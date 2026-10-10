@@ -1,0 +1,17 @@
+module Tests/StdlibSf/TupleSwapApi
+
+import IO/Console
+
+# `(a, b) = (b, a)` swaps places: locals and member variables of an entity.
+entity Box
+    first: Integer
+    second: Integer
+
+routine start()
+    var a = 1
+    var b = 2
+    (a, b) = (b, a)
+    var box = Box(first: 10, second: 20)
+    (box.first, box.second) = (box.second, box.first)
+    show(f"{a} {b} {box.first} {box.second}")
+    show("DONE")
