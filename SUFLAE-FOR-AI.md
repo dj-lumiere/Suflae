@@ -357,6 +357,8 @@ loop
 `.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
+`until c` loops while `c` is false (`while not (c)`). A `while`, `until` or `each` may end with a `then` block, run
+when the loop ends by itself and never after its own `break`.
 A `while` or `each` may end with an `else`, which runs only when the body ran zero times: the condition was
 false at the very first check, or the source was empty. Once the body has run, the `else` never runs, however
 the loop ended (condition false, source exhausted, or `break`).
@@ -1112,7 +1114,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each`
-  `break` `continue` `return` `throw` `pierce` `todo` `becomes`
+  `break` `continue` `return` `throw` `pierce` `todo` `becomes` `until`
 - **Recovery**: `try` `check`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`

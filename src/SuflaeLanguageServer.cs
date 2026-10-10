@@ -25,7 +25,7 @@ internal sealed class SuflaeLanguageServer : LanguageServerProfile
 
     /// <inheritdoc/>
     /// <remarks>From the improvement plan: `until` loops, `becomes` in an expression `when`.</remarks>
-    public override IReadOnlyList<string> PlannedKeywords { get; } = ["until"];
+    public override IReadOnlyList<string> PlannedKeywords { get; } = [];
 
     /// <inheritdoc/>
     /// <remarks>`suspended` gave way to `agent` at the call.</remarks>
