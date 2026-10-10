@@ -419,7 +419,7 @@ routine start()
   same object everywhere; a change through any name is seen through every name.
 - **Memory is automatic.** Each entity is reference-counted and freed when its last name goes away, and a
   cycle collector reclaims structures that point at each other (a doubly-linked list, a parent ↔ child
-  pair). There are no weak-reference annotations, no `destroy` to write or call, and no lifetimes. For a
+  pair). There are no weak-reference annotations, no `destruct` to write or call, and no lifetimes. For a
   resource that must be released at a known point (a file), use `using` (§15).
 - **Identity**: `===` / `!==` compare whether two entity names refer to the same object. On a record or a
   number they are a build error (SF-S440): values have no identity, use `==`.
@@ -780,7 +780,7 @@ routine start()
   `agents.race()` returns the first finisher's value; `agents.cancel_all()` asks every agent to stop and
   returns their final values.
 - `agent.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
-  `try agent.waitfor(5s).retrieve()` gives `None` instead.
+  `try job.waitfor(5s).retrieve()` gives `None` instead.
 - Free routines: `waitfor(duration)` pauses (parks a coroutine), `yield_now()` lets siblings run,
   `cancellation_requested()` tells a long loop to stop early.
 - An agent that no verb runs never runs; dropping one is warning SF-W008.

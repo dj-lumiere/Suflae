@@ -139,7 +139,7 @@ routine Buffer[T].at!(position: U64) -> T
 routine Buffer[T].put!(position: U64, value: T)
     danger
         var slot = me.slot(position: me.checked(position: position))
-        slot.peek().destroy()
+        slot.peek().destruct()
         slot.poke(value)
     return
 
@@ -156,7 +156,7 @@ routine Buffer[T].take_at!(position: U64) -> T
 routine Buffer[T].erase_at!(position: U64)
     var place = me.checked(position: position)
     danger
-        me.slot(position: place).peek().destroy()
+        me.slot(position: place).peek().destruct()
     me.clear_places(from: place, count: 1_u64)
     return
 
@@ -211,7 +211,7 @@ routine Buffer[T].carry!(source: U64, target: U64, count: U64)
     while i < target + n
         if i < source or i >= source + n
             danger
-                me.slot(position: i).peek().destroy()
+                me.slot(position: i).peek().destruct()
         i = i +% 1
     me.move_places(target: target, source: source, count: n)
     i = source
@@ -259,7 +259,7 @@ routine Buffer[T].fill(value: T)
     while i < me.room
         danger
             var slot = me.slot(position: i)
-            slot.peek().destroy()
+            slot.peek().destruct()
             slot.poke(value)
         i = i +% 1
     return
@@ -728,10 +728,10 @@ secret routine Buffer[T].swap_places(a: U64, b: U64)
 
 ### Destroys what every place holds (a zero place holds nothing to tear down), then frees the memory.
 @override
-dangerous routine BufferStorage[T].destroy()
+dangerous routine BufferStorage[T].destruct()
     var i: U64 = 0
     while i < me.room
-        me.data.offset(T.data_size() * i).peek().destroy()
+        me.data.offset(T.data_size() * i).peek().destruct()
         i = i +% 1
     me.data.invalidate()
     me.hijack().invalidate()

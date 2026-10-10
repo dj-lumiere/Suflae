@@ -14,7 +14,7 @@ module Core
 ### atomic-refcounted handle to an immutable character buffer. Copying a
 ### `Text` bumps the underlying refcount via SeqCst atomic; the last drop
 ### frees the buffer + controller. When `ctrl` is null (`hijacked_none[...]()`),
-### the value represents an empty or static-literal string and `store`/`destroy`
+### the value represents an empty or static-literal string and `store`/`destruct`
 ### are no-ops.
 @rf("Text")
 record Text
@@ -50,7 +50,7 @@ routine Text.duplicate() -> Text
 ### Allocates ONE block — a `FrozenController` (strong count = 1) header immediately followed by `count`
 ### Characters — and returns a `Text` owning it, with `data` pointing just past the header. This is the
 ### SOLE Text-buffer allocator: co-locating the refcount cell with the payload means one
-### `rf_allocate_dynamic` (and one `invalidate` in `destroy`) instead of two separate allocations. The
+### `rf_allocate_dynamic` (and one `invalidate` in `destruct`) instead of two separate allocations. The
 ### `FrozenController` is a single `U64 strong_count` at offset 0, so the block head IS the refcount cell;
 ### `hold`/`unhold` drive atomics on it exactly as for a standalone controller. Callers fill the returned
 ### `result.data` buffer (refcount is 1 and not yet shared) and return it. `count` MUST be > 0 — callers

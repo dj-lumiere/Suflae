@@ -151,7 +151,7 @@ public class FeatureCoverageTests
                       .First();
         int endAt = ir.IndexOf(value: "\n}", startIndex: defAt, comparisonType: StringComparison.Ordinal);
         string start = ir[defAt..endAt];
-        Assert.Contains(expectedSubstring: "__ModuleGlobals].destroy()", actualString: start);
+        Assert.Contains(expectedSubstring: "__ModuleGlobals].destruct()", actualString: start);
     }
 
     [Fact]

@@ -208,7 +208,7 @@ routine File.open_append!() -> FileSink
 @rf("FileSource.load")
 routine FileSource.load(max: U64) -> Bytes
 
-### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destroy` never
+### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destruct` never
 ### double-close.
 @rf("FileSource.close")
 routine FileSource.close()
@@ -232,7 +232,7 @@ routine FileSink.store(data: Bytes) -> U64
 @rf("FileSink.flush")
 routine FileSink.flush()
 
-### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destroy` never
+### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destruct` never
 ### double-close.
 @rf("FileSink.close")
 routine FileSink.close()

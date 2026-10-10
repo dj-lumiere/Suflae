@@ -19,8 +19,8 @@ namespace Suflae.Passes;
 /// v1 scope (deferred bits noted): forwards public, non-lifecycle member routines whose return type is NOT
 /// the inner container type itself (a <c>RF::Y -&gt; SF Y</c> return re-wrap is not built yet, so
 /// container-returning methods like <c>copy</c>/<c>sorted</c> are skipped for now). Constructors and
-/// <c>destroy</c> are excluded — the wrapper hand-writes its constructor and gets a synthesized field-walk
-/// <c>destroy</c> (called by RoamController).
+/// <c>destruct</c> are excluded — the wrapper hand-writes its constructor and gets a synthesized field-walk
+/// <c>destruct</c> (called by RoamController).
 /// </summary>
 internal static class WrapperForwarderSynthesis
 {
@@ -294,7 +294,7 @@ internal static class WrapperForwarderSynthesis
         string member = inner.MemberRoutineName!;
         // Lifecycle: destroy is a synthesized field-walk. (A constructor `routine X(...)` has no member
         // name and never reaches here.)
-        if (member is "destroy")
+        if (member is "destruct")
         {
             return false;
         }
