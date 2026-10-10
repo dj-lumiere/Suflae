@@ -80,7 +80,7 @@ routine List[T].to_razorforge() -> RF::Core.List[T]
 routine List[T]!(from: SerialValue) -> List[T]
     var result = List[T]()
     when from
-        is RF::Core.List[SerialValue] items =>
+        is RF::Core.List[SerialValue] as items =>
             each item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
@@ -449,7 +449,6 @@ secret routine List[T].place(index: U64) -> U64
     var place = me.head + index
     var room = me.items.room
     return if place >= room then place - room else place
-
 ### The position `index` names, crashing unless it is the position of an element.
 secret routine List[T].checked_position!(index: Integer) -> U64
     var at = position_of(value: index)

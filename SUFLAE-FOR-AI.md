@@ -319,16 +319,16 @@ routine classify(n: Integer) -> Text
 
 routine describe(v: Number) -> Text
     when v
-        is S64 n and n > 100 => return f"big {n}"
-        is S64 n => return f"int {n}"
-        is Text t => return f"text {t}"
+        is S64 as n and n > 100 => return f"big {n}"
+        is S64 as n => return f"int {n}"
+        is Text as t => return f"text {t}"
         is None => return "nothing"
         else => return "other"
 ```
 
-- Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T name`), a guard after a
-  binding (`is S64 n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
-  `else name` last. A failed guard falls through to the next arm.
+- Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T as name`), a guard after a
+  binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
+  `else as name` last. A failed guard falls through to the next arm.
 - Without a subject, `when` picks the first true condition:
 
 ```suflae
@@ -352,7 +352,7 @@ when terrain
 
 - An expression `when` takes one expression per arm after `=>`. Several statements in an arm are a build error
   (SF-S307): compute the value first, or write a `when` statement that sets a variable.
-- `if x is T name` tests and binds in one step; the binding exists only inside that branch.
+- `if x is T as name` tests and binds in one step; the binding exists only inside that branch.
 - `when` must cover every case of a `choice`, a `variant`, or a carrier's success arm; `else` covers the
   rest.
 
@@ -460,7 +460,7 @@ variant Number
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
   `have` / `lack` / `==` (`perms have Permission.WRITE`).
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
-  `var d: Number = none`) and take it apart with `when` / `is T name`.
+  `var d: Number = none`) and take it apart with `when` / `is T as name`.
 - **crashable**: an error type (§11).
 
 ## 11. Errors and failure
@@ -503,14 +503,14 @@ routine find!(items: List[Text], name: Text) -> Integer
 ```suflae
 routine start()
     when check parse(n: -1)
-        is Integer v => show(f"ok {v}")
-        is NopeError e => show(f"caught: {e.what}")
-        is Crashables e => show(f"{e.crash_title()}: {e.crash_message()}")
+        is Integer as v => show(f"ok {v}")
+        is NopeError as e => show(f"caught: {e.what}")
+        is Crashables as e => show(f"{e.crash_title()}: {e.crash_message()}")
 
     var m = try parse(n: 4)
     when m
         is None => show("failed")
-        else v => show(f"got {v}")
+        else as v => show(f"got {v}")
 
     var safe = try parse(n: -5) ?? 0
     show(f"{safe}")
@@ -542,12 +542,12 @@ routine start()
   both throw and be absent.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
   under `try` (`true` when it succeeded).
-- A `when` on a `Check` or `Lookup` **must** have the success arm (`is T v` or `else v`); leaving it out is
-  a build error. `is NopeError e` takes only that error and binds it as a `NopeError` (its member variables
-  are readable); `is Crashables e` takes any error, so write it after the specific ones; `else e` after the
+- A `when` on a `Check` or `Lookup` **must** have the success arm (`is T as v` or `else as v`); leaving it out is
+  a build error. `is NopeError as e` takes only that error and binds it as a `NopeError` (its member variables
+  are readable); `is Crashables as e` takes any error, so write it after the specific ones; `else as e` after the
   other arms binds whatever is left. `x is NopeError` also works as an expression.
 - **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `!` routine
-  as if `is Crashables e => throw e` were written (the caller receives it), anywhere else the program
+  as if `is Crashables as e => throw e` were written (the caller receives it), anywhere else the program
   crashes loudly. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
   its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
   `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,

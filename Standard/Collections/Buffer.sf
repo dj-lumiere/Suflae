@@ -660,7 +660,6 @@ secret routine Buffer[T].places_text(first: U64, count: U64) -> Text
 @inline
 secret routine Buffer[T].wrap(position: U64) -> U64
     return if position >= me.room then position - me.room else position
-
 ### What a place already checked holds, as it sits in memory (no holder of its own).
 @inline
 secret routine Buffer[T].read(position: U64) -> T

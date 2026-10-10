@@ -36,7 +36,7 @@ routine names(lights: List[Light]) -> Text
 routine arm_fstring(m: Integer?, other: Integer?) -> Text
     when m
         is None => return f"none {other is None}"
-        else v => return f"{v} {other is None} {(v + 1) * 2}"
+        else as v => return f"{v} {other is None} {(v + 1) * 2}"
 
 suspended routine fetch(id: Integer) -> Integer
     waitfor(5ms)
