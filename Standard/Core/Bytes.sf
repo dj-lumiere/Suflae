@@ -41,13 +41,13 @@ routine Bytes.getitem(range: Range[Integer]) -> Bytes
 
 ### Returns the position of the first `byte`.
 ### :param byte: The byte to look for.
-### :absent: There is no such byte.
+### :throws: {AbsentValueError} There is no such byte.
 routine Bytes.find!(byte: Byte) -> Integer
     return Integer(from: me.find(byte: byte))
 
 ### Returns the position where the first `other` starts.
 ### :param other: The bytes to look for.
-### :absent: The bytes do not contain `other`.
+### :throws: {AbsentValueError} The bytes do not contain `other`.
 routine Bytes.find!(other: Bytes) -> Integer
     return Integer(from: me.find(other: other))
 

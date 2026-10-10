@@ -20,19 +20,19 @@ routine ten_over!(n: Integer) -> Integer
 
 routine grow!(n: S64) -> S64
     if n < 0
-        absent
+        throw AbsentValueError()
     return n + 9223372036854775800
 
 routine bump!(n: S64) -> S64
     if n < 0
-        absent
+        throw AbsentValueError()
     var total = n
     total += 9223372036854775800
     return total
 
 routine sum_quotients!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     var total = 0
     each i in 0 til 3
         total = total + 60 // (n - i)
@@ -49,7 +49,7 @@ routine hundred_over(n: Integer) -> Integer
 
 routine via_plain!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     return hundred_over(n: n) + 1
 
 # depth 3: a failable routine calls a routine that is not failable, which calls a failable one bare
@@ -64,14 +64,14 @@ routine middle(n: Integer) -> Integer
 
 routine outer!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     var v = middle(n: n)
     return v + 1
 
 # a loop condition, a branch of a conditional return and the fallback of `??` run only when reached
 routine count_below!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     var i = 0
     while i < 10 // n
         i = i + 1
@@ -79,17 +79,17 @@ routine count_below!(n: Integer) -> Integer
 
 routine pick_branch!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     return if n > -5 then 10 // n else 0
 
 routine negative_only!(n: Integer) -> Integer
     if n >= 0
-        absent
+        throw AbsentValueError()
     return n
 
 routine or_quotient!(n: Integer) -> Integer
     if n < -100
-        absent
+        throw AbsentValueError()
     return (try negative_only(n: n)) ?? 10 // n
 
 record Pair
@@ -103,23 +103,23 @@ routine start()
     show(f"try ten_over(5): {try ten_over(n: 5)}")
     show(f"try ten_over(0): {try ten_over(n: 0)}")
     show(f"grab ten_over(0): {check ten_over(n: 0)}")
-    show(f"lookup ten_over(0): {lookup ten_over(n: 0)}")
+    show(f"check ten_over(0): {check ten_over(n: 0)}")
     show(f"grab ten_over(-1): {check ten_over(n: -1)}")
     show(f"try grow(100): {try grow(n: 100)}")
     show(f"grab grow(100): {check grow(n: 100)}")
-    show(f"lookup grow(-1): {lookup grow(n: -1)}")
+    show(f"check grow(-1): {check grow(n: -1)}")
     show(f"try bump(7): {try bump(n: 7)}")
     show(f"grab bump(100): {check bump(n: 100)}")
     show(f"try sum_quotients(10): {try sum_quotients(n: 10)}")
-    show(f"lookup sum_quotients(1): {lookup sum_quotients(n: 1)}")
+    show(f"check sum_quotients(1): {check sum_quotients(n: 1)}")
     show(f"try via_bare(2): {try via_bare(n: 2)}")
     show(f"grab via_bare(0): {check via_bare(n: 0)}")
     show(f"grab via_plain(0): {check via_plain(n: 0)}")
     show(f"try hundred_over(0): {try hundred_over(n: 0)}")
     show(f"try outer(3): {try outer(n: 3)}")
     show(f"grab outer(0): {check outer(n: 0)}")
-    show(f"lookup outer(0): {lookup outer(n: 0)}")
-    show(f"lookup outer(-1): {lookup outer(n: -1)}")
+    show(f"check outer(0): {check outer(n: 0)}")
+    show(f"check outer(-1): {check outer(n: -1)}")
     var p = Pair(a: 6, b: 0)
     show(f"grab p.ratio(): {check p.ratio()}")
     when check via_bare(n: 0)
@@ -127,6 +127,6 @@ routine start()
         else as v => show(f"when: {v}")
     show(f"try count_below: {try count_below(n: 2)} {try count_below(n: 0)}")
     show(f"grab pick_branch: {check pick_branch(n: 2)} {check pick_branch(n: 0)}")
-    show(f"lookup or_quotient: {lookup or_quotient(n: -3)} {lookup or_quotient(n: 5)} {lookup or_quotient(n: 0)}")
+    show(f"check or_quotient: {check or_quotient(n: -3)} {check or_quotient(n: 5)} {check or_quotient(n: 0)}")
     show("DONE")
     return

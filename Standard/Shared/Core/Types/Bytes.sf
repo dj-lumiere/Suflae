@@ -186,7 +186,7 @@ routine Bytes.iter() -> BytesEmittable
 ### Returns the next byte from this iterator.
 ### Each successful call yields one byte and advances the internal index.
 ### :returns: The resulting `Byte` value.
-### :absent: Returns absent when the requested value is unavailable.
+### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("BytesEmittable.emit")
 routine BytesEmittable.emit!() -> Byte
 
@@ -248,7 +248,7 @@ routine BytesUtf8LossyView.iter() -> BytesUtf8LossyEmittable
 
 ### Returns the next decoded character from this strict UTF-8 iterator.
 ### :returns: The resulting `Char` value.
-### :absent: Returns absent when iteration is exhausted.
+### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 ### :throws: {MalformedUtf8Error} on the first ill-formed subsequence.
 @rf("BytesUtf8Emittable.emit")
 routine BytesUtf8Emittable.emit!() -> Char
@@ -256,7 +256,7 @@ routine BytesUtf8Emittable.emit!() -> Char
 ### Returns the next decoded character from this lossy UTF-8 iterator.
 ### Malformed subsequences are surfaced as the replacement character (U+FFFD).
 ### :returns: The resulting `Char` value.
-### :absent: Returns absent when iteration is exhausted.
+### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 @rf("BytesUtf8LossyEmittable.emit")
 routine BytesUtf8LossyEmittable.emit!() -> Char
 

@@ -184,11 +184,11 @@ routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> T
 
 ### Returns the value of `key` (`d[k]`).
 ### :param key: The key to look up.
-### :absent: The key has no entry.
+### :throws: {AbsentValueError} The key has no entry.
 routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
     var slot = me.find_slot(key: key)
     if not me.index.holds(slot: slot)
-        absent
+        throw KeyNotFoundError(key: key.represent())
     return me.vals.at(position: me.index.entry(slot: slot))
 
 ### Puts `value` at `key` (`d[k] = v`): replaces the value of a key that is there, and adds the key otherwise.
@@ -246,7 +246,7 @@ routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
     )
 
 ### Returns the next entry.
-### :absent: The walk is over.
+### :throws: {AbsentValueError} The walk is over.
 routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
     while me.left > 0
         me.left = me.left - 1
@@ -254,7 +254,7 @@ routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
             return DictEntry[TKey, TValue](key: me.keys.emit(), value: me.vals.emit())
         me.keys.skip()
         me.vals.skip()
-    absent
+    throw AbsentValueError()
 
 # ============================================================================
 # Copy

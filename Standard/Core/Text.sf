@@ -47,25 +47,25 @@ routine Text.getitem(range: Range[Integer]) -> Text
 
 ### Returns the position of the first `letter`.
 ### :param letter: The character to look for.
-### :absent: The text has no such character.
+### :throws: {AbsentValueError} The text has no such character.
 routine Text.find!(letter: Char) -> Integer
     return Integer(from: me.find(letter: letter))
 
 ### Returns the position where the first `other` starts.
 ### :param other: The text to look for.
-### :absent: The text does not contain `other`.
+### :throws: {AbsentValueError} The text does not contain `other`.
 routine Text.find!(other: Text) -> Integer
     return Integer(from: me.find(other: other))
 
 ### Returns the position of the last `letter`.
 ### :param letter: The character to look for.
-### :absent: The text has no such character.
+### :throws: {AbsentValueError} The text has no such character.
 routine Text.find_last!(letter: Char) -> Integer
     return Integer(from: me.find_last(letter: letter))
 
 ### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
 ### :param other: The text to look for.
-### :absent: The text does not contain `other`.
+### :throws: {AbsentValueError} The text does not contain `other`.
 routine Text.find_last!(other: Text) -> Integer
     return Integer(from: me.find_last(other: other))
 

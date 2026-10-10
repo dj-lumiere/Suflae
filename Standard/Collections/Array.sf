@@ -118,7 +118,7 @@ needs RecordType T
 
 ### Returns the position of the first element equal to `value`.
 ### :param value: The value to look for.
-### :absent: No element equals `value`.
+### :throws: {AbsentValueError} No element equals `value`.
 routine Array[T, COUNT].index_of!(value: T) -> Integer
 needs T obeys Equatable
     var i = 0u64
@@ -126,7 +126,7 @@ needs T obeys Equatable
         if me.get_raw(index: i) == value
             return Integer(from: i)
         i = i +% 1u64
-    absent
+    throw AbsentValueError()
 
 # ============================================================================
 # Inside the array

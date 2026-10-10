@@ -50,7 +50,7 @@
         {
           "comment": "Control flow",
           "name": "keyword.control.sf",
-          "match": "\\b(if|elseif|else|then|each|loop|while|when|break|continue|return|throw|absent|try|check|lookup|pierce|danger|agent|until|becomes)\\b"
+          "match": "\\b(if|elseif|else|then|each|loop|while|when|break|continue|return|throw|try|check|pierce|danger|agent|until|becomes)\\b"
         },
         {
           "comment": "Type and pattern operations",
@@ -103,7 +103,7 @@
           "match": "\\b(None)\\b"
         },
         {
-          "comment": "none value literal (absent value for Maybe/Lookup/variant-with-None)",
+          "comment": "none value literal (the empty value of a Maybe or a variant with a None case)",
           "name": "constant.language.null.sf",
           "match": "\\b(none)\\b"
         }

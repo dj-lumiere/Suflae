@@ -1,7 +1,7 @@
 module Tests/StdlibSf/RecoveryAccessApi
 
 import IO/Console
-# With `try`, `grab` or `lookup` in front of a call, a failing subscript or conversion anywhere beneath it is
+# With `try` or `check` in front of a call, a failing subscript or conversion anywhere beneath it is
 # recovered: an index out of range on a list or a text, a missing dictionary key, a value that does not fit
 # the target type, a text that does not parse, also in a routine that is not failable. Only the carrier
 # differs.
@@ -20,7 +20,7 @@ routine pick!(items: List[Integer], i: Integer) -> Integer
 
 routine letter!(t: Text, i: Integer) -> Char
     if i < 0
-        absent
+        throw AbsentValueError()
     return t[i]
 
 routine score!(ages: Dict[Text, Integer], name: Text) -> Integer
@@ -30,13 +30,13 @@ routine score!(ages: Dict[Text, Integer], name: Text) -> Integer
 
 routine narrow!(n: S64) -> S8
     if n < 0
-        absent
+        throw AbsentValueError()
     var b = S8(from: n)
     return b
 
 routine parsed!(t: Text) -> Integer
     if t == ""
-        absent
+        throw AbsentValueError()
     return Integer(text: t)
 
 # a routine that is not failable, with a subscript, called bare by a failable one
@@ -45,7 +45,7 @@ routine last_of(items: List[Integer]) -> Integer
 
 routine last_plus_one!(items: List[Integer]) -> Integer
     if items.count() > 1000
-        absent
+        throw AbsentValueError()
     return last_of(items: items) + 1
 
 routine start()
@@ -54,12 +54,12 @@ routine start()
     show(f"try pick(1): {try pick(items: nums, i: 1)}")
     show(f"try pick(9): {try pick(items: nums, i: 9)}")
     show(f"grab pick(9): {check pick(items: nums, i: 9)}")
-    show(f"lookup pick(9): {lookup pick(items: nums, i: 9)}")
+    show(f"check pick(9): {check pick(items: nums, i: 9)}")
     show(f"try letter(1): {try letter(t: "abc", i: 1)}")
     show(f"grab letter(9): {check letter(t: "abc", i: 9)}")
     var ages = {"ann": 3}
     show(f"try score(ann): {try score(ages: ages, name: "ann")}")
-    show(f"lookup score(bob): {lookup score(ages: ages, name: "bob")}")
+    show(f"check score(bob): {check score(ages: ages, name: "bob")}")
     show(f"grab score(empty): {check score(ages: ages, name: "")}")
     show(f"try narrow(100): {try narrow(n: 100)}")
     show(f"grab narrow(300): {check narrow(n: 300)}")

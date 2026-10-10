@@ -166,7 +166,7 @@ routine Text.ends_with(suffix: Text) -> Bool
 ### not present (use `try_split_once` to recover a `Maybe`).
 ### :param separator: The separator to split on.
 ### :returns: A `(before, after)` tuple.
-### :absent: Returns absent when the separator is not found.
+### :throws: {AbsentValueError} Thrown when the separator is not found.
 @rf("Text.split_once")
 routine Text.split_once!(separator: Text) -> (Text, Text)
 
@@ -271,6 +271,6 @@ routine Text.iter() -> TextEmittable
 ### Returns the next character from this iterator.
 ### Each successful call advances the iterator by one character.
 ### :returns: The resulting `Char` value.
-### :absent: Returns absent when the requested value is unavailable.
+### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("TextEmittable.emit")
 routine TextEmittable.emit!() -> Char

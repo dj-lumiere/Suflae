@@ -41,7 +41,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
    `@positional` accept all-positional calls. Mixing named and positional in one call is always an error
    (SF-S512).
 2. **Every routine you write ends with an explicit `return`**, even one that returns nothing. A failable
-   routine may also end with `throw` or `absent`. Script-mode top-level code (rule 6) needs none.
+   routine may also end with `throw`. Script-mode top-level code (rule 6) needs none.
 3. **Entities are shared; records are copied.** `var b = a` on an entity gives a second name for the same
    object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
@@ -54,7 +54,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **Failable routines carry `!` on the DECLARATION only** (`routine parse!(...)`); call sites never write
-   it. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` / `lookup` and
+   it. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` and
    take the result apart with `when`. There is no try/catch and no `try_parse` name form (§11).
 8. **Conditional expressions are top-level only.** `return if c then a else b` works;
    `f(x: if c then a else b)` and `(if c then a else b) + 1` are parse errors by design. Use `when` or a
@@ -72,7 +72,7 @@ available behind explicit markers: `danger` blocks, `dangerous` routines and for
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `suspended`, `retrieve()`, `try`/`check`/`lookup`, `none`, `show`, `start`.
+    `preset`, `each`, `when`, `suspended`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -181,7 +181,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 
 - `T?` is the optional type (`Maybe[T]` for values). For an entity, `E?` is a handle that may be empty.
 - `None` (capital) is the type and pattern (`is None`, `isnot None`); `none` (lowercase) is the value.
-- `none` is legal only where the target type can be absent: `T?`, `Lookup[T]`, a variant with a `None`
+- `none` is legal only where the target type can be absent: `T?`, a variant with a `None`
   member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
 - Reading through an `E?` before checking it is SF-S619; check with `if e isnot None` (or return early on
   `if e is None`) and the name is narrowed after the check. Putting `none` into a non-optional `E` slot is
@@ -465,8 +465,8 @@ variant Number
 
 ## 11. Errors and failure
 
-**Failable routines.** A routine that can fail is declared with `!` and fails with `throw` (an error) or
-`absent` (no value):
+**Failable routines.** A routine that can fail is declared with `!` and fails with `throw`. A routine with
+no value to give throws `AbsentValueError()`, an ordinary standard error:
 
 ```suflae
 crashable NopeError
@@ -484,11 +484,10 @@ routine find!(items: List[Text], name: Text) -> Integer
     each i in 0 til items.count()
         if items[i] == name
             return i
-    absent
+    throw AbsentValueError()
 ```
 
-- `throw` or `absent` in a routine declared without `!` is SF-S750 / SF-S751. A `!` routine with neither is
-  an error too.
+- `throw` in a routine declared without `!` is SF-S750. A `!` routine that never throws is an error too.
 - Call sites never write `!` (`parse!(n: 1)` is SF-G211). **A bare call crashes loudly on failure**: the
   error's title and message, where it was thrown, and a stack trace go to stderr.
 
@@ -496,9 +495,8 @@ routine find!(items: List[Text], name: Text) -> Integer
 
 | Keyword       | Result                           | Holds                                      |
 |---------------|----------------------------------|--------------------------------------------|
-| `try EXPR`    | `Maybe[T]`, written `T?`         | the value, or `None` (error or absence)    |
-| `check EXPR`   | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
-| `lookup EXPR` | `Lookup[T]` = `None \| T \| Crashables` | the value, `None` (absent), or the error |
+| `try EXPR`    | `Maybe[T]`, written `T?`         | the value, or `None` (any failure)         |
+| `check EXPR`  | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
 
 ```suflae
 routine start()
@@ -514,17 +512,21 @@ routine start()
 
     var safe = try parse(n: -5) ?? 0
     show(f"{safe}")
+
+    when check find(items: ["a", "b"], name: "z")
+        is AbsentValueError => show("not found")
+        is Integer as i => show(f"at {i}")
+        is Crashables as e => show(f"failed: {e}")
     return
 ```
 
 - **With a keyword in front, every failure beneath it is recovered, at any depth; only `pierce` still
-  crashes.** That covers a `throw`/`absent` in the called routine and in every routine it calls, bare calls
+  crashes.** That covers a `throw` in the called routine and in every routine it calls, bare calls
   included (failable or not: `try f()` also recovers a division by zero inside a plain helper `f` calls), a
   checked operation (`try a + b` recovers a fixed-width overflow, `check a // b` a division by zero,
   `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
   (`S8(from: 300)`, `Integer(text: "x")`). Each becomes the result's failure (`try`: `None`; `check`: the
-  error, an absence as `AbsentValueError`; `lookup`: the error or `None`), and evaluation stops at the first
-  one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
+  error), and evaluation stops at the first one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
   inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).List()`,
   `check items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
   several levels or kept in a record) is recovered by the keyword above the call that reaches it, at any
@@ -535,14 +537,14 @@ routine start()
   fatal walls below stay fatal.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
 - **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
-  `throw` (status 82), and it crashes the same way under `try`/`check`/`lookup` at any depth. Use it for a
+  `throw` (status 82), and it crashes the same way under `try`/`check` at any depth. Use it for a
   broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
   does not make a routine failable (no `!` needed for it).
-- Typical use: `try` when only absence matters, `check` for a routine that throws, `lookup` for one that can
-  both throw and be absent.
+- Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
+  the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
   under `try` (`true` when it succeeded).
-- A `when` on a `Check` or `Lookup` **must** have the success arm (`is T as v` or `else as v`); leaving it out is
+- A `when` on a `Check` **must** have the success arm (`is T as v` or `else as v`); leaving it out is
   a build error. `is NopeError as e` takes only that error and binds it as a `NopeError` (its member variables
   are readable); `is Crashables as e` takes any error, so write it after the specific ones; `else as e` after the
   other arms binds whatever is left. `x is NopeError` also works as an expression.
@@ -552,10 +554,10 @@ routine start()
   its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
   `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,
   the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
-- `is None` is an arm of `Lookup` and `Maybe` only (and the success arm of `Check[None]`); a `Check` has no
-  absent state.
-- Users never write `Maybe`/`Check`/`Lookup` as a return type (SF-S806); only a keyword produces one.
-  `Check` and `Lookup` are meant to be taken apart where they are made: they cannot be a parameter type
+- `is None` is an arm of `Maybe` only (and the success arm of `Check[None]`). A `Check` has no
+  absent state: "not found" in a `Check` is `is AbsentValueError`.
+- Users never write `Maybe`/`Check` as a return type (SF-S806), only a keyword produces one.
+  `Check` is meant to be taken apart where it is made: they cannot be a parameter type
   (SF-S754), a member variable type (SF-S755), or copied from one variable to another (SF-S758). `Maybe` is
   an ordinary optional value and may be stored.
 
@@ -585,7 +587,7 @@ logic limit** is fatal and cannot be caught.
   is a builder or runtime bug, not a language failure mode.
 - Fatal messages describe what the program did, never the machine.
 
-**Exit status.** Every crash (an unrecovered `throw`/`absent`, a checked-arithmetic failure, out of memory)
+**Exit status.** Every crash (an unrecovered `throw`, a checked-arithmetic failure, out of memory)
 exits with **status 82** (`0x52`, `'R'`). A run that ended with 82 crashed: read stderr for the error and
 the stack trace. Status 1 is not a crash. A process killed from outside (SIGKILL, the OS out-of-memory
 killer) dies before Suflae gets control and reports nothing. A run that returns from `start` normally exits with 0,
@@ -878,8 +880,8 @@ routine start()
 ```
 
 - `type_name(of:)`, `memvars(of:)` (every member variable, `secret` ones included, in declaration order),
-  `peek(target:)` (the whole object serialized), `peek(target:, memvar:)` (failable: absent for an unknown
-  name), `poke(target:, memvar:, value:)` (entities only; throws `NoSuchMemberVariableError`),
+  `peek(target:)` (the whole object serialized), `peek(target:, memvar:)` (failable: throws `AbsentValueError`
+  for an unknown name), `poke(target:, memvar:, value:)` (entities only; throws `NoSuchMemberVariableError`),
   `watch(target:)` (an observation that does not keep the entity alive; `is_alive()`).
 
 ## 20. CLI and `config.toml`
@@ -928,8 +930,8 @@ number). At most 20 are shown per batch.
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
 | SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
-| SF-S750/S751  | `throw`/`absent` in a routine without `!`           | declare it `routine name!(...)`                   |
-| SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`/`lookup`       |
+| SF-S750       | `throw` in a routine without `!`                    | declare it `routine name!(...)`                   |
+| SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll have x`                                     |
 | SF-W008       | an agent that is never run                          | `.retrieve()` or `.execute()` it                  |
 
@@ -943,8 +945,8 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each`
-  `break` `continue` `return` `throw` `pierce` `absent`
-- **Recovery**: `try` `check` `lookup`
+  `break` `continue` `return` `throw` `pierce`
+- **Recovery**: `try` `check`
 - **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
 - **Modules**: `import` `module`
 - **Other**: `using` `as` `define` `given` `pass` (an empty body: a type's, or a block's that

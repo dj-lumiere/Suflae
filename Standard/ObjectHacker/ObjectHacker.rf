@@ -75,8 +75,7 @@ needs AnyType T
     expand m in allmemvarof(T)
         if memvar == nameof(m)
             return target.$nameof(m).serialize()
-    absent
-
+    throw AbsentValueError()
 ### Changes one member variable of an entity, `secret` ones included: every alias sees the new value. Only an
 ### entity can be poked: a record is a value, and changing a copy would reach nobody.
 ### :param target: The entity.

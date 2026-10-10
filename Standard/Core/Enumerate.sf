@@ -34,7 +34,7 @@ routine EnumerateIterable[T, TSource].iter() -> EnumerateEmittable[T, TSource/It
         )
 
 ### Returns the next pair.
-### :absent: The source has no more values.
+### :throws: {AbsentValueError} The source has no more values.
 routine EnumerateEmittable[T, TSourceIter].emit!() -> Tuple[Integer, TSourceIter/Item]
     var position = me.index
     me.index = me.index + Integer(from: 1u64)

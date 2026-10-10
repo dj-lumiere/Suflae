@@ -69,7 +69,7 @@ routine List[T].second() -> T
 
 routine find!(n: Integer) -> Integer
     if n < 0
-        absent
+        throw AbsentValueError()
     return n
 
 # A conditional expression as a variable's initializer inside a generic routine.

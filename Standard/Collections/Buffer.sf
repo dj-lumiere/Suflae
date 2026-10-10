@@ -602,10 +602,10 @@ secret routine Buffer[T].walking(first: U64, count: U64) -> BufferEmittable[T]
     return BufferEmittable[T](storage: me.storage, base: me.start, room: me.room, first: first, index: 0_u64, count: count)
 
 ### Returns what the next place holds.
-### :absent: The walk is over.
+### :throws: {AbsentValueError} The walk is over.
 routine BufferEmittable[T].emit!() -> T
     if me.index >= me.count
-        absent
+        throw AbsentValueError()
     var place = me.first + me.index
     if place >= me.room
         place = place - me.room

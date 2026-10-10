@@ -163,14 +163,14 @@ routine Set[T].iter() -> SetEmittable[T]
     )
 
 ### Returns the next value.
-### :absent: The walk is over.
+### :throws: {AbsentValueError} The walk is over.
 routine SetEmittable[T].emit!() -> T
     while me.left > 0
         me.left = me.left - 1
         if me.live.emit()
             return me.values.emit()
         me.values.skip()
-    absent
+    throw AbsentValueError()
 
 # ============================================================================
 # Set Operations

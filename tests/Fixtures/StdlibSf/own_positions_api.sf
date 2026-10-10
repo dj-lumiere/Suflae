@@ -9,7 +9,7 @@ routine find!(items: List[Text], name: Text) -> Integer
     each i in 0 til items.count()
         if items[i] == name
             return i
-    absent
+    throw AbsentValueError()
 
 routine start()
     var xs = ["a", "b", "c"]

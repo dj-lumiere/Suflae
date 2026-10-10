@@ -151,26 +151,26 @@ routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
 # ============================================================================
 
 ### Returns the smallest element in the list.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine SortedList[T].min!() -> T
     if me.is_empty()
-        absent
+        throw AbsentValueError()
     return me.tree.key_at(rank: 0u64)
 
 ### Returns the largest element in the list.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine SortedList[T].max!() -> T
     if me.is_empty()
-        absent
+        throw AbsentValueError()
     return me.tree.key_at(rank: me.tree.count() - 1u64)
 
 ### Returns the smallest element. Alias for {SortedList[T].min()}.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine SortedList[T].first!() -> T
     return me.min()
 
 ### Returns the largest element. Alias for {SortedList[T].max()}.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine SortedList[T].last!() -> T
     return me.max()
 
@@ -183,10 +183,10 @@ routine SortedList[T].iter() -> SortedListEmittable[T]
     return SortedListEmittable[T](tree: me.tree, index: 0u64)
 
 ### Returns the next element.
-### :absent: The walk is over.
+### :throws: {AbsentValueError} The walk is over.
 routine SortedListEmittable[T].emit!() -> T
     if me.index >= me.tree.count()
-        absent
+        throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)
     me.index = me.index + 1u64
     return result

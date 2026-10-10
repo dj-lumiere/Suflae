@@ -21,7 +21,7 @@ routine look!(n: Integer) -> Integer
     if n < 0
         throw InvalidValueError(input: "negative", target: "Integer")
     if n == 0
-        absent
+        throw AbsentValueError()
     return n
 
 routine three() -> List[Integer]
@@ -58,9 +58,9 @@ routine start()
 
     # `??` takes the fallback for every arm that is not the value.
     var a = check Integer(text: "x") ?? 7
-    var b = lookup look(n: -1) ?? 1
-    var c = lookup look(n: 0) ?? 2
-    var d = lookup look(n: 5) ?? 3
+    var b = check look(n: -1) ?? 1
+    var c = check look(n: 0) ?? 2
+    var d = check look(n: 5) ?? 3
     show(f"fallback_everywhere: {a} {b} {c} {d}")
 
     # A failable creator with type arguments, recovered.

@@ -3,8 +3,8 @@ module Core
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
-### Any crashable: the error a `grab` or `lookup` caught, whatever its type. `is Crashables e` on a `Check` or
-### `Lookup` binds it. It is the address of the heap object the error lives in, whose mold names the crashable's
+### Any crashable: the error a `check` caught, whatever its type. `is Crashables e` on a `Check`
+### binds it. It is the address of the heap object the error lives in, whose mold names the crashable's
 ### own routines, so `crash_title`, `crash_message`, `represent` and `diagnose` reach that crashable's. The carrier
 ### that caught the error owns the object and frees it; a `Crashables` read out of it is valid while the carrier
 ### holds the error.

@@ -174,19 +174,19 @@ routine List[T].add_at!(index: Integer, value: T)
     return
 
 ### Removes and returns the last element.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine List[T].remove_last!() -> T
     if me.count == 0
-        absent
+        throw AbsentValueError()
     var value = me.items.take_at(position: me.place(index: me.count - 1))
     me.forget(count: 1)
     return value
 
 ### Removes and returns the first element.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine List[T].remove_first!() -> T
     if me.count == 0
-        absent
+        throw AbsentValueError()
     var value = me.items.take_at(position: me.head)
     me.advance_head()
     return value
@@ -270,17 +270,17 @@ routine List[T].reserve(new_capacity: Integer)
 # ============================================================================
 
 ### Returns the first element.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine List[T].first!() -> T
     if me.count == 0
-        absent
+        throw AbsentValueError()
     return me.items.at(position: me.head)
 
 ### Returns the last element.
-### :absent: The list is empty.
+### :throws: {AbsentValueError} The list is empty.
 routine List[T].last!() -> T
     if me.count == 0
-        absent
+        throw AbsentValueError()
     return me.items.at(position: me.place(index: me.count - 1))
 
 ### Returns the first element, or `default_value` if the list is empty.
