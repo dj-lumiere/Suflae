@@ -194,6 +194,7 @@ public partial class SuflaeLexer
             [key: "elseif"] = TokenType.Elseif,
             [key: "else"] = TokenType.Else,
             [key: "then"] = TokenType.Then,
+            [key: "with"] = TokenType.With,
             [key: "when"] = TokenType.When,
             [key: "is"] = TokenType.Is,
             [key: "loop"] = TokenType.Loop,
