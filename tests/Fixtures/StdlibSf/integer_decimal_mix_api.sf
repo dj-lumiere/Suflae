@@ -1,0 +1,13 @@
+module Tests/StdlibSf/IntegerDecimalMixApi
+
+import IO/Console
+
+routine start()
+    var price = 3.5
+    var count = 2
+    show(f"{price * count} {count * price} {count + 0.25} {count / 0.5} {price - count} {count - price}")
+    show(f"{price > count} {price < count} {count == 2.0} {2.0 == count} {count < price}")
+    var total = 0.0
+    each n in 1 to 3
+        total = total + n
+    show(f"{total}")

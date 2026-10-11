@@ -47,11 +47,15 @@ through a `.rf` module the program imports (section 18).
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
 4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`), but variables of different
-   number types never mix without an explicit conversion (`n.to[S64]()`, §5).
+   number types never mix without an explicit conversion (`n.to[S64]()`, §5). The one exception is the two
+   default types: an `Integer` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
+   (`3.5 * 2` is `7`), and an `Integer` with more significant digits than a `Decimal` holds (34) crashes. Mixing
+   two chosen types (`S32` and `U32`) is SF-S767, whose message names a type holding both
+   (`a.to[S64]() + b.to[S64]()`).
 5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
    significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Integer` values turns each into a `Decimal`
    first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
-   Mixing an `Integer` and a `Decimal` operand (`1.0 / 3`) is still an error, SF-S502.
+   `1.0 / 3` is `0.333…` too (§4).
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **Failable routines carry `!` on the DECLARATION only** (`routine parse!(...)`); call sites never write
