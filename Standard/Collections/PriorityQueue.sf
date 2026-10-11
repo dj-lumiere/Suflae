@@ -228,6 +228,13 @@ needs TElement obeys Equatable
         i = i + 1
     return false
 
+### Returns whether `element` is not in this value: the opposite of `has`.
+### :param element: The value to look for.
+### :returns: `true` when `element` is absent.
+routine PriorityQueue[TPriority, TElement].lacks(element: TElement) -> Bool
+needs TElement obeys Equatable
+    return not me.has(element)
+
 @override
 routine PriorityQueue[TPriority, TElement].represent() -> Text
     return f"{me.type_name()}({me.entries_text()})"

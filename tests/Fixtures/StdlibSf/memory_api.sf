@@ -41,7 +41,7 @@ routine start()
     each x in buf
         buf[0] = x
     show(f"after loop: {buf}")
-    show(f"have 20: {buf have 20} have 3: {buf have 3}")
+    show(f"have 20: {buf.has(20)} have 3: {buf.has(3)}")
 
     var words = Memory[Text](count: 3, fill: "a")
     words[1] = "b" + "c"

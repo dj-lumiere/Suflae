@@ -31,7 +31,7 @@ routine start()
         if i % 2 == 0
             numbers.add(value: i)
         i = i + 1
-    show(f"after removes: count={numbers.count()} first={numbers.first()} last={numbers.last()} has 3: {numbers have 3}")
+    show(f"after removes: count={numbers.count()} first={numbers.first()} last={numbers.last()} has 3: {numbers.has(3)}")
 
     var squares = SortedSet[Integer]()
     i = 0

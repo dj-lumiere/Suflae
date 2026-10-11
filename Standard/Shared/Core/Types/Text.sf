@@ -118,6 +118,12 @@ routine Text.hash(k0: U64, k1: U64) -> U64
 @rf("Text.has")
 routine Text.has(character: Char) -> Bool
 
+### Returns whether `character` is not in this value: the opposite of `has`.
+### :param character: The value to look for.
+### :returns: `true` when `character` is absent.
+@rf("Text.lacks")
+routine Text.lacks(character: Char) -> Bool
+
 ### Returns `true` when this text contains `other` as a contiguous substring.
 ### An empty `other` value is always considered contained. Uses the
 ### Knuth-Morris-Pratt algorithm for O(n + m) worst-case scanning.
@@ -125,6 +131,12 @@ routine Text.has(character: Char) -> Bool
 ### :returns: The resulting `Bool` value.
 @rf("Text.has")
 routine Text.has(other: Text) -> Bool
+
+### Returns whether `other` is not in this value: the opposite of `has`.
+### :param other: The value to look for.
+### :returns: `true` when `other` is absent.
+@rf("Text.lacks")
+routine Text.lacks(other: Text) -> Bool
 
 ### Returns `true` when this text begins with `prefix`.
 ### The entire `prefix` must match from the first character onward.

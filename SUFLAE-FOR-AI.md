@@ -73,8 +73,8 @@ through a `.rf` module the program imports (section 18).
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
 13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Integer]`. `<` is a
     comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
-14. **Containment is container-first:** `xs have 3`, `d have "key"`, `"hello" have "ell"`, `xs lack 3`. The routines
-    are `has`/`lacks` (`xs.has(value: 3)`), and a dict's keys are `has_key`/`lacks_key`.
+14. **Containment is a call on the container:** `xs.has(3)`, `"hello".has("ell")`, `xs.lacks(3)`, and a dict's
+    keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
@@ -311,13 +311,13 @@ routine start()
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
   (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
   (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: SF-S706.
-- Containment: `coll have x`, `coll lack x`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
+- Containment: `coll.has(x)`, `coll.lacks(x)`, on a dict `d.has_key(k)` / `d.lacks_key(k)`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
   `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
-  (`2 to 1` yields nothing, `2 to 1 have 1` is `false`). A negative step counts down: `10 to 1 by -1`,
+  (`2 to 1` yields nothing, `(2 to 1).has(1)` is `false`). A negative step counts down: `10 to 1 by -1`,
   `10 to 0 by -2`, also on unsigned types (`3u64 to 0u64 by -1` yields 3 2 1 0). A step held in a variable
   decides the direction by its sign. A literal `by 0` is SF-S516, and a zero step held in a variable crashes
-  with `RangeStepZeroError` when the range is iterated. `0 to 10 have 10` is `true`, and `have` follows the
-  step (`10 to 0 by -2 have 4` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
+  with `RangeStepZeroError` when the range is iterated. `(0 to 10).has(10)` is `true`, and `has` follows the
+  step (`(10 to 0 by -2).has(4)` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
 - Optionals: `m ?? fallback` takes the value or the fallback; `m!!` takes the value and crashes if absent.
 
 **Precedence**, tightest first:
@@ -330,8 +330,8 @@ routine start()
 6. bitwise `<< >> >>> & ^ |`, one level: different bitwise operators side by side need parentheses
    (`(a & b) | c`, `(a >>> 58) << 2`), a chain of one does not (`a | b | c`). Shifts are looser than
    arithmetic: `1 << n + 1` shifts by `n + 1`.
-7. ranges `to` / `til` / `by` (`0 to n - 1`, `0 to 10 have x` read as written)
-8. comparisons `== != < <= > >= <=>` (chained), `have` `lack` `is` `isnot` `obeys` (`x & 1 == 0` is
+7. ranges `to` / `til` / `by` (`0 to n - 1` reads as written, a range test is a call: `(0 to 10).has(x)`)
+8. comparisons `== != < <= > >= <=>` (chained), `is` `isnot` `obeys` (`x & 1 == 0` is
    `(x & 1) == 0`)
 9. `and` / `or`, one level: mixing them needs parentheses (`a or (b and c)`), a chain of one does not
 10. `??`
@@ -565,7 +565,8 @@ variant Number
   `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
   `Integer`); flags have the same two for their members.
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
-  `have` / `lack` / `==` (`perms have Permission.WRITE`), and taken off with `without` (`perms.without(WRITE)`: where a
+  `has` / `has_any` / `lacks` / `==` (`perms.has(WRITE)`, `perms.has(READ and WRITE)` is all of them,
+  `perms.has_any(READ and WRITE)` at least one, `perms.lacks(READ and WRITE)` none), and taken off with `without` (`perms.without(WRITE)`: where a
   value of the flags type goes, its members are named bare).
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
   `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Integer | Text`,
@@ -772,7 +773,7 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
   `pad_start`/`pad_end`/`center`/`zero_pad`. `split(separator:)`, `lines()` and `words()` give a `List[Text]`.
 - `Text` is a value. Useful members: `count()`, `is_empty()`, `starts_with(prefix:)`,
   `ends_with(suffix:)`, `split(...)`, `words()`, `replace(old:, new:)`, `to_uppercase()`,
-  `to_lowercase()`, `encode_as_utf8()`, and `+` to join. Substring test: `s have "ell"`. Slices take ranges:
+  `to_lowercase()`, `encode_as_utf8()`, and `+` to join. Substring test: `s.has("ell")`. Slices take ranges:
   `s[0 til 3]`, `s[2 til ^0]` (to the end).
 - `Char` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
 - A binary float shows as the shortest decimal that reads back to the same value
@@ -791,7 +792,7 @@ show(nums[0])                             # 3
 show(nums[^1])                            # 4, the last element
 ages["grace"] = 85
 show(ages["ada"])
-if ages have "alan"
+if ages.has_key("alan")
     show("found")
 each entry in ages
     show(f"{entry.key} -> {entry.value}")
@@ -1009,7 +1010,7 @@ it, so one full subscriber does not hold up the rest).
 
 A statement is one step for the agents that share an entity, so two statements can be split by another agent. A
 shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
-and says whether it did (`if d lack k` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
+and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
 of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another agent adds or removes an entry during the walk).
 
 ## 17. Process signals
@@ -1146,7 +1147,7 @@ number). At most 20 are shown per batch.
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | SF-S750       | `throw` in a routine without `!`                    | declare it `routine name!(...)`                   |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
-| SF-G212       | `x in coll` as a test                               | `coll have x`                                     |
+| SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
@@ -1167,7 +1168,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each` `with`
   `break` `continue` `return` `throw` `pierce` `todo` `becomes` `until`
 - **Recovery**: `try` `check`
-- **Ranges and containment**: `in` (loops only) `have` `lack` `to` `til` `by`
+- **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`
 - **Other**: `using` `as` `define` `given` `pass` (an empty body: a type's, or a block's that
   does nothing)
@@ -1179,8 +1180,8 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 `!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
 words.
 
-The word operators `to` `til` `by` `have` `lack` `is` `isnot` `in` `as` `and` `or` are keywords only where an
-operator stands, right after something that ends an expression (`0 to 10`, `xs have v`, `each x in xs`). Anywhere
+The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
+operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `each x in xs`). Anywhere
 else they are names: `var to = 3`, `routine step(by: Integer, to: Integer)`, `by + to`. Two places keep them
 keywords: a `when` arm that starts with `is`/`isnot`, and `else as p`. `not` starts an expression, so it is always a
 keyword.

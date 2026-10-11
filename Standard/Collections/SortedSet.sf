@@ -93,6 +93,12 @@ routine SortedSet[T].clear()
 routine SortedSet[T].has(value: T) -> Bool
     return me.tree.has_key(key: value)
 
+### Returns whether `value` is not in this value: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+routine SortedSet[T].lacks(value: T) -> Bool
+    return not me.has(value)
+
 ### Adds `value` unless it is already in the set.
 ### :param value: The value to add.
 ### :returns: `true` when the value was new.

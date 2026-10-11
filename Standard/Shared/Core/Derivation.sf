@@ -31,6 +31,27 @@ needs ChoiceType T
 routine T.to[U64]() -> U64
 needs FlagsType T
 
+### Whether every member of `you` is on in `me`: `perms.has(READ and WRITE)`.
+### :param you: The members to look for.
+### :returns: `true` when all of them are on.
+@rf("T.has")
+routine T.has(you: T) -> Bool
+needs FlagsType T
+
+### Whether at least one member of `you` is on in `me`: `perms.has_any(READ and WRITE)`.
+### :param you: The members to look for.
+### :returns: `true` when one or more of them are on.
+@rf("T.has_any")
+routine T.has_any(you: T) -> Bool
+needs FlagsType T
+
+### Whether no member of `you` is on in `me`: `perms.lacks(WRITE)`.
+### :param you: The members to look for.
+### :returns: `true` when none of them is on.
+@rf("T.lacks")
+routine T.lacks(you: T) -> Bool
+needs FlagsType T
+
 ### The flags of `me` with the members of `you` taken off: `perms.without(WRITE)`.
 ### :param you: The members to take off.
 ### :returns: `me` without those members.

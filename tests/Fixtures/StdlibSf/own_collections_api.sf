@@ -22,7 +22,7 @@ routine start()
 
     var ys = [7, 8, 9]
     var zs = ys.duplicate()
-    show(f"ys={ys} has8={ys have 8} eq={ys == zs} sorted={[3, 1, 2].sorted()} slice={ys[1 til 3]}")
+    show(f"ys={ys} has8={ys.has(8)} eq={ys == zs} sorted={[3, 1, 2].sorted()} slice={ys[1 til 3]}")
     var filled = List[Text](count: 2, fill_value: "ab")
     show(f"filled={filled} capacity_ok={List[Integer](capacity: 8).capacity() >= 8}")
 
@@ -33,11 +33,11 @@ routine start()
         sum = sum + e.value
     show(f"d={d} count={d.count()} d[a]={d["a"]} sum={sum} keys={d.keys()} keys_count={d.keys().count()}")
     d.remove(key: "a")
-    show(f"after remove={d} count={d.count()} has_a={d have "a"}")
+    show(f"after remove={d} count={d.count()} has_a={d.has_key("a")}")
 
     var s = {1, 2, 3}
     var t = {2, 3, 4}
-    show(f"s={s} count={s.count()} has2={s have 2}")
+    show(f"s={s} count={s.count()} has2={s.has(2)}")
     show(f"union={s.union(other: t)} inter={s.intersection(other: t)} diff={s.difference(other: t)}")
     show(f"subset={s.is_subset(other: t)} list={s.to[List[Integer]]()}")
     show("DONE")

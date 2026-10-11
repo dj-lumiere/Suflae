@@ -53,7 +53,7 @@ routine start()
     var total = 0
     each n in queue
         total = total + n
-    show(f"queue: {queue} total={total} have 7: {queue have 7}")
+    show(f"queue: {queue} total={total} have 7: {queue.has(7)}")
     show(f"copy equal: {queue.duplicate() == queue} slice: {queue[1 til 3]}")
 
     var box = Box(id: 1)

@@ -90,6 +90,13 @@ routine Range[T].is_empty() -> Bool
 routine Range[T].has(value: T) -> Bool
 needs T obeys FloorDivisible
 
+### Returns whether `value` is not in this value: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+@rf("Range.has")
+routine Range[T].lacks(value: T) -> Bool
+needs T obeys FloorDivisible
+
 ### Crashes when the step is zero: it never moves, so the range would never reach its end.
 ### :throws: {RangeStepZeroError} when `step` is zero.
 @rf("Range.require_nonzero_step")

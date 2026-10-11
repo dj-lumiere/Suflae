@@ -20,7 +20,7 @@ routine start()
     var total = 0
     each x in q
         total = total + x
-    show(f"kept={q} total={total} has1={q have 1}")
+    show(f"kept={q} total={total} has1={q.has(1)}")
 
     var bits = BitList()
     bits.add_last(value: true)

@@ -117,12 +117,24 @@ routine Bytes.hash(k0: U64, k1: U64) -> U64
 @rf("Bytes.has")
 routine Bytes.has(byte: Byte) -> Bool
 
+### Returns whether `byte` is not in this value: the opposite of `has`.
+### :param byte: The value to look for.
+### :returns: `true` when `byte` is absent.
+@rf("Bytes.lacks")
+routine Bytes.lacks(byte: Byte) -> Bool
+
 ### Returns `true` when this byte sequence contains `other` as a contiguous sub-sequence.
 ### An empty `other` is always considered contained.
 ### :param other: The sub-sequence to search for.
 ### :returns: The resulting `Bool` value.
 @rf("Bytes.has")
 routine Bytes.has(other: Bytes) -> Bool
+
+### Returns whether `other` is not in this value: the opposite of `has`.
+### :param other: The value to look for.
+### :returns: `true` when `other` is absent.
+@rf("Bytes.lacks")
+routine Bytes.lacks(other: Bytes) -> Bool
 
 ### Returns `true` when this byte sequence begins with `prefix`.
 ### :param prefix: The prefix to test.

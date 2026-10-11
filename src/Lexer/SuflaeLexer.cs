@@ -223,8 +223,6 @@ public partial class SuflaeLexer
             [key: "in"] = TokenType.In,
             [key: "isnot"] = TokenType.IsNot,
             // Container-first containment (collections AND flags). `notin` is retired — use `lack`.
-            [key: "have"] = TokenType.Have,
-            [key: "lack"] = TokenType.Lack,
             [key: "to"] = TokenType.To,
             [key: "til"] = TokenType.Til,
             [key: "by"] = TokenType.By,

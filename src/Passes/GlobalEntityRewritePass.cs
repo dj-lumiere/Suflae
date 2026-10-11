@@ -329,7 +329,6 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
             {
                 Expression = RW(e: x.Expression), Pattern = RewritePattern(p: x.Pattern)
             },
-            FlagsTestExpression x => x with { Subject = RW(e: x.Subject) },
             WhenExpression x => x with
             {
                 Expression = x.Expression is null

@@ -83,6 +83,13 @@ routine Array[T, COUNT].last!() -> T
 routine Array[T, COUNT].has(value: T) -> Bool
 needs T obeys Equatable
 
+### Returns whether `value` is not in this value: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+@rf("Array.has")
+routine Array[T, COUNT].lacks(value: T) -> Bool
+needs T obeys Equatable
+
 ### Returns an iterator over the elements in ascending index order. It reads each element where the array holds it,
 ### so the array must stay where it is while the loop runs (the builder keeps it from being reshaped, RF-S625).
 @rf("Array.iter")

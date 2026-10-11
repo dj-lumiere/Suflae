@@ -90,6 +90,12 @@ routine SortedList[T].clear()
 routine SortedList[T].has(value: T) -> Bool
     return me.tree.has_key(key: value)
 
+### Returns whether `value` is not in this value: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+routine SortedList[T].lacks(value: T) -> Bool
+    return not me.has(value)
+
 ### Returns the number of times `value` appears in this list.
 ### :param value: The value to count.
 ### :returns: The occurrence count; zero if the value is not present.

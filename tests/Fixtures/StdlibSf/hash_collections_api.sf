@@ -12,7 +12,7 @@ routine start()
     var ages = {"ann": 31, "bob": 25}
     ages["cid"] = 40
     ages["bob"] = 26
-    show(f"dict: {ages} count={ages.count()} have ann: {ages have "ann"}")
+    show(f"dict: {ages} count={ages.count()} have ann: {ages.has_key("ann")}")
     ages.remove(key: "ann")
     show(f"after remove: {ages} keys={ages.keys()} values={ages.values()}")
     var missing = try ages["ann"]
@@ -29,7 +29,7 @@ routine start()
     var sum = 0
     each entry in squares
         sum = sum + entry.value
-    show(f"squares: count={squares.count()} sum={sum} 199={squares[199]} have 10: {squares have 10}")
+    show(f"squares: count={squares.count()} sum={sum} 199={squares[199]} have 10: {squares.has_key(10)}")
     show(f"copy equal: {squares.duplicate() == squares}")
     squares.clear()
     show(f"cleared: {squares} empty={squares.is_empty()}")
@@ -38,7 +38,7 @@ routine start()
     seen.add(value: 2)
     seen.add(value: 4)
     seen.remove(value: 1)
-    show(f"set: {seen} count={seen.count()} have 4: {seen have 4} have 1: {seen have 1}")
+    show(f"set: {seen} count={seen.count()} have 4: {seen.has(4)} have 1: {seen.has(1)}")
     var other = {3, 4, 5}
     show(f"union={seen.union(other)} inter={seen.intersection(other)} diff={seen.difference(other)}")
     var many = Set[Integer]()

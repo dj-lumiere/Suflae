@@ -55,7 +55,7 @@
         {
           "comment": "Type and pattern operations",
           "name": "keyword.operator.sf",
-          "match": "\\b(is|isnot|obeys|in|have|lack|everywhere)\\b"
+          "match": "\\b(is|isnot|obeys|in|everywhere)\\b"
         },
         {
           "comment": "Module system",
