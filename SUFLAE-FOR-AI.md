@@ -300,7 +300,8 @@ routine start()
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
   Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
   and the complex types, `0 / 0` crashes with `NumericDomainError` instead.
-- Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. Every operand of a chain is
+- Comparison: `== != < <= > >=`, chained in one expression: `0 <= x <= 10`. A chain goes one way: `<`, `<=`,
+  `==` together or `>`, `>=`, `==` together (`a < b > c`, `!=` and `<=>` in a chain are errors). Every operand of a chain is
   evaluated once, eagerly, left to right, before any comparison (`a < b < f()` calls `f` even when `a < b`
   is false), and only the comparisons stop at the first false link, so a failure in any operand is a failure
   like any other (`try 1 < 5 < 10 // n` recovers it). `==` compares values (it calls `eq`); `===` / `!==`
