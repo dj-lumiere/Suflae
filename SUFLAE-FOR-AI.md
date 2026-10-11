@@ -239,7 +239,9 @@ preset MAX_RETRIES: Integer = 5     # constant: explicit type, inlined at each u
 ```
 
 - There is no `let` and no `const`: `var` for variables, `preset` for constants. A `preset` may be an
-  f-string built from other presets.
+  f-string built from other presets. A preset is computed when the program is built: one that calls a routine,
+  does arithmetic or fills in a text runs once during the build and becomes the value it came to (a number, a
+  Bool, a Text, a Char, or a record, tuple or choice of those; SF-S258 if it fails).
 - **No shadowing inside a routine**: a `var` may not reuse the name of a parameter or of a variable of an
   enclosing block (SF-S008). Sibling blocks may each declare their own `i`.
 - Compound assignment works: `+=`, `-=`, `*=` and the like.
@@ -819,7 +821,8 @@ routine start()
 ## 15. Console, files and resources
 
 - Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Integer = ask()`,
-  failing like `to[T]()`), `ask_word()`, `ask_all()`,
+  failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Integer, Integer) = ask()`,
+  `"3 4".to[(Integer, Integer)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
   `ask_lines()`, `ask_words()`.
 - Files are values that name a path (no I/O happens at construction): `File(at: "notes.txt")` with
   `exists()`, `read_text()`, `write_text(content:)`, `size()`, `extension()` (no leading dot), `parent()`,

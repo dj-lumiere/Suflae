@@ -1,0 +1,23 @@
+module Tests/StdlibSf/PresetBuildtimeApi
+
+# A preset is computed once, when the program is built: a routine call, arithmetic or a filled-in text becomes the
+# value it came to, and a preset made by a construction is one value everywhere.
+
+record Pair
+    left: Integer
+    right: Text
+
+routine square(n: Integer) -> Integer
+    return n * n
+
+routine pair_of(n: Integer) -> Pair
+    return Pair(left: square(n: n), right: f"{n}²")
+
+preset AREA: Integer = square(n: 12)
+preset NAME: Text = f"area {AREA}"
+preset BUILT: Pair = pair_of(n: 3)
+preset RATIO: Decimal = 1 / 8
+
+routine start()
+    show(f"{AREA} {NAME} {BUILT} {RATIO}")
+    show("DONE")

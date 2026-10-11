@@ -440,3 +440,10 @@ routine Integer!(from: SerialValue) -> Integer
 ### :throws: May throw {ParseError}.
 @rf("Text.to")
 routine Text.to![Integer]() -> Integer
+
+### Builder plumbing for presets computed at build time: this value as an `Integer` literal (`12n`).
+### :returns: The source text.
+@rf("Integer.preset_literal")
+@readonly
+@override
+routine Integer.preset_literal() -> Text

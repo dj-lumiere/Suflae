@@ -37,3 +37,10 @@ needs FlagsType T
 @rf("T.without")
 routine T.without(you: T) -> T
 needs FlagsType T
+
+### Builder plumbing for presets computed at build time: the value written back as source that reads as the same
+### value, a literal or a construction from literals.
+### :returns: The source text.
+@rf("T.preset_literal")
+routine T.preset_literal() -> Text
+needs AnyType T

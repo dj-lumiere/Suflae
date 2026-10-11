@@ -1,0 +1,2 @@
+144 area 144 Pair(left: 9, right: 3²) 0.125
+DONE

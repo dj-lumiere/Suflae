@@ -1,0 +1,13 @@
+module Tests/StdlibSf/TupleToApi
+
+# Text reads as a tuple: the text is split into words and each word becomes the item in its place. The tuple type
+# is written in the call, or comes from where the value goes (a declared variable, names declared with a type).
+
+routine start()
+    var date = "2024 4 1".to[(Integer, Integer, Integer)]()
+    show(f"{date}")
+    var (name, age): (Text, Integer) = "Lumi 30".to()
+    show(f"{name} {age}")
+    var bad = try "1 x".to[(Integer, Integer)]()
+    show(f"not a number: {bad is None}")
+    show("DONE")
