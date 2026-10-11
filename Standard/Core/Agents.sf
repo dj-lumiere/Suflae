@@ -108,9 +108,10 @@ secret routine Agent[T].reap()
 ### Ends an Agent the last holder lets go of: work that still runs is cancelled and waited for, work nothing
 ### started never runs.
 @override
-dangerous routine Agent[T].destruct()
-    me.work.dispose()
-    return
+routine Agent[T].destruct()
+    danger
+        me.work.dispose()
+        return
 
 # ============================================================================
 # Running a list of Agents

@@ -726,13 +726,14 @@ secret routine Memory[T].swap_places(a: U64, b: U64)
 
 ### Destroys what every place holds (a zero place holds nothing to tear down), then frees the storage.
 @override
-dangerous routine MemoryStorage[T].destruct()
-    var i: U64 = 0
-    while i < me.room
-        me.data.offset(T.data_size() * i).peek().destruct()
-        i = i +% 1
-    me.data.invalidate()
-    return
+routine MemoryStorage[T].destruct()
+    danger
+        var i: U64 = 0
+        while i < me.room
+            me.data.offset(T.data_size() * i).peek().destruct()
+            i = i +% 1
+        me.data.invalidate()
+        return
 
 ### Cycle-collector trace: reports what every place holds to the collector.
 @override
