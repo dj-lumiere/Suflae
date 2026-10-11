@@ -90,14 +90,14 @@ routine SortedSet[T].clear()
 
 ### Returns true if `value` is in this set.
 ### :param value: The value to search for.
-routine SortedSet[T].contains(value: T) -> Bool
-    return me.tree.has(key: value)
+routine SortedSet[T].has(value: T) -> Bool
+    return me.tree.has_key(key: value)
 
 ### Adds `value` unless it is already in the set.
 ### :param value: The value to add.
 ### :returns: `true` when the value was new.
 routine SortedSet[T].add(value: T) -> Bool
-    if me.tree.has(key: value)
+    if me.tree.has_key(key: value)
         return false
     me.tree.insert(key: value, value: true)
     return true

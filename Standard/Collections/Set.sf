@@ -118,7 +118,7 @@ routine Set[T].clear()
 
 ### Returns whether `value` is in the set (`s have v`).
 ### :param value: The value to look for.
-routine Set[T].contains(value: T) -> Bool
+routine Set[T].has(value: T) -> Bool
     return me.index.holds(slot: me.find_slot(value: value))
 
 ### Adds `value` unless it is already in the set.

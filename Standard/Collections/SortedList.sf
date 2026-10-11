@@ -87,8 +87,8 @@ routine SortedList[T].clear()
 
 ### Returns true if `value` appears at least once in this list.
 ### :param value: The value to search for.
-routine SortedList[T].contains(value: T) -> Bool
-    return me.tree.has(key: value)
+routine SortedList[T].has(value: T) -> Bool
+    return me.tree.has_key(key: value)
 
 ### Returns the number of times `value` appears in this list.
 ### :param value: The value to count.

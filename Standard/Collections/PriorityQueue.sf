@@ -219,7 +219,7 @@ routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElem
 
 ### Returns true if any stored entry carries `element`, scanning in heap order.
 ### :param element: The element value to search for.
-routine PriorityQueue[TPriority, TElement].contains(element: TElement) -> Bool
+routine PriorityQueue[TPriority, TElement].has(element: TElement) -> Bool
 needs TElement obeys Equatable
     var i: U64 = 0
     while i < me.count

@@ -199,7 +199,7 @@ secret routine SortedTree[K, V].clear()
 # ============================================================================
 
 ### Whether an entry with the key `key` is in the tree.
-secret routine SortedTree[K, V].has(key: K) -> Bool
+secret routine SortedTree[K, V].has_key(key: K) -> Bool
     return me.has_in(node: me.root, key: key)
 
 secret routine SortedTree[K, V].has_in(node: SortedNode[K, V], key: K) -> Bool

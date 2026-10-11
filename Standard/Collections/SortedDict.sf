@@ -31,7 +31,7 @@ import BuilderQuery
 ### :see: {SortedList[T]} for a sorted sequence that allows duplicates.
 entity SortedDict[TKey, TValue]
 relates SortedDictEmittable[TKey, TValue] as Iter, TKey as Key, TValue as Value
-obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, DictLiteral[TKey, TValue]
+obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
 needs TKey obeys Comparable
     ### The tree holding the entries.
     secret tree: SortedTree[TKey, TValue]
@@ -89,14 +89,19 @@ routine SortedDict[TKey, TValue].clear()
 
 ### Returns true if `key` has an entry (`d have k`).
 ### :param key: The key to look up.
-routine SortedDict[TKey, TValue].contains(key: TKey) -> Bool
-    return me.tree.has(key: key)
+routine SortedDict[TKey, TValue].has_key(key: TKey) -> Bool
+    return me.tree.has_key(key: key)
+
+### Returns whether `key` has no entry (`d lack k`).
+### :param key: The key to look for.
+routine SortedDict[TKey, TValue].lacks_key(key: TKey) -> Bool
+    return not me.has_key(key: key)
 
 ### Returns the value of `key` (`d[k]`).
 ### :param key: The key to look up.
 ### :throws: {AbsentValueError} The key has no entry.
 routine SortedDict[TKey, TValue].getitem!(key: TKey) -> TValue
-    if not me.tree.has(key: key)
+    if not me.tree.has_key(key: key)
         throw KeyNotFoundError(key: key.represent())
     return me.tree.value_of(key: key)
 
@@ -111,7 +116,7 @@ routine SortedDict[TKey, TValue].setitem(key: TKey, value: TValue)
 ### :param key: The key to look up.
 ### :param default: The value returned when `key` has no entry.
 routine SortedDict[TKey, TValue].get_or(key: TKey, default: TValue) -> TValue
-    if me.tree.has(key: key)
+    if me.tree.has_key(key: key)
         return me.tree.value_of(key: key)
     return default
 
@@ -120,7 +125,7 @@ routine SortedDict[TKey, TValue].get_or(key: TKey, default: TValue) -> TValue
 ### :param value: The value for `key`.
 ### :returns: `true` if a new key was added; `false` if an existing key's value was replaced.
 secret routine SortedDict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
-    if me.tree.has(key: key)
+    if me.tree.has_key(key: key)
         me.tree.replace(key: key, value: value)
         return false
     me.tree.insert(key: key, value: value)

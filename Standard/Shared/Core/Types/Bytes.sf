@@ -114,15 +114,15 @@ routine Bytes.hash(k0: U64, k1: U64) -> U64
 ### Returns `true` when this byte sequence contains `byte`.
 ### :param byte: The byte to search for.
 ### :returns: The resulting `Bool` value.
-@rf("Bytes.contains")
-routine Bytes.contains(byte: Byte) -> Bool
+@rf("Bytes.has")
+routine Bytes.has(byte: Byte) -> Bool
 
 ### Returns `true` when this byte sequence contains `other` as a contiguous sub-sequence.
 ### An empty `other` is always considered contained.
 ### :param other: The sub-sequence to search for.
 ### :returns: The resulting `Bool` value.
-@rf("Bytes.contains")
-routine Bytes.contains(other: Bytes) -> Bool
+@rf("Bytes.has")
+routine Bytes.has(other: Bytes) -> Bool
 
 ### Returns `true` when this byte sequence begins with `prefix`.
 ### :param prefix: The prefix to test.

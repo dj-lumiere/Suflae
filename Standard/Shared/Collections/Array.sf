@@ -79,8 +79,8 @@ routine Array[T, COUNT].last!() -> T
 ### Scans from index 0 to N - 1 using the element type's equality operator.
 ### :param value: The value to search for.
 ### :returns: `true` if `value` is found; `false` otherwise.
-@rf("Array.contains")
-routine Array[T, COUNT].contains(value: T) -> Bool
+@rf("Array.has")
+routine Array[T, COUNT].has(value: T) -> Bool
 needs T obeys Equatable
 
 ### Returns an iterator over the elements in ascending index order. It reads each element where the array holds it,

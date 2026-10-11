@@ -116,16 +116,16 @@ routine Text.hash(k0: U64, k1: U64) -> U64
 ### The search succeeds when any stored character matches exactly.
 ### :param character: The character to test.
 ### :returns: The resulting `Bool` value.
-@rf("Text.contains")
-routine Text.contains(character: Char) -> Bool
+@rf("Text.has")
+routine Text.has(character: Char) -> Bool
 
 ### Returns `true` when this text contains `other` as a contiguous substring.
 ### An empty `other` value is always considered contained. Uses the
 ### Knuth-Morris-Pratt algorithm for O(n + m) worst-case scanning.
 ### :param other: The substring to search for.
 ### :returns: The resulting `Bool` value.
-@rf("Text.contains")
-routine Text.contains(other: Text) -> Bool
+@rf("Text.has")
+routine Text.has(other: Text) -> Bool
 
 ### Returns `true` when this text begins with `prefix`.
 ### The entire `prefix` must match from the first character onward.

@@ -346,7 +346,7 @@ needs T obeys Equatable
 
 ### Returns whether some element equals `value` (`xs have v`).
 ### :param value: The value to look for.
-routine CircularList[T].contains(value: T) -> Bool
+routine CircularList[T].has(value: T) -> Bool
 needs T obeys Equatable
     each element in me
         if element == value

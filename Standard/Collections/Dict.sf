@@ -27,7 +27,7 @@ import Core.SecureHashKey
 ### :see: {Set[T]} for the set counterpart.
 entity Dict[TKey, TValue]
 relates DictEmittable[TKey, TValue] as Iter, TKey as Key, TValue as Value
-obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, Container, Copyable, DictLiteral[TKey, TValue]
+obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, Copyable, DictLiteral[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
@@ -132,8 +132,13 @@ routine Dict[TKey, TValue].clear()
 
 ### Returns whether `key` has an entry (`d have k`).
 ### :param key: The key to look for.
-routine Dict[TKey, TValue].contains(key: TKey) -> Bool
+routine Dict[TKey, TValue].has_key(key: TKey) -> Bool
     return me.index.holds(slot: me.find_slot(key: key))
+
+### Returns whether `key` has no entry (`d lack k`).
+### :param key: The key to look for.
+routine Dict[TKey, TValue].lacks_key(key: TKey) -> Bool
+    return not me.has_key(key: key)
 
 ### Adds `key` with `value`, or replaces the value of an existing `key`.
 ### :param key: The key.

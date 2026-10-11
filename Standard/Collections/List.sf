@@ -294,7 +294,7 @@ needs T obeys Equatable
 
 ### Returns whether some element equals `value` (`xs have v`).
 ### :param value: The value to look for.
-routine List[T].contains(value: T) -> Bool
+routine List[T].has(value: T) -> Bool
 needs T obeys Equatable
     each element in me
         if element == value

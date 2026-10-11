@@ -17,7 +17,7 @@ routine start()
     pq.add(element: "test", priority: 4)
     pq.add(element: "build", priority: 2)
     pq.add(element: "ship", priority: 5)
-    show(f"count={pq.count()} peek={pq.peek()} priority={pq.peek_priority()} have test: {pq.contains(element: "test")}")
+    show(f"count={pq.count()} peek={pq.peek()} priority={pq.peek_priority()} have test: {pq.has(element: "test")}")
     show(f"first={pq.remove()} then={pq.remove()} left={pq.count()}")
     var total = 0
     each (priority, element) in pq.unordered()

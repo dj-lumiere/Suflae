@@ -86,8 +86,8 @@ routine Range[T].is_empty() -> Bool
 ### Works for ranges that count down too (`10 to 0 by -2 have 4` is true).
 ### :param value: The value to test.
 ### :returns: `true` if `value` is within the bounds and on a step from `start`.
-@rf("Range.contains")
-routine Range[T].contains(value: T) -> Bool
+@rf("Range.has")
+routine Range[T].has(value: T) -> Bool
 needs T obeys FloorDivisible
 
 ### Crashes when the step is zero: it never moves, so the range would never reach its end.

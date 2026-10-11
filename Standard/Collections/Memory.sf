@@ -620,7 +620,7 @@ routine MemoryEmittable[T].skip()
 
 ### Returns whether some place holds a value equal to `value` (`buf have v`).
 ### :param value: The value to look for.
-routine Memory[T].contains(value: T) -> Bool
+routine Memory[T].has(value: T) -> Bool
 needs T obeys Equatable
     var i: U64 = 0
     while i < me.room

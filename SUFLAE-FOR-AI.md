@@ -69,7 +69,8 @@ through a `.rf` module the program imports (section 18).
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
 13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Integer]`. `<` is a
     comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
-14. **Containment is container-first:** `xs have 3`, `d have "key"`, `"hello" have "ell"`, `xs lack 3`.
+14. **Containment is container-first:** `xs have 3`, `d have "key"`, `"hello" have "ell"`, `xs lack 3`. The routines
+    are `has`/`lacks` (`xs.has(value: 3)`), and a dict's keys are `has_key`/`lacks_key`.
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
