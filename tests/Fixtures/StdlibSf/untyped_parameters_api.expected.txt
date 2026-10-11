@@ -1,0 +1,6 @@
+area 4
+area 3
+integer: 42
+decimal: 2.5
+text: abab
+DONE

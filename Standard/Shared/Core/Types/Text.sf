@@ -57,10 +57,9 @@ routine int_to_text(mag: U64, negative: Bool) -> Text
 ### A malformed sequence (a missing or stray continuation byte, an overlong encoding, a surrogate, or a
 ### code point past U+10FFFF) becomes one U+FFFD replacement character per offending lead byte, the same
 ### rule `Bytes.decode_as_utf8_lossy` follows.
-### :param from: The source C string.
 ### :returns: The resulting `Text` value.
-@rf("Text")
-routine Text(from: CStr) -> Text
+@rf("CStr.to")
+routine CStr.to[Text]() -> Text
 
 ### Returns `true` when this text contains no characters.
 ### This is equivalent to checking whether `count()` is `0`.

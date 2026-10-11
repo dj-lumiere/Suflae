@@ -749,7 +749,8 @@ internal sealed class EntityLoweringPass
         // interim below.
         if (!constructs && lowered.ResolvedRoutine is { } argRoutine)
         {
-            lowered = ProjectRoamedArgsIntoBareParams(call: lowered, routine: argRoutine);
+            lowered = HandleBindsTypeParameter(call: lowered, routine: argRoutine);
+            lowered = ProjectRoamedArgsIntoBareParams(call: lowered, routine: lowered.ResolvedRoutine!);
         }
 
         // (The interim receiver `.raw_inner()` projection was removed with representation
@@ -880,6 +881,49 @@ internal sealed class EntityLoweringPass
         }
 
         return loweredG;
+    }
+
+    // An entity handed to a parameter typed by a type parameter (`type_name(of: T)`) binds that parameter to the
+    // handle, not to the bare entity: a Suflae entity is shared, so the routine gets one more holder of it. Bound
+    // to the bare entity, the argument would have to give the entity up, which fails while another name holds it.
+    // Left alone when the type parameter is also the routine's result (the caller then expects the bare entity).
+    private CallExpression HandleBindsTypeParameter(CallExpression call, RoutineInfo routine)
+    {
+        if (routine.GenericDefinition is not { GenericParameters: { Count: > 0 } typeParameters } definition ||
+            routine.TypeArguments is not { } typeArguments || typeArguments.Count != typeParameters.Count)
+        {
+            return call;
+        }
+
+        List<ParamInfo> written = BuildNonMeParams(routine: definition);
+        List<TypeSymbol> bound = typeArguments.ToList();
+        bool changed = false;
+        int position = 0;
+        foreach (Expression argument in call.Arguments)
+        {
+            ParamInfo? parameter = ResolveArgParam(a: argument, nonMe: written, posIdx: ref position);
+            Expression value = argument is NamedArgumentExpression named ? named.Value : argument;
+            int slot = parameter?.Type is GenericParameterTypeSymbol typed
+                ? typeParameters.IndexOf(item: typed.Name)
+                : -1;
+            if (parameter?.Type is not GenericParameterTypeSymbol typeParameter || slot < 0 ||
+                RoamedInnerEntity(t: value.ResolvedType) is not { } entity ||
+                bound[index: slot] is not EntityTypeSymbol boundEntity || boundEntity.FullName != entity.FullName ||
+                definition.ReturnType is GenericParameterTypeSymbol { } returned && returned.Name == typeParameter.Name)
+            {
+                continue;
+            }
+
+            bound[index: slot] = value.ResolvedType!;
+            changed = true;
+        }
+
+        return changed
+            ? call with
+            {
+                ResolvedRoutine = _registry.GetOrCreateRoutineResolution(genericDef: definition, typeArguments: bound)
+            }
+            : call;
     }
 
     // Rewrite each argument that lands in a BARE-entity parameter of `routine` from a Roamed handle to

@@ -50,9 +50,10 @@ public class DocFindingsTests
             actual: result.Errors.Count(predicate: e => e.Code == SemanticDiagnosticCode.MemberVariableTypeMismatch));
     }
 
-    /// <summary>A routine's parameters always state their types.</summary>
+    /// <summary>A parameter written without a type takes any value: the routine is made for each type it is used
+    /// with, so writing it is not an error.</summary>
     [Fact]
-    public void Analyze_RoutineParameterWithoutType_ReportsError()
+    public void Analyze_RoutineParameterWithoutType_IsAccepted()
     {
         string source = """
                         routine f(x)
@@ -64,7 +65,7 @@ public class DocFindingsTests
                         """;
 
         AnalysisResult result = AnalyzeSaSuflae(source: source);
-        Assert.Contains(collection: result.Errors,
+        Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.RoutineParameterWithoutType);
     }
 

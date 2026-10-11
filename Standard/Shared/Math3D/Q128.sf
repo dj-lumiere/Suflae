@@ -24,16 +24,14 @@ obeys Addable, Subtractable, Multiplicable, Divisible, Negatable, Equatable, Has
     z: B32
 
 ### Constructs a real quaternion `w + 0i + 0j + 0k` from a scalar.
-### :param from: The scalar value.
 ### :returns: The corresponding real quaternion.
-@rf("Q128")
-routine Q128(from: B32) -> Q128
+@rf("B32.to")
+routine B32.to[Q128]() -> Q128
 
 ### Narrows a `Q256` to `Q128` by rounding each component to `B32`.
-### :param from: The double-precision quaternion.
 ### :returns: The nearest single-precision quaternion.
-@rf("Q128")
-routine Q128(from: Q256) -> Q128
+@rf("Q256.to")
+routine Q256.to[Q128]() -> Q128
 
 ### Builds a unit rotation quaternion from an axis and an angle (right-hand rule).
 ### The axis is normalized internally; a zero-length axis yields the identity.

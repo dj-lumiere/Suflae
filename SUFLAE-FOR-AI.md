@@ -454,8 +454,10 @@ routine Account.deposit(amount: Integer)                       # member routine,
 - Call with named arguments in any order: `add(b: 2, a: 1)`, `greet(name: "Ada")`. A variable named like its
   parameter goes by its name alone, also beside written names: `area(width, height: 4)`. A member routine is
   called on its receiver: `acct.deposit(amount: 5)`.
-- Parameter and return types are always written. A routine with no `->` returns nothing. A variadic
-  parameter is written `name...: Type`.
+- Return types are always written, and a routine with no `->` returns nothing. A parameter may be written
+  without a type (`routine describe(shape) -> Text`): the routine is made and checked for each type it is called
+  with, and a value that lacks what the body uses is a build error naming that use ("(in 'describe' used with
+  shape: Blob)"). A variadic parameter is written `name...: Type`.
 - Routines are declared at module level or as `routine Type.name`; there are no nested routines.
   `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
   type-level routine with no `me`, called as `Type.name(...)`.
@@ -718,7 +720,10 @@ needs T obeys Greetable
 - Type parameters go in `[...]` after the name; constraints go on a `needs` line under the signature
   (several are comma-separated), or inline: `routine f[T obeys Comparable](...)`.
 - `obeys` lines sit under the type's header. A protocol lists the routines a conforming type must have,
-  with `Me` for the conforming type.
+  with `Me` for the conforming type. Writing `obeys` is optional: a type that has the routines (same names,
+  parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
+  Write it to ask the builder for derived routines (`obeys Hashable`) or to hear about a missing routine at the
+  declaration. A type that does not fit is SF-S150 where it is passed, naming the missing or mismatched routine.
 - Common protocols: `Equatable`, `Comparable`, `Hashable`, `Iterable[T]`, `Copyable`.
 - Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
 

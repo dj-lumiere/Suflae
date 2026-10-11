@@ -39,15 +39,10 @@ common routine LocalMoment.from_local(
 common routine LocalMoment.now_utc() -> LocalMoment
 
 ### Extracts the underlying UTC `Moment` from a `LocalMoment`.
-### :param from: The local moment to convert.
 ### :returns: The resulting `Moment` value.
-@rf("Moment")
-routine Moment(from: LocalMoment) -> Moment
+@rf("LocalMoment.to")
+routine LocalMoment.to[Moment]() -> Moment
 
-### Converts this value to moment.
-### :returns: The resulting `Moment` value.
-@rf("LocalMoment.to_moment")
-routine LocalMoment.to_moment() -> Moment
 
 ### Returns the UTC offset associated with this local-time view.
 ### :returns: The resulting `Duration` value.

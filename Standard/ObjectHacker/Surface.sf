@@ -22,7 +22,10 @@ record MemberVariableInfo
 routine memvars(of: T) -> List[MemberVariableInfo]
 needs AnyType T
     var found = List[MemberVariableInfo]()
-    each info in memvars(of: of)
+    # Named, so the list lives until the loop is done: a library body is lowered after analysis, where a loop
+    # over a call's result is not given a name of its own.
+    var infos = memvars(of: of)
+    each info in infos
         found.add_last(value: MemberVariableInfo(
             name: info.name,
             type_name: info.type_name,

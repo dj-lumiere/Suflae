@@ -308,10 +308,9 @@ common routine U8.from_bytes_le(bytes: Array[Byte, 1]) -> U8
 common routine U8.from_bytes_be(bytes: Array[Byte, 1]) -> U8
 
 ### Returns `false` if `from` is `0`; `true` for any other value.
-### :param from: The `U8` value to convert.
 ### :returns: `true` if `from != 0`.
-@rf("Bool")
-routine Bool(from: U8) -> Bool
+@rf("U8.to")
+routine U8.to[Bool]() -> Bool
 
 ### Returns `true` if this value is zero.
 ### :returns: `true` if `me == 0`.

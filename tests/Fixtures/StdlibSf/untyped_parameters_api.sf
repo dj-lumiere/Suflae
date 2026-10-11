@@ -1,0 +1,32 @@
+module Tests/StdlibSf/UntypedParametersApi
+
+import IO/Console
+
+# A parameter written without a type takes any value: the routine is made, and checked, for each type it is
+# used with.
+record Square
+    side: Decimal
+
+routine Square.area() -> Decimal
+    return me.side * me.side
+
+record Circle
+    radius: Decimal
+
+routine Circle.area() -> Decimal
+    return me.radius * me.radius * 3
+
+routine describe(shape) -> Text
+    return f"area {shape.area()}"
+
+routine twice(x, label: Text) -> Text
+    return f"{label}: {x + x}"
+
+routine start()
+    show(describe(shape: Square(side: 2.0)))
+    show(describe(shape: Circle(radius: 1.0)))
+    show(twice(x: 21, label: "integer"))
+    show(twice(x: 1.25, label: "decimal"))
+    show(twice(x: "ab", label: "text"))
+    show("DONE")
+    return

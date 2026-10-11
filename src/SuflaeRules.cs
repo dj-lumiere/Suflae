@@ -64,6 +64,7 @@ public sealed class SuflaeRules : LanguageRules
     public override bool AllowsUnsafeCode => false;
     public override bool RoutinesEndWithReturn => false;
     public override bool HasPassStatement => false;
+    public override bool TakesUntypedParameters => true;
     public override bool HasModuleGlobals => true;
     public override bool HasTargetDirectives => false;
     public override bool DefaultsToArbitraryPrecision => true;
