@@ -30,9 +30,10 @@ routine gcd(a: Integer, b: Integer) -> Integer
         return x
     return 0
 
-show(f"collatz 27: {collatz_steps(start: 27)}")
-show(f"collatz 1: {collatz_steps(start: 1)}")
-show(f"sum: {sum_until_negative(xs: [1, 2, 3])}")
-show(f"stopped: {sum_until_negative(xs: [1, -2, 3])}")
-show(f"gcd: {gcd(a: 48, b: 18)}")
-show("DONE")
+routine start()
+    show(f"collatz 27: {collatz_steps(start: 27)}")
+    show(f"collatz 1: {collatz_steps(start: 1)}")
+    show(f"sum: {sum_until_negative(xs: [1, 2, 3])}")
+    show(f"stopped: {sum_until_negative(xs: [1, -2, 3])}")
+    show(f"gcd: {gcd(a: 48, b: 18)}")
+    show("DONE")
