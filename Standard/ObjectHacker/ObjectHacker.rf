@@ -87,7 +87,7 @@ routine poke!(target: T, memvar: Text, value: SerialValue)
 needs EntityType T
     expand m in allmemvarof(T)
         if memvar == nameof(m)
-            target.$nameof(m) = $typeof(m)(from: value)
+            target.$nameof(m) = value.to[$typeof(m)]()
             return
     throw NoSuchMemberVariableError(type_name: target.type_name(), memvar: memvar)
 

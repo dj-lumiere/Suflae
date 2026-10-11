@@ -192,11 +192,10 @@ routine SortedListEmittable[T].emit!() -> T
     return result
 
 ### Creates a {List[T]} from all elements of `from` in ascending sorted order.
-### :param from: The sorted list to convert.
 ### :returns: A new {List[T]} containing all elements in ascending order.
-routine List[T](from: SortedList[T]) -> List[T]
-    var result = List[T](capacity: from.count())
-    each value in from
+routine SortedList[T].to[List[T]]() -> List[T]
+    var result = List[T](capacity: me.count())
+    each value in me
         result.add_last(value: value)
     return result
 

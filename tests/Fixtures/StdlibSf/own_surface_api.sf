@@ -40,7 +40,7 @@ routine start()
     var weighted = 0
     each (i, x) in xs.enumerate()
         weighted = weighted + i * x
-    show(f"weighted={weighted} skip={xs.skip(count: 1).List()} take={xs.take(count: 2).List().count()}")
-    show(f"n={xs.get_count() + 1} set={xs.Set().count()}")
+    show(f"weighted={weighted} skip={xs.skip(count: 1).to[List]()} take={xs.take(count: 2).to[List]().count()}")
+    show(f"n={xs.get_count() + 1} set={xs.to[Set]().count()}")
     show("DONE")
     return

@@ -236,7 +236,7 @@ routine Integer.modpow!(exp: Integer, modulus: Integer) -> Integer
 @rf("Integer.represent")
 routine Integer.represent() -> Text
 
-### Serializes this value as its base-10 text, which `Integer(from: SerialValue)` parses back exactly.
+### Serializes this value as its base-10 text, which `sv.to[Integer]()` parses back exactly.
 ### :returns: The `SerialValue` text arm.
 @rf("Integer.serialize")
 routine Integer.serialize() -> SerialValue
@@ -430,8 +430,8 @@ routine Integer.to![Decimal]() -> Decimal
 ### :param from: The serialized value.
 ### :returns: The parsed value.
 ### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
-@rf("Integer")
-routine Integer!(from: SerialValue) -> Integer
+@rf("Integer.from_serial")
+common routine Integer.from_serial!(value: SerialValue) -> Integer
 
 ### Parses a base-10 integer from text.
 ### This is the canonical text-to-`Integer` conversion used by generic parsing

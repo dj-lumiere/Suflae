@@ -64,8 +64,8 @@ routine start()
     show(f"fallback_everywhere: {a} {b} {c} {d}")
 
     # A failable creator with type arguments, recovered.
-    var bad = try List[Integer](from: "x".serialize())
-    var good = try List[Integer](from: three().serialize())
+    var bad = try "x".serialize().to[List[Integer]]()
+    var good = try three().serialize().to[List[Integer]]()
     show(f"generic_ctor_recovered: {bad is None} {good is None}")
 
     # End-relative positions and slices on Integer indices.

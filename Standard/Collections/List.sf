@@ -54,16 +54,8 @@ routine List[T](capacity: Integer) -> List[T]
 routine List[T](count: Integer, fill_value: T) -> List[T]
     return List[T](items: Memory[T](count: count, fill: fill_value), count: count.to[U64]())
 
-### Makes a Suflae list of the elements of a list from RazorForge code (a RazorForge library routine's result).
-### :param from: The RazorForge list.
-routine List[T](from: RF::Core.List[T]) -> List[T]
-    var result = List[T](capacity: from.count().to[Integer]())
-    each element in from
-        result.add_last(value: element)
-    return result
-
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
-routine List[T].to_razorforge() -> RF::Core.List[T]
+routine List[T].to[RF::Core.List[T]]() -> RF::Core.List[T]
     var result = RF::Core.List[T](capacity: me.count)
     each element in me
         result.add_last(value: element)
@@ -71,9 +63,9 @@ routine List[T].to_razorforge() -> RF::Core.List[T]
 
 ### Builds a list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-routine List[T]!(from: SerialValue) -> List[T]
+common routine List[T].from_serial!(value: SerialValue) -> List[T]
     var result = List[T]()
-    when from
+    when value
         is RF::Core.List[SerialValue] as items =>
             each item in items
                 result.add_last(value: serial_decode[T](value: item))

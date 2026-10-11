@@ -501,6 +501,8 @@ internal sealed class EntityLoweringPass
             ListLiteralExpression list when expr.ResolvedType is EntityTypeSymbol le => WrapLiteralInRoam(
                 inner: list with { Elements = list.Elements.Select(selector: LowerExpression).ToList() },
                 entity: le),
+            // A tuple's items are values like any other: `(seen[k], i)` reaches the dict through its handle.
+            TupleLiteralExpression tuple => LowerTupleItems(tuple: tuple),
             SetLiteralExpression set when expr.ResolvedType is EntityTypeSymbol se => WrapLiteralInRoam(
                 inner: set with { Elements = set.Elements.Select(selector: LowerExpression).ToList() },
                 entity: se),
@@ -520,6 +522,10 @@ internal sealed class EntityLoweringPass
                 id: id,
                 w: w),
             MemberExpression m => LowerMemberExpression(m: m),
+            // The member of a call with a bracket (`s.to[List]()`): its receiver retypes like any other.
+            GenericMemberExpression gm when LowerExpression(expr: gm.Object) is var bracketObject &&
+                                            !ReferenceEquals(objA: bracketObject, objB: gm.Object) =>
+                gm with { Object = bracketObject },
             // `d[i]` on a Roamed container: recurse into the receiver so its identifier retypes to
             // Roamed[E] (else the getitem receiver stays bare-typed and OperatorLoweringPass lowers it
             // to `Dict.getitem` with the raw RoamManager handle — RoamedProjectionLoweringPass then
@@ -787,6 +793,22 @@ internal sealed class EntityLoweringPass
             }
         }
 
+        // A call with a bracket (`s.to[List]()`) reaches the entity the same way.
+        if (callee is GenericMemberExpression { Object: { } bracketRecv } bracketed &&
+            call.ResolvedRoutine is { OwnerType: EntityTypeSymbol } bracketRoutine &&
+            bracketRoutine.MeType is not RecordTypeSymbol
+            {
+                GenericDefinition.Name: RuntimeContract.Roamed
+            } && RoamedInnerEntity(t: bracketRecv.ResolvedType) is { } bracketEntity)
+        {
+            Expression rawRecv = ProjectRawInner(arg: bracketRecv, targetEntity: bracketEntity);
+            if (!ReferenceEquals(objA: rawRecv, objB: bracketRecv))
+            {
+                changed = true;
+                return bracketed with { Object = rawRecv };
+            }
+        }
+
         return callee;
     }
 
@@ -799,7 +821,8 @@ internal sealed class EntityLoweringPass
         bool returnsNoEntity = call.ResolvedRoutine is { IsCreator: false, ReturnType: { } returned } &&
                                returned is not (EntityTypeSymbol or GenericParameterTypeSymbol);
         if (call.ResolvedType is EntityTypeSymbol callEntity && !returnsNoEntity &&
-            !IsRfRealmRef(callee: call.Callee) && !IsRazorForgeEntity(entity: callEntity))
+            (IsSuflaeRealmEntity(entity: callEntity) || !IsRfRealmRef(callee: call.Callee)) &&
+            !IsRazorForgeEntity(entity: callEntity))
         {
             return WrapInRoam(inner: lowered, entity: callEntity);
         }
@@ -860,10 +883,31 @@ internal sealed class EntityLoweringPass
             gChanged = true;
         }
 
+        // The receiver of a member call with a bracket (`s.to[List]()`) retypes like any other, and a handle
+        // reaches the entity when the routine takes the bare entity as `me`.
+        Expression gObject = gmce.Object;
+        if (gmce.ResolvedRoutine is { IsCreator: false, Kind: not RoutineKind.CommonRoutine } gMember)
+        {
+            Expression loweredObject = LowerExpression(expr: gmce.Object);
+            if (gMember is { OwnerType: EntityTypeSymbol } &&
+                gMember.MeType is not RecordTypeSymbol { GenericDefinition.Name: RuntimeContract.Roamed } &&
+                RoamedInnerEntity(t: loweredObject.ResolvedType) is { } receiverEntity)
+            {
+                loweredObject = ProjectRawInner(arg: loweredObject, targetEntity: receiverEntity);
+            }
+
+            if (!ReferenceEquals(objA: loweredObject, objB: gmce.Object))
+            {
+                gObject = loweredObject;
+                gChanged = true;
+            }
+        }
+
         GenericMemberRoutineCallExpression loweredG = gChanged
-            ? gmce with { Arguments = gArgs }
+            ? gmce with { Object = gObject, Arguments = gArgs }
             : gmce;
-        if (gmce.ResolvedType is EntityTypeSymbol gEntity && !IsRfRealmRef(callee: gmce.Object) &&
+        if (gmce.ResolvedType is EntityTypeSymbol gEntity &&
+            (IsSuflaeRealmEntity(entity: gEntity) || !IsRfRealmRef(callee: gmce.Object)) &&
             !IsRazorForgeEntity(entity: gEntity))
         {
             return WrapInRoam(inner: loweredG, entity: gEntity);
@@ -924,6 +968,15 @@ internal sealed class EntityLoweringPass
                 ResolvedRoutine = _registry.GetOrCreateRoutineResolution(genericDef: definition, typeArguments: bound)
             }
             : call;
+    }
+
+    // A tuple literal with its items lowered, or the tuple itself when none changed.
+    private Expression LowerTupleItems(TupleLiteralExpression tuple)
+    {
+        List<Expression> items = tuple.Elements.Select(selector: LowerExpression).ToList();
+        return items.Where(predicate: (item, i) => !ReferenceEquals(objA: item, objB: tuple.Elements[index: i])).Any()
+            ? tuple with { Elements = items }
+            : tuple;
     }
 
     // Rewrite each argument that lands in a BARE-entity parameter of `routine` from a Roamed handle to
@@ -1167,6 +1220,13 @@ internal sealed class EntityLoweringPass
         string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
         return Builder.Frontends.Languages.HasSourceExtension(fileName: declaredIn) &&
                Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge;
+    }
+
+    // An entity of Suflae's own realm (`SF::Core.List`) is always held through a handle, whichever world's value the
+    // routine giving it back was called on (a RazorForge list's crossing `rf_list.to[List]()`).
+    private static bool IsSuflaeRealmEntity(EntityTypeSymbol entity)
+    {
+        return ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Realm != TypeModel.Realms.Shared;
     }
 
     private static bool IsRfRealmRef(Expression callee)

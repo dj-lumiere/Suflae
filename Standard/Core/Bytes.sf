@@ -13,7 +13,7 @@ routine Bytes() -> Bytes
 ### Creates bytes of the bytes of `from_list`, in order.
 ### :param from_list: The bytes.
 routine Bytes(from_list: List[Byte]) -> Bytes
-    return Bytes(from_list: from_list.to_razorforge())
+    return Bytes(from_list: from_list.to[RF::List]())
 
 ### Creates bytes of one byte.
 ### :param from_byte: The byte.
@@ -54,12 +54,12 @@ routine Bytes.find!(other: Bytes) -> Integer
 ### Returns the parts between the `separator` bytes.
 ### :param separator: The byte between parts.
 routine Bytes.split(separator: Byte) -> List[Bytes]
-    return List[Bytes](from: me.split(separator: separator))
+    return me.split(separator: separator).to[List[Bytes]]()
 
 ### Returns the parts between the `separator` runs.
 ### :param separator: The bytes between parts.
 routine Bytes.split(separator: Bytes) -> List[Bytes]
-    return List[Bytes](from: me.split(separator: separator))
+    return me.split(separator: separator).to[List[Bytes]]()
 
 ### Returns the bytes written `times` times in a row.
 ### :param times: How many copies.
@@ -68,7 +68,7 @@ routine Bytes.repeat(times: Integer) -> Bytes
 
 ### Returns the text's UTF-16 code units.
 routine Text.encode_as_utf16() -> List[U16]
-    return List[U16](from: me.encode_as_utf16())
+    return me.encode_as_utf16().to[List[U16]]()
 
 ### Returns the character's Unicode code point.
 routine Char.codepoint() -> Integer

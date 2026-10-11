@@ -12,7 +12,7 @@ routine Text() -> Text
 ### Creates a text of the characters of `from_list`, in order.
 ### :param from_list: The characters.
 routine Text(from_list: List[Char]) -> Text
-    return Text(from_list: from_list.to_razorforge())
+    return Text(from_list: from_list.to[RF::List]())
 
 ### Returns the number of characters.
 routine Text.count() -> Integer
@@ -99,17 +99,17 @@ routine Text.zero_pad(width: Integer) -> Text
 ### Returns the parts between the `separator` characters.
 ### :param separator: The character between parts.
 routine Text.split(separator: Char) -> List[Text]
-    return List[Text](from: me.split(separator: separator))
+    return me.split(separator: separator).to[List[Text]]()
 
 ### Returns the parts between the `separator` texts. An empty separator gives one part per character.
 ### :param separator: The text between parts.
 routine Text.split(separator: Text) -> List[Text]
-    return List[Text](from: me.split(separator: separator))
+    return me.split(separator: separator).to[List[Text]]()
 
 ### Returns the lines of the text. Windows line endings count as one.
 routine Text.lines() -> List[Text]
-    return List[Text](from: me.lines())
+    return me.lines().to[List[Text]]()
 
 ### Returns the words of the text: the parts between runs of whitespace.
 routine Text.words() -> List[Text]
-    return List[Text](from: me.words())
+    return me.words().to[List[Text]]()

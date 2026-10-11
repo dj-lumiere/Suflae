@@ -215,8 +215,10 @@ var why: Check[S64] = check line.to()
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
   they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: 25_s64)` putting 25 in an arm);
   a value computed from one value of another type is a conversion, `x.to[T]()` (`"hi".to[CStr]()`,
-  `local.to[Moment]()`, `3.0_b32.to[Q128]()`). So `S64(from: x)` is not a routine. Taking a variant's arm out
-  (`sv.Dict()`) is not a conversion and stays.
+  `local.to[Moment]()`, `3.0_b32.to[Q128]()`). So `S64(from: x)` is not a routine. A variant's arm comes out
+  the same way: `sv.to[S64]()` / `sv.to[Dict]()` is failable (another arm is active → crash, `try` gives
+  `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (SF-S458 /
+  SF-S646 point at `.to[...]()`).
 - Each conversion is its own routine, written with the target type in the bracket:
 
   ```suflae
@@ -619,7 +621,7 @@ routine start()
   `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
   (`300.to[S8]()`, `"x".to[Integer]()`). Each becomes the result's failure (`try`: `None`, `check`: the
   error), and evaluation stops at the first one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
-  inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).List()`,
+  inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).to[List]()`,
   `check items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
   several levels or kept in a record) is recovered by the keyword above the call that reaches it, at any
   depth. A routine value called with no keyword above that call still crashes on failure. An `each` loop over
@@ -781,8 +783,10 @@ each entry in ages
 - `List`, `Dict` and `Set` are always available; `[]`, `{k: v}` and `{a, b}` are their literals. The
   specialized containers (`SortedDict`, `SortedList`, `SortedSet`, `PriorityQueue`,
   `BitList`, `Array[T, COUNT]`) are constructor-only and come from `import Collections`.
-- `List(from: value)` reads a list back from the `SerialValue` that `xs.serialize()` gives; it is failable
-  (`try List[Integer](from: v)`).
+- `sv.to[List[Integer]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
+  `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Integer]]()`). A type rebuilds itself in
+  `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
+  builder's own: a program that writes or calls `from_serial` gets SF-S809 and uses `sv.to[T]()` instead.
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
@@ -804,8 +808,8 @@ each entry in ages
 - Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
 - Iterator adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
-  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `.List()` or `each`:
-  `nums.where(predicate: x => x % 2 == 0).List()`.
+  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `.to[List]()` or `each`:
+  `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 
 **Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that
 its next element is really the next one, so it is not allowed:
@@ -1184,8 +1188,8 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
   Suflae entity and pass that entity, or do the work on it inside the `.rf` module.
 - `RF::Name` and `SF::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Suflae's `List` is not RazorForge's (`RF::List`, counted with `U64`).
-  Convert at the boundary: `List(from: rf_list)` makes a Suflae list from a RazorForge one, and
-  `xs.to_razorforge()` makes a RazorForge list from a Suflae one.
+  Convert at the boundary: `rf_list.to[List]()` makes a Suflae list from a RazorForge one, and
+  `xs.to[RF::List]()` makes a RazorForge list from a Suflae one.
 
 ## 24. Status (do not generate as if shipped)
 

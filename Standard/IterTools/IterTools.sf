@@ -7,14 +7,14 @@ import Numerics
 # the same names.
 
 ### Collects the values into a list, in order.
-routine Iterable[T].List() -> List[T]
+routine Iterable[T].to[List[T]]() -> List[T]
     var result = List[T]()
     each item in me
         result.add_last(value: item)
     return result
 
 ### Collects the values into a set. A repeated value is kept once.
-routine Iterable[T].Set() -> Set[T]
+routine Iterable[T].to[Set[T]]() -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T]()
     each item in me

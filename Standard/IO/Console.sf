@@ -7,8 +7,8 @@ import Numerics
 
 ### Reads all remaining input and splits it into lines. Windows line endings count as one.
 routine ask_lines() -> List[Text]
-    return List[Text](from: ask_lines())
+    return ask_lines().to[List[Text]]()
 
 ### Reads all remaining input and splits it into the words between runs of whitespace.
 routine ask_words() -> List[Text]
-    return List[Text](from: ask_words())
+    return ask_words().to[List[Text]]()

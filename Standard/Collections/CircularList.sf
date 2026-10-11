@@ -61,9 +61,9 @@ routine CircularList[T](count: Integer, fill_value: T) -> CircularList[T]
 
 ### Builds a list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-routine CircularList[T]!(from: SerialValue) -> CircularList[T]
+common routine CircularList[T].from_serial!(value: SerialValue) -> CircularList[T]
     var result = CircularList[T]()
-    when from
+    when value
         is RF::Core.List[SerialValue] as items =>
             each item in items
                 result.add_last(value: serial_decode[T](value: item))

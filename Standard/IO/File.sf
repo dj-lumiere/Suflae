@@ -9,14 +9,14 @@ import IO/FileSystem
 ### Returns the names of the directory's entries.
 ### :throws: {IOError} when the directory cannot be listed.
 routine Directory.list!() -> List[Text]
-    return List[Text](from: me.list())
+    return me.list().to[List[Text]]()
 
 ### Returns the directory's entries.
 ### :throws: {IOError} when the directory cannot be listed.
 routine Directory.entries!() -> List[DirEntry]
-    return List[DirEntry](from: me.entries())
+    return me.entries().to[List[DirEntry]]()
 
 ### Returns the paths of everything under the directory, at any depth. Symbolic links are not followed.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
 routine Directory.walk!() -> List[Text]
-    return List[Text](from: me.walk())
+    return me.walk().to[List[Text]]()

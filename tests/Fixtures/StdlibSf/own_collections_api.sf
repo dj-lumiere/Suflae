@@ -39,6 +39,6 @@ routine start()
     var t = {2, 3, 4}
     show(f"s={s} count={s.count()} has2={s have 2}")
     show(f"union={s.union(other: t)} inter={s.intersection(other: t)} diff={s.difference(other: t)}")
-    show(f"subset={s.is_subset(other: t)} list={List[Integer](from: s)}")
+    show(f"subset={s.is_subset(other: t)} list={s.to[List[Integer]]()}")
     show("DONE")
     return
