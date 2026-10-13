@@ -1,0 +1,29 @@
+module Tests/StdlibSf/CompoundAssignSharedApi
+
+# A compound assignment on a shared entity's member variable or on a collection's element changes the one shared
+# value: every name for it sees the change.
+
+import IO/Console
+
+entity Account
+    owner: Text
+    balance: Decimal
+    visits: Integer
+    hits: S64
+
+routine start()
+    var mine = Account(owner: "Lumi", balance: 10.00, visits: 1, hits: 1)
+    var ours = mine
+    ours.balance += 5
+    ours.visits += 2
+    ours.hits *= 3
+    show(f"{mine.balance} {mine.visits} {mine.hits}")
+    var counts = List[S64]()
+    counts.add_last(1)
+    counts.add_last(2)
+    var same = counts
+    same[1] += 10
+    var totals = List[Integer]()
+    totals.add_last(10)
+    totals[0] -= 4
+    show(f"{counts[1]} {totals[0]}")

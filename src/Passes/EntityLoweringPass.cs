@@ -562,6 +562,13 @@ internal sealed class EntityLoweringPass
             // returns the refcount instead of the field).
             InsertedTextExpression fstr => LowerInsertedText(fstr: fstr),
             BinaryExpression bin => LowerBinaryExpression(bin: bin),
+            // `b.n += d`: the target is reached through the handle like any other place (else `b` stays bare-typed
+            // and its field is read off the handle itself), and the value like any other value.
+            CompoundAssignmentExpression compound when LowerExpression(expr: compound.Target) is var target &&
+                                                       LowerExpression(expr: compound.Value) is var value &&
+                                                       (!ReferenceEquals(objA: target, objB: compound.Target) ||
+                                                        !ReferenceEquals(objA: value, objB: compound.Value)) =>
+                compound with { Target = target, Value = value },
             UnaryExpression un => LowerUnaryExpression(un: un),
             NamedArgumentExpression namedArg => LowerNamedArgumentExpression(namedArg: namedArg),
             // An analyzed `try`/`check`/`lookup` is its recovery-variant call: lower that call in its place
