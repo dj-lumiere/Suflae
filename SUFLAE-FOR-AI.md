@@ -180,6 +180,10 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   wanted with nothing around to give it, the declaration states it: `var x: U8 = 5`. A variable's type is
   never guessed from its later uses. A number that names its type (`5_u8`, `7s32`, `10n`, `2.5dn`) is
   SF-G010, and `migrate --step suffix` rewrites old code.
+- `inf` and `nan` are number literals (reserved words) that take their type from where they go: `var x: B64 = inf`,
+  `limit: B32 = -inf` (negative infinity is `-` on `inf`), `return nan`, `x < inf`. The binary floats (B16 B32 B64
+  B128) and D32 D64 D128 take them. With nothing giving a type (`var x = inf`) it is SF-S019, and where a
+  `Decimal`, `Integer` or integer type goes it is SF-S020 (a `Decimal` is always finite).
 - A hex float (`0x1.8p3`, `0x1p-23` where a `B32` goes) is binary-float only and exact, and defaults to
   `B64`, never `Decimal`.
 - A literal out of range for its type is a build error (SF-S010): `-1` never fits an unsigned type; write
