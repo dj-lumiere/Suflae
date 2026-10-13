@@ -32,8 +32,13 @@ routine start()
     show(f"b > a: {b > a}")
 
     # Numeric chain
-    show(f"1 < 2 < 3: {1_s64 < 2_s64 and 2_s64 < 3_s64}")
-    show(f"max chain: {3_s64.max(you: 7_s64).max(you: 5_s64)}")
+    var s64_1: S64 = 1
+    var s64_2: S64 = 2
+    var s64_3: S64 = 3
+    show(f"1 < 2 < 3: {s64_1 < s64_2 and s64_2 < s64_3}")
+    var s64_7: S64 = 7
+    var s64_5: S64 = 5
+    show(f"max chain: {s64_3.max(you: s64_7).max(you: s64_5)}")
 
     # Text ordering
     show(f"'abc' < 'abd': {"abc" < "abd"}")

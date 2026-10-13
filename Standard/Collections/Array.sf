@@ -54,7 +54,7 @@ routine Array[T, COUNT].erase_at!(position: U64)
     var place = me.checked(position: position)
     danger
         me.slot(position: place).peek().destruct()
-    me.clear_places(from: place, count: 1_u64)
+    me.clear_places(from: place, count: 1)
     return
 
 ### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
@@ -66,7 +66,7 @@ routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     var n = count.to[U64]()
-    if n == 0_u64
+    if n == 0
         return
     me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
     return
@@ -78,7 +78,7 @@ routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
 ### :param count: How many places to carry.
 routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
     var n = count
-    if n == 0_u64
+    if n == 0
         return
     if source + n > COUNT
         throw IndexOutOfBoundsError(index: source + n, count: COUNT)
@@ -99,7 +99,7 @@ routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
     i = source
     while i < source + n
         if i < target or i >= target + n
-            me.clear_places(from: i, count: 1_u64)
+            me.clear_places(from: i, count: 1)
         i = i +% 1
     return
 
@@ -121,11 +121,11 @@ needs RecordType T
 ### :throws: {AbsentValueError} No element equals `value`.
 routine Array[T, COUNT].index_of!(value: T) -> Integer
 needs T obeys Equatable
-    var i = 0u64
+    var i: U64 = 0
     while i < COUNT
         if me.get_raw(index: i) == value
             return i.to[Integer]()
-        i = i +% 1u64
+        i = i +% 1
     throw AbsentValueError()
 
 # ============================================================================
@@ -146,7 +146,7 @@ secret routine Array[T, COUNT].filled!(position: U64) -> U64
     var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if me.slot(position: place).peek_as[Address]() == 0_addr
+            if me.slot(position: place).peek_as[Address]() == 0
                 throw EmptyPlaceError(index: place.to[Integer]())
     return place
 
@@ -164,5 +164,5 @@ secret routine Array[T, COUNT].slot(position: U64) -> Hijacked[T]
 ### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
 secret routine Array[T, COUNT].clear_places(from: U64, count: U64)
     danger
-        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0_u8, size: T.data_size() * count)
+        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
     return

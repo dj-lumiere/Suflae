@@ -10,9 +10,9 @@ routine start()
     show(f"ones={ones} rot={a.rotate_left(bits: 4)} lead={a.leading_zeros()} hex={a.to_text(radix: 16)}")
     var s: S64 = -5
     show(f"sign={s.signum()} shr={s.ashr(bits: 1)}")
-    var f = 2.75_b64
+    var f: B64 = 2.75
     show(f"fixed={f.fixed(places: 1)} scaled={f.scalbn(n: 2)}")
-    var d = 1.5_d64
+    var d: D64 = 1.5
     show(f"dfixed={d.fixed(places: 3)}")
 
     var big = Integer(text: "ff", radix: 16)

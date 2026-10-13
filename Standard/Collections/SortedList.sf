@@ -62,10 +62,10 @@ routine SortedList[T]() -> SortedList[T]
 common routine SortedList[T].from_literal(elements...: T) -> SortedList[T]
 needs T obeys Comparable
     var result = SortedList[T]()
-    var i = 0u64
+    var i: U64 = 0
     while i < elements.count()
         result.add(value: elements.get_raw(index: i))
-        i = i +% 1u64
+        i = i +% 1
     return result
 
 # ============================================================================
@@ -78,7 +78,7 @@ routine SortedList[T].count() -> Integer
 
 ### Returns true if this list contains no elements.
 routine SortedList[T].is_empty() -> Bool
-    return me.tree.count() == 0u64
+    return me.tree.count() == 0
 
 ### Removes all elements.
 routine SortedList[T].clear()
@@ -149,7 +149,7 @@ routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
     var end = me.tree.rank(key: max_val, after: true)
     while rank < end
         result.add_last(value: me.tree.key_at(rank: rank))
-        rank = rank + 1u64
+        rank = rank + 1
     return result
 
 # ============================================================================
@@ -161,14 +161,14 @@ routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
 routine SortedList[T].min!() -> T
     if me.is_empty()
         throw AbsentValueError()
-    return me.tree.key_at(rank: 0u64)
+    return me.tree.key_at(rank: 0)
 
 ### Returns the largest element in the list.
 ### :throws: {AbsentValueError} The list is empty.
 routine SortedList[T].max!() -> T
     if me.is_empty()
         throw AbsentValueError()
-    return me.tree.key_at(rank: me.tree.count() - 1u64)
+    return me.tree.key_at(rank: me.tree.count() - 1)
 
 ### Returns the smallest element. Alias for {SortedList[T].min()}.
 ### :throws: {AbsentValueError} The list is empty.
@@ -186,7 +186,7 @@ routine SortedList[T].last!() -> T
 
 ### Returns a walk over the elements in ascending order.
 routine SortedList[T].iter() -> SortedListEmittable[T]
-    return SortedListEmittable[T](tree: me.tree, index: 0u64)
+    return SortedListEmittable[T](tree: me.tree, index: 0)
 
 ### Returns the next element.
 ### :throws: {AbsentValueError} The walk is over.
@@ -194,7 +194,7 @@ routine SortedListEmittable[T].emit!() -> T
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)
-    me.index = me.index + 1u64
+    me.index = me.index + 1
     return result
 
 ### Creates a {List[T]} from all elements of `from` in ascending sorted order.
@@ -223,11 +223,11 @@ routine SortedList[T].eq(you: SortedList[T]) -> Bool
     var count = me.tree.count()
     if count != you.tree.count()
         return false
-    var i = 0u64
+    var i: U64 = 0
     while i < count
         if me.tree.key_at(rank: i) != you.tree.key_at(rank: i)
             return false
-        i = i + 1u64
+        i = i + 1
     return true
 
 ### Serializes this collection to a `SerialValue.List`, serializing each element.

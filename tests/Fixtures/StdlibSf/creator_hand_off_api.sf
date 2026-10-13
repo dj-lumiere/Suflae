@@ -12,7 +12,7 @@ routine make_box(n: S64) -> Box
     return Box(n: n)
 
 routine Box() -> Box
-    return make_box(n: 42_s64)
+    return make_box(n: 42)
 
 routine Box(half: S32) -> Box
     var b = make_box(n: half.to[S64]() * 2)
@@ -22,11 +22,11 @@ routine Box(half: S32) -> Box
 routine start()
     var a = Box()
     show(f"returned: {a.n}")
-    var b = Box(half: 10_s32)
+    var b = Box(half: 10)
     show(f"through a local: {b.n}")
     var c = b
-    c.n = 5_s64
+    c.n = 5
     show(f"still one entity: {b.n}")
-    var d = Box(n: 7_s64)
+    var d = Box(n: 7)
     show(f"memberwise: {d.n}")
     return

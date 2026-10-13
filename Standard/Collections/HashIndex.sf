@@ -32,11 +32,11 @@ secret routine hash_index_slots(wanted: U64) -> U64
 
 ### The slot a hash starts probing at.
 secret routine HashIndex.home(hash: U64) -> U64
-    return (hash >> 7u32) & (me.tags.room - 1)
+    return (hash >> 7) & (me.tags.room - 1)
 
 ### The tag a used slot of this hash carries.
 secret routine HashIndex.tag_of(hash: U64) -> U8
-    return (hash & 127u64).to[U8]() +% 2u8
+    return (hash & 127).to[U8]() +% 2
 
 ### The tag of `slot`: 0 never used, 1 removed, else used.
 secret routine HashIndex.tag(slot: U64) -> U8
@@ -45,7 +45,7 @@ secret routine HashIndex.tag(slot: U64) -> U8
 ### Whether `slot`, where a probe stopped, holds the entry looked for: a probe that finds nothing stops at a slot
 ### never used.
 secret routine HashIndex.holds(slot: U64) -> Bool
-    return me.tags.at(position: slot) != 0u8
+    return me.tags.at(position: slot) != 0
 
 ### The entry position `slot` holds.
 secret routine HashIndex.entry(slot: U64) -> U64
@@ -60,8 +60,8 @@ secret routine HashIndex.place(hash: U64, entry: U64)
     var slot = me.home(hash: hash)
     loop
         var tag = me.tags.at(position: slot)
-        if tag <= 1u8
-            if tag == 1u8
+        if tag <= 1
+            if tag == 1
                 me.removed = me.removed - 1
             me.tags.put(position: slot, value: me.tag_of(hash: hash))
             me.entries.put(position: slot, value: entry)
@@ -70,7 +70,7 @@ secret routine HashIndex.place(hash: U64, entry: U64)
 
 ### Marks `slot` as holding a removed entry, so probes keep going past it.
 secret routine HashIndex.retire(slot: U64)
-    me.tags.put(position: slot, value: 1u8)
+    me.tags.put(position: slot, value: 1)
     me.removed = me.removed + 1
     return
 
@@ -84,6 +84,6 @@ secret routine HashIndex.reset(capacity: U64)
     if slots > me.tags.room
         me.tags.grow_to(room: slots)
         me.entries.grow_to(room: slots)
-    me.tags.fill(value: 0u8)
+    me.tags.fill(value: 0)
     me.removed = 0
     return

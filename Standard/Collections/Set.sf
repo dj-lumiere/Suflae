@@ -59,10 +59,10 @@ obeys Emittable[T]
 common routine Set[T].from_literal(elements...: T) -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Integer]())
-    var i = 0u64
+    var i: U64 = 0
     while i < elements.count()
         result.add(value: elements.get_raw(index: i))
-        i = i +% 1u64
+        i = i +% 1
     return result
 
 ### Creates an empty set with a random secret key.
@@ -292,7 +292,7 @@ secret routine Set[T].find_slot(value: T) -> U64
     var slot = me.index.home(hash: hash)
     loop
         var found = me.index.tag(slot: slot)
-        if found == 0u8
+        if found == 0
             return slot
         if found == tag and me.values.at(position: me.index.entry(slot: slot)) == value
             return slot

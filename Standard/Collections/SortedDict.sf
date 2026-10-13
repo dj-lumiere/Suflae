@@ -62,12 +62,12 @@ routine SortedDict[TKey, TValue]() -> SortedDict[TKey, TValue]
 common routine SortedDict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> SortedDict[TKey, TValue]
 needs TKey obeys Comparable
     var result = SortedDict[TKey, TValue]()
-    var i = 0u64
+    var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
         result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
-        i = i +% 1u64
+        i = i +% 1
     return result
 
 # ============================================================================
@@ -80,7 +80,7 @@ routine SortedDict[TKey, TValue].count() -> Integer
 
 ### Returns true if this dictionary contains no entries.
 routine SortedDict[TKey, TValue].is_empty() -> Bool
-    return me.tree.count() == 0u64
+    return me.tree.count() == 0
 
 ### Removes all entries.
 routine SortedDict[TKey, TValue].clear()
@@ -162,14 +162,14 @@ routine SortedDict[TKey, TValue].get_by_rank!(i: Integer) -> DictEntry[TKey, TVa
 routine SortedDict[TKey, TValue].min!() -> DictEntry[TKey, TValue]
     if me.is_empty()
         throw AbsentValueError()
-    return me.entry_at(rank: 0u64)
+    return me.entry_at(rank: 0)
 
 ### Returns the entry with the largest key.
 ### :throws: {AbsentValueError} The dictionary is empty.
 routine SortedDict[TKey, TValue].max!() -> DictEntry[TKey, TValue]
     if me.is_empty()
         throw AbsentValueError()
-    return me.entry_at(rank: me.tree.count() - 1u64)
+    return me.entry_at(rank: me.tree.count() - 1)
 
 ### Returns the entry with the smallest key. Alias for {SortedDict[TKey, TValue].min()}.
 ### :throws: {AbsentValueError} The dictionary is empty.
@@ -189,20 +189,20 @@ routine SortedDict[TKey, TValue].last!() -> DictEntry[TKey, TValue]
 routine SortedDict[TKey, TValue].keys() -> List[TKey]
     var count = me.tree.count()
     var result = List[TKey](capacity: count.to[Integer]())
-    var i = 0u64
+    var i: U64 = 0
     while i < count
         result.add_last(value: me.tree.key_at(rank: i))
-        i = i + 1u64
+        i = i + 1
     return result
 
 ### Returns all values in key-ascending order.
 routine SortedDict[TKey, TValue].values() -> List[TValue]
     var count = me.tree.count()
     var result = List[TValue](capacity: count.to[Integer]())
-    var i = 0u64
+    var i: U64 = 0
     while i < count
         result.add_last(value: me.tree.value_at(rank: i))
-        i = i + 1u64
+        i = i + 1
     return result
 
 # ============================================================================
@@ -211,7 +211,7 @@ routine SortedDict[TKey, TValue].values() -> List[TValue]
 
 ### Returns a walk over the entries in ascending key order.
 routine SortedDict[TKey, TValue].iter() -> SortedDictEmittable[TKey, TValue]
-    return SortedDictEmittable[TKey, TValue](tree: me.tree, index: 0u64)
+    return SortedDictEmittable[TKey, TValue](tree: me.tree, index: 0)
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
@@ -219,7 +219,7 @@ routine SortedDictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var rank = me.index
-    me.index = me.index + 1u64
+    me.index = me.index + 1
     return DictEntry[TKey, TValue](key: me.tree.key_at(rank: rank), value: me.tree.value_at(rank: rank))
 
 ### Creates a {List[DictEntry[TKey, TValue]]} from all entries of `from` in ascending key order.

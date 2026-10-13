@@ -27,7 +27,7 @@ aliases (changing a collection while it is being looped over crashes at run time
 behind a call). A `record` is a value: copied on assignment, no identity. An `entity` is the one-of-a-kind
 object: it has identity, compared with `===`.
 
-The second axis is **machine visibility**. Suflae hides the machine. Unsuffixed numbers are `Integer`
+The second axis is **machine visibility**. Suflae hides the machine. Numbers are `Integer`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
 memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `agent` calls
 whose work the runtime schedules, and shared entities are locked for you. A Suflae program has no
@@ -173,10 +173,15 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 - **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
   safe) with 34 significant digits; a result needing more digits (`1 / 3`) is rounded to 34, and a result
   beyond about `1e6144` crashes. It displays canonically: `2.50` shows as `2.5`.
-- Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Typed suffixes: `5_s32`, `7s32`, `1.5_b64`,
-  `0_u64`, `10n` (`Integer`), `2.5dn` (`Decimal`). Imaginary: `3 + 4i` (`C128` with no context).
-- A hex float (`0x1.8p3`, `0x1p-23_b32`) is binary-float only and exact, and defaults to `B64`, never
-  `Decimal`.
+- Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
+- A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
+  the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`
+  goes too), and otherwise it is an `Integer` (a `Decimal` with a fraction point). Where another type is
+  wanted with nothing around to give it, the declaration states it: `var x: U8 = 5`. A variable's type is
+  never guessed from its later uses. A number that names its type (`5_u8`, `7s32`, `10n`, `2.5dn`) is
+  SF-G010, and `migrate --step suffix` rewrites old code.
+- A hex float (`0x1.8p3`, `0x1p-23` where a `B32` goes) is binary-float only and exact, and defaults to
+  `B64`, never `Decimal`.
 - A literal out of range for its type is a build error (SF-S010): `-1` never fits an unsigned type; write
   `U8_MAX`, `U64_MAX`.
 - Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
@@ -194,8 +199,8 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 var small = count.to[U8]()        # Integer to U8 (a bare literal is an Integer: 200.to[U8]())
 var n = "42".to[S64]()             # text parsing (also Integer, Decimal, B64, ...)
 var code = 'A'.to[U32]()           # a Char's codepoint (b.to[U8]() for a Byte)
-var letter = 65u8.to[Char]()       # 'A' (also 0x41u32.to[Char]()), and 'x'.to[Text]() makes one-character text
-var byte = 0x41u8.to[Byte]()       # the same bits as a Byte
+var letter = code.to[Char]()       # 'A' when code is a U32 of 65, and 'x'.to[Text]() makes one-character text
+var byte = bits.to[Byte]()         # the same bits as a Byte, from a U8
 var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
 var wide: U64 = count.to()         # T left out: the declared type gives it
 var fits: U8? = try count.to()     # none when it does not fit
@@ -216,9 +221,9 @@ var why: Check[S64] = check line.to()
 - A pair with no conversion is SF-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
   Converting a value to its own type is SF-S646 too (use the value as it is).
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
-  they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: 25_s64)` putting 25 in an arm);
+  they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: hp)` putting an `S64` in an arm);
   a value computed from one value of another type is a conversion, `x.to[T]()` (`"hi".to[CStr]()`,
-  `local.to[Moment]()`, `3.0_b32.to[Q128]()`). So `S64(from: x)` is not a routine. A variant's arm comes out
+  `local.to[Moment]()`, `ratio.to[Q128]()` from a `B32`). So `S64(from: x)` is not a routine. A variant's arm comes out
   the same way: `sv.to[S64]()` / `sv.to[Dict]()` is failable (another arm is active → crash, `try` gives
   `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (SF-S458 /
   SF-S646 point at `.to[...]()`).
@@ -318,7 +323,7 @@ routine start()
 - Containment: `coll.has(x)`, `coll.lacks(x)`, on a dict `d.has_key(k)` / `d.lacks_key(k)`. Ranges: `1 to 5` (inclusive), `1 til 5` (exclusive),
   `1 to 10 by 2` (step). Without `by` a range counts up: when the end is below the start it is empty
   (`2 to 1` yields nothing, `(2 to 1).has(1)` is `false`). A negative step counts down: `10 to 1 by -1`,
-  `10 to 0 by -2`, also on unsigned types (`3u64 to 0u64 by -1` yields 3 2 1 0). A step held in a variable
+  `10 to 0 by -2`, also on unsigned types (`3 to 0 by -1` over `U64` yields 3 2 1 0). A step held in a variable
   decides the direction by its sign. A literal `by 0` is SF-S516, and a zero step held in a variable crashes
   with `RangeStepZeroError` when the range is iterated. `(0 to 10).has(10)` is `true`, and `has` follows the
   step (`(10 to 0 by -2).has(4)` is `true`). Slicing with a counting-down range reverses: `text[4 to 0 by -1]`.
@@ -781,7 +786,7 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
   `s[0 til 3]`, `s[2 til ^0]` (to the end).
 - `Char` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
 - A binary float shows as the shortest decimal that reads back to the same value
-  (`0.1_b64 + 0.2_b64` shows `0.30000000000000004`); a `Decimal` shows exactly (`0.1 + 0.2` shows `0.3`).
+  (`x + 0.2` with `var x: B64 = 0.1` shows `0.30000000000000004`); a `Decimal` shows exactly (`0.1 + 0.2` shows `0.3`).
 
 ## 14. Collections
 
@@ -1091,7 +1096,8 @@ routine start()
     each info in memvars(of: hero)
         show(f"{info.order}: {info.name}: {info.type_name}, secret: {info.is_secret}")
     show(peek(target: hero, memvar: "hp"))             # SerialValue(10)
-    poke(target: hero, memvar: "hp", value: SerialValue(from: 25_s64))
+    var hp: S64 = 25
+    poke(target: hero, memvar: "hp", value: SerialValue(from: hp))
     show(alias.hp)                                     # 25: every name sees the change
     var seen = watch(target: hero)
     show(seen.is_alive())                              # true
@@ -1144,6 +1150,7 @@ number). At most 20 are shown per batch.
 |---------------|-----------------------------------------------------|---------------------------------------------------|
 | SF-S510/S512  | positional arguments in a multi-parameter call      | name every argument                               |
 | SF-S010       | literal out of range for its type                   | use the right constant (`U8_MAX`)                 |
+| SF-G010       | a number names its type (`5_u8`)                    | `var x: U8 = 5`, or let the place it goes type it |
 | SF-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
 | SF-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |

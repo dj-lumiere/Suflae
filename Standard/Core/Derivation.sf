@@ -27,16 +27,16 @@ needs FlagsType T
 @overridable
 routine T.count() -> Integer
 needs ChoiceType T
-    var n = 0u64
+    var n: U64 = 0
     expand c in caseof(T)
-        n = n +% 1u64
+        n = n +% 1
     return n.to()
 
 ### The number of declared members.
 @overridable
 routine T.count() -> Integer
 needs FlagsType T
-    var n = 0u64
+    var n: U64 = 0
     expand c in caseof(T)
-        n = n +% 1u64
+        n = n +% 1
     return n.to()

@@ -55,10 +55,10 @@ needs TPriority obeys Comparable
 common routine PriorityQueue[TPriority, TElement].from_literal(pairs...: DictEntry[TPriority, TElement]) -> PriorityQueue[TPriority, TElement]
 needs TPriority obeys Comparable
     var result = PriorityQueue[TPriority, TElement](capacity: pairs.count().to[Integer]())
-    var i = 0u64
+    var i: U64 = 0
     while i < pairs.count()
         result.add(element: pairs.get_raw(index: i).value, priority: pairs.get_raw(index: i).key)
-        i = i +% 1u64
+        i = i +% 1
     return result
 
 ### Creates an empty priority pool.

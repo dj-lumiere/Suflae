@@ -76,7 +76,7 @@ routine Memory[T](capacity: Integer) -> Memory[T]
 ### Creates a memory of `room` places, all zero, counted with `U64`.
 ### :param room: How many places it has.
 routine Memory[T](room: U64) -> Memory[T]
-    return Memory[T](storage: new_memory_storage[T](room: room), start: 0_u64, room: room)
+    return Memory[T](storage: new_memory_storage[T](room: room), start: 0, room: room)
 
 ### Creates a memory of `count` places, each holding `fill`.
 ### :param count: The number of places.
@@ -93,7 +93,7 @@ routine Memory[T](count: Integer, fill: T) -> Memory[T]
 ### Memory with `room` places, all zero.
 secret routine new_memory_storage[T](room: U64) -> MemoryStorage[T]
     var data = hijacked_none[T]()
-    if room > 0_u64
+    if room > 0
         danger
             data = hijacked_from[T](rf_allocate_dynamic(T.data_size() * room))
     return MemoryStorage[T](data: data, room: room)
@@ -148,7 +148,7 @@ routine Memory[T].put!(position: U64, value: T)
 routine Memory[T].take_at!(position: U64) -> T
     var place = me.filled(position: position)
     var value = me.read(position: place)
-    me.clear_places(from: place, count: 1_u64)
+    me.clear_places(from: place, count: 1)
     return value
 
 ### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
@@ -157,7 +157,7 @@ routine Memory[T].erase_at!(position: U64)
     var place = me.checked(position: position)
     danger
         me.slot(position: place).peek().destruct()
-    me.clear_places(from: place, count: 1_u64)
+    me.clear_places(from: place, count: 1)
     return
 
 ### Returns a view of `room` places from `first`, counted with `U64`: a memory that shares this one's memory, as
@@ -189,7 +189,7 @@ routine Memory[T].move!(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     var n = count.to[U64]()
-    if n == 0_u64
+    if n == 0
         return
     me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
     return
@@ -201,7 +201,7 @@ routine Memory[T].move!(from: Integer, into: Integer, count: Integer)
 ### :param count: How many places to carry.
 routine Memory[T].carry!(source: U64, target: U64, count: U64)
     var n = count
-    if n == 0_u64
+    if n == 0
         return
     if source + n > me.room
         throw IndexOutOfBoundsError(index: source + n, count: me.room)
@@ -217,7 +217,7 @@ routine Memory[T].carry!(source: U64, target: U64, count: U64)
     i = source
     while i < source + n
         if i < target or i >= target + n
-            me.clear_places(from: i, count: 1_u64)
+            me.clear_places(from: i, count: 1)
         i = i +% 1
     return
 
@@ -245,7 +245,7 @@ routine Memory[T].getitem!(range: Range[Integer]) -> Memory[T]
     if range.start.is_negative()
         throw NegativeIndexError(index: range.start)
     var first = range.start.to[U64]()
-    var last = if range.inclusive then range.end.to[U64]() + 1_u64 else range.end.to[U64]()
+    var last = if range.inclusive then range.end.to[U64]() + 1 else range.end.to[U64]()
     if last < first
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
     if last > me.room
@@ -278,19 +278,19 @@ routine Memory[T].grow!(capacity: Integer)
 ### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.
 ### :param room: How many places the new row has, at least `room()`.
 routine Memory[T].grow_to!(room: U64)
-    if me.start != 0_u64 or me.room != me.storage.room
+    if me.start != 0 or me.room != me.storage.room
         throw MemoryViewShapeError(operation: "grow")
     if room < me.room
         throw IndexOutOfBoundsError(index: room, count: me.room)
     var moved = new_memory_storage[T](room: room)
-    if me.room > 0_u64
+    if me.room > 0
         danger
             rf_copy_bytes_at(
                 dest: moved.data.get_address(),
-                src: me.slot(position: 0_u64).get_address(),
+                src: me.slot(position: 0).get_address(),
                 size: T.data_size() * me.room,
             )
-        me.clear_places(from: 0_u64, count: me.room)
+        me.clear_places(from: 0, count: me.room)
     me.storage = moved
     me.room = room
     return
@@ -306,10 +306,10 @@ routine Memory[T].rotate_left!(count: Integer)
 ### Moves every place `count` positions toward the front, as `rotate_left` does, counted with `U64`.
 ### :param count: How many positions to rotate by.
 routine Memory[T].turn(count: U64)
-    if me.room == 0_u64
+    if me.room == 0
         return
     var shift = LLVM::unsigned_rem(count, me.room)
-    if shift == 0_u64
+    if shift == 0
         return
     var size = T.data_size()
     var rest = me.room - shift
@@ -318,19 +318,19 @@ routine Memory[T].turn(count: U64)
         rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: shift).get_address(), size: size * rest)
         rf_copy_bytes_at(
             dest: held.offset(size * rest).get_address(),
-            src: me.slot(position: 0_u64).get_address(),
+            src: me.slot(position: 0).get_address(),
             size: size * shift,
         )
-        rf_copy_bytes_at(dest: me.slot(position: 0_u64).get_address(), src: held.get_address(), size: size * me.room)
+        rf_copy_bytes_at(dest: me.slot(position: 0).get_address(), src: held.get_address(), size: size * me.room)
         held.invalidate()
     return
 
 ### Reverses the order of the places.
 routine Memory[T].reverse()
-    if me.room <= 1_u64
+    if me.room <= 1
         return
     var lo: U64 = 0
-    var hi = me.room - 1_u64
+    var hi = me.room - 1
     while lo < hi
         me.swap_places(a: lo, b: hi)
         lo = lo +% 1
@@ -342,13 +342,13 @@ routine Memory[T].reverse()
 # ============================================================================
 
 ### The longest run sorted by insertion before the merge passes begin.
-secret preset BUFFER_SORT_MIN_RUN: U64 = 32u64
+secret preset BUFFER_SORT_MIN_RUN: U64 = 32
 
 ### Sorts what the places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
 routine Memory[T].sort_by(compare: Callable[(T, T), Bool])
     var n = me.room
-    if n <= 1_u64
+    if n <= 1
         return
     var size = T.data_size()
     var start: U64 = 0
@@ -397,7 +397,7 @@ secret routine Memory[T].insertion_sort(start: U64, end: U64, held: Hijacked[T],
             rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: i).get_address(), size: size)
         var j = i
         while j > start and me.goes_before(held: held, position: j - 1, compare: compare)
-            me.move_places(target: j, source: j - 1, count: 1_u64)
+            me.move_places(target: j, source: j - 1, count: 1)
             j = j - 1
         danger
             rf_copy_bytes_at(dest: me.slot(position: j).get_address(), src: held.get_address(), size: size)
@@ -457,7 +457,7 @@ secret routine Memory[T].merge(left: U64, mid: U64, right: U64, scratch: Hijacke
 routine Memory[T].sort()
 needs T obeys Comparable
     var n = me.room
-    if n <= 1_u64
+    if n <= 1
         return
     var size = T.data_size()
     var start: U64 = 0
@@ -507,7 +507,7 @@ needs T obeys Comparable
             rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: i).get_address(), size: size)
         var j = i
         while j > start and me.less_than(held: held, position: j - 1)
-            me.move_places(target: j, source: j - 1, count: 1_u64)
+            me.move_places(target: j, source: j - 1, count: 1)
             j = j - 1
         danger
             rf_copy_bytes_at(dest: me.slot(position: j).get_address(), src: held.get_address(), size: size)
@@ -571,7 +571,7 @@ needs T obeys Comparable
 
 ### Returns a walk over every place, front to back.
 routine Memory[T].iter() -> MemoryEmittable[T]
-    return me.walking(first: 0_u64, count: me.room)
+    return me.walking(first: 0, count: me.room)
 
 ### Returns a walk over `count` places from `first`, wrapping past the end of the memory to its start: the elements
 ### of a collection that keeps them as a ring.
@@ -581,7 +581,7 @@ routine Memory[T].walk!(first: Integer, count: Integer) -> MemoryEmittable[T]
     if count.is_negative()
         throw NegativeIndexError(index: count)
     if count == 0
-        return me.walking(first: 0_u64, count: 0_u64)
+        return me.walking(first: 0, count: 0)
     return me.walk_at(first: position_of(value: first), count: count.to[U64]())
 
 ### Returns a walk over `count` places from `first`, wrapping past the end of the memory to its start, as `walk`
@@ -589,15 +589,15 @@ routine Memory[T].walk!(first: Integer, count: Integer) -> MemoryEmittable[T]
 ### :param first: The place the walk starts at.
 ### :param count: How many places the walk reads, at most `room()`.
 routine Memory[T].walk_at!(first: U64, count: U64) -> MemoryEmittable[T]
-    if count == 0_u64
-        return me.walking(first: 0_u64, count: 0_u64)
+    if count == 0
+        return me.walking(first: 0, count: 0)
     if count > me.room
         throw IndexOutOfBoundsError(index: count, count: me.room)
     return me.walking(first: me.checked(position: first), count: count)
 
 ### A walk over `count` places from `first`, both already checked.
 secret routine Memory[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
-    return MemoryEmittable[T](storage: me.storage, base: me.start, room: me.room, first: first, index: 0_u64, count: count)
+    return MemoryEmittable[T](storage: me.storage, base: me.start, room: me.room, first: first, index: 0, count: count)
 
 ### Returns what the next place holds.
 ### :throws: {AbsentValueError} The walk is over.
@@ -639,19 +639,19 @@ needs T obeys Equatable
 ### Returns the memory as text: `Memory([1, 2, 0])`.
 @override
 routine Memory[T].represent() -> Text
-    return f"Memory({me.places_text(first: 0_u64, count: me.room)})"
+    return f"Memory({me.places_text(first: 0, count: me.room)})"
 
 ### Returns the memory as text for debugging, with its size: `Memory[Integer](capacity: 3, [1, 2, 0])`.
 @override
 routine Memory[T].diagnose() -> Text
-    return f"{me.type_name()}(capacity: {me.room}, {me.places_text(first: 0_u64, count: me.room)})"
+    return f"{me.type_name()}(capacity: {me.room}, {me.places_text(first: 0, count: me.room)})"
 
 ### What `count` places from `first` hold, as text (`[1, 2, 3]`), wrapping past the end of the memory to its start.
 secret routine Memory[T].places_text(first: U64, count: U64) -> Text
     var result = "["
     var i: U64 = 0
     while i < count
-        if i > 0_u64
+        if i > 0
             result = f"{result}, "
         result = f"{result}{nested_repr(me.read(position: me.wrap(position: first + i)))}"
         i = i +% 1
@@ -684,7 +684,7 @@ secret routine Memory[T].filled!(position: U64) -> U64
     var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if me.slot(position: place).peek_as[Address]() == 0_addr
+            if me.slot(position: place).peek_as[Address]() == 0
                 throw EmptyPlaceError(index: place.to[Integer]())
     return place
 
@@ -696,7 +696,7 @@ secret routine Memory[T].slot(position: U64) -> Hijacked[T]
 ### Moves the bits of `count` places from `source` to `target` (the ranges may overlap). The places left behind still
 ### hold the same bits: the caller overwrites or clears them.
 secret routine Memory[T].move_places(target: U64, source: U64, count: U64)
-    if count == 0_u64
+    if count == 0
         return
     danger
         rf_copy_bytes_at(
@@ -708,10 +708,10 @@ secret routine Memory[T].move_places(target: U64, source: U64, count: U64)
 
 ### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
 secret routine Memory[T].clear_places(from: U64, count: U64)
-    if count == 0_u64
+    if count == 0
         return
     danger
-        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0_u8, size: T.data_size() * count)
+        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
     return
 
 ### Swaps the bits of the places at `a` and `b`.

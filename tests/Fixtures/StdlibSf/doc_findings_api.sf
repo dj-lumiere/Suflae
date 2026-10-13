@@ -140,7 +140,7 @@ routine start()
     show([4, 5, 6].second())
 
     # A bare literal right of `**` takes the left side's type.
-    var x = 1.5_b64
+    var x: B64 = 1.5
     show(x ** 2.0)
     var three = 3
     show(three ** 3)

@@ -441,7 +441,8 @@ common routine Integer.from_serial!(value: SerialValue) -> Integer
 @rf("Text.to")
 routine Text.to![Integer]() -> Integer
 
-### Builder plumbing for presets computed at build time: this value as an `Integer` literal (`12n`).
+### Builder plumbing for presets computed at build time: this value as a bare number (`12`), which takes the
+### `Integer` type from the preset's declared type.
 ### :returns: The source text.
 @rf("Integer.preset_literal")
 @readonly

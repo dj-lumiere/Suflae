@@ -36,9 +36,11 @@ routine start()
         is None => show("peek mana: absent")
         else as v => show(f"peek mana: {v}")
 
-    poke(target: hero, memvar: "hp", value: SerialValue(from: 25_s64))
+    var s64_25: S64 = 25
+    poke(target: hero, memvar: "hp", value: SerialValue(from: s64_25))
     show(f"after poke, alias.hp: {alias.hp}")
-    when check poke(target: hero, memvar: "mana", value: SerialValue(from: 1_s64))
+    var s64_1: S64 = 1
+    when check poke(target: hero, memvar: "mana", value: SerialValue(from: s64_1))
         is NoSuchMemberVariableError as e => show(f"poke mana: {e.crash_message()}")
         else => show("poke mana: done")
 

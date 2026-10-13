@@ -69,12 +69,12 @@ obeys Emittable[DictEntry[TKey, TValue]]
 common routine Dict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> Dict[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: pairs.count().to[Integer]())
-    var i = 0u64
+    var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     while i < pairs.count()
         result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
-        i = i +% 1u64
+        i = i +% 1
     return result
 
 ### Creates an empty dictionary with a random secret key.
@@ -345,7 +345,7 @@ secret routine Dict[TKey, TValue].find_slot(key: TKey) -> U64
     var slot = me.index.home(hash: hash)
     loop
         var found = me.index.tag(slot: slot)
-        if found == 0u8
+        if found == 0
             return slot
         if found == tag and me.keys.at(position: me.index.entry(slot: slot)) == key
             return slot

@@ -11,11 +11,11 @@ routine compute(x: S64) -> S64
     return x * 2
 
 routine counter() -> S64
-    var n = 10_s64
+    var n: S64 = 10
     yield_now()
-    n = n + 5_s64
+    n = n + 5
     yield_now()
-    n = n + 5_s64
+    n = n + 5
     return n
 
 routine start()
