@@ -46,7 +46,8 @@ through a `.rf` module the program imports (section 18).
    object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
 4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
-   `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`), but variables of different
+   `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`, and a whole number written in base 10
+   to a float or decimal type: `price: 5` for a `Decimal` parameter, but not `0xFF`), but variables of different
    number types never mix without an explicit conversion (`n.to[S64]()`, §5). The one exception is the two
    default types: an `Integer` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
    (`3.5 * 2` is `7`), and an `Integer` with more significant digits than a `Decimal` holds (34) crashes. Mixing

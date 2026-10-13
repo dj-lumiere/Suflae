@@ -1,0 +1,14 @@
+module Tests/StdlibSf/LiteralConformApi
+
+# A whole number written in base 10 takes the type of where it goes, a float or decimal type included.
+
+import IO/Console
+
+routine half(x: Decimal) -> Decimal
+    return x / 2
+
+routine start()
+    var price: Decimal = 3
+    var ratio: B64 = 2
+    var small: D64 = 7
+    show(f"{price} {ratio} {small} {half(x: 5)}")
