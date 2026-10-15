@@ -10,7 +10,7 @@
 <p align="center"><strong>Make programming sweet again.</strong></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-informational.svg" alt="Version 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.5.0-informational.svg" alt="Version 0.5.0">
   <img src="https://img.shields.io/badge/status-early%20alpha-orange.svg" alt="Status: early alpha">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
 </p>
@@ -26,7 +26,7 @@
 Suflae (`.sf`) is a natively compiled language for building applications without managing memory by
 hand. It is the sibling of [RazorForge](https://github.com/dj-lumiere/RazorForge): the same grammar,
 the same standard library, the same loud failures, and every entity shared for you. A file
-can be just its statements, and running it is one command, like `python hello.py`.
+can be just its statements, and running it is one command: `suflae run hello.sf`.
 
 ```suflae
 import IO/Console
@@ -35,24 +35,23 @@ entity Point
     x: Integer
     y: Integer
 
-global moves: Integer = 0
+global MOVES: Integer = 0
 
 routine nudge(p: Point)
     p.x = p.x + 1
-    moves = moves + 1
-    return
+    MOVES = MOVES + 1
 
 var p = Point(x: 3, y: 4)
 var q = p                   # both names refer to the same Point
 nudge(p: q)
 show(f"p.x = {p.x}")        # 4
-show(f"moves = {moves}")    # 1
+show(f"moves = {MOVES}")    # 1
 
 show(0.1 + 0.2 == 0.3)      # true: bare numbers are Integer and Decimal
 show(99999999999999999999 * 99999999999999999999)
 ```
 
-> **Early alpha.** Suflae 0.1 is the first release. Programs build and run on Windows, Linux, and
+> **Early alpha.** Suflae 0.5 is the current version, numbered together with RazorForge. Programs build and run on Windows, Linux, and
 > macOS, and every commit runs the Suflae test suite and its end-to-end programs in CI, several of
 > them locked to produce the same output as their RazorForge twins. APIs will change, and you will
 > find bugs.
@@ -72,27 +71,27 @@ And for Suflae, the joy of having made something.
 
 **Copy or share, decided once.** A value is either copied or shared, and the type says which when you
 declare it: a `record` is copied, an `entity` is shared. An entity is a reference-counted handle: `var q = p`
-gives you a second name for the same object, with nothing to write for the sharing. The count is cheap while an
-entity stays on one task and becomes thread-safe when it escapes to another, and a cycle collector
+gives you a second name for the same object, with nothing to write for the sharing. The count is a plain counter
+while an entity stays on one task and becomes thread-safe when it escapes to another, and a cycle collector
 reclaims reference cycles. There are no access tokens, no lifetimes, and no weak-reference
 annotations. An entity that may be missing is written `Point?` and must be checked against `None`
 before you use it.
 
 **Numbers are exact by default.** A bare `42` is an arbitrary-precision `Integer` and a bare `3.14`
-is a base-10 `Decimal`, so `0.1 + 0.2 == 0.3` holds and big numbers don't overflow. The fixed-width
-types (`S32`, `U64`, `B64`, …) are still there when you name them.
+is a base-10 `Decimal`, so `0.1 + 0.2 == 0.3` holds and big numbers don't overflow. A number gets a
+fixed-width type (`S32`, `U64`, `B64`, …) when its declaration names one: `var x: U8 = 5`.
 
 **A file can be just its statements.** Top-level statements run top to bottom with no
-`routine start()`, and `module` is optional. Routines you define still end with `return`.
+`routine start()`, and `module` is optional. A routine ends where its body ends, with no closing `return`.
 
-**`global` is module state that tasks can share.** `global name: Type = value` declares module-level
+**`global` is module state that tasks can share.** `global NAME: Type = value` declares module-level
 mutable state. Globals initialize once, in dependency order, and every global is thread-safe: a
-single-statement update such as `count = count + 1` is atomic across parallel tasks. (RazorForge has
-no module-level mutable state; this is a Suflae feature.)
+single-statement update such as `COUNT = COUNT + 1` is atomic across parallel tasks.
 
-**Failure is loud, and recovery takes one keyword.** As in RazorForge, a routine that can `throw` carries
-`!` on its declaration. A bare call that fails crashes with a message (exit status 82); `try` or `check`
-in front of the call recovers it as `Maybe[T]` or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
+**Failure is loud, and recovery takes one keyword.** A routine that can `throw` is declared
+`failable routine parse(...)`, and calls to it are written like any other call. A bare call that fails
+crashes with a message (exit status 82). `try` or `check` in front of the call recovers it as `Maybe[T]`
+or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
 **Nothing unsafe is reachable.** `danger` blocks, `dangerous` routines, raw handles, and `steal` are
 not part of Suflae. Changing a list while an `each` loop walks it is stopped with a clear error: at
@@ -133,10 +132,10 @@ suflae version
 
 The short alias `sf` works as well.
 
-> **Linux:** linking needs the C library's development files. Most machines have them; otherwise
+> **Linux:** linking needs the C library's development files. Most machines have them. Otherwise
 > install `libc6-dev` (Debian/Ubuntu) or `glibc-devel` (Fedora) once.
 >
-> **macOS:** linking uses Apple's Command Line Tools; run `xcode-select --install` once if you have
+> **macOS:** linking uses Apple's Command Line Tools. Run `xcode-select --install` once if you have
 > never built anything on this Mac. This alpha is not notarized, and `install.sh` clears the
 > Gatekeeper quarantine on the unpacked folder for you.
 
@@ -258,4 +257,4 @@ Bug reports, feature suggestions, documentation fixes, and code are all welcome.
 
 ## License
 
-MIT; see [`LICENSE`](LICENSE).
+MIT. See [`LICENSE`](LICENSE).
