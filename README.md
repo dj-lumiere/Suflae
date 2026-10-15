@@ -25,7 +25,7 @@
 
 Suflae (`.sf`) is a natively compiled language for building applications without managing memory by
 hand. It is the sibling of [RazorForge](https://github.com/dj-lumiere/RazorForge): the same grammar,
-the same standard library, the same loud failures, with the ownership machinery out of sight. A file
+the same standard library, the same loud failures, and every entity shared for you. A file
 can be just its statements, and running it is one command, like `python hello.py`.
 
 ```suflae
@@ -70,8 +70,9 @@ And for Suflae, the joy of having made something.
 
 ## What it is like
 
-**Entities are shared.** A Suflae `entity` is a reference-counted handle: `var q = p` gives you a
-second name for the same object, with no `steal` and no ownership errors. The count is cheap while an
+**Copy or share, decided once.** A value is either copied or shared, and the type says which when you
+declare it: a `record` is copied, an `entity` is shared. An entity is a reference-counted handle: `var q = p`
+gives you a second name for the same object, with nothing to write for the sharing. The count is cheap while an
 entity stays on one task and becomes thread-safe when it escapes to another, and a cycle collector
 reclaims reference cycles. There are no access tokens, no lifetimes, and no weak-reference
 annotations. An entity that may be missing is written `Point?` and must be checked against `None`
@@ -184,9 +185,8 @@ is found next to the `suflae` executable, so a `.sf` file anywhere on disk build
 ## Mixing with RazorForge
 
 A `.sf` file can `import` a RazorForge module and use its types and routines directly. An entity
-that comes from RazorForge keeps RazorForge's single-ownership model: you can use it freely as a
-local or a field, and to pass one across a Suflae routine's signature you hold it in a
-`Retained[T]`. This is how a Suflae program reaches lower-level code written in RazorForge.
+that comes from RazorForge keeps RazorForge's rules for sharing: you can use it freely as a local or
+a field, and to pass one across a Suflae routine's signature you share it through a `Retained[T]`. This is how a Suflae program reaches lower-level code written in RazorForge.
 
 ## Not there yet
 

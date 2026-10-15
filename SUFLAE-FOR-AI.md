@@ -36,8 +36,8 @@ through a `.rf` module the program imports (section 18).
 
 ## 2. The rules most likely to break your assumptions
 
-1. **Multi-parameter calls REQUIRE named arguments.** `gcd(252, 105)` is an error (SF-S510);
-   `gcd(a: 252, b: 105)` is right. Single-argument calls may be positional. Routines annotated
+1. **Calls with three or more parameters REQUIRE named arguments (SF-S510).** Two parameters may be positional
+   (no warning), naming them is still clearer: `gcd(a: 252, b: 105)`. Single-argument calls may be positional. Routines annotated
    `@positional` accept all-positional calls. Mixing named and positional in one call is always an error
    (SF-S512).
 2. **A routine that returns a value returns it on every path** (`return x`). A routine that returns nothing
