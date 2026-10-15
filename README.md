@@ -70,15 +70,13 @@ And for Suflae, the joy of having made something.
 ## What it is like
 
 **Copy or share, decided once.** A value is either copied or shared, and the type says which when you
-declare it: a `record` is copied, an `entity` is shared. An entity is a reference-counted handle: `var q = p`
-gives you a second name for the same object, with nothing to write for the sharing. The count is a plain counter
-while an entity stays on one task and becomes thread-safe when it escapes to another, and a cycle collector
-reclaims reference cycles. There are no access tokens, no lifetimes, and no weak-reference
-annotations. An entity that may be missing is written `Point?` and must be checked against `None`
+declare it: a `record` is copied, an `entity` is shared. `var q = p` gives
+you a second name for the same entity, with nothing to write for the sharing. Its memory is freed once nothing
+uses it anymore, entities that point at each other included, and tasks can share it safely. An entity that may be missing is written `Point?` and must be checked against `None`
 before you use it.
 
 **Numbers are exact by default.** A bare `42` is an arbitrary-precision `Integer` and a bare `3.14`
-is a base-10 `Decimal`, so `0.1 + 0.2 == 0.3` holds and big numbers don't overflow. A number gets a
+is a base-10 `Decimal` with 34 significant digits, so `0.1 + 0.2 == 0.3` holds, and whole numbers never overflow. A number gets a
 fixed-width type (`S32`, `U64`, `B64`, …) when its declaration names one: `var x: U8 = 5`.
 
 **A file can be just its statements.** Top-level statements run top to bottom with no
