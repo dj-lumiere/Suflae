@@ -174,7 +174,7 @@ suflae --lsp                          Run the language server over stdio
 suflae help | version
 ```
 
-There are no build flags. Projects are configured in a `config.toml` manifest, the same one
+There are no build flags. A solution is configured in a `config.toml` manifest, the same one
 RazorForge uses (see the
 [RazorForge README](https://github.com/dj-lumiere/RazorForge#command-line)), and the standard library
 is found next to the `suflae` executable, so a `.sf` file anywhere on disk builds.
