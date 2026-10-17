@@ -433,7 +433,9 @@ One arm takes several values after `==`: `== 4, 6, 9, 11 => return 30`.
 
 - Arms: comparison arms (`== value`, `< value`, …), type arms (`is T`, `is T as name`), a guard after a
   binding (`is S64 as n and n > 100`), tuple arms (`(0, y) => ...` on a tuple subject), and `else` /
-  `else as name` last. A failed guard falls through to the next arm.
+  `else as name` last. A failed guard falls through to the next arm. `else as name` is allowed only when one
+  type is left after the earlier arms, and `name` has that type (the value of a `T?` after `is None`, the last
+  member type of a variant, every error of a `Check` taken as one type). With more left it is `SF-S359`.
 - Record patterns, written like construction: `is Monster(hp: 0) as m`, `is Monster(hp: < 5, name)`,
   `is Chest(item: is Weapon as w)`, `is Monster(hp: as health)`. `field` alone names it; a value equals; an arm
   that tests a member variable does not cover its type. Also after `if`: `if c is Monster(hp: 0) as m`.
@@ -674,10 +676,11 @@ routine start()
   the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
   under `try` (`true` when it succeeded).
-- A `when` on a `Check` **must** have the success arm (`is T as v` or `else as v`); leaving it out is
+- A `when` on a `Check` **must** have the success arm (`is T as v`, or `else as v` when every error is already
+  taken by `is Crashables as e`); leaving it out is
   a build error. `is NopeError as e` takes only that error and binds it as a `NopeError` (its member variables
   are readable); `is Crashables as e` takes any error, so write it after the specific ones; `else as e` after the
-  other arms binds whatever is left. `x is NopeError` also works as an expression.
+  success arm takes every error that is left, as `is Crashables as e` would. `x is NopeError` also works as an expression.
 - When the success value is itself a variant, the arms may name the types it holds instead of the whole value
   (`is Deposit as d`, `is Withdraw as w` on `check parse(...)`), and together they must name every one of them.
   The same holds on a plain variant that holds another variant.
