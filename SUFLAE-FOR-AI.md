@@ -320,7 +320,8 @@ routine start()
   ask whether two entities are the same object (§10).
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
-  sign fill for `>>`).
+  sign fill for `>>`). A shift amount and a subscript index may be an `Integer` or any fixed-width integer
+  (`xs[i]` with `i: S64`); a negative one crashes.
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
   (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
   (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: SF-S706.

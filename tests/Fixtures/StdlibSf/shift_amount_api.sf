@@ -1,6 +1,7 @@
 module Tests/StdlibSf/ShiftAmountApi
 
-# A shift amount can be a literal, an Integer variable or an expression, on an Integer or a fixed-width number.
+# A shift amount and a subscript index may be any integer type: a literal, an Integer, a fixed-width variable or an
+# expression. A shift by more than the width gives 0.
 
 import IO/Console
 
@@ -18,3 +19,12 @@ routine start()
     var u: U8 = 128
     show(u >> n)
     show(u >>> n + 5)
+    var by: S64 = 4
+    show(x << by)
+    var far = 70
+    show(x << far)
+    var xs = [10, 20, 30]
+    var i: S64 = 1
+    var j: U8 = 2
+    xs[i] = 7
+    show(f"{xs[j]} {xs}")

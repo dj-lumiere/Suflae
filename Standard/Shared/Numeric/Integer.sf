@@ -448,3 +448,9 @@ routine Text.to![Integer]() -> Integer
 @readonly
 @override
 routine Integer.preset_literal() -> Text
+
+### This value as a shift amount: the same count as a `U32`, or `U32_MAX` when it is larger.
+### :returns: The count as a `U32`.
+### :throws: {NumericDomainError} when this value is below 0.
+@rf("Integer.to_shift_amount")
+routine Integer.to_shift_amount!() -> U32
