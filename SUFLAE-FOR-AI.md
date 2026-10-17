@@ -1214,9 +1214,12 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 - **An entity keeps its language.** An entity declared in an imported `.rf` module stays a RazorForge
   entity (single owner, no reference count); it is not shared like a Suflae entity. As a local, or as a
   member variable of a Suflae entity, it just works: construct it, call its routines (mutating ones
-  included), and it is released once.
+  included), and it is released once. It has one holder at a time: keeping it under a second name
+  (`var d = c`), putting a named one into a member variable, or handing it to a `.rf` routine that
+  keeps what it is given is SF-S413. Make it where it goes (`Board(counter: Counter(...))`).
 - **A RazorForge entity may not cross a Suflae routine signature by value (SF-S439).** As a parameter or a
-  (non-constructor) return type it would be released more than once. Keep it in a member variable of a
+  (non-constructor) return type it would be released more than once. This holds however the type is
+  written, `Counter` or `RF::Counter`. Keep it in a member variable of a
   Suflae entity and pass that entity, or do the work on it inside the `.rf` module.
 - `RF::Name` and `SF::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Suflae's `List` is not RazorForge's (`RF::List`, counted with `U64`).
