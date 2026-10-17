@@ -854,6 +854,9 @@ routine start()
 ```
 
 - Writing `nums.add_last(...)` directly in the loop body is a build error (SF-S625).
+- A dictionary's `d[k] = v` may add the key, so writing a key of the dictionary being looped over crashes with
+  `ReshapingWhileInUseError`, even when the key is already there. A list's `xs[i] = v` only replaces an
+  element and is fine.
 - When the change is inside a called routine, the builder cannot see that `xs` and `nums` are the same
   list, so the loop marks the list as in use and the change crashes at run time with
   `ReshapingWhileInUseError`.
