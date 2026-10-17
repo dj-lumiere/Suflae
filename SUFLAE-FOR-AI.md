@@ -388,8 +388,11 @@ loop
 `.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
-`until c` loops while `c` is false (`while not (c)`). A `while`, `until` or `each` may end with a `then` block, run
-when the loop ends by itself and never after its own `break`.
+`until c` loops while `c` is false (`while not (c)`). A `while`, `until`, `each` or `loop` may end with a `then`
+block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
+`break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
+loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
+(SF-G219): the case where the loop would not run even once is an `if` before the loop.
 A loop may carry values from one round to the next: `while n > 1 with n: Integer = start, steps: Integer = 0`
 (`each x in xs with sum: Integer = 0` too). Each carried value is bound anew every round, from what the round's
 `continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
@@ -405,17 +408,6 @@ routine collatz_steps(start: Integer) -> Integer
         continue with n: after, steps: steps + 1
     then
         return steps
-    return 0
-```
-A `while` or `each` may end with an `else`, which runs only when the body ran zero times: the condition was
-false at the very first check, or the source was empty. Once the body has run, the `else` never runs, however
-the loop ended (condition false, source exhausted, or `break`).
-
-```suflae
-each item in items
-    show(item)
-else
-    show("no items")
 ```
 
 **`when` is the pattern match**, as a statement or an expression:

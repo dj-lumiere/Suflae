@@ -1,6 +1,7 @@
 module Tests/StdlibSf/LoopWithApi
 
-# A loop carries values with `with`, passes the next ones with `continue with`, and `then` sees the last ones.
+# A loop carries values with `with`, passes the next ones with `continue with`, and `then` sees the last ones. A loop
+# whose `then` ends in `return` always returns, so nothing follows it.
 
 ### Collatz steps from `start` to 1: the two carried values change every round.
 routine collatz_steps(start: Integer) -> Integer
@@ -9,9 +10,8 @@ routine collatz_steps(start: Integer) -> Integer
         continue with n: after, steps: steps + 1
     then
         return steps
-    return 0
 
-### The sum of the values before the first negative one, or -1 when a negative one stops the loop.
+### The sum of the values before the first negative one: `then` runs after the `break` too.
 routine sum_until_negative(xs: List[Integer]) -> Integer
     each x in xs with sum: Integer = 0, count: Integer = 0
         if x < 0
@@ -20,7 +20,6 @@ routine sum_until_negative(xs: List[Integer]) -> Integer
     then
         show(f"summed {count} values")
         return sum
-    return -1
 
 ### The greatest common divisor, the carried pair swapped in one `continue with`.
 routine gcd(a: Integer, b: Integer) -> Integer
@@ -28,7 +27,6 @@ routine gcd(a: Integer, b: Integer) -> Integer
         continue with x: y, y: x % y
     then
         return x
-    return 0
 
 routine start()
     show(f"collatz 27: {collatz_steps(start: 27)}")

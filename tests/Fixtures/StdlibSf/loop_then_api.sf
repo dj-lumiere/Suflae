@@ -1,0 +1,66 @@
+module Tests/StdlibSf/LoopThenApi
+
+import IO/Console
+# A loop's `then` runs once whenever the loop is left for the line after it: when the loop ends by itself and after
+# a `break`. A `return` or `throw` leaves the routine and skips it. A failure in a `while` condition is a failure
+# point like any other: a recovery keyword above it recovers it. A loop whose `then` ends in `return` always
+# returns, so nothing follows it.
+
+routine first_negative(xs: List[Integer]) -> Text
+    each x in xs
+        if x < 0
+            return f"found {x}"
+    then
+        show("searched all")
+    return "none negative"
+
+routine stop_at_three(limit: Integer) -> Text
+    var n = 0
+    while n < limit
+        n += 1
+        if n == 3
+            break
+    then
+        show(f"left at {n}")
+    return f"stopped at {n}"
+
+routine ratio_steps(numerator: Integer, divisor: Integer) -> Integer
+    var n = 0
+    while n < numerator // divisor
+        n += 1
+    then
+        return n
+
+routine start()
+    var empty = List[Integer]()
+    show(first_negative(xs: empty))
+    var some = List[Integer]()
+    some.add_last(value: 4)
+    some.add_last(value: 7)
+    show(first_negative(xs: some))
+    some.add_last(value: -2)
+    show(first_negative(xs: some))
+
+    show(stop_at_three(limit: 0))
+    show(stop_at_three(limit: 10))
+    show(stop_at_three(limit: 2))
+
+    each x in some
+        if x == 7
+            break
+    then
+        show("each then: after break")
+    var k = 0
+    loop
+        k += 1
+        if k == 4
+            break
+    then
+        show(f"loop then: k is {k}")
+
+    show(f"ratio ok: {try ratio_steps(numerator: 6, divisor: 2)}")
+    show(f"ratio zero steps: {try ratio_steps(numerator: 0, divisor: 2)}")
+    show(f"ratio try: {try ratio_steps(numerator: 6, divisor: 0)}")
+    show(f"ratio check: {check ratio_steps(numerator: 6, divisor: 0)}")
+    show("DONE")
+    return

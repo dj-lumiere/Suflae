@@ -161,20 +161,14 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
             WhileStatement s => s with
             {
                 Condition = RW(e: s.Condition),
-                Body = RewriteStmt(stmt: s.Body),
-                ElseBranch = s.ElseBranch is null
-                    ? null
-                    : RewriteStmt(stmt: s.ElseBranch)
+                Body = RewriteStmt(stmt: s.Body)
             },
             LoopStatement s => s with { Body = RewriteStmt(stmt: s.Body) },
             ExpandStatement s => s with { Body = RewriteStmt(stmt: s.Body) },
             EachStatement s => s with
             {
                 Iterable = RW(e: s.Iterable),
-                Body = RewriteStmt(stmt: s.Body),
-                ElseBranch = s.ElseBranch is null
-                    ? null
-                    : RewriteStmt(stmt: s.ElseBranch)
+                Body = RewriteStmt(stmt: s.Body)
             },
             WhenStatement s => s with
             {
