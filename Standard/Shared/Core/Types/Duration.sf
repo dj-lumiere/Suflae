@@ -18,7 +18,7 @@ obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, Sc
 ### :param nanoseconds: The nanosecond component within the current second.
 ### :returns: The resulting `Duration` value.
 @rf("normalize_duration")
-routine normalize_duration(seconds: S64, nanoseconds: S64) -> Duration
+routine normalize_duration!(seconds: S64, nanoseconds: S64) -> Duration
 
 ### Returns the zero duration.
 ### :returns: The resulting `Duration` value.
@@ -167,54 +167,57 @@ routine Duration.int_abs() -> Duration
 ### :param you: The addend.
 ### :returns: The combined `Duration`.
 @rf("Duration.add")
-routine Duration.add(you: Duration) -> Duration
+routine Duration.add!(you: Duration) -> Duration
 
 ### Returns `me - you`, subtracting `you` from this duration and normalizing.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `Duration`.
 @rf("Duration.sub")
-routine Duration.sub(you: Duration) -> Duration
+routine Duration.sub!(you: Duration) -> Duration
 
 ### Returns the negated value.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.neg")
-routine Duration.neg() -> Duration
+routine Duration.neg!() -> Duration
 
 ### Returns this value scaled by `factor`.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.scale")
-routine Duration.scale(factor: S64) -> Duration
+routine Duration.scale!(factor: S64) -> Duration
 
 ### Returns the product of this value and the other value.
 ### :param factor: The scale factor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.mul")
-routine Duration.mul(factor: S64) -> Duration
+routine Duration.mul!(factor: S64) -> Duration
 
-### Returns how many times `you` fits into this duration (floor division).
+### Returns how many times `you` fits into this duration. Like integer `//`, the remainder this leaves is
+### never negative.
 ### :param you: The divisor duration.
 ### :returns: The integer quotient as `S64`.
+### :throws: {DivisionByZeroError} when `you` is zero.
 @rf("Duration.floordiv")
-routine Duration.floordiv(you: Duration) -> S64
+routine Duration.floordiv!(you: Duration) -> S64
 
-### Returns the duration remainder after floor-dividing by `you`.
+### Returns what is left after `me // you`. Like integer `%`, it is never negative.
 ### :param you: The divisor duration.
 ### :returns: The remaining `Duration`.
+### :throws: {DivisionByZeroError} when `you` is zero.
 @rf("Duration.mod")
-routine Duration.mod(you: Duration) -> Duration
+routine Duration.mod!(you: Duration) -> Duration
 
 ### Returns this duration divided by `divisor`.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.div_by")
-routine Duration.div_by(divisor: S64) -> Duration
+routine Duration.div_by!(divisor: S64) -> Duration
 
 ### Returns the quotient of this value and the other value.
 ### :param divisor: The divisor to apply.
 ### :returns: The resulting `Duration` value.
 @rf("Duration.floordiv")
-routine Duration.floordiv(divisor: S64) -> Duration
+routine Duration.floordiv!(divisor: S64) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
