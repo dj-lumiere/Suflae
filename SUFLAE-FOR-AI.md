@@ -497,6 +497,10 @@ routine Account.deposit(amount: Integer)                       # member routine,
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Agent](...)` defers a call into an `Agent[T]` (§16).
+- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
+  the `@test`/`@case`/`@time_limit`/`@memory_limit`/`@skip`/`@bench` family, which the test runner does not run yet,
+  …). Any other name is SF-G221, and a misspelling names the close one. There is no `@deprecated` and no
+  `@initonly`.
 
 ## 10. Records, entities, choices, flags, variants
 
