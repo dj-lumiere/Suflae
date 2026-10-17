@@ -499,12 +499,12 @@ routine Account.deposit(amount: Integer)                       # member routine,
 - Any routine can run concurrently: `f.to[Agent](...)` defers a call into an `Agent[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
   `@test`/`@case`/`@skip`/`@time_limit`, …). Any other name is SF-G221, and a misspelling names the close one. There
-  is no `@deprecated`, no `@initonly` and no `@bench` yet. `@memory_limit` is accepted, but a test with it fails (not
-  measured yet).
+  is no `@deprecated`, no `@initonly` and no `@bench` yet.
 - **Routine tests.** `suflae test` builds a file once per `@test` routine, calling it in place of the program's own
   statements: once per `@case(input: (a, b), output: r)` (arguments in parameter order, the result compared with
   `==`), or once with no arguments when there is no case. `@skip("reason")` reports it skipped, `@time_limit(1s)`
-  stops it. Lines read `ok    file::routine`.
+  stops it (units `ns us ms s m h d w`), `@memory_limit(64kib)` fails it when the program holds more memory than that
+  at any point (units `b kb mb gb kib mib gib`). Lines read `ok    file::routine`.
 
 ## 10. Records, entities, choices, flags, variants
 
