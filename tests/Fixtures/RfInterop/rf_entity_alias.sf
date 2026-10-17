@@ -1,0 +1,8 @@
+import Tally
+
+# A Counter from the `.rf` module has one holder: keeping it under a second name is a build error.
+routine start()
+    var xs = List[Text]()
+    var c = Counter(n: 0, names: xs.to[RF::List]())
+    var d = c
+    d.bump(name: "x")

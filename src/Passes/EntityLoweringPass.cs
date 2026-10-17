@@ -915,7 +915,7 @@ internal sealed class EntityLoweringPass
             : gmce;
         if (gmce.ResolvedType is EntityTypeSymbol gEntity &&
             (IsSuflaeRealmEntity(entity: gEntity) || !IsRfRealmRef(callee: gmce.Object)) &&
-            !IsRazorForgeEntity(entity: gEntity))
+            !IsRazorForgeEntity(entity: gEntity) && !AsksForRazorForgeType(typeArguments: gmce.TypeArguments, entity: gEntity))
         {
             return WrapInRoam(inner: loweredG, entity: gEntity);
         }
@@ -1234,6 +1234,16 @@ internal sealed class EntityLoweringPass
     private static bool IsSuflaeRealmEntity(EntityTypeSymbol entity)
     {
         return ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Realm != TypeModel.Realms.Shared;
+    }
+
+    // A call that names the RazorForge type it makes (`xs.to[RF::List]()`) hands back that world's value, which keeps
+    // its single holder: wrapping it would hand a handle to code that expects the entity itself.
+    private static bool AsksForRazorForgeType(List<TypeExpression> typeArguments, EntityTypeSymbol entity)
+    {
+        string bareName = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).BareName;
+        return entity.Realm == TypeModel.Realms.Shared && typeArguments.Any(predicate: t =>
+            t.Realm == TypeModel.Realms.Shared &&
+            (t.Name == bareName || t.Name.EndsWith(value: "." + bareName, comparisonType: StringComparison.Ordinal)));
     }
 
     private static bool IsRfRealmRef(Expression callee)

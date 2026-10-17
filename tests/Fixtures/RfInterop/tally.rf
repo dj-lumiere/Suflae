@@ -1,0 +1,11 @@
+entity Counter
+    n: S64
+    names: List[Text]
+
+routine Counter.bump(name: Text)
+    me.n += 1
+    me.names.add_last(name)
+    return
+
+routine Counter.total() -> S64
+    return me.n

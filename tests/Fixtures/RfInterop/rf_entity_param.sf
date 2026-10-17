@@ -1,0 +1,10 @@
+import Tally
+
+# A Counter from the `.rf` module may not be a parameter, even written without `RF::`.
+routine touch(c: Counter)
+    c.bump(name: "x")
+
+routine start()
+    var xs = List[Text]()
+    var c = Counter(n: 0, names: xs.to[RF::List]())
+    touch(c: c)

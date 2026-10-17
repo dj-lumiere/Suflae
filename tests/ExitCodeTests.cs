@@ -88,13 +88,48 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "Range step zero error", actualString: stdout + stderr);
     }
 
-    private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
+    /// <summary>An entity from an imported `.rf` module works as a local and as a member variable of a Suflae entity:
+    /// its routines are built as RazorForge code and it is released once.</summary>
+    [Fact]
+    public void RazorForgeEntity_UsedFromSuflae_RunsAndIsReleasedOnce()
     {
-        string sfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ExitCode", fixture]);
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_use.sf", folder: "RfInterop");
+
+        Assert.True(condition: exit == 0,
+            userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Equal(expected: "2\n12\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
+    }
+
+    /// <summary>A parameter written as a bare `.rf` entity name is SF-S439, as `RF::Counter` is.</summary>
+    [Fact]
+    public void RazorForgeEntity_BareNameParameter_IsS439()
+    {
+        (int exit, string stdout, string stderr) =
+            RunFixture(fixture: "rf_entity_param.sf", folder: "RfInterop", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "SF-S439", actualString: stdout + stderr);
+    }
+
+    /// <summary>Keeping a `.rf` entity under a second name is SF-S413: both names would release it.</summary>
+    [Fact]
+    public void RazorForgeEntity_SecondName_IsS413()
+    {
+        (int exit, string stdout, string stderr) =
+            RunFixture(fixture: "rf_entity_alias.sf", folder: "RfInterop", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "SF-S413", actualString: stdout + stderr);
+    }
+
+    private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
+        string verb = "buildandrun")
+    {
+        string sfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]);
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: sfPath), "buildandrun", sfPath },
+            ArgumentList = { TestHelpers.ToolchainDll(sourcePath: sfPath), verb, sfPath },
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,

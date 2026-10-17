@@ -1,0 +1,21 @@
+import Tally
+
+# A Counter from the `.rf` module, used as a local and as a member variable of a Suflae entity.
+entity Board
+    counter: Counter
+
+routine Board.hit()
+    me.counter.bump(name: "hit")
+
+routine start()
+    var xs = List[Text]()
+    var c = Counter(n: 0, names: xs.to[RF::List]())
+    c.bump(name: "a")
+    c.bump(name: "b")
+    show(c.total())
+    var board = Board(counter: Counter(n: 10, names: xs.to[RF::List]()))
+    board.hit()
+    var same = board
+    same.hit()
+    show(board.counter.total())
+    show(board.counter.names.count())
