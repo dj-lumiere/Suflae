@@ -677,6 +677,9 @@ routine start()
   a build error. `is NopeError as e` takes only that error and binds it as a `NopeError` (its member variables
   are readable); `is Crashables as e` takes any error, so write it after the specific ones; `else as e` after the
   other arms binds whatever is left. `x is NopeError` also works as an expression.
+- When the success value is itself a variant, the arms may name the types it holds instead of the whole value
+  (`is Deposit as d`, `is Withdraw as w` on `check parse(...)`), and together they must name every one of them.
+  The same holds on a plain variant that holds another variant.
 - **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `!` routine
   as if `is Crashables as e => throw e` were written (the caller receives it), anywhere else the program
   crashes loudly. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
