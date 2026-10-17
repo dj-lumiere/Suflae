@@ -1,0 +1,28 @@
+module Tests/StdlibSf/RethrowRecoverApi
+
+# A caught error thrown again inside a recovered call: the arm that caught it can still show it, and the recovery
+# keyword above takes the same error. The error the arm read stays alive until the throw hands it on.
+
+crashable DeepError
+    reason: Text
+
+routine DeepError.crash_message() -> Text
+    return f"deep failure: {me.reason}"
+
+routine innermost!(n: Integer) -> Integer
+    if n > 2
+        throw DeepError(reason: f"n is {n}")
+    return n
+
+routine helper!(n: Integer) -> Integer
+    when check innermost(n: n)
+        is Integer as value => return value
+        is Crashables as failure =>
+            show(f"caught: {failure}")
+            throw failure
+
+routine start()
+    show(f"try: {try helper(n: 5)}")
+    show(f"check: {check helper(n: 5)}")
+    show(f"ok: {check helper(n: 1)}")
+    return
