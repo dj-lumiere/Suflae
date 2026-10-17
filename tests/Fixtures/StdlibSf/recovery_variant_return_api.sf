@@ -19,21 +19,22 @@ routine parse!(word: Text) -> Command
         return Withdraw(amount: 3)
     throw InvalidValueError(input: word, target: "Command")
 
-var kept = check parse(word: "d")
-when kept
-    is Command as c =>
-        show(c)
-    is Crashables as e =>
-        show("bad")
-when try parse(word: "x")
-    is Command as c =>
-        show(c)
-    is None =>
-        show("none")
-when check parse(word: "w")
-    is Deposit as d =>
-        show(f"check deposit {d.amount}")
-    is Withdraw as w =>
-        show(f"check withdraw {w.amount}")
-    is Crashables as e =>
-        show("check bad")
+routine start()
+    var kept = check parse(word: "d")
+    when kept
+        is Command as c =>
+            show(c)
+        is Crashables as e =>
+            show("bad")
+    when try parse(word: "x")
+        is Command as c =>
+            show(c)
+        is None =>
+            show("none")
+    when check parse(word: "w")
+        is Deposit as d =>
+            show(f"check deposit {d.amount}")
+        is Withdraw as w =>
+            show(f"check withdraw {w.amount}")
+        is Crashables as e =>
+            show("check bad")

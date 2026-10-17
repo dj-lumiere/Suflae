@@ -1,0 +1,53 @@
+module Tests/StdlibSf/AgentsSharedEntityApi
+
+# Two agents changing the same entity at once. A compound assignment on a member variable keeps every update, and
+# an argument that reads another entity's member variable doesn't hold that entity while the routine runs, so two
+# agents never wait for each other forever.
+
+import IO/Console
+
+entity Board
+    score: S64
+    total: Decimal
+
+routine add_points(board: Board, times: S64)
+    each i in 0 til times
+        board.score += 1
+        board.total += 0.5
+
+entity Account
+    member: Text
+    balance: Decimal
+
+entity Book
+    lines: List[Text]
+
+routine Book.add(account: Account, amount: Decimal, note: Text)
+    account.balance += amount
+    me.lines.add_last(f"{account.member} {note}")
+
+routine pay(book: Book, payer: Account, payee: Account, times: S64)
+    each i in 0 til times
+        book.add(account: payer, amount: -1, note: f"to {payee.member}")
+        book.add(account: payee, amount: 1, note: f"from {payer.member}")
+
+routine start()
+    var board = Board(score: 0, total: 0)
+    var left = agent add_points(board: board, times: 2000)
+    var right = agent add_points(board: board, times: 2000)
+    left.start_now()
+    right.start_now()
+    left.retrieve()
+    right.retrieve()
+    show(f"{board.score} {board.total}")
+
+    var book = Book(lines: List[Text]())
+    var mina = Account(member: "mina", balance: 0)
+    var joon = Account(member: "joon", balance: 0)
+    var there = agent pay(book: book, payer: mina, payee: joon, times: 500)
+    var back = agent pay(book: book, payer: joon, payee: mina, times: 300)
+    there.start_now()
+    back.start_now()
+    there.retrieve()
+    back.retrieve()
+    show(f"{book.lines.count()} {mina.balance} {joon.balance}")
