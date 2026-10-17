@@ -1,22 +1,27 @@
 module IO/File
 
 import IO/Errors
-import IO/FileSystem
 
 # Suflae's surface of the directory listings: Suflae lists. A Suflae program calls these in place of the
-# RazorForge routines of the same names.
+# shared routines of the same names.
 
 ### Returns the names of the directory's entries.
+### :param at: The directory.
+### :returns: The entry names.
 ### :throws: {IOError} when the directory cannot be listed.
-routine Directory.list!() -> List[Text]
-    return me.list().to[List[Text]]()
+common routine FileManager.list!(at: Directory) -> List[Text]
+    return FileManager.list(at: at).to[List[Text]]()
 
 ### Returns the directory's entries.
+### :param at: The directory.
+### :returns: The entries.
 ### :throws: {IOError} when the directory cannot be listed.
-routine Directory.entries!() -> List[DirEntry]
-    return me.entries().to[List[DirEntry]]()
+common routine FileManager.entries!(at: Directory) -> List[DirEntry]
+    return FileManager.entries(at: at).to[List[DirEntry]]()
 
 ### Returns the paths of everything under the directory, at any depth. Symbolic links are not followed.
+### :param at: The directory.
+### :returns: The full paths.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
-routine Directory.walk!() -> List[Text]
-    return me.walk().to[List[Text]]()
+common routine FileManager.walk!(at: Directory) -> List[Text]
+    return FileManager.walk(at: at).to[List[Text]]()

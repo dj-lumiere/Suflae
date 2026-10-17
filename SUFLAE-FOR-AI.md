@@ -121,8 +121,8 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 `preset` or `global`) of module `Foo`. Always available without an import: `Core` (the basic types,
 `List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, `Mailbox`), `Integer`, console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`, `IO/FileSystem`
-(path strings), `Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
+`PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`,
+`Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
 already in the prelude (many fixtures write `import IO/Console`) is harmless.
 
 ## 4. Naming and vocabulary
@@ -879,18 +879,23 @@ routine start()
   failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Integer, Integer) = ask()`,
   `"3 4".to[(Integer, Integer)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
   `ask_lines()`, `ask_words()`.
-- Files are values that name a path (no I/O happens at construction): `File(at: "notes.txt")` with
-  `exists()`, `read_text()`, `write_text(content:)`, `size()`, `extension()` (no leading dot), `parent()`,
-  `copy_to(...)`, `move_to(...)`, `delete()`, `touch()`; `Directory(at: "data")` with `exists()`,
-  `create()`, `create_all()`, `list()`, `entries()`, `walk()`, `file(name:)`, `subdir(name:)`. Routines
-  that touch the disk and can fail (`size`, `delete`, `list`, …) are failable: recover with
-  `try`/`check`. `current_dir()`, `home_dir()`, `temp_dir()` are free routines. Pure path-string helpers
-  (`join_path(a:, b:)`, `file_name`, `extension`, …) live in `import IO/FileSystem`.
-- `read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
+- Files: `FileManager` is the one place that touches the disk, its routines called on the type. `File(at:
+  "notes.txt")` and `Directory(at: "data")` only say where (no I/O at construction), with path members `name`,
+  `stem`, `extension` (no leading dot), `parent`, `with_extension(ext:)`, `with_name(name:)`, `file(name:)`,
+  `subdir(name:)`. `FileManager.read_text(at:)`, `write_text(at:, content:)`, `append_text`, `read_bytes`,
+  `write_bytes`, `open_read`/`open_write`/`open_append`, `size`, `metadata`, `exists`, `is_file`, `is_directory`,
+  `delete`, `delete_all`, `move(from:, to:)`, `copy(from:, to:)`, `list`, `entries`, `walk`, `current_directory()`,
+  `home_directory()`, `temp_directory()`. **A file must exist before it is read, written or opened**: a missing one
+  is an `IOError`, nothing is created silently. `FileManager.make_file(at:, replacing: false)` makes one (an
+  existing file is an `IOError` unless `replacing: true`, which empties it), `make_directory(at:, parents: false)`
+  makes a directory. `move`/`copy` refuse an existing destination unless `replacing: true`. There is no `touch`
+  and no `IO/FileSystem`. Failures are recovered with `try`/`check`.
+- `FileManager.read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
 - **`using`** binds a resource for a block and releases it at the block's end, however the block is left:
 
 ```suflae
-using File(at: "out.txt").open_write() as sink
+var out = FileManager.make_file(at: File(at: "out.txt"), replacing: true)
+using FileManager.open_write(at: out) as sink
     sink.store(data: "hello\n".encode_as_utf8())
 ```
 
