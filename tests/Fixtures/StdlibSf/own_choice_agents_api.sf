@@ -33,11 +33,11 @@ routine names(colors: List[Color]) -> Text
 routine start()
     show(f"colors={names(colors: Color.all_cases())}count={Color.count() * 10}")
     show(f"perms={Perm.all_cases().count()} count={Perm.count()}")
-    var jobs = [agent fetch(id: 1), agent fetch(id: 2), agent fetch(id: 3)]
+    var jobs = [fetch.to[Agent](id: 1), fetch.to[Agent](id: 2), fetch.to[Agent](id: 3)]
     show(f"gather={jobs.gather()}")
-    var racers = [agent fetch(id: 4), agent fetch(id: 5)]
+    var racers = [fetch.to[Agent](id: 4), fetch.to[Agent](id: 5)]
     show(f"race={racers.race() > 0}")
-    var stoppers = [agent slow(id: 6), agent slow(id: 7)]
+    var stoppers = [slow.to[Agent](id: 6), slow.to[Agent](id: 7)]
     stoppers.cancel_all()
     show(f"cancel={stoppers[0].is_done()} {stoppers[1].is_done()}")
     show("DONE")

@@ -87,7 +87,7 @@ routine start()
     show(f"box_of_box: {outer.item.item + 1}")
 
     # Agents gathered from a literal held in a name, inside an f-string hole.
-    var jobs = [agent fetch(id: 1), agent fetch(id: 2)]
+    var jobs = [fetch.to[Agent](id: 1), fetch.to[Agent](id: 2)]
     show(f"gather_in_hole: {jobs.gather()}")
 
     # An f-string hole inside a `when` arm reads `is` as a test.

@@ -14,7 +14,7 @@ routine produce(q: Mailbox[Integer], n: Integer) -> Integer
 
 routine start()
     var q = Mailbox[Integer](capacity: 2)
-    var job = agent produce(q: q, n: 5)
+    var job = produce.to[Agent](q: q, n: 5)
     job.start_now()
     var first = q.remove_first()
     var total = first

@@ -21,28 +21,28 @@ routine checked!(n: Integer) -> Integer
     return n
 
 routine start()
-    var now = agent add(a: 1, b: 2)
+    var now = add.to[Agent](a: 1, b: 2)
     now.start_now()
     show(f"now: {now.retrieve()}")
 
-    var waiting = agent add(a: 7, b: 8)
+    var waiting = add.to[Agent](a: 7, b: 8)
     show(f"waiting: {waiting.retrieve()}")
 
     var x = 40
-    var early = agent add(a: x, b: 2)
+    var early = add.to[Agent](a: x, b: 2)
     x = 0
     show(f"arguments now: {early.retrieve()}")
 
     var p = Pair(a: 2, b: 3)
-    show(f"member: {(agent p.sum()).retrieve()}")
+    show(f"member: {p.sum.to[Agent]().retrieve()}")
 
-    var jobs = [agent add(a: 1, b: 1), agent add(a: 2, b: 2), agent add(a: 3, b: 3)]
+    var jobs = [add.to[Agent](a: 1, b: 1), add.to[Agent](a: 2, b: 2), add.to[Agent](a: 3, b: 3)]
     show(f"gather: {jobs.gather()}")
 
-    var failing = try agent checked(n: -1)
-    show(f"try agent: {failing.retrieve()}")
+    var failing = checked.to[Agent](n: -1)
+    show(f"try retrieve: {try failing.retrieve()}")
 
-    var twice = agent add(a: 1, b: 1)
+    var twice = add.to[Agent](a: 1, b: 1)
     twice.start_now()
     when check twice.start_now()
         is AgentStartError as e => show(f"second start: {e.crash_message()}")

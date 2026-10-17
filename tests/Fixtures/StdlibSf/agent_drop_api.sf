@@ -14,7 +14,7 @@ routine spin(stopped: Atomic[S64]) -> Integer
     return turns
 
 routine leave_running(stopped: Atomic[S64])
-    var job = agent spin(stopped: stopped)
+    var job = spin.to[Agent](stopped: stopped)
     job.start_now()
     waitfor(5ms)
 
@@ -22,7 +22,7 @@ routine start()
     var stopped = Atomic[S64](initial: 0)
     leave_running(stopped: stopped)
     show(f"after scope: {stopped.load()}")
-    var jobs = [agent spin(stopped: stopped), agent spin(stopped: stopped)]
+    var jobs = [spin.to[Agent](stopped: stopped), spin.to[Agent](stopped: stopped)]
     jobs[0].start_now()
     waitfor(5ms)
     jobs = []

@@ -29,7 +29,7 @@ object: it has identity, compared with `===`.
 
 The second axis is **machine visibility**. Suflae hides the machine. Numbers are `Integer`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
-memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `agent` calls
+memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Agent](args)`
 whose work the runtime schedules, and shared entities are locked for you. A Suflae program has no
 machine-level code at all: no `danger` blocks, no `dangerous` routines, no foreign `C::` routines. C is reached
 through a `.rf` module the program imports (section 18).
@@ -79,7 +79,7 @@ through a `.rf` module the program imports (section 18).
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `agent`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
+    `preset`, `each`, `when`, `to[Agent]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -496,7 +496,7 @@ routine Account.deposit(amount: Integer)                       # member routine,
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
   `nums.select(transform: double)`.
-- Any routine can run concurrently: `agent f(...)` defers a call into an `Agent[T]` (§16).
+- Any routine can run concurrently: `f.to[Agent](...)` defers a call into an `Agent[T]` (§16).
 
 ## 10. Records, entities, choices, flags, variants
 
@@ -891,8 +891,8 @@ using File(at: "out.txt").open_write() as sink
 
 ## 16. Concurrency
 
-Any routine can run concurrently. The keyword **`agent`** before a call computes the call's arguments now
-(and a receiver that is a value, as in `agent list.sum()`), defers the call into an `Agent[T]`, and starts
+Any routine can run concurrently. **`f.to[Agent](args)`** computes the arguments now (and a receiver that is a
+value, as in `p.total.to[Agent]()`), defers the call into an `Agent[T]`, and starts
 nothing. **Nothing runs until a verb starts it.** Where the work runs is the runtime's business.
 
 ```suflae
@@ -901,31 +901,31 @@ routine fetch(id: Integer) -> Integer
     return id * 10
 
 routine start()
-    var a = agent fetch(id: 1)           # Agent[Integer], not started
+    var a = fetch.to[Agent](id: 1)           # Agent[Integer], not started
     a.start_now()                        # starts it now
     show(f"one => {a.retrieve()}")       # wait for the value
 
-    var jobs = [agent fetch(id: 2), agent fetch(id: 3)]
+    var jobs = [fetch.to[Agent](id: 2), fetch.to[Agent](id: 3)]
     var results = jobs.gather()          # start both, wait for all
     show(f"{results[0]} {results[1]}")
     return
 ```
 
-- `agent` takes the whole call chain after it, like `try`: `agent f(x).retrieve()` defers `.retrieve()` too.
-  To start or collect at once, parenthesize: `(agent f(x)).retrieve()`, `(agent f(x)).start_now()`.
-- With a recovery keyword the recovery comes first and works inside the work: `try agent f()` is
-  `Agent[Maybe[T]]`, `check agent f()` is `Agent[Check[T]]`.
+- The routine is named, not called, and the conversion takes the routine's own arguments. Only that routine is the
+  work: `f.to[Agent](x).retrieve()` makes the Agent and collects it at once. `agent f(x)` is the old spelling
+  (SF-G220, `migrate --step agent`).
+- A failure is recovered where the Agent is collected: `try job.retrieve()`, `check job.retrieve()`.
 - An agent of a routine that returns nothing is `Agent[None]`, and the type can be inferred:
-  `var jobs = [agent work(), agent work()]` then `jobs.gather()`.
-- `agent.start_now()` starts the work now. Collect it later with `retrieve()` or `gather()`.
-- `agent.retrieve()` waits for its value, starting it first if nothing has. Inside a job it parks (other
+  `var jobs = [work.to[Agent](), work.to[Agent]()]` then `jobs.gather()`.
+- `job.start_now()` starts the work now. Collect it later with `retrieve()` or `gather()`.
+- `job.retrieve()` waits for its value, starting it first if nothing has. Inside a job it parks (other
   jobs keep running).
 - A failure stays in its agent. A failure inside the work does not end the program where the work runs,
   and the other agents keep running. It surfaces where the agent is retrieved: `a.retrieve()` rethrows it
   (bare, it crashes loudly there like any failure), `check a.retrieve()` / `try a.retrieve()` recover it
-  (or `try agent f()` up front). The crash report's trace ends with `agent in start()` (the line of the
-  `agent` call) and `Thrown again at` names the `retrieve()` line.
-- `agent.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
+  The crash report's trace ends with `agent in start()` (the line that made the
+  Agent) and `Thrown again at` names the `retrieve()` line.
+- `job.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
   at its next wait (`waitfor`, `retrieve`, a channel) or through `cancellation_requested()`, and stops
   there. Retrieving a cancelled agent waits for it to stop, then crashes with `CancelRequested` (the name
   carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
@@ -941,13 +941,13 @@ routine start()
   collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
 - When the last holder of an agent lets go of it before anything retrieved it, its work is cancelled and waited
   for (work nothing started never runs).
-- `agent.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
+- `job.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
   `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
   one already started with `start_now()` is refused with `AgentStartError`.
-- `agent.is_done()` and `agent.is_running()` are snapshots for polling.
+- `job.is_done()` and `job.is_running()` are snapshots for polling.
 - Free routines: `waitfor(duration)` pauses (parks a job), `yield_now()` lets other jobs run,
   `cancellation_requested()` tells a long loop to stop early. Cancellation is cooperative.
-- An agent that nothing starts never runs. `agent f()` as a statement is warning
+- An agent that nothing starts never runs. `f.to[Agent]()` as a statement is warning
   SF-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
 - Jobs that talk to each other (over a channel) must all be started before you wait on one:
   `producer.start_now()` first, then `consumer.retrieve()`.
@@ -971,15 +971,15 @@ routine slow(n: Integer) -> Integer
     return n
 
 routine start()
-    var bad = agent checked(n: -1)
-    var good = agent checked(n: 3)
+    var bad = checked.to[Agent](n: -1)
+    var good = checked.to[Agent](n: 3)
     bad.start_now()
     good.start_now()
     show(f"good: {good.retrieve()}")     # 3
     when check bad.retrieve()
         is Integer as v => show(f"bad: {v}")
         is Crashables as e => show(f"bad failed: {e.crash_message()}")
-    var running = agent slow(n: 1)
+    var running = slow.to[Agent](n: 1)
     running.start_now()
     running.cancel()
     when check running.retrieve()
@@ -1001,7 +1001,7 @@ routine produce(m: Mailbox[Integer], n: Integer) -> Integer
 
 routine start()
     var m = Mailbox[Integer](capacity: 2)
-    var job = agent produce(m: m, n: 5)
+    var job = produce.to[Agent](m: m, n: 5)
     job.start_now()
     var first = m.remove_first()
     var total = first
@@ -1165,7 +1165,7 @@ number). At most 20 are shown per batch.
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
-| SF-S642       | `agent` before a non-call, or over generic values   | put `agent` before a call with concrete types     |
+| SF-S642       | `to[Agent]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
 ## 22. Keywords
 
@@ -1188,7 +1188,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
   does nothing)
 - **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`
-- **Concurrency**: `agent`
+- **Concurrency**: `f.to[Agent](args)`
 - **Reserved, not usable in a program**: `danger` `dangerous`
 
 `!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
@@ -1226,7 +1226,7 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 ## 24. Status (do not generate as if shipped)
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
-nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, `agent`
+nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Agent
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and the basic `ObjectHacker`
 surface. The `StdlibSf` fixtures run in CI with their expected output.
 
