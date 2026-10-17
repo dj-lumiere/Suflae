@@ -1,0 +1,20 @@
+module Tests/StdlibSf/FileManagerApi
+
+import IO/Errors
+
+# FileManager in Suflae: a file is made before it is written, a missing one fails, and listings are Suflae lists.
+routine start()
+    var root = FileManager.make_directory(at: FileManager.temp_directory().subdir(name: "sf_fixture_file_manager"),
+        parents: true)
+    var notes = FileManager.make_file(at: root.file(name: "notes.txt"), replacing: true)
+    FileManager.write_text(at: notes, content: "hello")
+    show(FileManager.read_text(at: notes))
+    FileManager.make_file(at: root.file(name: "a.txt"), replacing: true)
+    show(FileManager.list(at: root).sorted())
+    show(FileManager.entries(at: root).count())
+    show(try FileManager.read_text(at: root.file(name: "missing.txt")))
+    when check FileManager.make_file(at: notes)
+        is File => show("made again")
+        is IOError => show("already exists")
+    FileManager.delete_all(at: root)
+    show(FileManager.exists(at: root))

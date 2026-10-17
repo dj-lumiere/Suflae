@@ -1,0 +1,6 @@
+hello
+["a.txt", "notes.txt"]
+2
+none
+already exists
+false
