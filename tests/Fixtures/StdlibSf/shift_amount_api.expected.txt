@@ -9,3 +9,4 @@
 16
 0
 30 [10, 7, 30]
+Index -2 is negative: positions count from 0

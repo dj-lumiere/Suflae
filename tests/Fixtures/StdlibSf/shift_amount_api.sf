@@ -28,3 +28,7 @@ routine start()
     var j: U8 = 2
     xs[i] = 7
     show(f"{xs[j]} {xs}")
+    var back: S64 = -2
+    when check xs[back]
+        is NegativeIndexError as e => show(e.crash_message())
+        else => show("other")
