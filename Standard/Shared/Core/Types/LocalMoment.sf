@@ -23,7 +23,7 @@ obeys Comparable, DurationAddable, DurationSubtractable
 ### :param offset: The UTC offset associated with the local civil time.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.from_local")
-common routine LocalMoment.from_local(
+common routine LocalMoment.from_local!(
     year: S64,
     month: S64,
     day: S64,
@@ -132,14 +132,14 @@ routine LocalMoment.to_utc() -> LocalMoment
 ### :param duration: The `duration` value.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.add_duration")
-routine LocalMoment.add_duration(duration: Duration) -> LocalMoment
+routine LocalMoment.add_duration!(duration: Duration) -> LocalMoment
 
 ### Returns this local moment shifted backward by `duration`.
 ### The stored offset is preserved.
 ### :param duration: The time span to subtract.
 ### :returns: The resulting `LocalMoment` value.
 @rf("LocalMoment.subtract_duration")
-routine LocalMoment.subtract_duration(duration: Duration) -> LocalMoment
+routine LocalMoment.subtract_duration!(duration: Duration) -> LocalMoment
 
 ### Returns the elapsed duration from `earlier` to this local moment.
 ### Offset differences do not affect the result because arithmetic is based on
@@ -147,25 +147,25 @@ routine LocalMoment.subtract_duration(duration: Duration) -> LocalMoment
 ### :param earlier: The earlier comparison local moment.
 ### :returns: The resulting `Duration` value.
 @rf("LocalMoment.elapsed_since")
-routine LocalMoment.elapsed_since(earlier: LocalMoment) -> Duration
+routine LocalMoment.elapsed_since!(earlier: LocalMoment) -> Duration
 
 ### Returns the local moment reached by advancing this one by `you`.
 ### :param you: The duration to advance by.
 ### :returns: The resulting `LocalMoment`.
 @rf("LocalMoment.add")
-routine LocalMoment.add(you: Duration) -> LocalMoment
+routine LocalMoment.add!(you: Duration) -> LocalMoment
 
 ### Returns the local moment reached by retreating this one by `you`.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `LocalMoment`.
 @rf("LocalMoment.sub")
-routine LocalMoment.sub(you: Duration) -> LocalMoment
+routine LocalMoment.sub!(you: Duration) -> LocalMoment
 
 ### Returns the elapsed time from `you` to this moment.
 ### :param you: The earlier moment to measure from.
 ### :returns: The `Duration` between the two moments.
 @rf("LocalMoment.sub")
-routine LocalMoment.sub(you: LocalMoment) -> Duration
+routine LocalMoment.sub!(you: LocalMoment) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
