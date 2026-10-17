@@ -30,3 +30,10 @@ when try parse(word: "x")
         show(c)
     is None =>
         show("none")
+when check parse(word: "w")
+    is Deposit as d =>
+        show(f"check deposit {d.amount}")
+    is Withdraw as w =>
+        show(f"check withdraw {w.amount}")
+    is Crashables as e =>
+        show("check bad")

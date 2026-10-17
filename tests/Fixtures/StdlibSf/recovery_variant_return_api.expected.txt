@@ -1,2 +1,3 @@
 Command(Deposit(amount: 5))
 none
+check withdraw 3
