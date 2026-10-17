@@ -1,0 +1,32 @@
+module Tests/StdlibSf/RecoveryVariantReturnApi
+
+import IO/Console
+# A failable routine that returns a variant and gives back one of its types directly (`return Deposit(...)`)
+# is wrapped into the variant under `check`, `try`, and in a recovered value kept in a `var`.
+
+record Deposit
+    amount: Integer
+record Withdraw
+    amount: Integer
+variant Command
+    Deposit
+    Withdraw
+
+routine parse!(word: Text) -> Command
+    if word == "d"
+        return Deposit(amount: 5)
+    if word == "w"
+        return Withdraw(amount: 3)
+    throw InvalidValueError(input: word, target: "Command")
+
+var kept = check parse(word: "d")
+when kept
+    is Command as c =>
+        show(c)
+    is Crashables as e =>
+        show("bad")
+when try parse(word: "x")
+    is Command as c =>
+        show(c)
+    is None =>
+        show("none")

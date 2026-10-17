@@ -1,0 +1,2 @@
+Command(Deposit(amount: 5))
+none
