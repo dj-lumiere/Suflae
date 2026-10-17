@@ -1,0 +1,31 @@
+module Tests/StdlibSf/TryNoResultApi
+
+# `try` on a routine that returns nothing gives true when the routine reaches its end, false when it fails.
+
+import IO/Console
+
+crashable TooBigError
+    n: S64
+
+routine TooBigError.crash_message() -> Text
+    return f"{me.n} too big"
+
+routine check_size!(n: S64)
+    if n > 10
+        throw TooBigError(n: n)
+
+entity Shelf
+    count: S64
+
+routine Shelf.put!(n: S64)
+    check_size(n: n)
+    me.count += n
+
+routine start()
+    show(try check_size(n: 3))
+    show(try check_size(n: 30))
+    var shelf = Shelf(count: 0)
+    if try shelf.put(n: 4)
+        show(f"put {shelf.count}")
+    show(try shelf.put(n: 40))
+    show(shelf.count)
