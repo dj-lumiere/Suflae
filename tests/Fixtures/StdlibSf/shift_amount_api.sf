@@ -1,0 +1,20 @@
+module Tests/StdlibSf/ShiftAmountApi
+
+# A shift amount can be a literal, an Integer variable or an expression, on an Integer or a fixed-width number.
+
+import IO/Console
+
+routine start()
+    var n = 2
+    show(1 << n)
+    show(1 << n + 1)
+    show(64 >> n)
+    show(-5 >> 1)
+    var m = 5
+    m <<= n
+    show(m)
+    var x: S64 = 1
+    show(x << n)
+    var u: U8 = 128
+    show(u >> n)
+    show(u >>> n + 5)

@@ -28,6 +28,26 @@ routine Integer.shl(bits: Integer) -> Integer
 routine Integer.shr(bits: Integer) -> Integer
     return me.shr(bits: bits.to[S64]().to[S32]())
 
+### Shifts this value left by `bits` positions (`me << bits`).
+### :param bits: The number of bit positions to shift, 0 or more.
+### :returns: The resulting `Integer` value.
+routine Integer.ashl(bits: Integer) -> Integer
+    return me.ashl(bits: bits.to[U64]().to[U32]())
+
+### Shifts this value right by `bits` positions (`me >> bits`): `floor(me / 2^bits)`, so `-5 >> 1` is `-3`.
+### :param bits: The number of bit positions to shift, 0 or more.
+### :returns: The resulting `Integer` value.
+routine Integer.ashr(bits: Integer) -> Integer
+    return me.ashr(bits: bits.to[U64]().to[U32]())
+
+### Shifts this value right by `bits` positions filling with zeros (`me >>> bits`). An `Integer` has no fixed
+### width, so a negative value has no zero-filled form: this is `>>` for a value that is not negative.
+### :param bits: The number of bit positions to shift, 0 or more.
+### :returns: The resulting `Integer` value.
+### :throws: {NumericDomainError} when this value is negative.
+routine Integer.lshr!(bits: Integer) -> Integer
+    return me.lshr(bits: bits.to[U64]().to[U32]())
+
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Integer` value.
