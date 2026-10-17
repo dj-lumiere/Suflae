@@ -190,6 +190,10 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   `U8_MAX`, `U64_MAX`.
 - Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
   `1gb`, `1gib`.
+- Duration `//` and `%` leave a remainder that is never negative (`-10s // 3s` is `-4`), and overflow or `// 0s`
+  crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
+  hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
+  start no new line after a final line ending.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
   `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
