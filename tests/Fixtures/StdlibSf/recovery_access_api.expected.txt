@@ -8,7 +8,7 @@ try score(ann): 30
 check score(bob): Key not found: bob
 grab score(empty): nope: empty
 try narrow(100): 100
-grab narrow(300): Integer overflow: value does not fit in the target type.
+grab narrow(300): The value does not fit in the target type.
 try parsed(42): 42
 grab parsed(4x): Cannot parse "4x" as Integer.
 try last_plus_one(nums): 6

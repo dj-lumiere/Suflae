@@ -194,6 +194,9 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
+- A crash trace shows the program's types (`Core.List[Numerics.Integer]`, never a handle type) and a library frame as
+  `(standard library)`, the crash line being where the program called in. A lambda may capture an entity (it keeps
+  one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Iterable[T]` user type gets its `Iter` from `iter()`, so IterTools adapters walk it.
   `when_interrupted` works.
