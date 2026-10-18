@@ -269,6 +269,7 @@ public partial class SuflaeLexer
             // peek/poke, addresses), so a Suflae library can manage its own memory.
             [key: "danger"] = TokenType.Danger,
             [key: "dangerous"] = TokenType.Dangerous,
+            [key: "failable"] = TokenType.Failable,
 
             // `needs P everywhere` — the structural-conferral gate of the protocol model (a `needs`-clause
             // modifier, NOT a reflection construct). It lives with `needs`/`obeys`/`protocol`, which SF
