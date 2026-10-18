@@ -117,6 +117,29 @@ public sealed class LspServerTests
         Assert.DoesNotContain(expected: "steal", collection: labels);
     }
 
+    [Theory]
+    [InlineData("routine start()\n    var m = Moment.epoch()\n    return\n", "Moment", "absolute point in time")]
+    [InlineData("routine start()\n    var d = Duration.zero()\n    return\n", "Duration", "span of time")]
+    [InlineData("### Two numbers side by side.\nrecord Pair\n    a: S64\n    b: S64\n\nroutine start()\n    var p = Pair(a: 1, b: 2)\n    return\n", "Pair(", "side by side")]
+    public void Hover_OverType_ShowsItsDocComment(string source, string needle, string doc)
+    {
+        // A Suflae standard library type is shown with `@rf(...)` between its doc comment and its header.
+        string dir = Directory.CreateTempSubdirectory(prefix: "lsp_hover_").FullName;
+        string path = Path.Combine(path1: dir, path2: "main.sf");
+        File.WriteAllText(path: path, contents: source);
+        string uri = new System.Uri(uriString: path).AbsoluteUri;
+        (int line, int character) = LspTestHarness.PositionOf(text: source, needle: needle);
+        IReadOnlyList<JsonDocument> replies = LspTestHarness.Run(
+            LspTestHarness.DidOpen(uri: uri, text: source, languageId: "suflae"),
+            LspTestHarness.Positional(id: 9, method: "textDocument/hover", uri: uri, line: line, character: character),
+            Exit);
+
+        JsonElement? reply = LspTestHarness.ReplyWithId(replies: replies, id: 9);
+        Assert.NotNull(@object: reply);
+        Assert.True(condition: reply!.Value.GetRawText().Contains(value: doc),
+            userMessage: string.Join("\n", replies.Select(r => r.RootElement.GetRawText())));
+    }
+
     [Fact]
     public void SuflaeDocument_Analyzes()
     {

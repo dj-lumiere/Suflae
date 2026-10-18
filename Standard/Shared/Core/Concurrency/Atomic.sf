@@ -24,7 +24,6 @@ module Core
 ### unchecked — instantiating `Atomic[T]` on a non-integer `T` is a misuse.
 ###
 ### :typeparam T: The cell's element type (an atomic-capable scalar).
-### :see: {Guarded}, {Hijacked}
 @rf("Atomic")
 record Atomic[T]
 needs RecordType T
