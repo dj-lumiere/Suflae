@@ -45,6 +45,7 @@ routine Atomic[T].store(desired: T)
 ### :param desired: The replacement value.
 ### :returns: The previous value.
 @rf("Atomic.swap")
+@discardable
 routine Atomic[T].swap(desired: T) -> T
 
 ### Atomically installs `desired` iff the cell currently equals `expected`.
@@ -58,28 +59,33 @@ routine Atomic[T].compare_exchange(expected: T, desired: T) -> Bool
 ### :param delta: The increment to apply.
 ### :returns: The previous value.
 @rf("Atomic.fetch_add")
+@discardable
 routine Atomic[T].fetch_add(delta: T) -> T
 
 ### Atomically subtracts `delta`, returning the value before the subtraction. Integer `T` only.
 ### :param delta: The decrement to apply.
 ### :returns: The previous value.
 @rf("Atomic.fetch_sub")
+@discardable
 routine Atomic[T].fetch_sub(delta: T) -> T
 
 ### Atomically ANDs the cell with `mask`, returning the value before the update. Integer `T` only.
 ### :param mask: The bit mask to apply.
 ### :returns: The previous value.
 @rf("Atomic.fetch_and")
+@discardable
 routine Atomic[T].fetch_and(mask: T) -> T
 
 ### Atomically ORs the cell with `mask`, returning the value before the update. Integer `T` only.
 ### :param mask: The bit mask to apply.
 ### :returns: The previous value.
 @rf("Atomic.fetch_or")
+@discardable
 routine Atomic[T].fetch_or(mask: T) -> T
 
 ### Atomically XORs the cell with `mask`, returning the value before the update. Integer `T` only.
 ### :param mask: The bit mask to apply.
 ### :returns: The previous value.
 @rf("Atomic.fetch_xor")
+@discardable
 routine Atomic[T].fetch_xor(mask: T) -> T

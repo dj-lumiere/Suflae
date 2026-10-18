@@ -102,6 +102,7 @@ routine SortedSet[T].lacks(value: T) -> Bool
 ### Adds `value` unless it is already in the set.
 ### :param value: The value to add.
 ### :returns: `true` when the value was new.
+@discardable
 routine SortedSet[T].add(value: T) -> Bool
     if me.tree.has_key(key: value)
         return false
@@ -111,6 +112,7 @@ routine SortedSet[T].add(value: T) -> Bool
 ### Removes `value` from the set if it is present.
 ### :param value: The value to remove.
 ### :returns: `true` if the value was found and removed; `false` if it was not present.
+@discardable
 routine SortedSet[T].remove(value: T) -> Bool
     return me.tree.remove(key: value)
 

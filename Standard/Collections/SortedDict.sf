@@ -134,6 +134,7 @@ secret routine SortedDict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
 ### Removes the entry for `key`.
 ### :param key: The key to remove.
 ### :returns: `true` if the key had an entry.
+@discardable
 routine SortedDict[TKey, TValue].remove(key: TKey) -> Bool
     return me.tree.remove(key: key)
 

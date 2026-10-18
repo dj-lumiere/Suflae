@@ -112,12 +112,14 @@ routine SortedList[T].add(value: T)
 ### Removes one occurrence of `value`.
 ### :param value: The value to remove.
 ### :returns: `true` if an occurrence was found and removed.
+@discardable
 routine SortedList[T].remove(value: T) -> Bool
     return me.tree.remove(key: value)
 
 ### Removes every occurrence of `value` from the list.
 ### :param value: The value whose every copy is removed.
 ### :returns: The number of elements that were removed.
+@discardable
 routine SortedList[T].remove_all(value: T) -> Integer
     var removed = 0
     while me.tree.remove(key: value)

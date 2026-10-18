@@ -69,6 +69,14 @@ through a `.rf` module the program imports (section 18).
    body is a build error (SF-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
 10. **A result you do not need takes no marker**: `seen.add(value: v)` on its own line simply drops the `Bool`.
+    A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
+    from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
+    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Atomic.fetch_*`/`swap`), which get none.
+    Other notes: `while true` / `until false` get SF-W304 with the quick fix "Write 'loop'", the body of
+    `while false` / `until true` gets SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
+    an error). Diagnostics may carry a fix the language server offers as a quick fix, and `suflae check --json`
+    writes all diagnostics as a JSON array (`file`, `line`, `column`, `severity`, `code`, `message`, `endLine?`,
+    `fix?` with 1-based edits).
 11. **A module-level `var` is an error (SF-S435).** Module-level mutable state is `global name: Type = init`
     (§6). Constants are `preset`.
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.

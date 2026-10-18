@@ -130,6 +130,7 @@ routine Set[T].lacks(value: T) -> Bool
 ### Adds `value` unless it is already in the set.
 ### :param value: The value to add.
 ### :returns: `true` when the value was new.
+@discardable
 routine Set[T].add(value: T) -> Bool
     if me.index.holds(slot: me.find_slot(value: value))
         return false
@@ -145,6 +146,7 @@ routine Set[T].add(value: T) -> Bool
 ### Removes `value` from the set.
 ### :param value: The value to remove.
 ### :returns: `true` when the value was in the set.
+@discardable
 routine Set[T].remove(value: T) -> Bool
     var slot = me.find_slot(value: value)
     if not me.index.holds(slot: slot)

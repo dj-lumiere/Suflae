@@ -179,6 +179,7 @@ secret routine Dict[TKey, TValue].add_new(key: TKey, value: TValue)
 ### Removes the entry of `key`.
 ### :param key: The key to remove.
 ### :returns: `true` when there was an entry.
+@discardable
 routine Dict[TKey, TValue].remove(key: TKey) -> Bool
     var slot = me.find_slot(key: key)
     if not me.index.holds(slot: slot)
