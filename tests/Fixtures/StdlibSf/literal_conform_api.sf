@@ -12,3 +12,5 @@ routine start()
     var ratio: B64 = 2
     var small: D64 = 7
     show(f"{price} {ratio} {small} {half(x: 5)}")
+    # Of the two `//` a Duration has, only the one taking a count fits a bare whole number.
+    show(1h // 4)

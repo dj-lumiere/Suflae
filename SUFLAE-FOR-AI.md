@@ -194,6 +194,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
+- A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
   `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
@@ -885,7 +886,9 @@ routine start()
 - Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Integer = ask()`,
   failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Integer, Integer) = ask()`,
   `"3 4".to[(Integer, Integer)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
-  `ask_lines()`, `ask_words()`.
+  `ask_lines()`, `ask_words()`. A blank line is `""`. At the end of the input `ask_line()`/`ask_word()` crash with
+  `EndOfInputError` (`IO/Errors`): read until the end with `when check ask_line()` + `is EndOfInputError => break`.
+  An `ask_line()` right after `ask_word()` skips the line end the word left.
 - Files: `FileManager` is the one place that touches the disk, its routines called on the type. `File(at:
   "notes.txt")` and `Directory(at: "data")` only say where (no I/O at construction), with path members `name`,
   `stem`, `extension` (no leading dot), `parent`, `with_extension(ext:)`, `with_name(name:)`, `file(name:)`,

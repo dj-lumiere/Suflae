@@ -15,3 +15,14 @@ crashable IOError
 ### :returns: The resulting `Text` value.
 @rf("IOError.crash_message")
 routine IOError.crash_message() -> Text
+
+### Represents the crashable raised when standard input has ended before a read found anything to read.
+@rf("EndOfInputError")
+crashable EndOfInputError
+    ### Stores the name of the routine that found the input ended.
+    reader: Text
+
+### Returns the message naming the routine that found the input ended.
+### :returns: The resulting `Text` value.
+@rf("EndOfInputError.crash_message")
+routine EndOfInputError.crash_message() -> Text
