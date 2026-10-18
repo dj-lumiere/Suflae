@@ -33,11 +33,6 @@ failable common routine LocalMoment.from_local(
     offset: Duration,
 ) -> LocalMoment
 
-### Returns the current instant with a zero UTC offset.
-### :returns: The resulting `LocalMoment` value.
-@rf("LocalMoment.now_utc")
-common routine LocalMoment.now_utc() -> LocalMoment
-
 ### Extracts the underlying UTC `Moment` from a `LocalMoment`.
 ### :returns: The resulting `Moment` value.
 @rf("LocalMoment.to")

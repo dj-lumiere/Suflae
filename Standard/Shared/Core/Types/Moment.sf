@@ -72,11 +72,6 @@ common routine Moment.epoch() -> Moment
 @rf("Moment.from_timestamp")
 common routine Moment.from_timestamp(seconds: S64) -> Moment
 
-### Returns the current UTC instant from the runtime clock.
-### :returns: The resulting `Moment` value.
-@rf("Moment.now")
-common routine Moment.now() -> Moment
-
 ### Returns the UTC calendar year of this moment.
 ### :returns: The resulting `S64` value.
 @rf("Moment.year")

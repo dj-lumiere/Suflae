@@ -201,7 +201,9 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   `1gb`, `1gib`.
 - Duration `//` and `%` leave a remainder that is never negative (`-10s // 3s` is `-4`), and overflow or `// 0s`
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
-  hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
+  hour 25). The time is read from `Clock`, called on the type: `Clock.now()` (a `Moment`), `Clock.monotonic()` (a
+  `Duration` that only goes forward, for measuring and deadlines), `CpuClock.now()` (processor time used). There is
+  no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
 - A crash trace shows the program's types (`Core.List[Numerics.Integer]`, never a handle type) and a library frame as
   `(standard library)`, the crash line being where the program called in. A lambda may capture an entity (it keeps
