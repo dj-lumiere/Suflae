@@ -18,10 +18,11 @@ When unsure, consult ground truth in the repo:
 ## 1. What Suflae is
 
 RazorForge and Suflae share one object model, one grammar and one standard library, and differ on two
-axes. The first is the **ownership dial: how many names one entity may have.** In Suflae, many. An
-`entity` is shared: `var b = a` makes a second name for the same object, passing it to a routine hands
-over another name for it, and memory is reclaimed by reference counting plus a cycle collector. Because
-names are free, Suflae has things a single-owner language cannot: module-level mutable state (`global`),
+axes. Data exists to be shared, and `record` and `entity` are the two ways: a record is shared by handing out
+copies, an entity is the one legitimate version everyone reaches. The first axis is **how an entity is
+reached**. In Suflae, through any number of names: `var b = a` makes a second name for the same object,
+passing it to a routine hands over another name for it, and memory is reclaimed by reference counting plus a
+cycle collector. Because names are free, Suflae has module-level mutable state (`global`),
 cyclic structures with no weak-reference annotations, and runtime checks where the builder cannot follow
 aliases (changing a collection while it is being looped over crashes at run time when the change is hidden
 behind a call). A `record` is a value: copied on assignment, no identity. An `entity` is the one-of-a-kind
@@ -1262,17 +1263,17 @@ keyword.
 
 ## 23. Relation to RazorForge and interop
 
-RazorForge is the same object model with the ownership dial at one name per entity (a single owner,
-explicit `steal` transfers, deterministic teardown at scope exit) and the machine visible (fixed-width
-numbers by default, OS threads, build-time reflection). Suflae turns the dial to many names and hides the
-machine. The two share the grammar and the standard library, which is written in RazorForge.
+RazorForge is the same object model where an entity lives in one place, reached by permission or through a
+manager (explicit `steal` hand-overs, deterministic teardown at scope exit), and the machine visible
+(fixed-width numbers by default, OS threads, build-time reflection). Suflae reaches an entity through any
+number of names and hides the machine. The two share the grammar and the standard library, which is written in RazorForge.
 
 A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may not import Suflae files.
 
 - **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Maybe` and `Range` are the same
   types in both languages.
 - **An entity keeps its language.** An entity declared in an imported `.rf` module stays a RazorForge
-  entity (single owner, no reference count); it is not shared like a Suflae entity. As a local, or as a
+  entity (kept in one place, no reference count); it is not shared like a Suflae entity. As a local, or as a
   member variable of a Suflae entity, it just works: construct it, call its routines (mutating ones
   included), and it is released once. It has one holder at a time: keeping it under a second name
   (`var d = c`), putting a named one into a member variable, or handing it to a `.rf` routine that
