@@ -8,13 +8,13 @@ module Numerics
 ### :returns: The quotient as a `Decimal`.
 ### :throws: {DivisionByZeroError} when `you` is zero, and {NumericOverflowError} when a side has more significant
 ###     digits than a `Decimal` holds exactly (34).
-routine Integer.truediv!(you: Integer) -> Decimal
+failable routine Integer.truediv(you: Integer) -> Decimal
     return me.exact_decimal().truediv(you: you.exact_decimal())
 
 ### This value as a `Decimal`, which holds it exactly: 34 significant digits, trailing zeros aside.
 ### :returns: The same value as a `Decimal`.
 ### :throws: {NumericOverflowError} when the value has more significant digits than a `Decimal` holds.
-secret routine Integer.exact_decimal!() -> Decimal
+secret failable routine Integer.exact_decimal() -> Decimal
     var digits = me.abs()
     var ten = 10
     if not digits.is_zero()

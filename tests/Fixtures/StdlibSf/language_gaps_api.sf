@@ -76,14 +76,14 @@ variant Command
     Deposit
     Report
 
-routine parse!(word: Text) -> Command
+failable routine parse(word: Text) -> Command
     if word == "deposit"
         return Deposit(amount: 2)
     if word == "report"
         return Report(title: "r")
     throw AbsentValueError()
 
-routine run!(word: Text)
+failable routine run(word: Text)
     when parse(word: word)
         is Deposit as d => show(f"deposit {d.amount}")
         is Report as r => show(f"report {r.title}")

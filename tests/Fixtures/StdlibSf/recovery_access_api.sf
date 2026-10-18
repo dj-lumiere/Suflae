@@ -12,29 +12,29 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-routine pick!(items: List[Integer], i: Integer) -> Integer
+failable routine pick(items: List[Integer], i: Integer) -> Integer
     if i < 0
         throw NopeError(what: "negative")
     var v = items[i]
     return v
 
-routine letter!(t: Text, i: Integer) -> Char
+failable routine letter(t: Text, i: Integer) -> Char
     if i < 0
         throw AbsentValueError()
     return t[i]
 
-routine score!(ages: Dict[Text, Integer], name: Text) -> Integer
+failable routine score(ages: Dict[Text, Integer], name: Text) -> Integer
     if name == ""
         throw NopeError(what: "empty")
     return ages[name] * 10
 
-routine narrow!(n: S64) -> S8
+failable routine narrow(n: S64) -> S8
     if n < 0
         throw AbsentValueError()
     var b = n.to[S8]()
     return b
 
-routine parsed!(t: Text) -> Integer
+failable routine parsed(t: Text) -> Integer
     if t == ""
         throw AbsentValueError()
     return t.to[Integer]()
@@ -43,7 +43,7 @@ routine parsed!(t: Text) -> Integer
 routine last_of(items: List[Integer]) -> Integer
     return items[items.count() - 1]
 
-routine last_plus_one!(items: List[Integer]) -> Integer
+failable routine last_plus_one(items: List[Integer]) -> Integer
     if items.count() > 1000
         throw AbsentValueError()
     return last_of(items: items) + 1

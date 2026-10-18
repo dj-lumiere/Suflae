@@ -59,7 +59,7 @@ routine alert[T](value: T, end: Text = "\n")
 ### :returns: The resulting `Text` value.
 ### :throws: {EndOfInputError} when the input has ended.
 @rf("ask_line")
-routine ask_line!() -> Text
+failable routine ask_line() -> Text
 
 ### Reads one line of standard input as a `T`: `var n: Integer = ask()` (the type the value goes to), or
 ### `ask[Integer]()`. The line becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like
@@ -69,13 +69,13 @@ routine ask_line!() -> Text
 ### :throws: {InvalidValueError} or what else `to[T]()` throws when the line isn't a `T`, {EndOfInputError} when the
 ### input has ended.
 @rf("ask")
-routine ask![T]() -> T
+failable routine ask[T]() -> T
 
 ### Reads one whitespace-delimited word from standard input.
 ### :returns: The resulting `Text` value.
 ### :throws: {EndOfInputError} when the input has ended before another word.
 @rf("ask_word")
-routine ask_word!() -> Text
+failable routine ask_word() -> Text
 
 ### Reads all remaining text from standard input.
 ### :returns: The resulting `Text` value.

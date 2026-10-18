@@ -5,7 +5,7 @@ import IterTools
 
 # Positions count with Integer in Suflae: end-relative `^n`, slices, Text search, and the RazorForge
 # list crossing.
-routine find!(items: List[Text], name: Text) -> Integer
+failable routine find(items: List[Text], name: Text) -> Integer
     each i in 0 til items.count()
         if items[i] == name
             return i

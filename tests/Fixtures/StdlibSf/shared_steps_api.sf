@@ -12,7 +12,7 @@ routine slow(n: Integer, wait: Duration) -> Integer
     waitfor(duration: wait)
     return n
 
-routine risky!(n: Integer) -> Integer
+failable routine risky(n: Integer) -> Integer
     if n == 2
         throw VerificationFailedError()
     return n * 10

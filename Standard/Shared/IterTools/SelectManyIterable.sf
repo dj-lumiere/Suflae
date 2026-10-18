@@ -40,7 +40,7 @@ routine SelectManyIterable[T, TResult, TInner, TSource].iter() -> SelectManyEmit
 ### The emitter calls `emit!` on the outer source whenever the buffer is exhausted.
 ### :returns: The resulting `TResult` value.
 @rf("SelectManyEmittable.emit")
-routine SelectManyEmittable[T, TResult, TInner, TSourceIter].emit!() -> TResult
+failable routine SelectManyEmittable[T, TResult, TInner, TSourceIter].emit() -> TResult
 
 ### Returns a lazy adapter that applies `transform` to each element and yields values from all
 ### resulting inner iterables in sequence. The inner-iterable type `TInner` is an explicit type

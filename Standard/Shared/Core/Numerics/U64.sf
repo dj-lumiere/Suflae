@@ -33,35 +33,35 @@ routine U64.mul_with_overflow(you: U64) -> (U64, Bool)
 ### :returns: The sum.
 ### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
 @rf("U64.add")
-routine U64.add!(you: U64) -> U64
+failable routine U64.add(you: U64) -> U64
 
 ### Returns `me - you`, throwing on underflow.
 ### :param you: The value to subtract.
 ### :returns: The difference.
 ### :throws: {IntegerOverflowError} if the result would go below zero.
 @rf("U64.sub")
-routine U64.sub!(you: U64) -> U64
+failable routine U64.sub(you: U64) -> U64
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product.
 ### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
 @rf("U64.mul")
-routine U64.mul!(you: U64) -> U64
+failable routine U64.mul(you: U64) -> U64
 
 ### Returns `me // you` (floor division), throwing if `you` is zero.
 ### :param you: The divisor.
 ### :returns: The quotient, rounding toward zero.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("U64.floordiv")
-routine U64.floordiv!(you: U64) -> U64
+failable routine U64.floordiv(you: U64) -> U64
 
 ### Returns `me % you`, throwing if `you` is zero.
 ### :param you: The divisor.
 ### :returns: The remainder.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("U64.mod")
-routine U64.mod!(you: U64) -> U64
+failable routine U64.mod(you: U64) -> U64
 
 ### Returns the two's-complement negation `(2⁶⁴ - me) mod 2⁶⁴`.
 ### :returns: The wrapped negation.
@@ -156,7 +156,7 @@ routine U64.pow_with_overflow(exp: U64) -> (U64, Bool)
 ### :returns: The result.
 ### :throws: {IntegerOverflowError} if the result exceeds `U64_MAX`.
 @rf("U64.pow")
-routine U64.pow!(exp: U64) -> U64
+failable routine U64.pow(exp: U64) -> U64
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent.
@@ -240,7 +240,7 @@ routine U64.sqrtrem() -> (U64, U64)
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me == 0` or `base < 2`.
 @rf("U64.ilog")
-routine U64.ilog!(base: U64) -> U64
+failable routine U64.ilog(base: U64) -> U64
 
 ### Returns the absolute difference |me - you| without overflow.
 ### :param you: The other value.
@@ -259,7 +259,7 @@ routine U64.div_ceil(you: U64) -> U64
 ### :returns: The next power of two at or above `me`.
 ### :throws: {IntegerOverflowError} if the next power of two exceeds `U64_MAX`.
 @rf("U64.next_power_of_two")
-routine U64.next_power_of_two!() -> U64
+failable routine U64.next_power_of_two() -> U64
 
 ### Returns the smallest multiple of `you` that is ≥ me.
 ### :param you: The base to round up to.
@@ -342,31 +342,31 @@ routine U64.hash(k0: U64, k1: U64) -> U64
 ### :returns: The `U64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is negative.
 @rf("S8.to")
-routine S8.to![U64]() -> U64
+failable routine S8.to[U64]() -> U64
 
 ### Converts a signed 16-bit integer to `U64`.
 ### :returns: The `U64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is negative.
 @rf("S16.to")
-routine S16.to![U64]() -> U64
+failable routine S16.to[U64]() -> U64
 
 ### Converts a signed 32-bit integer to `U64`.
 ### :returns: The `U64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is negative.
 @rf("S32.to")
-routine S32.to![U64]() -> U64
+failable routine S32.to[U64]() -> U64
 
 ### Converts a signed 64-bit integer to `U64`.
 ### :returns: The `U64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is negative.
 @rf("S64.to")
-routine S64.to![U64]() -> U64
+failable routine S64.to[U64]() -> U64
 
 ### Converts a signed 128-bit integer to `U64`.
 ### :returns: The `U64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is outside the `U64` range.
 @rf("S128.to")
-routine S128.to![U64]() -> U64
+failable routine S128.to[U64]() -> U64
 
 ### Zero-extends an unsigned 8-bit integer to `U64`.
 ### :returns: The `U64` representation of this value.
@@ -392,58 +392,58 @@ routine U64.to[U64]() -> U64
 ### :returns: The lower 64 bits of this value.
 ### :throws: {IntegerOverflowError} if this value exceeds `U64_MAX`.
 @rf("U128.to")
-routine U128.to![U64]() -> U64
+failable routine U128.to[U64]() -> U64
 
 ### Converts an `S256` to `U64`, throwing if the value is negative or exceeds U64_MAX.
 ### :returns: The lower 64 bits of this value.
 ### :throws: {IntegerOverflowError} if this value is outside 0..18446744073709551615.
 @rf("S256.to")
-routine S256.to![U64]() -> U64
+failable routine S256.to[U64]() -> U64
 
 ### Converts a `U256` to `U64`, throwing if the value exceeds U64_MAX.
 ### :returns: The lower 64 bits of this value.
 ### :throws: {IntegerOverflowError} if `me > 18446744073709551615`.
 @rf("U256.to")
-routine U256.to![U64]() -> U64
+failable routine U256.to[U64]() -> U64
 
 ### Truncates a 16-bit float to `U64` by first widening to `B32`.
 ### :returns: The truncated `U64` representation.
 @rf("B16.to")
-routine B16.to![U64]() -> U64
+failable routine B16.to[U64]() -> U64
 
 ### Truncates a 32-bit float to `U64`, rounding toward zero.
 ### :returns: The truncated `U64` representation.
 @rf("B32.to")
-routine B32.to![U64]() -> U64
+failable routine B32.to[U64]() -> U64
 
 ### Truncates a 64-bit float to `U64`, rounding toward zero.
 ### :returns: The truncated `U64` representation.
 @rf("B64.to")
-routine B64.to![U64]() -> U64
+failable routine B64.to[U64]() -> U64
 
 ### Truncates a 128-bit float to `U64` by narrowing to `B64` first.
 ### :returns: The truncated `U64` representation.
 @rf("B128.to")
-routine B128.to![U64]() -> U64
+failable routine B128.to[U64]() -> U64
 
 ### Converts a 32-bit decimal float to `U64` via `S64`.
 ### :returns: The truncated `U64` representation.
 @rf("D32.to")
-routine D32.to![U64]() -> U64
+failable routine D32.to[U64]() -> U64
 
 ### Converts a 64-bit decimal float to `U64` via `S64`.
 ### :returns: The truncated `U64` representation.
 @rf("D64.to")
-routine D64.to![U64]() -> U64
+failable routine D64.to[U64]() -> U64
 
 ### Converts a 128-bit decimal float to `U64` via `S64`.
 ### :returns: The truncated `U64` representation.
 @rf("D128.to")
-routine D128.to![U64]() -> U64
+failable routine D128.to[U64]() -> U64
 
 ### Parses a decimal text representation of a `U64`.
 ### :returns: The parsed `U64` value.
 ### :throws: {InvalidValueError} if the text is empty or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `U64`.
 @rf("Text.to")
-routine Text.to![U64]() -> U64
+failable routine Text.to[U64]() -> U64

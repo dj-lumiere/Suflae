@@ -7,7 +7,7 @@ module Core
 ### :param radix: The requested numeric base.
 ### :throws: {NumericDomainError} if `radix` is below 2 or above 36.
 @rf("check_radix")
-routine check_radix!(radix: S32)
+failable routine check_radix(radix: S32)
 
 ### The digit character for `d` (0 to 35): `0`-`9`, then `a`-`z`.
 @rf("radix_digit")

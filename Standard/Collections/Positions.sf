@@ -6,7 +6,7 @@ import Numerics
 ### and with `U64` inside.
 ### :param value: The position or count, from 0.
 ### :throws: {NegativeIndexError} if `value` is negative.
-routine position_of!(value: Integer) -> U64
+failable routine position_of(value: Integer) -> U64
     if value.is_negative()
         throw NegativeIndexError(index: value)
     return value.to[U64]()
@@ -15,7 +15,7 @@ routine position_of!(value: Integer) -> U64
 ### counts down keeps its direction: the positions count down by the step's magnitude.
 ### :param range: The positions, from 0.
 ### :throws: {NegativeIndexError} if the range starts or ends at a negative position.
-routine positions_of!(range: Range[Integer]) -> Range[U64]
+failable routine positions_of(range: Range[Integer]) -> Range[U64]
     return Range[U64](
         start: position_of(value: range.start),
         end: position_of(value: range.end),

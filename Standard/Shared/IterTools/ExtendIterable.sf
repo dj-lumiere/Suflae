@@ -37,4 +37,4 @@ routine ExtendIterable[T, TFirstSource, TSecondSource].iter() -> ExtendEmittable
 ### Once the first iterator is exhausted, all remaining values come from the second iterator.
 ### :returns: The resulting `T` value.
 @rf("ExtendEmittable.emit")
-routine ExtendEmittable[T, TFirstIter, TSecondIter].emit!() -> T
+failable routine ExtendEmittable[T, TFirstIter, TSecondIter].emit() -> T

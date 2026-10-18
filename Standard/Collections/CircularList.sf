@@ -61,7 +61,7 @@ routine CircularList[T](count: Integer, fill_value: T) -> CircularList[T]
 
 ### Builds a list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-common routine CircularList[T].from_serial!(value: SerialValue) -> CircularList[T]
+failable common routine CircularList[T].from_serial(value: SerialValue) -> CircularList[T]
     var result = CircularList[T]()
     when value
         is RF::Core.List[SerialValue] as items =>
@@ -131,7 +131,7 @@ routine CircularList[T].add_range(you: Iterable[T])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-routine CircularList[T].add_range!(source: CircularList[T], from: Integer, count: Integer)
+failable routine CircularList[T].add_range(source: CircularList[T], from: Integer, count: Integer)
     var first = position_of(value: from)
     var n = position_of(value: count)
     if first + n > source.count
@@ -146,7 +146,7 @@ routine CircularList[T].add_range!(source: CircularList[T], from: Integer, count
 ### Inserts `value` at `index`, moving the elements from there one place back.
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
-routine CircularList[T].add_at!(index: Integer, value: T)
+failable routine CircularList[T].add_at(index: Integer, value: T)
     var at = position_of(value: index)
     if at > me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)
@@ -159,7 +159,7 @@ routine CircularList[T].add_at!(index: Integer, value: T)
 
 ### Removes and returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
-routine CircularList[T].remove_last!() -> T
+failable routine CircularList[T].remove_last() -> T
     if me.count == 0
         throw AbsentValueError()
     var value = me.items.take_at(position: me.place(index: me.count - 1))
@@ -168,7 +168,7 @@ routine CircularList[T].remove_last!() -> T
 
 ### Removes and returns the first element.
 ### :throws: {AbsentValueError} The list is empty.
-routine CircularList[T].remove_first!() -> T
+failable routine CircularList[T].remove_first() -> T
     if me.count == 0
         throw AbsentValueError()
     var value = me.items.take_at(position: me.head)
@@ -177,7 +177,7 @@ routine CircularList[T].remove_first!() -> T
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
-routine CircularList[T].remove_at!(index: Integer) -> T
+failable routine CircularList[T].remove_at(index: Integer) -> T
     var at = me.checked_position(index: index)
     me.straighten()
     var value = me.items.take_at(position: at)
@@ -187,7 +187,7 @@ routine CircularList[T].remove_at!(index: Integer) -> T
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
-routine CircularList[T].truncate!(new_count: Integer)
+failable routine CircularList[T].truncate(new_count: Integer)
     var kept = position_of(value: new_count)
     if kept > me.count
         throw IndexOutOfBoundsError(index: kept, count: me.count)
@@ -202,7 +202,7 @@ routine CircularList[T].clear()
 ### Discards the oldest elements so at most the latest `n` remain, keeping the memory: the fixed-space step of a
 ### rolling "keep the latest N" history. When `n` is at least the count, nothing changes.
 ### :param n: The maximum number of most-recent elements to keep.
-routine CircularList[T].keep_last!(n: Integer)
+failable routine CircularList[T].keep_last(n: Integer)
     me.drop_oldest(kept: position_of(value: n))
     return
 
@@ -218,7 +218,7 @@ routine CircularList[T].keep_first(n: Integer)
 ### fixed-size latest-N history, which never needs more room than `keeping`. With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of most-recent elements to keep afterward.
-routine CircularList[T].add_last_keeping!(value: T, keeping: Integer)
+failable routine CircularList[T].add_last_keeping(value: T, keeping: Integer)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -231,7 +231,7 @@ routine CircularList[T].add_last_keeping!(value: T, keeping: Integer)
 ### With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of elements to keep afterward.
-routine CircularList[T].add_first_keeping!(value: T, keeping: Integer)
+failable routine CircularList[T].add_first_keeping(value: T, keeping: Integer)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -255,14 +255,14 @@ routine CircularList[T].reserve(new_capacity: Integer)
 
 ### Returns the first element.
 ### :throws: {AbsentValueError} The list is empty.
-routine CircularList[T].first!() -> T
+failable routine CircularList[T].first() -> T
     if me.count == 0
         throw AbsentValueError()
     return me.items.at(position: me.head)
 
 ### Returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
-routine CircularList[T].last!() -> T
+failable routine CircularList[T].last() -> T
     if me.count == 0
         throw AbsentValueError()
     return me.items.at(position: me.place(index: me.count - 1))
@@ -283,13 +283,13 @@ routine CircularList[T].last_or_default(default_value: T) -> T
 
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
-routine CircularList[T].getitem!(index: Integer) -> T
+failable routine CircularList[T].getitem(index: Integer) -> T
     return me.items.at(position: me.place(index: me.checked_position(index: index)))
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
-routine CircularList[T].setitem!(index: Integer, value: T)
+failable routine CircularList[T].setitem(index: Integer, value: T)
     me.items.put(position: me.place(index: me.checked_position(index: index)), value: value)
     return
 
@@ -310,13 +310,13 @@ routine CircularList[T].getitem(range: Range[Integer]) -> CircularList[T]
 
 ### Moves the first `n` elements to the back, keeping their order.
 ### :param n: How many positions to rotate by.
-routine CircularList[T].rotate_left!(n: Integer)
+failable routine CircularList[T].rotate_left(n: Integer)
     me.turn(count: position_of(value: n))
     return
 
 ### Moves the last `n` elements to the front, keeping their order.
 ### :param n: How many positions to rotate by.
-routine CircularList[T].rotate_right!(n: Integer)
+failable routine CircularList[T].rotate_right(n: Integer)
     var shift = position_of(value: n)
     if me.count == 0
         return
@@ -420,7 +420,7 @@ routine CircularList[T].sorted_by(compare: Callable[(T, T), Bool]) -> CircularLi
 ### Swaps the elements at `first` and `second` in place.
 ### :param first: One position.
 ### :param second: The other position.
-routine CircularList[T].swap!(first: Integer, second: Integer)
+failable routine CircularList[T].swap(first: Integer, second: Integer)
     me.items.swap_at(first: me.place(index: me.checked_position(index: first)), second: me.place(index: me.checked_position(index: second)))
     return
 
@@ -441,7 +441,7 @@ secret routine CircularList[T].place(index: U64) -> U64
     var room = me.items.room()
     return if place >= room then place - room else place
 ### The position `index` names, crashing unless it is the position of an element.
-secret routine CircularList[T].checked_position!(index: Integer) -> U64
+secret failable routine CircularList[T].checked_position(index: Integer) -> U64
     var at = position_of(value: index)
     if at >= me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)

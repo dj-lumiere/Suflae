@@ -21,7 +21,7 @@ routine dec_of_d128(x: D128) -> Decimal
 ### Decimal finite-only on every conversion from a possibly infinite/NaN source.
 ### :throws: {NumericOverflowError} if `d` is +-infinity; {NumericDomainError} if `d` is NaN.
 @rf("dec_of_d128_finite")
-routine dec_of_d128_finite!(d: D128) -> Decimal
+failable routine dec_of_d128_finite(d: D128) -> Decimal
 
 ### Returns the raw i128 BID storage of this value.
 @rf("Decimal.to_bits")
@@ -65,19 +65,19 @@ routine Decimal.eq(you: Decimal) -> Bool
 
 ### Returns `me * you`.
 @rf("Decimal.mul")
-routine Decimal.mul!(you: Decimal) -> Decimal
+failable routine Decimal.mul(you: Decimal) -> Decimal
 
 ### Returns `me + you`.
 @rf("Decimal.add")
-routine Decimal.add!(you: Decimal) -> Decimal
+failable routine Decimal.add(you: Decimal) -> Decimal
 
 ### Returns `me - you`.
 @rf("Decimal.sub")
-routine Decimal.sub!(you: Decimal) -> Decimal
+failable routine Decimal.sub(you: Decimal) -> Decimal
 
 ### Returns `me / you`.
 @rf("Decimal.truediv")
-routine Decimal.truediv!(you: Decimal) -> Decimal
+failable routine Decimal.truediv(you: Decimal) -> Decimal
 
 ### Returns the smaller of `me` and `you`.
 ### :param you: The value to compare against.
@@ -124,7 +124,7 @@ routine Decimal.diagnose() -> Text
 ### Parses a decimal literal into a Decimal.
 ### :throws: {InvalidValueError} if the text is not a valid FINITE decimal literal.
 @rf("Text.to")
-routine Text.to![Decimal]() -> Decimal
+failable routine Text.to[Decimal]() -> Decimal
 
 ### S8 -> Decimal.
 @rf("S8.to")
@@ -190,13 +190,13 @@ routine B64.to[Decimal]() -> Decimal
 ### :returns: The `B32` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
 @rf("Decimal.to")
-routine Decimal.to![B32]() -> B32
+failable routine Decimal.to[B32]() -> B32
 
 ### Converts a `Decimal` to the nearest `B64`.
 ### :returns: The `B64` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
 @rf("Decimal.to")
-routine Decimal.to![B64]() -> B64
+failable routine Decimal.to[B64]() -> B64
 
 ### B128 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
 @rf("B128.to")

@@ -100,7 +100,7 @@ needs T obeys FloorDivisible
 ### Crashes when the step is zero: it never moves, so the range would never reach its end.
 ### :throws: {RangeStepZeroError} when `step` is zero.
 @rf("Range.require_nonzero_step")
-routine Range[T].require_nonzero_step!()
+failable routine Range[T].require_nonzero_step()
 
 ### Creates an iterator for this value.
 ### The emitter starts at `me.start` and moves by the step's magnitude in the step's direction. A step of zero
@@ -114,4 +114,4 @@ routine Range[T].iter() -> RangeEmittable[T]
 ### :returns: The resulting `T` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("RangeEmittable.emit")
-routine RangeEmittable[T].emit!() -> T
+failable routine RangeEmittable[T].emit() -> T

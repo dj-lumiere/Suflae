@@ -7,13 +7,13 @@ module IterTools
 ### This is a convenience terminal operation over the first iterator element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.first")
-routine Iterable[T].first!() -> T
+failable routine Iterable[T].first() -> T
 
 ### Returns the last value produced by this iterable.
 ### The iterable is consumed fully in order to find the final element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.last")
-routine Iterable[T].last!() -> T
+failable routine Iterable[T].last() -> T
 
 ### Returns `true` when any produced value satisfies `predicate`.
 ### Iteration stops as soon as a matching value is found.
@@ -45,33 +45,33 @@ routine Iterable[T].accumulate[TState](
 ### The first element is used as the initial accumulator; subsequent elements are added to it.
 ### :returns: The resulting `T` value.
 @rf("Iterable.sum")
-routine Iterable[T].sum!() -> T
+failable routine Iterable[T].sum() -> T
 needs T obeys Addable
 
 ### Returns the smallest value in this iterable.
 ### :returns: The resulting `T` value.
 @rf("Iterable.min")
-routine Iterable[T].min!() -> T
+failable routine Iterable[T].min() -> T
 needs T obeys Comparable
 
 ### Returns the largest value in this iterable.
 ### :returns: The resulting `T` value.
 @rf("Iterable.max")
-routine Iterable[T].max!() -> T
+failable routine Iterable[T].max() -> T
 needs T obeys Comparable
 
 ### Returns the element for which `selector` returns the smallest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.min_by")
-routine Iterable[T].min_by![TKey](selector: Callable[(T,), TKey]) -> T
+failable routine Iterable[T].min_by[TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the element for which `selector` returns the largest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Iterable.max_by")
-routine Iterable[T].max_by![TKey](selector: Callable[(T,), TKey]) -> T
+failable routine Iterable[T].max_by[TKey](selector: Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the first value produced by this iterable, or `default` when the iterable is empty.

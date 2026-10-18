@@ -208,7 +208,7 @@ routine Dict[TKey, TValue].get_or_default(key: TKey, default_value: TValue) -> T
 ### Returns the value of `key` (`d[k]`).
 ### :param key: The key to look up.
 ### :throws: {AbsentValueError} The key has no entry.
-routine Dict[TKey, TValue].getitem!(key: TKey) -> TValue
+failable routine Dict[TKey, TValue].getitem(key: TKey) -> TValue
     var slot = me.find_slot(key: key)
     if not me.index.holds(slot: slot)
         throw KeyNotFoundError(key: key.represent())
@@ -273,7 +273,7 @@ routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-routine DictEmittable[TKey, TValue].emit!() -> DictEntry[TKey, TValue]
+failable routine DictEmittable[TKey, TValue].emit() -> DictEntry[TKey, TValue]
     while me.left > 0
         me.left = me.left - 1
         if me.live.emit()
@@ -337,7 +337,7 @@ routine Dict[TKey, TValue].serialize() -> SerialValue
 ### Builds the dictionary from its serialized entry table.
 ### :throws: {SerialShapeError} when the value is not a table or an entry does not fit, or a parse error when a key
 ### does not read as a `TKey`.
-common routine Dict[TKey, TValue].from_serial!(value: SerialValue) -> Dict[TKey, TValue]
+failable common routine Dict[TKey, TValue].from_serial(value: SerialValue) -> Dict[TKey, TValue]
     var result = Dict[TKey, TValue]()
     when value
         is RF::Core.Dict[Text, SerialValue] as entries =>

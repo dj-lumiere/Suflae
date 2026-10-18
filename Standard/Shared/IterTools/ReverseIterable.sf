@@ -33,7 +33,7 @@ routine ReverseIterable[T, TSource].iter() -> ReverseEmittable[T]
 ### Signals absence once all elements have been yielded.
 ### :returns: The resulting `T` value.
 @rf("ReverseEmittable.emit")
-routine ReverseEmittable[T].emit!() -> T
+failable routine ReverseEmittable[T].emit() -> T
 
 ### Returns a lazy adapter that yields this iterable's elements in reverse order.
 ### The source is fully consumed when the returned adapter is first iterated.

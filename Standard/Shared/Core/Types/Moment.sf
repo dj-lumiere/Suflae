@@ -18,7 +18,7 @@ obeys Comparable, DurationAddable, DurationSubtractable
 ### :param nanoseconds: The nanosecond component within the current second.
 ### :returns: The resulting `Moment` value.
 @rf("normalize_moment")
-routine normalize_moment!(seconds: S64, nanoseconds: S64) -> Moment
+failable routine normalize_moment(seconds: S64, nanoseconds: S64) -> Moment
 
 ### Converts a civil year-month-day triple to days since the Unix epoch.
 ### :param year: The `year` value.
@@ -58,7 +58,7 @@ routine days_to_day(days_since_epoch: S64) -> S64
 ### :throws: {InvalidMomentError} when a part is out of its range: a month outside `1..12`, a day the month doesn't
 ### have, an hour outside `0..23`, or a minute or second outside `0..59`.
 @rf("Moment")
-routine Moment!(year: S64, month: S64, day: S64, hour: S64, minute: S64, second: S64) -> Moment
+failable routine Moment(year: S64, month: S64, day: S64, hour: S64, minute: S64, second: S64) -> Moment
 
 ### Returns the Unix epoch.
 ### This is `1970-01-01 00:00:00 UTC`.
@@ -142,38 +142,38 @@ routine Moment.timestamp_ms() -> S64
 ### :param duration: The `duration` value.
 ### :returns: The resulting `Moment` value.
 @rf("Moment.add_duration")
-routine Moment.add_duration!(duration: Duration) -> Moment
+failable routine Moment.add_duration(duration: Duration) -> Moment
 
 ### Returns this moment shifted backward by `duration`.
 ### :param duration: The time span to subtract.
 ### :returns: The resulting `Moment` value.
 @rf("Moment.subtract_duration")
-routine Moment.subtract_duration!(duration: Duration) -> Moment
+failable routine Moment.subtract_duration(duration: Duration) -> Moment
 
 ### Returns the elapsed duration from `earlier` to this moment.
 ### Positive results mean this moment occurs after `earlier`.
 ### :param earlier: The earlier comparison instant.
 ### :returns: The resulting `Duration` value.
 @rf("Moment.elapsed_since")
-routine Moment.elapsed_since!(earlier: Moment) -> Duration
+failable routine Moment.elapsed_since(earlier: Moment) -> Duration
 
 ### Returns the moment reached by advancing this one by `you`.
 ### :param you: The duration to advance by.
 ### :returns: The resulting `Moment`.
 @rf("Moment.add")
-routine Moment.add!(you: Duration) -> Moment
+failable routine Moment.add(you: Duration) -> Moment
 
 ### Returns the moment reached by retreating this one by `you`.
 ### :param you: The duration to subtract.
 ### :returns: The resulting `Moment`.
 @rf("Moment.sub")
-routine Moment.sub!(you: Duration) -> Moment
+failable routine Moment.sub(you: Duration) -> Moment
 
 ### Returns the elapsed time from `you` to this moment.
 ### :param you: The earlier moment to measure from.
 ### :returns: The `Duration` between the two moments.
 @rf("Moment.sub")
-routine Moment.sub!(you: Moment) -> Duration
+failable routine Moment.sub(you: Moment) -> Duration
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.

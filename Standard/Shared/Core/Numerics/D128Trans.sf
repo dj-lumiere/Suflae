@@ -6,7 +6,7 @@ module Core
 ### e^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.exp")
-routine D128.exp!() -> D128
+failable routine D128.exp() -> D128
 
 ### e^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.exp_unchecked")
@@ -15,7 +15,7 @@ routine D128.exp_unchecked() -> D128
 ### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.expm1")
-routine D128.expm1!() -> D128
+failable routine D128.expm1() -> D128
 
 ### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.expm1_unchecked")
@@ -24,7 +24,7 @@ routine D128.expm1_unchecked() -> D128
 ### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.exp2")
-routine D128.exp2!() -> D128
+failable routine D128.exp2() -> D128
 
 ### 2^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.exp2_unchecked")
@@ -33,7 +33,7 @@ routine D128.exp2_unchecked() -> D128
 ### 10^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.exp10")
-routine D128.exp10!() -> D128
+failable routine D128.exp10() -> D128
 
 ### 10^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.exp10_unchecked")
@@ -42,7 +42,7 @@ routine D128.exp10_unchecked() -> D128
 ### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.log")
-routine D128.log!() -> D128
+failable routine D128.log() -> D128
 
 ### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.log_unchecked")
@@ -51,7 +51,7 @@ routine D128.log_unchecked() -> D128
 ### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.log1p")
-routine D128.log1p!() -> D128
+failable routine D128.log1p() -> D128
 
 ### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.log1p_unchecked")
@@ -60,7 +60,7 @@ routine D128.log1p_unchecked() -> D128
 ### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.log2")
-routine D128.log2!() -> D128
+failable routine D128.log2() -> D128
 
 ### log2(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.log2_unchecked")
@@ -69,7 +69,7 @@ routine D128.log2_unchecked() -> D128
 ### log10(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.log10")
-routine D128.log10!() -> D128
+failable routine D128.log10() -> D128
 
 ### log10(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.log10_unchecked")
@@ -78,7 +78,7 @@ routine D128.log10_unchecked() -> D128
 ### sqrt(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.sqrt")
-routine D128.sqrt!() -> D128
+failable routine D128.sqrt() -> D128
 
 ### sqrt(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.sqrt_unchecked")
@@ -91,7 +91,7 @@ routine D128.cbrt() -> D128
 ### asin(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.asin")
-routine D128.asin!() -> D128
+failable routine D128.asin() -> D128
 
 ### asin(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.asin_unchecked")
@@ -100,7 +100,7 @@ routine D128.asin_unchecked() -> D128
 ### acos(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.acos")
-routine D128.acos!() -> D128
+failable routine D128.acos() -> D128
 
 ### acos(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.acos_unchecked")
@@ -125,7 +125,7 @@ routine D128.tan() -> D128
 ### sinh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.sinh")
-routine D128.sinh!() -> D128
+failable routine D128.sinh() -> D128
 
 ### sinh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.sinh_unchecked")
@@ -134,7 +134,7 @@ routine D128.sinh_unchecked() -> D128
 ### cosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.cosh")
-routine D128.cosh!() -> D128
+failable routine D128.cosh() -> D128
 
 ### cosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.cosh_unchecked")
@@ -151,7 +151,7 @@ routine D128.asinh() -> D128
 ### acosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.acosh")
-routine D128.acosh!() -> D128
+failable routine D128.acosh() -> D128
 
 ### acosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.acosh_unchecked")
@@ -160,7 +160,7 @@ routine D128.acosh_unchecked() -> D128
 ### atanh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.atanh")
-routine D128.atanh!() -> D128
+failable routine D128.atanh() -> D128
 
 ### atanh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.atanh_unchecked")
@@ -177,7 +177,7 @@ routine D128.erfc() -> D128
 ### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D128.tgamma")
-routine D128.tgamma!() -> D128
+failable routine D128.tgamma() -> D128
 
 ### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D128.tgamma_unchecked")
@@ -197,7 +197,7 @@ routine atan2(y: D128, x: D128) -> D128
 
 ### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-routine hypot!(x: D128, y: D128) -> D128
+failable routine hypot(x: D128, y: D128) -> D128
 
 ### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
 @rf("hypot_unchecked")
@@ -205,7 +205,7 @@ routine hypot_unchecked(x: D128, y: D128) -> D128
 
 ### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-routine hypot!(x: D128, y: D128, z: D128) -> D128
+failable routine hypot(x: D128, y: D128, z: D128) -> D128
 
 ### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
 @rf("hypot_unchecked")
@@ -213,7 +213,7 @@ routine hypot_unchecked(x: D128, y: D128, z: D128) -> D128
 
 ### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
 @rf("D128.fma")
-routine D128.fma!(b: D128, c: D128) -> D128
+failable routine D128.fma(b: D128, c: D128) -> D128
 
 ### me*b + c with a single rounding, raw IEEE.
 @rf("D128.fma_unchecked")
@@ -286,7 +286,7 @@ routine D128.signum() -> D128
 
 ### Throws when `me` is non-finite (inf or NaN).
 @rf("D128.finite")
-routine D128.finite!() -> D128
+failable routine D128.finite() -> D128
 
 ### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
 @rf("D128.fmod")

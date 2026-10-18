@@ -35,4 +35,4 @@ routine TakeIterable[T, TSource].iter() -> TakeEmittable[T, TSource/Iter]
 ### :returns: The resulting `T` value.
 ### :throws: {AbsentValueError} Thrown when the take limit has been exhausted or the source ends first.
 @rf("TakeEmittable.emit")
-routine TakeEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+failable routine TakeEmittable[T, TSourceIter].emit() -> TSourceIter/Item

@@ -85,35 +85,35 @@ routine U256.mul_with_overflow(you: U256) -> (U256, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
 @rf("U256.add")
-routine U256.add!(you: U256) -> U256
+failable routine U256.add(you: U256) -> U256
 
 ### Returns `me - you`, throwing on underflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is less than `U256_MIN` (0).
 @rf("U256.sub")
-routine U256.sub!(you: U256) -> U256
+failable routine U256.sub(you: U256) -> U256
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
 @rf("U256.mul")
-routine U256.mul!(you: U256) -> U256
+failable routine U256.mul(you: U256) -> U256
 
 ### Returns `me // you` (integer division), throwing if `you` is zero.
 ### :param you: The divisor.
 ### :returns: The quotient `me // you`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("U256.floordiv")
-routine U256.floordiv!(you: U256) -> U256
+failable routine U256.floordiv(you: U256) -> U256
 
 ### Returns `me % you` (integer remainder), throwing if `you` is zero.
 ### :param you: The divisor.
 ### :returns: The remainder `me % you`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("U256.mod")
-routine U256.mod!(you: U256) -> U256
+failable routine U256.mod(you: U256) -> U256
 
 ### (quotient, remainder) of `me // you` and `me % you` from ONE Knuth-D pass — half the work of
 ### calling `//` and `%` separately (each runs its own full `udivrem256`). Throws on a zero divisor.
@@ -121,7 +121,7 @@ routine U256.mod!(you: U256) -> U256
 ### :returns: The tuple `(me // you, me % you)`.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("U256.divmod")
-routine U256.divmod!(you: U256) -> (U256, U256)
+failable routine U256.divmod(you: U256) -> (U256, U256)
 
 ### Returns `(me + you) mod 2²⁵⁶` without overflow check.
 ### :param you: The right operand.
@@ -171,7 +171,7 @@ routine U256.pow_with_overflow(exp: U256) -> (U256, Bool)
 ### :returns: The result of raising `me` to the power `exp`.
 ### :throws: {IntegerOverflowError} if the result exceeds `U256_MAX`.
 @rf("U256.pow")
-routine U256.pow!(exp: U256) -> U256
+failable routine U256.pow(exp: U256) -> U256
 
 ### Returns `me ** exp` with wrapping arithmetic (mod 2²⁵⁶).
 ### :param exp: The exponent.
@@ -396,38 +396,38 @@ needs T obeys FloorDivisible
 ### :returns: A `U256` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S8.to")
-routine S8.to![U256]() -> U256
+failable routine S8.to[U256]() -> U256
 
 ### Converts an `S16` to `U256`, throwing if the value is negative.
 ### :returns: A `U256` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S16.to")
-routine S16.to![U256]() -> U256
+failable routine S16.to[U256]() -> U256
 
 ### Converts an `S32` to `U256`, throwing if the value is negative.
 ### :returns: A `U256` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S32.to")
-routine S32.to![U256]() -> U256
+failable routine S32.to[U256]() -> U256
 
 ### Converts an `S64` to `U256`, throwing if the value is negative.
 ### :returns: A `U256` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S64.to")
-routine S64.to![U256]() -> U256
+failable routine S64.to[U256]() -> U256
 
 ### Converts an `S128` to `U256`, throwing if the value is negative.
 ### A non-negative `S128` sign-extends to the same magnitude in 256 bits.
 ### :returns: A `U256` with the same unsigned value as this value.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S128.to")
-routine S128.to![U256]() -> U256
+failable routine S128.to[U256]() -> U256
 
 ### Converts an `S256` to `U256`, throwing if the value is negative.
 ### :returns: The same bit pattern reinterpreted as `U256`.
 ### :throws: {IntegerOverflowError} if `me < 0`.
 @rf("S256.to")
-routine S256.to![U256]() -> U256
+failable routine S256.to[U256]() -> U256
 
 ### Zero-extends a `U8` to `U256`.
 ### :returns: A `U256` equal in value to this value.
@@ -463,41 +463,41 @@ routine U256.to[U256]() -> U256
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
 @rf("B16.to")
-routine B16.to![U256]() -> U256
+failable routine B16.to[U256]() -> U256
 
 ### Converts an `B32` to `U256`, truncating toward zero.
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or negative.
 @rf("B32.to")
-routine B32.to![U256]() -> U256
+failable routine B32.to[U256]() -> U256
 
 ### Converts an `B64` to `U256`, truncating toward zero.
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, negative, or >= 2^256.
 @rf("B64.to")
-routine B64.to![U256]() -> U256
+failable routine B64.to[U256]() -> U256
 
 ### Converts an `B128` to `U256`, truncating toward zero.
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {NumericOverflowError} if negative or >= 2^256; {NumericDomainError} if NaN.
 @rf("B128.to")
-routine B128.to![U256]() -> U256
+failable routine B128.to[U256]() -> U256
 
 ### Converts a `D32` to `U256`, truncating toward zero.
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {NumericOverflowError} if the integer part overflows U256.
 @rf("D32.to")
-routine D32.to![U256]() -> U256
+failable routine D32.to[U256]() -> U256
 
 ### Converts a `D64` to `U256`, truncating toward zero.
 ### :returns: The integer part of this value as a `U256`.
 ### :throws: {NumericOverflowError} if the integer part overflows U256.
 @rf("D64.to")
-routine D64.to![U256]() -> U256
+failable routine D64.to[U256]() -> U256
 
 ### Parses a decimal string into a `U256`.
 ### :returns: The parsed `U256` value.
 ### :throws: {InvalidValueError} if this value is empty or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `U256`.
 @rf("Text.to")
-routine Text.to![U256]() -> U256
+failable routine Text.to[U256]() -> U256

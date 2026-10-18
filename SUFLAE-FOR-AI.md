@@ -59,8 +59,8 @@ through a `.rf` module the program imports (section 18).
    `1.0 / 3` is `0.333…` too (§4).
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
-7. **Failable routines carry `!` on the DECLARATION only** (`routine parse!(...)`); call sites never write
-   it. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` and
+7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before
+   `dangerous` or `common`). `routine parse!(...)` is SF-G222, and call sites never mark the call. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` and
    take the result apart with `when`. There is no try/catch and no `try_parse` name form (§11).
 8. **Conditional expressions are top-level only.** `return if c then a else b` works;
    `f(x: if c then a else b)` and `(if c then a else b) + 1` are parse errors by design. Use `when` or a
@@ -518,7 +518,7 @@ routine Account.deposit(amount: Integer)                       # member routine,
   `secret routine helper(...)` keeps a helper module-private. `common routine Type.name(...)` is a
   type-level routine with no `me`, called as `Type.name(...)`.
 - A constructor is the type's name: `Point(x: 1, y: 2)` (the wired memberwise one), or one you write as
-  `routine Celsius(degrees: B64) -> Celsius` (`routine Celsius!(...)` when it can fail). A conversion is
+  `routine Celsius(degrees: B64) -> Celsius` (`failable routine Celsius(...)` when it can fail). A conversion is
   a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
@@ -619,7 +619,7 @@ variant Number
 
 ## 11. Errors and failure
 
-**Failable routines.** A routine that can fail is declared with `!` and fails with `throw`. A routine with
+**Failable routines.** A routine that can fail is declared `failable` and fails with `throw`. A routine with
 no value to give throws `AbsentValueError()`, an ordinary standard error:
 
 ```suflae
@@ -629,20 +629,21 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-routine parse!(n: Integer) -> Integer
+failable routine parse(n: Integer) -> Integer
     if n < 0
         throw NopeError(what: f"{n} is negative")
     return n * 10
 
-routine find!(items: List[Text], name: Text) -> Integer
+failable routine find(items: List[Text], name: Text) -> Integer
     each i in 0 til items.count()
         if items[i] == name
             return i
     throw AbsentValueError()
 ```
 
-- `throw` in a routine declared without `!` is SF-S750. A `!` routine that never throws is an error too.
-- Call sites never write `!` (`parse!(n: 1)` is SF-G211). **A bare call crashes loudly on failure**: the
+- `throw` in a routine not declared `failable` is SF-S750. A `failable` routine that never throws is an error too.
+- Call sites never write `!` (`parse!(n: 1)` is SF-G211), and a declaration never does (`routine parse!(...)` is
+  SF-G222). **A bare call crashes loudly on failure**: the
   error's title and message, where it was thrown, and a stack trace go to stderr.
 
 **Recovering.** Put a keyword in front of the expression:
@@ -687,13 +688,13 @@ routine start()
   depth. A routine value called with no keyword above that call still crashes on failure. An `each` loop over
   an adapter holding a lambda ends only when its source ends: a failure inside the lambda is the loop's
   failure, recovered by a keyword above the loop or crashing without one. Not covered: a crash inside a
-  library routine declared without `!` (other than in a routine value you handed it) stays a crash, and the
+  library routine not declared `failable` (other than in a routine value you handed it) stays a crash, and the
   fatal walls below stay fatal.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
 - **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
   `throw` (status 82), and it crashes the same way under `try`/`check` at any depth. Use it for a
   broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
-  does not make a routine failable (no `!` needed for it).
+  does not make a routine failable (no `failable` needed for it).
 - **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
   running it crashes with `NotImplementedError` naming the routine, like `pierce`. It does not make the routine
   failable and ends its path, so a body that is only `todo` needs no `return`. The build warns once per routine
@@ -710,7 +711,7 @@ routine start()
 - When the success value is itself a variant, the arms may name the types it holds instead of the whole value
   (`is Deposit as d`, `is Withdraw as w` on `check parse(...)`), and together they must name every one of them.
   The same holds on a plain variant that holds another variant.
-- **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `!` routine
+- **An error arm is optional.** With no arm for the error, the `when` passes it on: inside a `failable` routine
   as if `is Crashables as e => throw e` were written (the caller receives it), anywhere else the program
   crashes loudly. `throw e` on a caught `Crashables` rethrows the same error. A caught error keeps the trace of
   its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
@@ -739,7 +740,7 @@ category: only a crashable can be thrown.
   `LogicBreachedError`).
 
 **Fatal walls.** The line between recoverable and fatal is: a **data condition** the program can respond to
-(file missing, key absent, bad input) is recoverable through a `!` routine and a keyword; a **physical or
+(file missing, key absent, bad input) is recoverable through a `failable` routine and a keyword; a **physical or
 logic limit** is fatal and cannot be caught.
 
 - Out of memory is fatal, loud and uncatchable (a handler would itself need memory). Very deep recursion
@@ -1017,7 +1018,7 @@ routine start()
 - There is no thread type in Suflae.
 
 ```suflae
-routine checked!(n: Integer) -> Integer
+failable routine checked(n: Integer) -> Integer
     if n < 0
         throw VerificationFailedError()
     return n

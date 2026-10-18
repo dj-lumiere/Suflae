@@ -35,21 +35,21 @@ routine S8.mul_with_overflow(you: S8) -> (S8, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside −128..127.
 @rf("S8.add")
-routine S8.add!(you: S8) -> S8
+failable routine S8.add(you: S8) -> S8
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside −128..127.
 @rf("S8.sub")
-routine S8.sub!(you: S8) -> S8
+failable routine S8.sub(you: S8) -> S8
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside −128..127.
 @rf("S8.mul")
-routine S8.mul!(you: S8) -> S8
+failable routine S8.mul(you: S8) -> S8
 
 ### Returns `me // you` (euclidean division), throwing on errors.
 ### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
@@ -59,19 +59,19 @@ routine S8.mul!(you: S8) -> S8
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if `me == S8_MIN` and `you == -1`.
 @rf("S8.floordiv")
-routine S8.floordiv!(you: S8) -> S8
+failable routine S8.floordiv(you: S8) -> S8
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S8.mod")
-routine S8.mod!(you: S8) -> S8
+failable routine S8.mod(you: S8) -> S8
 
 ### Returns `-me` (arithmetic negation), with wrapping behavior on `S8_MIN`.
 ### :returns: The negated value. `-S8_MIN` wraps to `S8_MIN` (−128).
 @rf("S8.neg")
-routine S8.neg!() -> S8
+failable routine S8.neg() -> S8
 
 ### Returns `-me` in two's complement, wrapping `S8_MIN` to itself.
 ### :returns: The wrapped negation.
@@ -197,7 +197,7 @@ routine S8.borrowing_sub(you: S8, borrow: Bool) -> (S8, Bool)
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S8.pow_with_overflow")
-routine S8.pow_with_overflow!(exp: S8) -> (S8, Bool)
+failable routine S8.pow_with_overflow(exp: S8) -> (S8, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent (must be non-negative).
@@ -205,21 +205,21 @@ routine S8.pow_with_overflow!(exp: S8) -> (S8, Bool)
 ### :throws: {IntegerOverflowError} if the result is outside −128..127.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S8.pow")
-routine S8.pow!(exp: S8) -> S8
+failable routine S8.pow(exp: S8) -> S8
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 256 (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S8.pow_wrap")
-routine S8.pow_wrap!(exp: S8) -> S8
+failable routine S8.pow_wrap(exp: S8) -> S8
 
 ### Returns `me ** exp`, clamped to `S8_MAX` or `S8_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `127` / `−128` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S8.pow_clamp")
-routine S8.pow_clamp!(exp: S8) -> S8
+failable routine S8.pow_clamp(exp: S8) -> S8
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
@@ -260,7 +260,7 @@ routine S8.cmp(you: S8) -> ComparisonSign
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S8_MIN` (its magnitude is not representable in S8).
 @rf("S8.abs")
-routine S8.abs!() -> S8
+failable routine S8.abs() -> S8
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
@@ -292,14 +292,14 @@ routine S8.isqrt() -> S8
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S8.sqrtrem")
-routine S8.sqrtrem!() -> (S8, S8)
+failable routine S8.sqrtrem() -> (S8, S8)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
 @rf("S8.ilog")
-routine S8.ilog!(base: S8) -> S8
+failable routine S8.ilog(base: S8) -> S8
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
@@ -391,113 +391,113 @@ routine S8.to[S8]() -> S8
 ### :returns: The lower 8 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-128..=127`.
 @rf("S16.to")
-routine S16.to![S8]() -> S8
+failable routine S16.to[S8]() -> S8
 
 ### Converts an `S32` to `S8`, throwing if the value is outside −128..127.
 ### :returns: The lower 8 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-128..=127`.
 @rf("S32.to")
-routine S32.to![S8]() -> S8
+failable routine S32.to[S8]() -> S8
 
 ### Converts an `S64` to `S8`, throwing if the value is outside −128..127.
 ### :returns: The lower 8 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-128..=127`.
 @rf("S64.to")
-routine S64.to![S8]() -> S8
+failable routine S64.to[S8]() -> S8
 
 ### Converts an `S128` to `S8`, throwing if the value is outside −128..127.
 ### :returns: The lower 8 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-128..=127`.
 @rf("S128.to")
-routine S128.to![S8]() -> S8
+failable routine S128.to[S8]() -> S8
 
 ### Reinterprets a `U8` as `S8` using two's complement, throwing if the value exceeds 127.
 ### :returns: The same bit pattern interpreted as `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U8.to")
-routine U8.to![S8]() -> S8
+failable routine U8.to[S8]() -> S8
 
 ### Converts a `U16` to `S8`, throwing if the value exceeds 127.
 ### :returns: The lower 8 bits interpreted as a signed `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U16.to")
-routine U16.to![S8]() -> S8
+failable routine U16.to[S8]() -> S8
 
 ### Converts a `U32` to `S8`, throwing if the value exceeds 127.
 ### :returns: The lower 8 bits interpreted as a signed `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U32.to")
-routine U32.to![S8]() -> S8
+failable routine U32.to[S8]() -> S8
 
 ### Converts a `U64` to `S8`, throwing if the value exceeds 127.
 ### :returns: The lower 8 bits interpreted as a signed `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U64.to")
-routine U64.to![S8]() -> S8
+failable routine U64.to[S8]() -> S8
 
 ### Converts a `U128` to `S8`, throwing if the value exceeds 127.
 ### :returns: The lower 8 bits interpreted as a signed `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U128.to")
-routine U128.to![S8]() -> S8
+failable routine U128.to[S8]() -> S8
 
 ### Converts an `S256` to `S8`, throwing if outside −128..127.
 ### :returns: The lower 8 bits reinterpreted as an `S8`.
 ### :throws: {IntegerOverflowError} if this value is outside −128..127.
 @rf("S256.to")
-routine S256.to![S8]() -> S8
+failable routine S256.to[S8]() -> S8
 
 ### Converts a `U256` to `S8`, throwing if the value exceeds 127.
 ### :returns: The lower 8 bits reinterpreted as an `S8`.
 ### :throws: {IntegerOverflowError} if `me > 127`.
 @rf("U256.to")
-routine U256.to![S8]() -> S8
+failable routine U256.to[S8]() -> S8
 
 ### Converts an `B16` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("B16.to")
-routine B16.to![S8]() -> S8
+failable routine B16.to[S8]() -> S8
 
 ### Converts an `B32` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("B32.to")
-routine B32.to![S8]() -> S8
+failable routine B32.to[S8]() -> S8
 
 ### Converts an `B64` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("B64.to")
-routine B64.to![S8]() -> S8
+failable routine B64.to[S8]() -> S8
 
 ### Converts an `B128` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("B128.to")
-routine B128.to![S8]() -> S8
+failable routine B128.to[S8]() -> S8
 
 ### Converts a `D32` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("D32.to")
-routine D32.to![S8]() -> S8
+failable routine D32.to[S8]() -> S8
 
 ### Converts a `D64` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("D64.to")
-routine D64.to![S8]() -> S8
+failable routine D64.to[S8]() -> S8
 
 ### Converts a `D128` to `S8` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S8`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −128..127.
 @rf("D128.to")
-routine D128.to![S8]() -> S8
+failable routine D128.to[S8]() -> S8
 
 ### Parses a decimal string into an `S8`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S8` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S8`.
 @rf("Text.to")
-routine Text.to![S8]() -> S8
+failable routine Text.to[S8]() -> S8

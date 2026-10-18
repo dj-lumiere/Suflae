@@ -151,7 +151,7 @@ routine Text.ends_with(suffix: Text) -> Bool
 ### :returns: A `(before, after)` tuple.
 ### :throws: {AbsentValueError} Thrown when the separator is not found.
 @rf("Text.split_once")
-routine Text.split_once!(separator: Text) -> (Text, Text)
+failable routine Text.split_once(separator: Text) -> (Text, Text)
 
 ### Converts this value to uppercase.
 ### Case conversion follows the behavior defined on `Char`.
@@ -256,4 +256,4 @@ routine Text.iter() -> TextEmittable
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("TextEmittable.emit")
-routine TextEmittable.emit!() -> Char
+failable routine TextEmittable.emit() -> Char

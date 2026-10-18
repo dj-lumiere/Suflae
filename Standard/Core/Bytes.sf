@@ -31,7 +31,7 @@ routine Bytes.count_of(byte: Byte) -> Integer
 
 ### Returns the byte at `index` (`bytes[i]`).
 ### :param index: The position, from 0.
-routine Bytes.getitem!(index: Integer) -> Byte
+failable routine Bytes.getitem(index: Integer) -> Byte
     return me.getitem(index: position_of(value: index))
 
 ### Returns the bytes at the positions in `range` (`bytes[a til b]`). Positions past the end are skipped.
@@ -42,13 +42,13 @@ routine Bytes.getitem(range: Range[Integer]) -> Bytes
 ### Returns the position of the first `byte`.
 ### :param byte: The byte to look for.
 ### :throws: {AbsentValueError} There is no such byte.
-routine Bytes.find!(byte: Byte) -> Integer
+failable routine Bytes.find(byte: Byte) -> Integer
     return me.find(byte: byte).to[Integer]()
 
 ### Returns the position where the first `other` starts.
 ### :param other: The bytes to look for.
 ### :throws: {AbsentValueError} The bytes do not contain `other`.
-routine Bytes.find!(other: Bytes) -> Integer
+failable routine Bytes.find(other: Bytes) -> Integer
     return me.find(other: other).to[Integer]()
 
 ### Returns the parts between the `separator` bytes.
@@ -81,7 +81,7 @@ routine Char.digit_value() -> Integer
 ### Returns the character `delta` code points away (`'a'.offset(delta: 2)` is `'c'`). The result is not checked
 ### to be a valid Unicode scalar.
 ### :param delta: How far to move. A negative one moves back.
-routine Char.offset!(delta: Integer) -> Char
+failable routine Char.offset(delta: Integer) -> Char
     return me.offset(delta: delta.to[S64]())
 
 ### Returns the character's value as one byte, for a character that fits in one.
@@ -94,10 +94,10 @@ routine Byte.codepoint() -> Integer
 
 ### Returns the value of an ASCII decimal digit byte.
 ### :throws: {InvalidDigitError} if the byte is not a digit.
-routine Byte.digit_value!() -> Integer
+failable routine Byte.digit_value() -> Integer
     return me.digit_value().to[Integer]()
 
 ### Returns the value of an ASCII hexadecimal digit byte.
 ### :throws: {InvalidHexDigitError} if the byte is not a hexadecimal digit.
-routine Byte.hex_value!() -> Integer
+failable routine Byte.hex_value() -> Integer
     return me.hex_value().to[Integer]()

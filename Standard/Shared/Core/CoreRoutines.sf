@@ -6,18 +6,18 @@ module Core
 ### Executes `stop`.
 ### :throws: May throw {UserTerminationError}.
 @rf("stop")
-routine stop!()
+failable routine stop()
 
 ### Checks that `expr` holds, and crashes when it does not.
 ### :param expr: The condition that must hold.
 ### :throws: {VerificationFailedError} when `expr` is false.
 @rf("verify")
-routine verify!(expr: Bool)
+failable routine verify(expr: Bool)
 
 ### Executes `breach`.
 ### :throws: May throw {LogicBreachedError}.
 @rf("breach")
-routine breach!()
+failable routine breach()
 
 ### Sets the exit status the program ends with when `start` returns, 0 (success) until something sets it. The last
 ### call wins: it is one atomic value, so any thread may set it, but a thread still running when `start` returns may

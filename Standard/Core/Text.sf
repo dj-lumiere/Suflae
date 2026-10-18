@@ -31,7 +31,7 @@ routine Text.count_of(other: Text) -> Integer
 
 ### Returns the character at `index` (`text[i]`).
 ### :param index: The position, from 0.
-routine Text.getitem!(index: Integer) -> Char
+failable routine Text.getitem(index: Integer) -> Char
     return me.getitem(index: position_of(value: index))
 
 ### Returns the characters at the positions in `range` (`text[a til b]`). Positions past the end are skipped,
@@ -43,25 +43,25 @@ routine Text.getitem(range: Range[Integer]) -> Text
 ### Returns the position of the first `letter`.
 ### :param letter: The character to look for.
 ### :throws: {AbsentValueError} The text has no such character.
-routine Text.find!(letter: Char) -> Integer
+failable routine Text.find(letter: Char) -> Integer
     return me.find(letter: letter).to[Integer]()
 
 ### Returns the position where the first `other` starts.
 ### :param other: The text to look for.
 ### :throws: {AbsentValueError} The text does not contain `other`.
-routine Text.find!(other: Text) -> Integer
+failable routine Text.find(other: Text) -> Integer
     return me.find(other: other).to[Integer]()
 
 ### Returns the position of the last `letter`.
 ### :param letter: The character to look for.
 ### :throws: {AbsentValueError} The text has no such character.
-routine Text.find_last!(letter: Char) -> Integer
+failable routine Text.find_last(letter: Char) -> Integer
     return me.find_last(letter: letter).to[Integer]()
 
 ### Returns the position where the last `other` starts. An empty `other` is found at `count()`.
 ### :param other: The text to look for.
 ### :throws: {AbsentValueError} The text does not contain `other`.
-routine Text.find_last!(other: Text) -> Integer
+failable routine Text.find_last(other: Text) -> Integer
     return me.find_last(other: other).to[Integer]()
 
 ### Returns the text written `times` times in a row.

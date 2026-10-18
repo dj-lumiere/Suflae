@@ -27,21 +27,21 @@ routine S64.mul_with_overflow(you: S64) -> (S64, Bool)
 ### :returns: The sum.
 ### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
 @rf("S64.add")
-routine S64.add!(you: S64) -> S64
+failable routine S64.add(you: S64) -> S64
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference.
 ### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
 @rf("S64.sub")
-routine S64.sub!(you: S64) -> S64
+failable routine S64.sub(you: S64) -> S64
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product.
 ### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
 @rf("S64.mul")
-routine S64.mul!(you: S64) -> S64
+failable routine S64.mul(you: S64) -> S64
 
 ### Returns `me // you` (euclidean division), throwing on errors.
 ### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
@@ -50,19 +50,19 @@ routine S64.mul!(you: S64) -> S64
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if `me == S64_MIN and you == -1`.
 @rf("S64.floordiv")
-routine S64.floordiv!(you: S64) -> S64
+failable routine S64.floordiv(you: S64) -> S64
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S64.mod")
-routine S64.mod!(you: S64) -> S64
+failable routine S64.mod(you: S64) -> S64
 
 ### Returns `-me` (arithmetic negation).
 ### :returns: The negated value.
 @rf("S64.neg")
-routine S64.neg!() -> S64
+failable routine S64.neg() -> S64
 
 ### Returns `-me` in two's complement, wrapping `S64_MIN` to itself.
 ### :returns: The wrapped negation.
@@ -190,26 +190,26 @@ routine S64.borrowing_sub(you: S64, borrow: Bool) -> (S64, Bool)
 ### :returns: A tuple of `(result, overflow_flag)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S64.pow_with_overflow")
-routine S64.pow_with_overflow!(exp: S64) -> (S64, Bool)
+failable routine S64.pow_with_overflow(exp: S64) -> (S64, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent. Must be non-negative.
 ### :returns: The result.
 ### :throws: {IntegerOverflowError} if the result is outside the `S64` range.
 @rf("S64.pow")
-routine S64.pow!(exp: S64) -> S64
+failable routine S64.pow(exp: S64) -> S64
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent. Must be non-negative.
 ### :returns: The result modulo 2⁶⁴ in two's complement.
 @rf("S64.pow_wrap")
-routine S64.pow_wrap!(exp: S64) -> S64
+failable routine S64.pow_wrap(exp: S64) -> S64
 
 ### Returns `me ** exp` clamped to `[S64_MIN, S64_MAX]` on overflow.
 ### :param exp: The exponent. Must be non-negative.
 ### :returns: The clamped result.
 @rf("S64.pow_clamp")
-routine S64.pow_clamp!(exp: S64) -> S64
+failable routine S64.pow_clamp(exp: S64) -> S64
 
 ### Returns `me & you` (bitwise AND).
 ### :param you: The right operand.
@@ -250,7 +250,7 @@ routine S64.cmp(you: S64) -> ComparisonSign
 ### :returns: `me` if non-negative; `-me` otherwise.
 ### :throws: {IntegerOverflowError} when `me` is `S64_MIN` (its magnitude is not representable in S64).
 @rf("S64.abs")
-routine S64.abs!() -> S64
+failable routine S64.abs() -> S64
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare.
@@ -269,14 +269,14 @@ routine S64.isqrt() -> S64
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S64.sqrtrem")
-routine S64.sqrtrem!() -> (S64, S64)
+failable routine S64.sqrtrem() -> (S64, S64)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
 @rf("S64.ilog")
-routine S64.ilog!(base: S64) -> S64
+failable routine S64.ilog(base: S64) -> S64
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
@@ -377,7 +377,7 @@ routine S64.to[S64]() -> S64
 ### :returns: The `S64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value is outside the `S64` range.
 @rf("S128.to")
-routine S128.to![S64]() -> S64
+failable routine S128.to[S64]() -> S64
 
 ### Zero-extends an unsigned 8-bit integer to `S64`.
 ### :returns: The `S64` representation of this value.
@@ -398,60 +398,60 @@ routine U32.to[S64]() -> S64
 ### :returns: The `S64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value exceeds `S64_MAX`.
 @rf("U64.to")
-routine U64.to![S64]() -> S64
+failable routine U64.to[S64]() -> S64
 
 ### Truncates an unsigned 128-bit integer to `S64`.
 ### :returns: The `S64` representation of this value.
 ### :throws: {IntegerOverflowError} if this value exceeds `S64_MAX`.
 @rf("U128.to")
-routine U128.to![S64]() -> S64
+failable routine U128.to[S64]() -> S64
 
 ### Converts an `S256` to `S64`, throwing if outside the S64 range.
 ### :returns: The lower 64 bits reinterpreted as an `S64`.
 ### :throws: {IntegerOverflowError} if this value is outside −9223372036854775808..9223372036854775807.
 @rf("S256.to")
-routine S256.to![S64]() -> S64
+failable routine S256.to[S64]() -> S64
 
 ### Converts a `U256` to `S64`, throwing if the value exceeds S64_MAX.
 ### :returns: The lower 64 bits reinterpreted as an `S64`.
 ### :throws: {IntegerOverflowError} if `me > 9223372036854775807`.
 @rf("U256.to")
-routine U256.to![S64]() -> S64
+failable routine U256.to[S64]() -> S64
 
 ### Truncates a 16-bit float to `S64` by first widening to `B32`.
 ### :returns: The truncated `S64` representation.
 @rf("B16.to")
-routine B16.to![S64]() -> S64
+failable routine B16.to[S64]() -> S64
 
 ### Truncates a 32-bit float to `S64`, rounding toward zero.
 ### :returns: The truncated `S64` representation.
 @rf("B32.to")
-routine B32.to![S64]() -> S64
+failable routine B32.to[S64]() -> S64
 
 ### Truncates a 64-bit float to `S64`, rounding toward zero.
 ### :returns: The truncated `S64` representation.
 @rf("B64.to")
-routine B64.to![S64]() -> S64
+failable routine B64.to[S64]() -> S64
 
 ### Truncates a 128-bit float to `S64` by narrowing to `B64` first.
 ### :returns: The truncated `S64` representation.
 @rf("B128.to")
-routine B128.to![S64]() -> S64
+failable routine B128.to[S64]() -> S64
 
 ### Converts a 32-bit decimal float to `S64`.
 ### :returns: The truncated `S64` representation.
 @rf("D32.to")
-routine D32.to![S64]() -> S64
+failable routine D32.to[S64]() -> S64
 
 ### Converts a 64-bit decimal float to `S64`.
 ### :returns: The truncated `S64` representation.
 @rf("D64.to")
-routine D64.to![S64]() -> S64
+failable routine D64.to[S64]() -> S64
 
 ### Converts a 128-bit decimal float to `S64`.
 ### :returns: The truncated `S64` representation.
 @rf("D128.to")
-routine D128.to![S64]() -> S64
+failable routine D128.to[S64]() -> S64
 
 ### Parses a decimal text representation of an `S64`.
 ### Accepts an optional leading `+` or `-` sign followed by ASCII decimal digits.
@@ -459,4 +459,4 @@ routine D128.to![S64]() -> S64
 ### :throws: {InvalidValueError} if the text is empty or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S64`.
 @rf("Text.to")
-routine Text.to![S64]() -> S64
+failable routine Text.to[S64]() -> S64

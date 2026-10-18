@@ -28,5 +28,5 @@ routine Check[T].diagnose() -> Text
 ### :returns: The success value.
 ### :throws: The caught error.
 @rf("Check.unwrap")
-routine Check[T].unwrap!() -> T
+failable routine Check[T].unwrap() -> T
 needs RecordType T

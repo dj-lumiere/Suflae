@@ -17,7 +17,7 @@ record Box[T]
 routine wrap[T](x: T) -> Box[T]
     return Box[T](item: x)
 
-routine look!(n: Integer) -> Integer
+failable routine look(n: Integer) -> Integer
     if n < 0
         throw InvalidValueError(input: "negative", target: "Integer")
     if n == 0

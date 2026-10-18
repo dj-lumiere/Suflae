@@ -205,14 +205,14 @@ routine B128.cmp(you: B128) -> ComparisonSign
 ### :param you: The addend.
 ### :returns: The sum (always finite).
 @rf("B128.add")
-routine B128.add!(you: B128) -> B128
+failable routine B128.add(you: B128) -> B128
 
 ### Returns `me - you` (software IEEE 754). Checked: crashes if the result is non-finite.
 ### Use `sub_unchecked` for raw IEEE 754 propagation.
 ### :param you: The value to subtract.
 ### :returns: The difference (always finite).
 @rf("B128.sub")
-routine B128.sub!(you: B128) -> B128
+failable routine B128.sub(you: B128) -> B128
 
 ### Returns `me + you`, promoting the real `me` to complex (imaginary part 0). Only `+`/`-` allow
 ### real↔complex mixing; the component width must match (B128 pairs with C256).
@@ -232,14 +232,14 @@ routine B128.sub(you: C256) -> C256
 ### :param you: The multiplier.
 ### :returns: The product (always finite).
 @rf("B128.mul")
-routine B128.mul!(you: B128) -> B128
+failable routine B128.mul(you: B128) -> B128
 
 ### Returns `me / you` (software IEEE 754). Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain,
 ### overflow -> overflow. Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
 ### :param you: The divisor.
 ### :returns: The quotient (always finite).
 @rf("B128.truediv")
-routine B128.truediv!(you: B128) -> B128
+failable routine B128.truediv(you: B128) -> B128
 
 ### Truncates toward zero to an integer value (C `trunc`).
 ### :returns: The integer part, preserving sign (NaN/inf returned unchanged).
@@ -411,7 +411,7 @@ routine b128_isqrt256(n: U256) -> U256
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
 ### :returns: The quadruple-precision square root (always finite for finite non-negative input).
 @rf("B128.sqrt")
-routine B128.sqrt!() -> B128
+failable routine B128.sqrt() -> B128
 
 ### Normalizes a positive integer significand `sig * 2^exp_lsb` into packed bits.
 ### Exact: assumes the value is representable (true for fmod/remainder results).
@@ -484,7 +484,7 @@ routine B128.frexp() -> (B128, S64)
 ### :returns: `me`, when finite.
 ### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
 @rf("B128.finite")
-routine B128.finite!() -> B128
+failable routine B128.finite() -> B128
 
 ### Returns `me / you` with raw IEEE 754 propagation (`x/0` -> ±infinity, `0/0` -> NaN). No crash.
 @rf("B128.truediv_unchecked")
@@ -710,4 +710,4 @@ routine B128.to[B64]() -> B64
 ### :returns: The correctly-rounded `B128` value.
 ### :throws: {InvalidValueError} on malformed input.
 @rf("Text.to")
-routine Text.to![B128]() -> B128
+failable routine Text.to[B128]() -> B128

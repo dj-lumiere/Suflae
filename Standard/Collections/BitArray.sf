@@ -93,7 +93,7 @@ routine BitArray[BITS].is_empty() -> Bool
 # Indexing (read-only, value semantics)
 # ============================================================================
 
-secret routine BitArray[BITS].getitem_raw!(index: U64) -> Bool
+secret failable routine BitArray[BITS].getitem_raw(index: U64) -> Bool
     if index >= BITS
         throw IndexOutOfBoundsError(index: index, count: BITS)
     # Access bit at index within packed bytes
@@ -109,10 +109,10 @@ secret routine BitArray[BITS].getitem_raw!(index: U64) -> Bool
 ### :param index: The zero-based bit position to read.
 ### :returns: `true` if the bit at `index` is set; `false` if it is clear.
 ### :throws: {IndexOutOfBoundsError} if `index >= BITS`.
-routine BitArray[BITS].getitem!(index: Integer) -> Bool
+failable routine BitArray[BITS].getitem(index: Integer) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
-secret routine BitArray[BITS].setitem_raw!(index: U64, value: Bool)
+secret failable routine BitArray[BITS].setitem_raw(index: U64, value: Bool)
     if index >= BITS
         throw IndexOutOfBoundsError(index: index, count: BITS)
     var byte_idx = LLVM::unsigned_div(index, 8)
@@ -139,7 +139,7 @@ secret routine BitArray[BITS].setitem_raw!(index: U64, value: Bool)
 ### :param index: The zero-based bit position to update.
 ### :param value: The new bit value.
 ### :throws: {IndexOutOfBoundsError} if `index >= BITS`.
-routine BitArray[BITS].setitem!(index: Integer, value: Bool)
+failable routine BitArray[BITS].setitem(index: Integer, value: Bool)
     me.setitem_raw(index: position_of(value: index), value: value)
     return
 
@@ -286,7 +286,7 @@ routine BitArray[BITS].iter() -> BitArrayEmittable[BITS]
 ### Returns the next bit from the iterator in ascending index order.
 ### :returns: The bit at the current index.
 ### :throws: {AbsentValueError} All `BITS` bits have been yielded.
-routine BitArrayEmittable[BITS].emit!() -> Bool
+failable routine BitArrayEmittable[BITS].emit() -> Bool
     if me.index >= BITS
         throw AbsentValueError()
     var value = me.bits.getitem_raw(index: me.index)

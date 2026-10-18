@@ -72,4 +72,4 @@ routine Random.chance(probability: B64) -> Bool
 ### :returns: A `U64` in `[low, high)`.
 ### :throws: if `high <= low` (empty range) — the modulo has no valid width.
 @rf("Random.range")
-routine Random.range!(low: U64, high: U64) -> U64
+failable routine Random.range(low: U64, high: U64) -> U64

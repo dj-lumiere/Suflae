@@ -111,7 +111,7 @@ routine ZipIterable[TFirst, TSecond, TFirstSource, TSecondSource].iter() -> ZipE
 ### Propagates absence as soon as either source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond]` value.
 @rf("ZipEmittable.emit")
-routine ZipEmittable[TFirst, TSecond, TFirstIter, TSecondIter].emit!() -> Tuple[TFirst, TSecond]
+failable routine ZipEmittable[TFirst, TSecond, TFirstIter, TSecondIter].emit() -> Tuple[TFirst, TSecond]
 
 ### Returns the stateful iterator that produces paired triples lazily.
 ### :returns: The resulting `Zip3Emittable[TFirst, TSecond, TThird, TFirstSource/Iter, TSecondSource/Iter, TThirdSource/Iter]` value.
@@ -122,7 +122,7 @@ routine Zip3Iterable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThir
 ### Propagates absence as soon as any source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond, TThird]` value.
 @rf("Zip3Emittable.emit")
-routine Zip3Emittable[TFirst, TSecond, TThird, TFirstIter, TSecondIter, TThirdIter].emit!() -> Tuple[TFirst, TSecond, TThird]
+failable routine Zip3Emittable[TFirst, TSecond, TThird, TFirstIter, TSecondIter, TThirdIter].emit() -> Tuple[TFirst, TSecond, TThird]
 
 ### Returns the stateful iterator that produces paired quadruples lazily.
 ### :returns: The resulting `Zip4Emittable[...]` value.
@@ -133,4 +133,4 @@ routine Zip4Iterable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSour
 ### Propagates absence as soon as any source is exhausted.
 ### :returns: The resulting `Tuple[TFirst, TSecond, TThird, TFourth]` value.
 @rf("Zip4Emittable.emit")
-routine Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstIter, TSecondIter, TThirdIter, TFourthIter].emit!() -> Tuple[TFirst, TSecond, TThird, TFourth]
+failable routine Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstIter, TSecondIter, TThirdIter, TFourthIter].emit() -> Tuple[TFirst, TSecond, TThird, TFourth]

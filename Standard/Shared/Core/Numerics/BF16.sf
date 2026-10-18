@@ -106,7 +106,7 @@ routine B64.to[BF16]() -> BF16
 ### :returns: The nearest `BF16` value.
 ### :throws: {InvalidValueError} on malformed input.
 @rf("Text.to")
-routine Text.to![BF16]() -> BF16
+failable routine Text.to[BF16]() -> BF16
 
 ### Returns `me + you` with raw IEEE 754 results (overflow gives ±infinity), rounded once to BF16.
 ### :param you: The other operand.
@@ -121,7 +121,7 @@ routine BF16.add_unchecked(you: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.add")
-routine BF16.add!(you: BF16) -> BF16
+failable routine BF16.add(you: BF16) -> BF16
 
 ### Returns `me - you` with raw IEEE 754 results (overflow gives ±infinity), rounded once to BF16.
 ### :param you: The other operand.
@@ -136,7 +136,7 @@ routine BF16.sub_unchecked(you: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.sub")
-routine BF16.sub!(you: BF16) -> BF16
+failable routine BF16.sub(you: BF16) -> BF16
 
 ### Returns `me * you` with raw IEEE 754 results (overflow gives ±infinity), rounded once to BF16.
 ### :param you: The other operand.
@@ -151,7 +151,7 @@ routine BF16.mul_unchecked(you: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.mul")
-routine BF16.mul!(you: BF16) -> BF16
+failable routine BF16.mul(you: BF16) -> BF16
 
 ### Returns `me / you` with raw IEEE 754 results (overflow gives ±infinity), rounded once to BF16.
 ### :param you: The other operand.
@@ -166,7 +166,7 @@ routine BF16.truediv_unchecked(you: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.truediv")
-routine BF16.truediv!(you: BF16) -> BF16
+failable routine BF16.truediv(you: BF16) -> BF16
 
 ### Returns the square root with raw IEEE 754 results (`sqrt` of a negative value is NaN), rounded once to BF16.
 ### :returns: The square root.
@@ -178,14 +178,14 @@ routine BF16.sqrt_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.sqrt")
-routine BF16.sqrt!() -> BF16
+failable routine BF16.sqrt() -> BF16
 
 ### Returns this value when it is finite. Checked: crashes on ±infinity or NaN.
 ### :returns: This value.
 ### :throws: {NumericDomainError} for NaN.
 ### :throws: {NumericOverflowError} for ±infinity.
 @rf("BF16.finite")
-routine BF16.finite!() -> BF16
+failable routine BF16.finite() -> BF16
 
 ### Returns the negation: the sign bit flipped (NaN keeps its payload).
 ### :returns: `-me`.
@@ -374,7 +374,7 @@ routine BF16.fma_unchecked(b: BF16, c: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.fma")
-routine BF16.fma!(b: BF16, c: BF16) -> BF16
+failable routine BF16.fma(b: BF16, c: BF16) -> BF16
 
 ### Returns the whole part and the fractional part of this value, both with its sign.
 ### :returns: `(whole, fractional)`.
@@ -457,7 +457,7 @@ routine BF16.exp_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.exp")
-routine BF16.exp!() -> BF16
+failable routine BF16.exp() -> BF16
 
 ### Returns 2 raised to this value with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -470,7 +470,7 @@ routine BF16.exp2_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.exp2")
-routine BF16.exp2!() -> BF16
+failable routine BF16.exp2() -> BF16
 
 ### Returns 10 raised to this value with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -483,7 +483,7 @@ routine BF16.exp10_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.exp10")
-routine BF16.exp10!() -> BF16
+failable routine BF16.exp10() -> BF16
 
 ### Returns e raised to this value, minus 1 with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -496,7 +496,7 @@ routine BF16.expm1_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.expm1")
-routine BF16.expm1!() -> BF16
+failable routine BF16.expm1() -> BF16
 
 ### Returns the natural logarithm with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -509,7 +509,7 @@ routine BF16.log_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.log")
-routine BF16.log!() -> BF16
+failable routine BF16.log() -> BF16
 
 ### Returns the base-2 logarithm with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -522,7 +522,7 @@ routine BF16.log2_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.log2")
-routine BF16.log2!() -> BF16
+failable routine BF16.log2() -> BF16
 
 ### Returns the base-10 logarithm with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -535,7 +535,7 @@ routine BF16.log10_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.log10")
-routine BF16.log10!() -> BF16
+failable routine BF16.log10() -> BF16
 
 ### Returns the natural logarithm of 1 plus this value with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -548,7 +548,7 @@ routine BF16.log1p_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.log1p")
-routine BF16.log1p!() -> BF16
+failable routine BF16.log1p() -> BF16
 
 ### Returns the sine (radians), correctly rounded to BF16.
 ### :returns: The correctly rounded result.
@@ -576,7 +576,7 @@ routine BF16.asin_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.asin")
-routine BF16.asin!() -> BF16
+failable routine BF16.asin() -> BF16
 
 ### Returns the arc cosine with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -589,7 +589,7 @@ routine BF16.acos_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.acos")
-routine BF16.acos!() -> BF16
+failable routine BF16.acos() -> BF16
 
 ### Returns the arc tangent, correctly rounded to BF16.
 ### :returns: The correctly rounded result.
@@ -607,7 +607,7 @@ routine BF16.sinh_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.sinh")
-routine BF16.sinh!() -> BF16
+failable routine BF16.sinh() -> BF16
 
 ### Returns the hyperbolic cosine with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -620,7 +620,7 @@ routine BF16.cosh_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.cosh")
-routine BF16.cosh!() -> BF16
+failable routine BF16.cosh() -> BF16
 
 ### Returns the hyperbolic tangent, correctly rounded to BF16.
 ### :returns: The correctly rounded result.
@@ -643,7 +643,7 @@ routine BF16.acosh_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.acosh")
-routine BF16.acosh!() -> BF16
+failable routine BF16.acosh() -> BF16
 
 ### Returns the inverse hyperbolic tangent with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
@@ -656,7 +656,7 @@ routine BF16.atanh_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.atanh")
-routine BF16.atanh!() -> BF16
+failable routine BF16.atanh() -> BF16
 
 ### Returns the error function, correctly rounded to BF16.
 ### :returns: The correctly rounded result.
@@ -679,7 +679,7 @@ routine BF16.tgamma_unchecked() -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.tgamma")
-routine BF16.tgamma!() -> BF16
+failable routine BF16.tgamma() -> BF16
 
 ### Returns the natural logarithm of |gamma(x)|, correctly rounded to BF16.
 ### :returns: The correctly rounded result.
@@ -719,7 +719,7 @@ routine BF16.pow_unchecked(exp: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("BF16.pow")
-routine BF16.pow!(exp: BF16) -> BF16
+failable routine BF16.pow(exp: BF16) -> BF16
 
 ### The angle of the point (x, y) in [-pi, pi], correctly rounded (C `atan2`).
 ### :param y: The y-coordinate.
@@ -742,4 +742,4 @@ routine hypot_unchecked(x: BF16, y: BF16) -> BF16
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
 @rf("hypot")
-routine hypot!(x: BF16, y: BF16) -> BF16
+failable routine hypot(x: BF16, y: BF16) -> BF16

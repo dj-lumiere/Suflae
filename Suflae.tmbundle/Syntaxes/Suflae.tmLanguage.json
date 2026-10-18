@@ -45,7 +45,7 @@
         {
           "comment": "Access and routine modifiers",
           "name": "keyword.modifier.sf",
-          "match": "\\b(secret|posted|global|suspended|dangerous)\\b"
+          "match": "\\b(secret|posted|global|suspended|failable|dangerous)\\b"
         },
         {
           "comment": "Control flow",

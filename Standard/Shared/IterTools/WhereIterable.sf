@@ -33,7 +33,7 @@ routine WhereIterable[T, TSource].iter() -> WhereEmittable[T, TSource/Iter]
 ### Source values are consumed and discarded until one passes the filter.
 ### :returns: The resulting `T` value.
 @rf("WhereEmittable.emit")
-routine WhereEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+failable routine WhereEmittable[T, TSourceIter].emit() -> TSourceIter/Item
 
 ### Returns a lazy adapter that keeps only values for which `predicate` returns
 ### `true`.

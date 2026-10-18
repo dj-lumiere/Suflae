@@ -116,27 +116,27 @@ routine Memory[T].room() -> U64
 
 ### Returns what the place at `index` holds (`mem[i]`).
 ### :param index: The position to read.
-routine Memory[T].getitem!(index: Integer) -> T
+failable routine Memory[T].getitem(index: Integer) -> T
     return me.at(position: position_of(value: index))
 
 ### Replaces what the place at `index` holds (`mem[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new value.
-routine Memory[T].setitem!(index: Integer, value: T)
+failable routine Memory[T].setitem(index: Integer, value: T)
     me.put(position: position_of(value: index), value: value)
     return
 
 ### Returns what the place at `position` holds, counted with `U64`.
 ### :param position: The position to read.
 @inline
-routine Memory[T].at!(position: U64) -> T
+failable routine Memory[T].at(position: U64) -> T
     return me.read(position: me.filled(position: position)).share()
 
 ### Replaces what the place at `position` holds, counted with `U64`.
 ### :param position: The position to write.
 ### :param value: The new value.
 @inline
-routine Memory[T].put!(position: U64, value: T)
+failable routine Memory[T].put(position: U64, value: T)
     danger
         var slot = me.slot(position: me.checked(position: position))
         slot.peek().destruct()
@@ -145,7 +145,7 @@ routine Memory[T].put!(position: U64, value: T)
 
 ### Hands out what the place at `position` holds and leaves the place zero, counted with `U64`.
 ### :param position: The position to empty.
-routine Memory[T].take_at!(position: U64) -> T
+failable routine Memory[T].take_at(position: U64) -> T
     var place = me.filled(position: position)
     var value = me.read(position: place)
     me.clear_places(from: place, count: 1)
@@ -153,7 +153,7 @@ routine Memory[T].take_at!(position: U64) -> T
 
 ### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
 ### :param position: The position to empty.
-routine Memory[T].erase_at!(position: U64)
+failable routine Memory[T].erase_at(position: U64)
     var place = me.checked(position: position)
     danger
         me.slot(position: place).peek().destruct()
@@ -164,19 +164,19 @@ routine Memory[T].erase_at!(position: U64)
 ### `mem[a til b]` is.
 ### :param first: The first place of the view.
 ### :param room: How many places the view spans.
-routine Memory[T].view!(first: U64, room: U64) -> Memory[T]
+failable routine Memory[T].view(first: U64, room: U64) -> Memory[T]
     if first + room > me.room
         throw IndexOutOfBoundsError(index: first + room, count: me.room)
     return Memory[T](storage: me.storage, start: me.start + first, room: room)
 
 ### Hands out what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
-routine Memory[T].take!(index: Integer) -> T
+failable routine Memory[T].take(index: Integer) -> T
     return me.take_at(position: position_of(value: index))
 
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
-routine Memory[T].erase!(index: Integer)
+failable routine Memory[T].erase(index: Integer)
     me.erase_at(position: position_of(value: index))
     return
 
@@ -185,7 +185,7 @@ routine Memory[T].erase!(index: Integer)
 ### :param from: The first place to carry from.
 ### :param into: The first place to carry into.
 ### :param count: How many places to carry.
-routine Memory[T].move!(from: Integer, into: Integer, count: Integer)
+failable routine Memory[T].move(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     var n = count.to[U64]()
@@ -199,7 +199,7 @@ routine Memory[T].move!(from: Integer, into: Integer, count: Integer)
 ### :param source: The first place to carry from.
 ### :param target: The first place to carry into.
 ### :param count: How many places to carry.
-routine Memory[T].carry!(source: U64, target: U64, count: U64)
+failable routine Memory[T].carry(source: U64, target: U64, count: U64)
     var n = count
     if n == 0
         return
@@ -224,14 +224,14 @@ routine Memory[T].carry!(source: U64, target: U64, count: U64)
 ### Swaps what the places at `first` and `second` hold.
 ### :param first: One position.
 ### :param second: The other position.
-routine Memory[T].swap!(first: Integer, second: Integer)
+failable routine Memory[T].swap(first: Integer, second: Integer)
     me.swap_at(first: position_of(value: first), second: position_of(value: second))
     return
 
 ### Swaps what the places at `first` and `second` hold, counted with `U64`.
 ### :param first: One position.
 ### :param second: The other position.
-routine Memory[T].swap_at!(first: U64, second: U64)
+failable routine Memory[T].swap_at(first: U64, second: U64)
     me.swap_places(a: me.checked(position: first), b: me.checked(position: second))
     return
 
@@ -239,7 +239,7 @@ routine Memory[T].swap_at!(first: U64, second: U64)
 ### memory, so writing through it changes this memory. The range must run forward one position at a time and stay
 ### inside the memory.
 ### :param range: The positions to view.
-routine Memory[T].getitem!(range: Range[Integer]) -> Memory[T]
+failable routine Memory[T].getitem(range: Range[Integer]) -> Memory[T]
     if range.step != 1 or not range.is_ascending()
         throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
     if range.start.is_negative()
@@ -271,13 +271,13 @@ routine Memory[T].fill(value: T)
 ### Moves everything into a new row of `capacity` places, the first ones holding what this memory holds and the rest
 ### zero. Views made before keep the old memory, which is left all zero. Only a whole memory grows, not a view.
 ### :param capacity: How many places the new row has, at least `capacity()`.
-routine Memory[T].grow!(capacity: Integer)
+failable routine Memory[T].grow(capacity: Integer)
     me.grow_to(room: capacity.to[U64]())
     return
 
 ### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.
 ### :param room: How many places the new row has, at least `room()`.
-routine Memory[T].grow_to!(room: U64)
+failable routine Memory[T].grow_to(room: U64)
     if me.start != 0 or me.room != me.storage.room
         throw MemoryViewShapeError(operation: "grow")
     if room < me.room
@@ -297,7 +297,7 @@ routine Memory[T].grow_to!(room: U64)
 
 ### Moves every place `count` positions toward the front, the first ones going round to the back.
 ### :param count: How many positions to rotate by.
-routine Memory[T].rotate_left!(count: Integer)
+failable routine Memory[T].rotate_left(count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     me.turn(count: count.to[U64]())
@@ -577,7 +577,7 @@ routine Memory[T].iter() -> MemoryEmittable[T]
 ### of a collection that keeps them as a ring.
 ### :param first: The place the walk starts at.
 ### :param count: How many places the walk reads, at most `capacity()`.
-routine Memory[T].walk!(first: Integer, count: Integer) -> MemoryEmittable[T]
+failable routine Memory[T].walk(first: Integer, count: Integer) -> MemoryEmittable[T]
     if count.is_negative()
         throw NegativeIndexError(index: count)
     if count == 0
@@ -588,7 +588,7 @@ routine Memory[T].walk!(first: Integer, count: Integer) -> MemoryEmittable[T]
 ### does, counted with `U64`.
 ### :param first: The place the walk starts at.
 ### :param count: How many places the walk reads, at most `room()`.
-routine Memory[T].walk_at!(first: U64, count: U64) -> MemoryEmittable[T]
+failable routine Memory[T].walk_at(first: U64, count: U64) -> MemoryEmittable[T]
     if count == 0
         return me.walking(first: 0, count: 0)
     if count > me.room
@@ -601,7 +601,7 @@ secret routine Memory[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
 
 ### Returns what the next place holds.
 ### :throws: {AbsentValueError} The walk is over.
-routine MemoryEmittable[T].emit!() -> T
+failable routine MemoryEmittable[T].emit() -> T
     if me.index >= me.count
         throw AbsentValueError()
     var place = me.first + me.index
@@ -673,14 +673,14 @@ secret routine Memory[T].read(position: U64) -> T
 
 ### `position` checked against the places.
 @inline
-secret routine Memory[T].checked!(position: U64) -> U64
+secret failable routine Memory[T].checked(position: U64) -> U64
     if position >= me.room
         throw IndexOutOfBoundsError(index: position, count: me.room)
     return position
 
 ### `position` checked against the places and, in a memory of entities, against a place that holds no entity yet.
 @inline
-secret routine Memory[T].filled!(position: U64) -> U64
+secret failable routine Memory[T].filled(position: U64) -> U64
     var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger

@@ -6,7 +6,7 @@ module Core
 ### e^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.exp")
-routine D64.exp!() -> D64
+failable routine D64.exp() -> D64
 
 ### e^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.exp_unchecked")
@@ -15,7 +15,7 @@ routine D64.exp_unchecked() -> D64
 ### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.expm1")
-routine D64.expm1!() -> D64
+failable routine D64.expm1() -> D64
 
 ### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.expm1_unchecked")
@@ -24,7 +24,7 @@ routine D64.expm1_unchecked() -> D64
 ### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.exp2")
-routine D64.exp2!() -> D64
+failable routine D64.exp2() -> D64
 
 ### 2^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.exp2_unchecked")
@@ -33,7 +33,7 @@ routine D64.exp2_unchecked() -> D64
 ### 10^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.exp10")
-routine D64.exp10!() -> D64
+failable routine D64.exp10() -> D64
 
 ### 10^me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.exp10_unchecked")
@@ -42,7 +42,7 @@ routine D64.exp10_unchecked() -> D64
 ### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.log")
-routine D64.log!() -> D64
+failable routine D64.log() -> D64
 
 ### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.log_unchecked")
@@ -51,7 +51,7 @@ routine D64.log_unchecked() -> D64
 ### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.log1p")
-routine D64.log1p!() -> D64
+failable routine D64.log1p() -> D64
 
 ### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.log1p_unchecked")
@@ -60,7 +60,7 @@ routine D64.log1p_unchecked() -> D64
 ### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.log2")
-routine D64.log2!() -> D64
+failable routine D64.log2() -> D64
 
 ### log2(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.log2_unchecked")
@@ -69,7 +69,7 @@ routine D64.log2_unchecked() -> D64
 ### log10(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.log10")
-routine D64.log10!() -> D64
+failable routine D64.log10() -> D64
 
 ### log10(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.log10_unchecked")
@@ -78,7 +78,7 @@ routine D64.log10_unchecked() -> D64
 ### sqrt(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.sqrt")
-routine D64.sqrt!() -> D64
+failable routine D64.sqrt() -> D64
 
 ### sqrt(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.sqrt_unchecked")
@@ -91,7 +91,7 @@ routine D64.cbrt() -> D64
 ### asin(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.asin")
-routine D64.asin!() -> D64
+failable routine D64.asin() -> D64
 
 ### asin(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.asin_unchecked")
@@ -100,7 +100,7 @@ routine D64.asin_unchecked() -> D64
 ### acos(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.acos")
-routine D64.acos!() -> D64
+failable routine D64.acos() -> D64
 
 ### acos(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.acos_unchecked")
@@ -125,7 +125,7 @@ routine D64.tan() -> D64
 ### sinh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.sinh")
-routine D64.sinh!() -> D64
+failable routine D64.sinh() -> D64
 
 ### sinh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.sinh_unchecked")
@@ -134,7 +134,7 @@ routine D64.sinh_unchecked() -> D64
 ### cosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.cosh")
-routine D64.cosh!() -> D64
+failable routine D64.cosh() -> D64
 
 ### cosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.cosh_unchecked")
@@ -151,7 +151,7 @@ routine D64.asinh() -> D64
 ### acosh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.acosh")
-routine D64.acosh!() -> D64
+failable routine D64.acosh() -> D64
 
 ### acosh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.acosh_unchecked")
@@ -160,7 +160,7 @@ routine D64.acosh_unchecked() -> D64
 ### atanh(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.atanh")
-routine D64.atanh!() -> D64
+failable routine D64.atanh() -> D64
 
 ### atanh(me), raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.atanh_unchecked")
@@ -177,7 +177,7 @@ routine D64.erfc() -> D64
 ### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
 @rf("D64.tgamma")
-routine D64.tgamma!() -> D64
+failable routine D64.tgamma() -> D64
 
 ### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
 @rf("D64.tgamma_unchecked")
@@ -197,7 +197,7 @@ routine atan2(y: D64, x: D64) -> D64
 
 ### hypot(x, y) = sqrt(x^2 + y^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-routine hypot!(x: D64, y: D64) -> D64
+failable routine hypot(x: D64, y: D64) -> D64
 
 ### sqrt(x^2 + y^2), rounded once, raw IEEE (an infinity wins over a NaN).
 @rf("hypot_unchecked")
@@ -205,7 +205,7 @@ routine hypot_unchecked(x: D64, y: D64) -> D64
 
 ### hypot(x, y, z) = sqrt(x^2 + y^2 + z^2), no spurious overflow. Crashes on a non-finite result.
 @rf("hypot")
-routine hypot!(x: D64, y: D64, z: D64) -> D64
+failable routine hypot(x: D64, y: D64, z: D64) -> D64
 
 ### sqrt(x^2 + y^2 + z^2), rounded once, raw IEEE.
 @rf("hypot_unchecked")
@@ -213,7 +213,7 @@ routine hypot_unchecked(x: D64, y: D64, z: D64) -> D64
 
 ### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
 @rf("D64.fma")
-routine D64.fma!(b: D64, c: D64) -> D64
+failable routine D64.fma(b: D64, c: D64) -> D64
 
 ### me*b + c with a single rounding, raw IEEE.
 @rf("D64.fma_unchecked")
@@ -280,7 +280,7 @@ routine D64.signum() -> D64
 
 ### Throws when `me` is non-finite (inf or NaN).
 @rf("D64.finite")
-routine D64.finite!() -> D64
+failable routine D64.finite() -> D64
 
 ### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
 @rf("D64.fmod")

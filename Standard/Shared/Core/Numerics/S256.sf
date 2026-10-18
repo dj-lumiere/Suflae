@@ -37,21 +37,21 @@ routine S256.mul_with_overflow(you: S256) -> (S256, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S256 range.
 @rf("S256.add")
-routine S256.add!(you: S256) -> S256
+failable routine S256.add(you: S256) -> S256
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S256 range.
 @rf("S256.sub")
-routine S256.sub!(you: S256) -> S256
+failable routine S256.sub(you: S256) -> S256
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S256 range.
 @rf("S256.mul")
-routine S256.mul!(you: S256) -> S256
+failable routine S256.mul(you: S256) -> S256
 
 ### `|x|` as a U256 magnitude. `S256_MIN` maps to exactly 2²⁵⁵ (the wrapping
 ### negate reinterpreted as unsigned), so there is no overflow.
@@ -66,14 +66,14 @@ routine s256_abs_u256(x: S256) -> U256
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if `me == S256_MIN` and `you == -1`.
 @rf("S256.floordiv")
-routine S256.floordiv!(you: S256) -> S256
+failable routine S256.floordiv(you: S256) -> S256
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S256.mod")
-routine S256.mod!(you: S256) -> S256
+failable routine S256.mod(you: S256) -> S256
 
 ### (quotient, remainder) of euclidean `me // you` and `me % you` from ONE Knuth-D pass — half the
 ### work of calling `//` and `%` separately. Remainder is always in `[0, |you|)`.
@@ -81,13 +81,13 @@ routine S256.mod!(you: S256) -> S256
 ### :returns: The euclidean tuple `(me // you, me % you)`.
 ### :throws: {DivisionByZeroError} if `you == 0`; {IntegerOverflowError} if `me == S256_MIN` and `you == -1`.
 @rf("S256.divmod")
-routine S256.divmod!(you: S256) -> (S256, S256)
+failable routine S256.divmod(you: S256) -> (S256, S256)
 
 ### Returns `-me` (arithmetic negation), throwing on `S256_MIN`.
 ### :returns: The negated value.
 ### :throws: {IntegerOverflowError} if `me == S256_MIN`.
 @rf("S256.neg")
-routine S256.neg!() -> S256
+failable routine S256.neg() -> S256
 
 ### Returns `(me + you)` with wrapping arithmetic (mod 2²⁵⁶, signed).
 ### :param you: The right operand.
@@ -132,7 +132,7 @@ routine S256.mul_clamp(you: S256) -> S256
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S256.pow_with_overflow")
-routine S256.pow_with_overflow!(exp: S256) -> (S256, Bool)
+failable routine S256.pow_with_overflow(exp: S256) -> (S256, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent (must be non-negative).
@@ -140,21 +140,21 @@ routine S256.pow_with_overflow!(exp: S256) -> (S256, Bool)
 ### :throws: {IntegerOverflowError} if the result is outside the S256 range.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S256.pow")
-routine S256.pow!(exp: S256) -> S256
+failable routine S256.pow(exp: S256) -> S256
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 2²⁵⁶ (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S256.pow_wrap")
-routine S256.pow_wrap!(exp: S256) -> S256
+failable routine S256.pow_wrap(exp: S256) -> S256
 
 ### Returns `me ** exp`, clamped to `S256_MAX` or `S256_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `S256_MAX` / `S256_MIN` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S256.pow_clamp")
-routine S256.pow_clamp!(exp: S256) -> S256
+failable routine S256.pow_clamp(exp: S256) -> S256
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
@@ -216,7 +216,7 @@ routine S256.cmp(you: S256) -> ComparisonSign
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S256_MIN` (its magnitude is not representable in S256).
 @rf("S256.abs")
-routine S256.abs!() -> S256
+failable routine S256.abs() -> S256
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
@@ -371,7 +371,7 @@ routine S256.isqrt() -> S256
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S256.sqrtrem")
-routine S256.sqrtrem!() -> (S256, S256)
+failable routine S256.sqrtrem() -> (S256, S256)
 
 ### Sign-extends an `S8` to `S256` (always succeeds).
 ### :returns: An `S256` with the same signed value as this value.
@@ -432,47 +432,47 @@ routine U128.to[S256]() -> S256
 ### :returns: The same bit pattern interpreted as `S256`.
 ### :throws: {IntegerOverflowError} if `me > S256_MAX`.
 @rf("U256.to")
-routine U256.to![S256]() -> S256
+failable routine U256.to[S256]() -> S256
 
 ### Converts an `B16` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {IntegerOverflowError} if this value is NaN or infinite.
 @rf("B16.to")
-routine B16.to![S256]() -> S256
+failable routine B16.to[S256]() -> S256
 
 ### Converts an `B32` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {IntegerOverflowError} if this value is NaN or infinite.
 @rf("B32.to")
-routine B32.to![S256]() -> S256
+failable routine B32.to[S256]() -> S256
 
 ### Converts an `B64` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^255, 2^255-1].
 @rf("B64.to")
-routine B64.to![S256]() -> S256
+failable routine B64.to[S256]() -> S256
 
 ### Converts an `B128` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {NumericOverflowError} if out of range; {NumericDomainError} if NaN.
 @rf("B128.to")
-routine B128.to![S256]() -> S256
+failable routine B128.to[S256]() -> S256
 
 ### Converts a `D32` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {NumericOverflowError} if the integer part overflows S256.
 @rf("D32.to")
-routine D32.to![S256]() -> S256
+failable routine D32.to[S256]() -> S256
 
 ### Converts a `D64` to `S256`, truncating toward zero.
 ### :returns: The integer part of this value as an `S256`.
 ### :throws: {NumericOverflowError} if the integer part overflows S256.
 @rf("D64.to")
-routine D64.to![S256]() -> S256
+failable routine D64.to[S256]() -> S256
 
 ### Parses a decimal string into an `S256`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S256` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S256`.
 @rf("Text.to")
-routine Text.to![S256]() -> S256
+failable routine Text.to[S256]() -> S256

@@ -218,35 +218,35 @@ routine C128.pow(you: C128) -> C128
 ### Crashes unless both parts of `r` are finite: a NaN part is a domain error, an infinite part an
 ### overflow. The check behind the `!` forms of `exp`/`log`/`sqrt`/`sinh`/`cosh`.
 @rf("c128_checked")
-routine c128_checked!(r: C128) -> C128
+failable routine c128_checked(r: C128) -> C128
 
 ### Returns `e` raised to this value. Checked: crashes if a part of the result is not finite.
 ### Use `exp_unchecked` for raw IEEE 754 propagation.
 ### :returns: The complex exponential.
 @rf("C128.exp")
-routine C128.exp!() -> C128
+failable routine C128.exp() -> C128
 
 ### Returns the principal natural logarithm. Checked: crashes on `log(0)` (an infinite real part).
 ### Use `log_unchecked` for raw IEEE 754 propagation.
 ### :returns: `log(|me|) + i·arg(me)`.
 @rf("C128.log")
-routine C128.log!() -> C128
+failable routine C128.log() -> C128
 
 ### Returns the principal square root. Checked: crashes if a part of the result is not finite.
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
 ### :returns: The square root with non-negative real part.
 @rf("C128.sqrt")
-routine C128.sqrt!() -> C128
+failable routine C128.sqrt() -> C128
 
 ### Returns the hyperbolic sine. Checked: crashes if a part of the result is not finite.
 ### :returns: The complex hyperbolic sine.
 @rf("C128.sinh")
-routine C128.sinh!() -> C128
+failable routine C128.sinh() -> C128
 
 ### Returns the hyperbolic cosine. Checked: crashes if a part of the result is not finite.
 ### :returns: The complex hyperbolic cosine.
 @rf("C128.cosh")
-routine C128.cosh!() -> C128
+failable routine C128.cosh() -> C128
 
 ### Returns this value raised to the integer power `exp` by repeated squaring (exact up to rounding of
 ### each product, no `log`/`exp` round trip). A negative `exp` inverts first; `exp` 0 gives `1`.
@@ -407,4 +407,4 @@ routine B128.to[C128]() -> C128
 ### :returns: The parsed value.
 ### :throws: {InvalidValueError} if the text is not a complex number.
 @rf("Text.to")
-routine Text.to![C128]() -> C128
+failable routine Text.to[C128]() -> C128

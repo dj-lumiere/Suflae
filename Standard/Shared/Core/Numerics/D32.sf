@@ -82,23 +82,23 @@ routine d32_of_b128(x: B128) -> D32
 ### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
 ### IEEE.
 @rf("D32.add")
-routine D32.add!(you: D32) -> D32
+failable routine D32.add(you: D32) -> D32
 
 ### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
 ### IEEE.
 @rf("D32.sub")
-routine D32.sub!(you: D32) -> D32
+failable routine D32.sub(you: D32) -> D32
 
 ### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
 ### IEEE.
 @rf("D32.mul")
-routine D32.mul!(you: D32) -> D32
+failable routine D32.mul(you: D32) -> D32
 
 ### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
 ### overflow.
 ### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
 @rf("D32.truediv")
-routine D32.truediv!(you: D32) -> D32
+failable routine D32.truediv(you: D32) -> D32
 
 ### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
 @rf("D32.add_unchecked")
@@ -128,7 +128,7 @@ routine D32.cmp(you: D32) -> ComparisonSign
 
 ### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
 @rf("D32.pow")
-routine D32.pow!(you: D32) -> D32
+failable routine D32.pow(you: D32) -> D32
 
 ### Shortest decimal text (widens to D128Parts and reuses the shared formatter).
 @rf("D32.represent")
@@ -266,4 +266,4 @@ routine D128.to[D32]() -> D32
 ### Parses a decimal literal into a `D32` (the scanned value rounded once to 7 digits).
 ### :throws: {InvalidValueError} if the text is not a valid decimal literal.
 @rf("Text.to")
-routine Text.to![D32]() -> D32
+failable routine Text.to[D32]() -> D32

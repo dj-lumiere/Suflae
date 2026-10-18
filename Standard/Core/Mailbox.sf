@@ -33,7 +33,7 @@ routine Mailbox[T](capacity: Integer) -> Mailbox[T]
 ### Adds `value` at the end, waiting while the mailbox is full.
 ### :param value: The value that goes in.
 ### :throws: {ChannelClosedError} when the mailbox was closed.
-routine Mailbox[T].add_last!(value: T)
+failable routine Mailbox[T].add_last(value: T)
     me.sender.send(item: value)
     return
 
@@ -43,13 +43,13 @@ routine Mailbox[T].add_last!(value: T)
 ### :param value: The value that goes in.
 ### :returns: `true` when it went in, `false` when the mailbox was full.
 ### :throws: {ChannelClosedError} when the mailbox was closed.
-routine Mailbox[T].add_last_if_room!(value: T) -> Bool
+failable routine Mailbox[T].add_last_if_room(value: T) -> Bool
     return me.sender.send_if_room(item: value)
 
 ### Takes the first value out, waiting while the mailbox is empty.
 ### :returns: The value that was first.
 ### :throws: Crashes when the mailbox is closed and empty.
-routine Mailbox[T].remove_first!() -> T
+failable routine Mailbox[T].remove_first() -> T
     var drain = me.receiver.iter()
     return drain.emit()
 

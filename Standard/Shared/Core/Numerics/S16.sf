@@ -35,21 +35,21 @@ routine S16.mul_with_overflow(you: S16) -> (S16, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside −32768..32767.
 @rf("S16.add")
-routine S16.add!(you: S16) -> S16
+failable routine S16.add(you: S16) -> S16
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside −32768..32767.
 @rf("S16.sub")
-routine S16.sub!(you: S16) -> S16
+failable routine S16.sub(you: S16) -> S16
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside −32768..32767.
 @rf("S16.mul")
-routine S16.mul!(you: S16) -> S16
+failable routine S16.mul(you: S16) -> S16
 
 ### Returns `me // you` (euclidean division), throwing on errors.
 ### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
@@ -59,20 +59,20 @@ routine S16.mul!(you: S16) -> S16
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if `me == S16_MIN` and `you == -1`.
 @rf("S16.floordiv")
-routine S16.floordiv!(you: S16) -> S16
+failable routine S16.floordiv(you: S16) -> S16
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S16.mod")
-routine S16.mod!(you: S16) -> S16
+failable routine S16.mod(you: S16) -> S16
 
 ### Returns `-me` (arithmetic negation), throwing on overflow.
 ### :returns: The negated value.
 ### :throws: {IntegerOverflowError} when `me` is `S16_MIN` (its negation is not representable).
 @rf("S16.neg")
-routine S16.neg!() -> S16
+failable routine S16.neg() -> S16
 
 ### Returns `-me` in two's complement, wrapping `S16_MIN` to itself.
 ### :returns: The wrapped negation.
@@ -198,7 +198,7 @@ routine S16.borrowing_sub(you: S16, borrow: Bool) -> (S16, Bool)
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S16.pow_with_overflow")
-routine S16.pow_with_overflow!(exp: S16) -> (S16, Bool)
+failable routine S16.pow_with_overflow(exp: S16) -> (S16, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent (must be non-negative).
@@ -206,21 +206,21 @@ routine S16.pow_with_overflow!(exp: S16) -> (S16, Bool)
 ### :throws: {IntegerOverflowError} if the result is outside −32768..32767.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S16.pow")
-routine S16.pow!(exp: S16) -> S16
+failable routine S16.pow(exp: S16) -> S16
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 65536 (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S16.pow_wrap")
-routine S16.pow_wrap!(exp: S16) -> S16
+failable routine S16.pow_wrap(exp: S16) -> S16
 
 ### Returns `me ** exp`, clamped to `S16_MAX` or `S16_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `32767` / `−32768` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S16.pow_clamp")
-routine S16.pow_clamp!(exp: S16) -> S16
+failable routine S16.pow_clamp(exp: S16) -> S16
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
@@ -261,7 +261,7 @@ routine S16.cmp(you: S16) -> ComparisonSign
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S16_MIN` (its magnitude is not representable in S16).
 @rf("S16.abs")
-routine S16.abs!() -> S16
+failable routine S16.abs() -> S16
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
@@ -293,14 +293,14 @@ routine S16.isqrt() -> S16
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S16.sqrtrem")
-routine S16.sqrtrem!() -> (S16, S16)
+failable routine S16.sqrtrem() -> (S16, S16)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
 @rf("S16.ilog")
-routine S16.ilog!(base: S16) -> S16
+failable routine S16.ilog(base: S16) -> S16
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
@@ -396,19 +396,19 @@ routine S16.to[S16]() -> S16
 ### :returns: The lower 16 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
 @rf("S32.to")
-routine S32.to![S16]() -> S16
+failable routine S32.to[S16]() -> S16
 
 ### Converts an `S64` to `S16`, throwing if the value is outside −32768..32767.
 ### :returns: The lower 16 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
 @rf("S64.to")
-routine S64.to![S16]() -> S16
+failable routine S64.to[S16]() -> S16
 
 ### Converts an `S128` to `S16`, throwing if the value is outside −32768..32767.
 ### :returns: The lower 16 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-32768..=32767`.
 @rf("S128.to")
-routine S128.to![S16]() -> S16
+failable routine S128.to[S16]() -> S16
 
 ### Zero-extends a `U8` to `S16` (always succeeds — `U8` max 255 fits in S16).
 ### :returns: An `S16` equal in value to this value.
@@ -419,83 +419,83 @@ routine U8.to[S16]() -> S16
 ### :returns: The same bit pattern interpreted as `S16`.
 ### :throws: {IntegerOverflowError} if `me > 32767`.
 @rf("U16.to")
-routine U16.to![S16]() -> S16
+failable routine U16.to[S16]() -> S16
 
 ### Converts a `U32` to `S16`, throwing if the value exceeds 32767.
 ### :returns: The lower 16 bits interpreted as a signed `S16`.
 ### :throws: {IntegerOverflowError} if `me > 32767`.
 @rf("U32.to")
-routine U32.to![S16]() -> S16
+failable routine U32.to[S16]() -> S16
 
 ### Converts a `U64` to `S16`, throwing if the value exceeds 32767.
 ### :returns: The lower 16 bits interpreted as a signed `S16`.
 ### :throws: {IntegerOverflowError} if `me > 32767`.
 @rf("U64.to")
-routine U64.to![S16]() -> S16
+failable routine U64.to[S16]() -> S16
 
 ### Converts a `U128` to `S16`, throwing if the value exceeds 32767.
 ### :returns: The lower 16 bits interpreted as a signed `S16`.
 ### :throws: {IntegerOverflowError} if `me > 32767`.
 @rf("U128.to")
-routine U128.to![S16]() -> S16
+failable routine U128.to[S16]() -> S16
 
 ### Converts an `S256` to `S16`, throwing if outside −32768..32767.
 ### :returns: The lower 16 bits reinterpreted as an `S16`.
 ### :throws: {IntegerOverflowError} if this value is outside −32768..32767.
 @rf("S256.to")
-routine S256.to![S16]() -> S16
+failable routine S256.to[S16]() -> S16
 
 ### Converts a `U256` to `S16`, throwing if the value exceeds 32767.
 ### :returns: The lower 16 bits reinterpreted as an `S16`.
 ### :throws: {IntegerOverflowError} if `me > 32767`.
 @rf("U256.to")
-routine U256.to![S16]() -> S16
+failable routine U256.to[S16]() -> S16
 
 ### Converts an `B16` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("B16.to")
-routine B16.to![S16]() -> S16
+failable routine B16.to[S16]() -> S16
 
 ### Converts an `B32` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("B32.to")
-routine B32.to![S16]() -> S16
+failable routine B32.to[S16]() -> S16
 
 ### Converts an `B64` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("B64.to")
-routine B64.to![S16]() -> S16
+failable routine B64.to[S16]() -> S16
 
 ### Converts an `B128` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("B128.to")
-routine B128.to![S16]() -> S16
+failable routine B128.to[S16]() -> S16
 
 ### Converts a `D32` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("D32.to")
-routine D32.to![S16]() -> S16
+failable routine D32.to[S16]() -> S16
 
 ### Converts a `D64` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("D64.to")
-routine D64.to![S16]() -> S16
+failable routine D64.to[S16]() -> S16
 
 ### Converts a `D128` to `S16` by first converting to `S32`, then truncating.
 ### :returns: The integer part of this value as an `S16`.
 ### :throws: {IntegerOverflowError} if the integer part is outside −32768..32767.
 @rf("D128.to")
-routine D128.to![S16]() -> S16
+failable routine D128.to[S16]() -> S16
 
 ### Parses a decimal string into an `S16`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S16` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S16`.
 @rf("Text.to")
-routine Text.to![S16]() -> S16
+failable routine Text.to[S16]() -> S16

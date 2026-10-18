@@ -10,14 +10,14 @@ crashable TooBigError
 routine TooBigError.crash_message() -> Text
     return f"{me.n} too big"
 
-routine check_size!(n: S64)
+failable routine check_size(n: S64)
     if n > 10
         throw TooBigError(n: n)
 
 entity Shelf
     count: S64
 
-routine Shelf.put!(n: S64)
+failable routine Shelf.put(n: S64)
     check_size(n: n)
     me.count += n
 

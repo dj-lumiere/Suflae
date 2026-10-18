@@ -17,21 +17,21 @@ obeys Numeric, Comparable, Copyable
 ### :param you: The addend.
 ### :returns: The half-precision sum (always finite).
 @rf("B16.add")
-routine B16.add!(you: B16) -> B16
+failable routine B16.add(you: B16) -> B16
 
 ### Returns `me - you`. Checked: crashes if the IEEE result is non-finite. Use `sub_unchecked` for
 ### raw IEEE.
 ### :param you: The value to subtract.
 ### :returns: The half-precision difference (always finite).
 @rf("B16.sub")
-routine B16.sub!(you: B16) -> B16
+failable routine B16.sub(you: B16) -> B16
 
 ### Returns `me * you`. Checked: crashes if the IEEE result is non-finite. Use `mul_unchecked` for
 ### raw IEEE.
 ### :param you: The multiplier.
 ### :returns: The half-precision product (always finite).
 @rf("B16.mul")
-routine B16.mul!(you: B16) -> B16
+failable routine B16.mul(you: B16) -> B16
 
 ### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
 ### overflow.
@@ -39,14 +39,14 @@ routine B16.mul!(you: B16) -> B16
 ### :param you: The divisor.
 ### :returns: The half-precision quotient (always finite).
 @rf("B16.truediv")
-routine B16.truediv!(you: B16) -> B16
+failable routine B16.truediv(you: B16) -> B16
 
 ### Returns `me` if it is finite; throws if it is ±infinity or NaN. The opt-in
 ### finiteness assertion for IEEE arithmetic, e.g. `var x = (a * b + c).finite()`.
 ### :returns: `me`, when finite.
 ### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
 @rf("B16.finite")
-routine B16.finite!() -> B16
+failable routine B16.finite() -> B16
 
 ### Returns the negated value.
 ### :returns: The resulting `B16` value.
@@ -84,7 +84,7 @@ routine B16.cmp(you: B16) -> ComparisonSign
 ### Returns the square root of this value in half precision.
 ### :returns: The intrinsic square-root result for `me`.
 @rf("B16.sqrt")
-routine B16.sqrt!() -> B16
+failable routine B16.sqrt() -> B16
 
 ### Square root with raw IEEE 754 propagation (`sqrt(<0)` -> NaN). Thin wrapper over LLVM `sqrt`.
 @rf("B16.sqrt_unchecked")
@@ -253,79 +253,79 @@ routine B16.hash(k0: U64, k1: U64) -> U64
 
 ### Arc sine.
 @rf("B16.asin")
-routine B16.asin!() -> B16
+failable routine B16.asin() -> B16
 
 ### Arc cosine.
 @rf("B16.acos")
-routine B16.acos!() -> B16
+failable routine B16.acos() -> B16
 
 ### Hyperbolic sine.
 @rf("B16.sinh")
-routine B16.sinh!() -> B16
+failable routine B16.sinh() -> B16
 
 ### Hyperbolic cosine.
 @rf("B16.cosh")
-routine B16.cosh!() -> B16
+failable routine B16.cosh() -> B16
 
 ### Inverse hyperbolic cosine.
 @rf("B16.acosh")
-routine B16.acosh!() -> B16
+failable routine B16.acosh() -> B16
 
 ### Inverse hyperbolic tangent.
 @rf("B16.atanh")
-routine B16.atanh!() -> B16
+failable routine B16.atanh() -> B16
 
 ### Natural exponential.
 @rf("B16.exp")
-routine B16.exp!() -> B16
+failable routine B16.exp() -> B16
 
 ### Base-2 exponential.
 @rf("B16.exp2")
-routine B16.exp2!() -> B16
+failable routine B16.exp2() -> B16
 
 ### exp(me) - 1, accurate near zero.
 @rf("B16.expm1")
-routine B16.expm1!() -> B16
+failable routine B16.expm1() -> B16
 
 ### Base-10 exponential.
 @rf("B16.exp10")
-routine B16.exp10!() -> B16
+failable routine B16.exp10() -> B16
 
 ### Natural logarithm.
 @rf("B16.log")
-routine B16.log!() -> B16
+failable routine B16.log() -> B16
 
 ### Base-2 logarithm.
 @rf("B16.log2")
-routine B16.log2!() -> B16
+failable routine B16.log2() -> B16
 
 ### Base-10 logarithm.
 @rf("B16.log10")
-routine B16.log10!() -> B16
+failable routine B16.log10() -> B16
 
 ### log(1 + me), accurate near zero.
 @rf("B16.log1p")
-routine B16.log1p!() -> B16
+failable routine B16.log1p() -> B16
 
 ### Raises this value to `exp`, checked: crashes on a non-finite result (overflow -> inf, domain ->
 ### NaN). Use `pow_unchecked` for raw IEEE 754 propagation.
 ### :param exp: The exponent applied to `me`.
 ### :returns: `me` raised to `exp` (always finite).
 @rf("B16.pow")
-routine B16.pow!(exp: B16) -> B16
+failable routine B16.pow(exp: B16) -> B16
 
 ### Hypotenuse without overflow.
 ### :param x: One leg.
 ### :param y: The other leg.
 @rf("hypot")
-routine hypot!(x: B16, y: B16) -> B16
+failable routine hypot(x: B16, y: B16) -> B16
 
 ### 3D hypotenuse sqrt(x^2 + y^2 + z^2) without overflow. Checked: crashes on overflow.
 ### :param x: First leg.
 ### :param y: Second leg.
 ### :param z: Third leg.
 @rf("hypot")
-routine hypot!(x: B16, y: B16, z: B16) -> B16
+failable routine hypot(x: B16, y: B16, z: B16) -> B16
 
 ### 3D hypotenuse with raw IEEE 754 propagation (overflow -> +inf). Composed as
 ### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
@@ -337,7 +337,7 @@ routine hypot_unchecked(x: B16, y: B16, z: B16) -> B16
 
 ### Fused multiply-add me*b + c with a single rounding.
 @rf("B16.fma")
-routine B16.fma!(b: B16, c: B16) -> B16
+failable routine B16.fma(b: B16, c: B16) -> B16
 
 ### Fused multiply-add me*b + c with raw IEEE 754 propagation, correctly rounded (one rounding to
 ### nearest, ties to even).
@@ -375,7 +375,7 @@ routine B16.rint() -> B16
 
 ### Gamma function.
 @rf("B16.tgamma")
-routine B16.tgamma!() -> B16
+failable routine B16.tgamma() -> B16
 
 ### Truncates toward zero (alias of int_truncate).
 @rf("B16.trunc")
@@ -707,17 +707,17 @@ routine S16.to[B16]() -> B16
 ### Converts an `S32` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("S32.to")
-routine S32.to![B16]() -> B16
+failable routine S32.to[B16]() -> B16
 
 ### Converts an `S64` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("S64.to")
-routine S64.to![B16]() -> B16
+failable routine S64.to[B16]() -> B16
 
 ### Converts an `S128` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("S128.to")
-routine S128.to![B16]() -> B16
+failable routine S128.to[B16]() -> B16
 
 ### Converts a `U8` into half-precision floating-point form.
 ### :returns: The corresponding `B16` value.
@@ -727,32 +727,32 @@ routine U8.to[B16]() -> B16
 ### Converts a `U16` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("U16.to")
-routine U16.to![B16]() -> B16
+failable routine U16.to[B16]() -> B16
 
 ### Converts a `U32` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("U32.to")
-routine U32.to![B16]() -> B16
+failable routine U32.to[B16]() -> B16
 
 ### Converts a `U64` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("U64.to")
-routine U64.to![B16]() -> B16
+failable routine U64.to[B16]() -> B16
 
 ### Converts a `U128` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("U128.to")
-routine U128.to![B16]() -> B16
+failable routine U128.to[B16]() -> B16
 
 ### Converts an `S256` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("S256.to")
-routine S256.to![B16]() -> B16
+failable routine S256.to[B16]() -> B16
 
 ### Converts a `U256` into half-precision floating-point form.
 ### :returns: The closest representable `B16` value.
 @rf("U256.to")
-routine U256.to![B16]() -> B16
+failable routine U256.to[B16]() -> B16
 
 ### Returns an existing `B16` unchanged.
 ### :returns: this value.
@@ -793,4 +793,4 @@ routine D128.to[B16]() -> B16
 ### :returns: The resulting `B16` value.
 ### :throws: May throw {InvalidValueError}.
 @rf("Text.to")
-routine Text.to![B16]() -> B16
+failable routine Text.to[B16]() -> B16

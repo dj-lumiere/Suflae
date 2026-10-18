@@ -65,13 +65,13 @@ routine Integer.mul(other: Integer) -> Integer
 ### :param other: The non-zero divisor.
 ### :returns: The integer quotient.
 @rf("Integer.floordiv")
-routine Integer.floordiv!(other: Integer) -> Integer
+failable routine Integer.floordiv(other: Integer) -> Integer
 
 ### Returns the Euclidean remainder of this value divided by `other`.
 ### :param other: The non-zero divisor.
 ### :returns: The remainder, always in `[0, |other|)`.
 @rf("Integer.mod")
-routine Integer.mod!(other: Integer) -> Integer
+failable routine Integer.mod(other: Integer) -> Integer
 
 ### Returns the additive inverse of this value.
 ### :returns: The resulting `Integer` value.
@@ -126,7 +126,7 @@ routine Integer.ashr(bits: U32) -> Integer
 ### :returns: The resulting `Integer` value.
 ### :throws: {NumericDomainError} when this value is negative.
 @rf("Integer.lshr")
-routine Integer.lshr!(bits: U32) -> Integer
+failable routine Integer.lshr(bits: U32) -> Integer
 
 ### Returns the absolute magnitude of this value.
 ### :returns: The resulting `Integer` value.
@@ -138,14 +138,14 @@ routine Integer.abs() -> Integer
 ### :returns: The resulting `Integer` value.
 ### :throws: {NumericDomainError} when this value is negative (it has no real square root).
 @rf("Integer.sqrt")
-routine Integer.sqrt!() -> Integer
+failable routine Integer.sqrt() -> Integer
 
 ### Returns the integer square root together with its remainder: `(s, r)` with `s = ⌊√me⌋` and
 ### `r = me - s*s`, so `0 <= r <= 2s` (e.g. `5.sqrtrem()` is `(2, 1)`).
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} when this value is negative (it has no real square root).
 @rf("Integer.sqrtrem")
-routine Integer.sqrtrem!() -> (Integer, Integer)
+failable routine Integer.sqrtrem() -> (Integer, Integer)
 
 ### Computes the greatest common divisor of this value and `other` (non-negative).
 ### :param other: The other operand.
@@ -219,7 +219,7 @@ routine Integer.clamp(low: Integer, high: Integer) -> Integer
 ### :returns: A tuple `(quotient, remainder)`.
 ### :throws: {DivisionByZeroError} when `other` is zero.
 @rf("Integer.divmod")
-routine Integer.divmod!(other: Integer) -> (Integer, Integer)
+failable routine Integer.divmod(other: Integer) -> (Integer, Integer)
 
 ### Modular exponentiation `me^exp mod modulus` via right-to-left binary exponentiation
 ### (each step reduced modulo `modulus`, so intermediates never blow up).
@@ -228,7 +228,7 @@ routine Integer.divmod!(other: Integer) -> (Integer, Integer)
 ### :returns: The resulting `Integer` value in `[0, modulus)`.
 ### :throws: {DivisionByZeroError} when `modulus` is zero; {NumericDomainError} when `exp` is negative.
 @rf("Integer.modpow")
-routine Integer.modpow!(exp: Integer, modulus: Integer) -> Integer
+failable routine Integer.modpow(exp: Integer, modulus: Integer) -> Integer
 
 ### Formats this value as base-10 text. Standard `represent` shape (no args)
 ### so the f-string machinery can dispatch without supplying a radix.
@@ -254,14 +254,14 @@ routine Integer.hash(k0: U64, k1: U64) -> U64
 ### :returns: The resulting `Integer` value.
 ### :throws: May throw {ParseError}.
 @rf("Integer.from_binary")
-common routine Integer.from_binary!(text: Text) -> Integer
+failable common routine Integer.from_binary(text: Text) -> Integer
 
 ### Parses a base-16 integer from text.
 ### :param text: The hexadecimal digits to parse.
 ### :returns: The resulting `Integer` value.
 ### :throws: May throw {ParseError}.
 @rf("Integer.from_hex")
-common routine Integer.from_hex!(text: Text) -> Integer
+failable common routine Integer.from_hex(text: Text) -> Integer
 
 ### Returns the additive identity for `Integer`.
 ### :returns: The resulting `Integer` value.
@@ -340,98 +340,98 @@ routine U256.to[Integer]() -> Integer
 ### :returns: The resulting `S64` value.
 ### :throws: {IntegerOverflowError} if this value is outside `S64_MIN..S64_MAX`.
 @rf("Integer.to")
-routine Integer.to![S64]() -> S64
+failable routine Integer.to[S64]() -> S64
 
 ### Converts an arbitrary-precision integer to `U64`.
 ### :returns: The resulting `U64` value.
 ### :throws: {IntegerOverflowError} if this value is negative or exceeds `U64_MAX`.
 @rf("Integer.to")
-routine Integer.to![U64]() -> U64
+failable routine Integer.to[U64]() -> U64
 
 ### Converts an arbitrary-precision integer to `S8`.
 ### :returns: The resulting `S8` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `S8` range.
 @rf("Integer.to")
-routine Integer.to![S8]() -> S8
+failable routine Integer.to[S8]() -> S8
 
 ### Converts an arbitrary-precision integer to `S16`.
 ### :returns: The resulting `S16` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `S16` range.
 @rf("Integer.to")
-routine Integer.to![S16]() -> S16
+failable routine Integer.to[S16]() -> S16
 
 ### Converts an arbitrary-precision integer to `S32`.
 ### :returns: The resulting `S32` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `S32` range.
 @rf("Integer.to")
-routine Integer.to![S32]() -> S32
+failable routine Integer.to[S32]() -> S32
 
 ### Converts an arbitrary-precision integer to `U8`.
 ### :returns: The resulting `U8` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `U8` range.
 @rf("Integer.to")
-routine Integer.to![U8]() -> U8
+failable routine Integer.to[U8]() -> U8
 
 ### Converts an arbitrary-precision integer to `U16`.
 ### :returns: The resulting `U16` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `U16` range.
 @rf("Integer.to")
-routine Integer.to![U16]() -> U16
+failable routine Integer.to[U16]() -> U16
 
 ### Converts an arbitrary-precision integer to `U32`.
 ### :returns: The resulting `U32` value.
 ### :throws: {IntegerOverflowError} if this value is outside the `U32` range.
 @rf("Integer.to")
-routine Integer.to![U32]() -> U32
+failable routine Integer.to[U32]() -> U32
 
 ### Converts an arbitrary-precision integer to `U128`.
 ### :returns: The resulting `U128` value.
 ### :throws: {IntegerOverflowError} if this value is negative or exceeds `U128_MAX`.
 @rf("Integer.to")
-routine Integer.to![U128]() -> U128
+failable routine Integer.to[U128]() -> U128
 
 ### Converts an arbitrary-precision integer to `U256`.
 ### :returns: The resulting `U256` value.
 ### :throws: {IntegerOverflowError} if this value is negative or exceeds `U256_MAX`.
 @rf("Integer.to")
-routine Integer.to![U256]() -> U256
+failable routine Integer.to[U256]() -> U256
 
 ### Converts an arbitrary-precision integer to `S128`.
 ### :returns: The resulting `S128` value.
 ### :throws: {IntegerOverflowError} if this value is outside `S128_MIN..S128_MAX`.
 @rf("Integer.to")
-routine Integer.to![S128]() -> S128
+failable routine Integer.to[S128]() -> S128
 
 ### Converts an arbitrary-precision integer to `S256`.
 ### :returns: The resulting `S256` value.
 ### :throws: {IntegerOverflowError} if this value is outside `S256_MIN..S256_MAX`.
 @rf("Integer.to")
-routine Integer.to![S256]() -> S256
+failable routine Integer.to[S256]() -> S256
 
 ### Converts an arbitrary-precision integer to the nearest `B32`.
 ### :returns: The `B32` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B32`.
 @rf("Integer.to")
-routine Integer.to![B32]() -> B32
+failable routine Integer.to[B32]() -> B32
 
 ### Converts an arbitrary-precision integer to the nearest `B64`.
 ### :returns: The `B64` closest to this value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `B64`.
 @rf("Integer.to")
-routine Integer.to![B64]() -> B64
+failable routine Integer.to[B64]() -> B64
 
 ### Converts an arbitrary-precision integer to `Decimal`, rounding half-even to its 34 significant digits.
 ### :returns: The resulting `Decimal` value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `Decimal` (about `1e6144`).
 @rf("Integer.to")
-routine Integer.to![Decimal]() -> Decimal
+failable routine Integer.to[Decimal]() -> Decimal
 
 ### Builds an `Integer` from its serialized base-10 text.
 ### :param from: The serialized value.
 ### :returns: The parsed value.
 ### :throws: {SerialShapeError} when the value is not text, or a parse error when the text is not an integer.
 @rf("Integer.from_serial")
-common routine Integer.from_serial!(value: SerialValue) -> Integer
+failable common routine Integer.from_serial(value: SerialValue) -> Integer
 
 ### Parses a base-10 integer from text.
 ### This is the canonical text-to-`Integer` conversion used by generic parsing
@@ -439,7 +439,7 @@ common routine Integer.from_serial!(value: SerialValue) -> Integer
 ### :returns: The resulting `Integer` value.
 ### :throws: May throw {ParseError}.
 @rf("Text.to")
-routine Text.to![Integer]() -> Integer
+failable routine Text.to[Integer]() -> Integer
 
 ### Builder plumbing for presets computed at build time: this value as a bare number (`12`), which takes the
 ### `Integer` type from the preset's declared type.
@@ -453,4 +453,4 @@ routine Integer.preset_literal() -> Text
 ### :returns: The count as a `U32`.
 ### :throws: {NumericDomainError} when this value is below 0.
 @rf("Integer.to_shift_amount")
-routine Integer.to_shift_amount!() -> U32
+failable routine Integer.to_shift_amount() -> U32

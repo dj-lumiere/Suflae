@@ -126,7 +126,7 @@ routine PriorityQueue[TPriority, TElement].add(element: TElement, priority: TPri
 ### The last heap entry is moved to the root and sifted down to restore heap order.
 ### :returns: The element associated with the minimum priority.
 ### :throws: {AbsentValueError} The pool is empty.
-routine PriorityQueue[TPriority, TElement].remove!() -> TElement
+failable routine PriorityQueue[TPriority, TElement].remove() -> TElement
     if me.count == 0
         throw AbsentValueError()
     var result = me.elements.take_at(position: 0)
@@ -143,7 +143,7 @@ routine PriorityQueue[TPriority, TElement].remove!() -> TElement
 ### Returns the element at the front of the pool without removing it.
 ### :returns: The element with the smallest priority.
 ### :throws: {AbsentValueError} The pool is empty.
-routine PriorityQueue[TPriority, TElement].peek!() -> TElement
+failable routine PriorityQueue[TPriority, TElement].peek() -> TElement
     if me.count == 0
         throw AbsentValueError()
     return me.elements.at(position: 0)
@@ -151,7 +151,7 @@ routine PriorityQueue[TPriority, TElement].peek!() -> TElement
 ### Returns the smallest priority currently in the pool without removing its entry.
 ### :returns: The minimum priority value.
 ### :throws: {AbsentValueError} The pool is empty.
-routine PriorityQueue[TPriority, TElement].peek_priority!() -> TPriority
+failable routine PriorityQueue[TPriority, TElement].peek_priority() -> TPriority
     if me.count == 0
         throw AbsentValueError()
     return me.priorities.at(position: 0)
@@ -159,7 +159,7 @@ routine PriorityQueue[TPriority, TElement].peek_priority!() -> TPriority
 ### Returns the front `(priority, element)` pair without removing it.
 ### :returns: The pair with the smallest priority.
 ### :throws: {AbsentValueError} The pool is empty.
-routine PriorityQueue[TPriority, TElement].peek_entry!() -> (TPriority, TElement)
+failable routine PriorityQueue[TPriority, TElement].peek_entry() -> (TPriority, TElement)
     if me.count == 0
         throw AbsentValueError()
     return (me.priorities.at(position: 0), me.elements.at(position: 0))

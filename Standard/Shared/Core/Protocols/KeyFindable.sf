@@ -13,7 +13,7 @@ relates Key, Value
     ### :param key: The key to look up.
     ### :returns: The associated value.
     ### :throws: {KeyNotFoundError} when `key` is not present in the map.
-    routine Me.getitem!(key: Viewing[Me/Key]) -> Me/Value
+    failable routine Me.getitem(key: Viewing[Me/Key]) -> Me/Value
     ### Puts `value` at `key`: replaces the value of a key that is there, and adds the key otherwise.
     ### :param key: The key.
     ### :param value: The value that goes in.

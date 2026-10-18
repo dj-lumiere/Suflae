@@ -166,7 +166,7 @@ routine Bytes.to_hex() -> Text
 ### :returns: The resulting `Bytes` value.
 ### :throws: {InvalidValueError} on an odd length or a non-hex character.
 @rf("Bytes.from_hex")
-routine Bytes.from_hex!(hex: Text) -> Bytes
+failable routine Bytes.from_hex(hex: Text) -> Bytes
 
 ### Returns an iterator over this byte sequence.
 ### The iterator starts at byte index `0`.
@@ -179,7 +179,7 @@ routine Bytes.iter() -> BytesEmittable
 ### :returns: The resulting `Byte` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
 @rf("BytesEmittable.emit")
-routine BytesEmittable.emit!() -> Byte
+failable routine BytesEmittable.emit() -> Byte
 
 ### Returns the display form of this byte sequence.
 ### Each byte is rendered using its escaped `\\xHH` representation.
@@ -209,7 +209,7 @@ routine Bytes.decode_as_utf8_lossy() -> Text
 ### :returns: The resulting `Text` value.
 ### :throws: May throw {MalformedUtf8Error}.
 @rf("Bytes.decode_as_utf8")
-routine Bytes.decode_as_utf8!() -> Text
+failable routine Bytes.decode_as_utf8() -> Text
 
 ### Returns a strict lazy UTF-8 view over this byte sequence.
 ### The bytes are validated eagerly so subsequent iteration is guaranteed to
@@ -218,7 +218,7 @@ routine Bytes.decode_as_utf8!() -> Text
 ### :returns: The resulting `BytesUtf8View` value.
 ### :throws: {MalformedUtf8Error} if these bytes are not well-formed UTF-8.
 @rf("Bytes.interpret_as_utf8")
-routine Bytes.interpret_as_utf8!() -> BytesUtf8View
+failable routine Bytes.interpret_as_utf8() -> BytesUtf8View
 
 ### Returns a lossy lazy UTF-8 view over this byte sequence.
 ### Malformed subsequences are surfaced as the Unicode replacement character
@@ -242,14 +242,14 @@ routine BytesUtf8LossyView.iter() -> BytesUtf8LossyEmittable
 ### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 ### :throws: {MalformedUtf8Error} on the first ill-formed subsequence.
 @rf("BytesUtf8Emittable.emit")
-routine BytesUtf8Emittable.emit!() -> Char
+failable routine BytesUtf8Emittable.emit() -> Char
 
 ### Returns the next decoded character from this lossy UTF-8 iterator.
 ### Malformed subsequences are surfaced as the replacement character (U+FFFD).
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 @rf("BytesUtf8LossyEmittable.emit")
-routine BytesUtf8LossyEmittable.emit!() -> Char
+failable routine BytesUtf8LossyEmittable.emit() -> Char
 
 ### Returns a SipHash-2-4 keyed hash of the underlying byte buffer's address.
 ### :param k0: The first 64-bit key word.

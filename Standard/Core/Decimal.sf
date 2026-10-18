@@ -23,5 +23,5 @@ routine Decimal.fixed(places: Integer) -> Text
     return me.fixed(places: places.to[U64]())
 
 ### me * 10^n (the decimal analog of ldexp).
-routine Decimal.scaleb!(n: Integer) -> Decimal
+failable routine Decimal.scaleb(n: Integer) -> Decimal
     return me.scaleb(n: n.to[S64]())

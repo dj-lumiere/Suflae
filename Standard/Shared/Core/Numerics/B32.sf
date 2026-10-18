@@ -17,14 +17,14 @@ obeys Numeric, Comparable, Copyable
 ### :param you: The addend.
 ### :returns: The single-precision sum (always finite).
 @rf("B32.add")
-routine B32.add!(you: B32) -> B32
+failable routine B32.add(you: B32) -> B32
 
 ### Returns `me - you`. Checked: crashes if the IEEE result is non-finite. Use `sub_unchecked` for
 ### raw IEEE.
 ### :param you: The value to subtract.
 ### :returns: The single-precision difference (always finite).
 @rf("B32.sub")
-routine B32.sub!(you: B32) -> B32
+failable routine B32.sub(you: B32) -> B32
 
 ### Returns `me + you`, promoting the real `me` to complex (imaginary part 0). Only `+`/`-` allow
 ### real↔complex mixing; the component width must match (B32 pairs with C64).
@@ -44,7 +44,7 @@ routine B32.sub(you: C64) -> C64
 ### :param you: The multiplier.
 ### :returns: The single-precision product (always finite).
 @rf("B32.mul")
-routine B32.mul!(you: B32) -> B32
+failable routine B32.mul(you: B32) -> B32
 
 ### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
 ### overflow.
@@ -52,14 +52,14 @@ routine B32.mul!(you: B32) -> B32
 ### :param you: The divisor.
 ### :returns: The single-precision quotient (always finite).
 @rf("B32.truediv")
-routine B32.truediv!(you: B32) -> B32
+failable routine B32.truediv(you: B32) -> B32
 
 ### Returns `me` if it is finite; throws if it is ±infinity or NaN. The opt-in
 ### finiteness assertion for IEEE arithmetic, e.g. `var x = (a * b + c).finite()`.
 ### :returns: `me`, when finite.
 ### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
 @rf("B32.finite")
-routine B32.finite!() -> B32
+failable routine B32.finite() -> B32
 
 ### Returns the negated value.
 ### :returns: The resulting `B32` value.
@@ -97,7 +97,7 @@ routine B32.cmp(you: B32) -> ComparisonSign
 ### Returns the square root of this value in single precision.
 ### :returns: The intrinsic square-root result for `me`.
 @rf("B32.sqrt")
-routine B32.sqrt!() -> B32
+failable routine B32.sqrt() -> B32
 
 ### Square root with raw IEEE 754 propagation (`sqrt(<0)` -> NaN). Thin wrapper over LLVM `sqrt`.
 @rf("B32.sqrt_unchecked")
@@ -131,23 +131,23 @@ routine B32.int_truncate() -> B32
 ### Returns `e` raised to this value.
 ### :returns: The single-precision exponential result.
 @rf("B32.exp")
-routine B32.exp!() -> B32
+failable routine B32.exp() -> B32
 
 ### Returns the natural logarithm of this value.
 ### :returns: The single-precision natural-log result.
 @rf("B32.log")
-routine B32.log!() -> B32
+failable routine B32.log() -> B32
 
 ### Returns the base-10 logarithm of this value.
 ### :returns: The single-precision common-log result.
 @rf("B32.log10")
-routine B32.log10!() -> B32
+failable routine B32.log10() -> B32
 
 ### Raises this value to `exp` (IEEE semantics: overflow/domain errors yield inf/NaN).
 ### :param exp: The exponent applied to `me`.
 ### :returns: `me` raised to `exp` in single precision.
 @rf("B32.pow")
-routine B32.pow!(exp: B32) -> B32
+failable routine B32.pow(exp: B32) -> B32
 
 ### Returns this value with its sign bit replaced by the sign of `sign`.
 ### :param sign: The value supplying the sign bit.
@@ -287,60 +287,60 @@ routine B32.hash(k0: U64, k1: U64) -> U64
 
 ### Arc sine.
 @rf("B32.asin")
-routine B32.asin!() -> B32
+failable routine B32.asin() -> B32
 
 ### Arc cosine.
 @rf("B32.acos")
-routine B32.acos!() -> B32
+failable routine B32.acos() -> B32
 
 ### Hyperbolic sine.
 @rf("B32.sinh")
-routine B32.sinh!() -> B32
+failable routine B32.sinh() -> B32
 
 ### Hyperbolic cosine.
 @rf("B32.cosh")
-routine B32.cosh!() -> B32
+failable routine B32.cosh() -> B32
 
 ### Inverse hyperbolic cosine.
 @rf("B32.acosh")
-routine B32.acosh!() -> B32
+failable routine B32.acosh() -> B32
 
 ### Inverse hyperbolic tangent.
 @rf("B32.atanh")
-routine B32.atanh!() -> B32
+failable routine B32.atanh() -> B32
 
 ### Base-2 exponential.
 @rf("B32.exp2")
-routine B32.exp2!() -> B32
+failable routine B32.exp2() -> B32
 
 ### exp(me) - 1, accurate near zero.
 @rf("B32.expm1")
-routine B32.expm1!() -> B32
+failable routine B32.expm1() -> B32
 
 ### log(1 + me), accurate near zero.
 @rf("B32.log1p")
-routine B32.log1p!() -> B32
+failable routine B32.log1p() -> B32
 
 ### Base-2 logarithm.
 @rf("B32.log2")
-routine B32.log2!() -> B32
+failable routine B32.log2() -> B32
 
 ### Base-10 exponential 10**me.
 @rf("B32.exp10")
-routine B32.exp10!() -> B32
+failable routine B32.exp10() -> B32
 
 ### Hypotenuse sqrt(x^2 + y^2) without overflow.
 ### :param x: One leg.
 ### :param y: The other leg.
 @rf("hypot")
-routine hypot!(x: B32, y: B32) -> B32
+failable routine hypot(x: B32, y: B32) -> B32
 
 ### 3D hypotenuse sqrt(x^2 + y^2 + z^2) without overflow. Checked: crashes on overflow.
 ### :param x: First leg.
 ### :param y: Second leg.
 ### :param z: Third leg.
 @rf("hypot")
-routine hypot!(x: B32, y: B32, z: B32) -> B32
+failable routine hypot(x: B32, y: B32, z: B32) -> B32
 
 ### 3D hypotenuse with raw IEEE 754 propagation (overflow -> +inf). Composed as
 ### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
@@ -352,7 +352,7 @@ routine hypot_unchecked(x: B32, y: B32, z: B32) -> B32
 
 ### Fused multiply-add me*b + c with a single rounding.
 @rf("B32.fma")
-routine B32.fma!(b: B32, c: B32) -> B32
+failable routine B32.fma(b: B32, c: B32) -> B32
 
 ### Fused multiply-add me*b + c with raw IEEE 754 propagation. Thin wrapper over LLVM `fma` (single rounding).
 @rf("B32.fma_unchecked")
@@ -393,7 +393,7 @@ routine B32.rint() -> B32
 
 ### Gamma function.
 @rf("B32.tgamma")
-routine B32.tgamma!() -> B32
+failable routine B32.tgamma() -> B32
 
 ### Truncates toward zero (C trunc; alias of int_truncate).
 @rf("B32.trunc")
@@ -760,19 +760,19 @@ routine U64.to[B32]() -> B32
 ### :returns: The closest representable `B32` value (finite).
 ### :throws: {NumericOverflowError} if the value is out of the B32 range.
 @rf("U128.to")
-routine U128.to![B32]() -> B32
+failable routine U128.to[B32]() -> B32
 
 ### Converts an `S256` to `B32`. Failable: throws if the value exceeds the B32 range.
 ### :returns: The closest representable `B32` value (finite).
 ### :throws: {NumericOverflowError} if the value is out of the B32 range.
 @rf("S256.to")
-routine S256.to![B32]() -> B32
+failable routine S256.to[B32]() -> B32
 
 ### Converts a `U256` to `B32`. Failable: throws if the value exceeds the B32 range.
 ### :returns: The closest representable `B32` value (finite).
 ### :throws: {NumericOverflowError} if the value is out of the B32 range.
 @rf("U256.to")
-routine U256.to![B32]() -> B32
+failable routine U256.to[B32]() -> B32
 
 ### Widens a half-precision float to single precision.
 ### :returns: An `B32` carrying the same numeric value when representable.
@@ -813,4 +813,4 @@ routine D128.to[B32]() -> B32
 ### :returns: The resulting `B32` value.
 ### :throws: May throw {InvalidValueError}.
 @rf("Text.to")
-routine Text.to![B32]() -> B32
+failable routine Text.to[B32]() -> B32

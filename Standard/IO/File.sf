@@ -9,19 +9,19 @@ import IO/Errors
 ### :param at: The directory.
 ### :returns: The entry names.
 ### :throws: {IOError} when the directory cannot be listed.
-common routine FileManager.list!(at: Directory) -> List[Text]
+failable common routine FileManager.list(at: Directory) -> List[Text]
     return FileManager.list(at: at).to[List[Text]]()
 
 ### Returns the directory's entries.
 ### :param at: The directory.
 ### :returns: The entries.
 ### :throws: {IOError} when the directory cannot be listed.
-common routine FileManager.entries!(at: Directory) -> List[DirEntry]
+failable common routine FileManager.entries(at: Directory) -> List[DirEntry]
     return FileManager.entries(at: at).to[List[DirEntry]]()
 
 ### Returns the paths of everything under the directory, at any depth. Symbolic links are not followed.
 ### :param at: The directory.
 ### :returns: The full paths.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
-common routine FileManager.walk!(at: Directory) -> List[Text]
+failable common routine FileManager.walk(at: Directory) -> List[Text]
     return FileManager.walk(at: at).to[List[Text]]()

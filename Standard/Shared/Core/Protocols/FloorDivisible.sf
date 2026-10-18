@@ -13,9 +13,9 @@ protocol FloorDivisible
     ### remainder operation.
     ### :param you: The divisor.
     ### :returns: The resulting `Me` value.
-    routine Me.floordiv!(you: Me) -> Me
+    failable routine Me.floordiv(you: Me) -> Me
     ### Returns the remainder after division.
     ### This result should correspond to the quotient returned by `floordiv!`.
     ### :param you: The divisor.
     ### :returns: The resulting `Me` value.
-    routine Me.mod!(you: Me) -> Me
+    failable routine Me.mod(you: Me) -> Me

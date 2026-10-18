@@ -70,7 +70,7 @@ needs AnyType T
 ### :param target: Any value or entity.
 ### :param memvar: The member variable's name.
 ### :returns: The member variable's serialized value. Absent when target has no member variable of that name.
-routine peek!(target: T, memvar: Text) -> SerialValue
+failable routine peek(target: T, memvar: Text) -> SerialValue
 needs AnyType T
     expand m in allmemvarof(T)
         if memvar == nameof(m)
@@ -83,7 +83,7 @@ needs AnyType T
 ### :param value: The new value, in the form `serialize` gives it.
 ### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
 ### :throws: {SerialShapeError} when value does not fit the member variable's type.
-routine poke!(target: T, memvar: Text, value: SerialValue)
+failable routine poke(target: T, memvar: Text, value: SerialValue)
 needs EntityType T
     expand m in allmemvarof(T)
         if memvar == nameof(m)

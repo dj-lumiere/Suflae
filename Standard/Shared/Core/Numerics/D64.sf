@@ -82,23 +82,23 @@ routine d64_of_b128(x: B128) -> D64
 ### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
 ### IEEE.
 @rf("D64.add")
-routine D64.add!(you: D64) -> D64
+failable routine D64.add(you: D64) -> D64
 
 ### Returns `me - you`. Checked: crashes if the result is non-finite. Use `sub_unchecked` for raw
 ### IEEE.
 @rf("D64.sub")
-routine D64.sub!(you: D64) -> D64
+failable routine D64.sub(you: D64) -> D64
 
 ### Returns `me * you`. Checked: crashes if the result is non-finite. Use `mul_unchecked` for raw
 ### IEEE.
 @rf("D64.mul")
-routine D64.mul!(you: D64) -> D64
+failable routine D64.mul(you: D64) -> D64
 
 ### Returns `me / you`. Checked: `x/0` -> DivisionByZeroError, `0/0` -> domain, overflow ->
 ### overflow.
 ### Use `truediv_unchecked` for raw IEEE 754 (`x/0` -> ±inf, `0/0` -> NaN).
 @rf("D64.truediv")
-routine D64.truediv!(you: D64) -> D64
+failable routine D64.truediv(you: D64) -> D64
 
 ### Returns `me + you` with raw IEEE 754 propagation (may yield ±infinity or NaN). No crash.
 @rf("D64.add_unchecked")
@@ -128,7 +128,7 @@ routine D64.cmp(you: D64) -> ComparisonSign
 
 ### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
 @rf("D64.pow")
-routine D64.pow!(you: D64) -> D64
+failable routine D64.pow(you: D64) -> D64
 
 ### Shortest decimal text (widens to D128Parts and reuses the shared formatter).
 @rf("D64.represent")
@@ -262,4 +262,4 @@ routine D128.to[D64]() -> D64
 ### Parses a decimal literal into a `D64` (the scanned value rounded once to 16 digits).
 ### :throws: {InvalidValueError} if the text is not a valid decimal literal.
 @rf("Text.to")
-routine Text.to![D64]() -> D64
+failable routine Text.to[D64]() -> D64

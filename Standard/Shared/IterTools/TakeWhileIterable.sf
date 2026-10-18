@@ -36,7 +36,7 @@ routine TakeWhileIterable[T, TSource].iter() -> TakeWhileEmittable[T, TSource/It
 ### :returns: The resulting `T` value.
 ### :throws: {AbsentValueError} Thrown when the predicate has failed or the source ends first.
 @rf("TakeWhileEmittable.emit")
-routine TakeWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+failable routine TakeWhileEmittable[T, TSourceIter].emit() -> TSourceIter/Item
 
 ### Returns a lazy adapter that yields values while `predicate` returns `true`.
 ### The first failing value is consumed but not yielded.

@@ -37,21 +37,21 @@ routine S128.mul_with_overflow(you: S128) -> (S128, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
 @rf("S128.add")
-routine S128.add!(you: S128) -> S128
+failable routine S128.add(you: S128) -> S128
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
 @rf("S128.sub")
-routine S128.sub!(you: S128) -> S128
+failable routine S128.sub(you: S128) -> S128
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
 @rf("S128.mul")
-routine S128.mul!(you: S128) -> S128
+failable routine S128.mul(you: S128) -> S128
 
 ### Returns `me // you` (euclidean division), throwing on errors.
 ### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
@@ -70,14 +70,14 @@ routine s128_abs_u128(x: S128) -> U128
 ### :returns: The euclidean quotient (rounds toward negative infinity).
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S128.floordiv")
-routine S128.floordiv!(you: S128) -> S128
+failable routine S128.floordiv(you: S128) -> S128
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S128.mod")
-routine S128.mod!(you: S128) -> S128
+failable routine S128.mod(you: S128) -> S128
 
 ### (quotient, remainder) of euclidean `me // you` and `me % you` from ONE Knuth-D pass. `floordiv!`
 ### and `mod!` each run their own `u128_floordiv`/`u128_mod`, so computing both costs TWO divisions;
@@ -86,12 +86,12 @@ routine S128.mod!(you: S128) -> S128
 ### :returns: The euclidean tuple `(me // you, me % you)`.
 ### :throws: {DivisionByZeroError} if `you == 0`; {IntegerOverflowError} if `me == S128_MIN` and `you == -1`.
 @rf("S128.divmod")
-routine S128.divmod!(you: S128) -> (S128, S128)
+failable routine S128.divmod(you: S128) -> (S128, S128)
 
 ### Returns `-me` (arithmetic negation), with wrapping behavior on `S128_MIN`.
 ### :returns: The negated value. `-S128_MIN` wraps to `S128_MIN`.
 @rf("S128.neg")
-routine S128.neg!() -> S128
+failable routine S128.neg() -> S128
 
 ### Returns `-me` in two's complement, wrapping `S128_MIN` to itself.
 ### :returns: The wrapped negation.
@@ -219,7 +219,7 @@ routine S128.borrowing_sub(you: S128, borrow: Bool) -> (S128, Bool)
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S128.pow_with_overflow")
-routine S128.pow_with_overflow!(exp: S128) -> (S128, Bool)
+failable routine S128.pow_with_overflow(exp: S128) -> (S128, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent (must be non-negative).
@@ -227,21 +227,21 @@ routine S128.pow_with_overflow!(exp: S128) -> (S128, Bool)
 ### :throws: {IntegerOverflowError} if the result is outside the S128 range.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S128.pow")
-routine S128.pow!(exp: S128) -> S128
+failable routine S128.pow(exp: S128) -> S128
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 2¹²⁸ (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S128.pow_wrap")
-routine S128.pow_wrap!(exp: S128) -> S128
+failable routine S128.pow_wrap(exp: S128) -> S128
 
 ### Returns `me ** exp`, clamped to `S128_MAX` or `S128_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `S128_MAX` / `S128_MIN` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S128.pow_clamp")
-routine S128.pow_clamp!(exp: S128) -> S128
+failable routine S128.pow_clamp(exp: S128) -> S128
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
@@ -282,7 +282,7 @@ routine S128.cmp(you: S128) -> ComparisonSign
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S128_MIN` (its magnitude is not representable in S128).
 @rf("S128.abs")
-routine S128.abs!() -> S128
+failable routine S128.abs() -> S128
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
@@ -314,14 +314,14 @@ routine S128.isqrt() -> S128
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S128.sqrtrem")
-routine S128.sqrtrem!() -> (S128, S128)
+failable routine S128.sqrtrem() -> (S128, S128)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
 @rf("S128.ilog")
-routine S128.ilog!(base: S128) -> S128
+failable routine S128.ilog(base: S128) -> S128
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
@@ -451,59 +451,59 @@ routine U64.to[S128]() -> S128
 ### :returns: The same bit pattern interpreted as `S128`.
 ### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
 @rf("U128.to")
-routine U128.to![S128]() -> S128
+failable routine U128.to[S128]() -> S128
 
 ### Converts an `S256` to `S128`, throwing if outside the S128 range.
 ### :returns: The lower 128 bits reinterpreted as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is outside the S128 range.
 @rf("S256.to")
-routine S256.to![S128]() -> S128
+failable routine S256.to[S128]() -> S128
 
 ### Converts a `U256` to `S128`, throwing if the value exceeds S128_MAX.
 ### :returns: The lower 128 bits reinterpreted as an `S128`.
 ### :throws: {IntegerOverflowError} if `me > 170141183460469231731687303715884105727`.
 @rf("U256.to")
-routine U256.to![S128]() -> S128
+failable routine U256.to[S128]() -> S128
 
 ### Converts an `B16` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN or infinite.
 @rf("B16.to")
-routine B16.to![S128]() -> S128
+failable routine B16.to[S128]() -> S128
 
 ### Converts an `B32` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
 @rf("B32.to")
-routine B32.to![S128]() -> S128
+failable routine B32.to[S128]() -> S128
 
 ### Converts an `B64` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {IntegerOverflowError} if this value is NaN, infinite, or outside [-2^127, 2^127-1].
 @rf("B64.to")
-routine B64.to![S128]() -> S128
+failable routine B64.to[S128]() -> S128
 
 ### Converts an `B128` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if out of range; {NumericDomainError} if NaN.
 @rf("B128.to")
-routine B128.to![S128]() -> S128
+failable routine B128.to[S128]() -> S128
 
 ### Converts a `D32` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if the integer part overflows S128.
 @rf("D32.to")
-routine D32.to![S128]() -> S128
+failable routine D32.to[S128]() -> S128
 
 ### Converts a `D64` to `S128`, truncating toward zero.
 ### :returns: The integer part of this value as an `S128`.
 ### :throws: {NumericOverflowError} if the integer part overflows S128.
 @rf("D64.to")
-routine D64.to![S128]() -> S128
+failable routine D64.to[S128]() -> S128
 
 ### Parses a decimal string into an `S128`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S128` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S128`.
 @rf("Text.to")
-routine Text.to![S128]() -> S128
+failable routine Text.to[S128]() -> S128

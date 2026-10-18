@@ -31,7 +31,7 @@ entity CountdownWalk obeys Emittable[Integer]
 routine Countdown.iter() -> CountdownWalk
     return CountdownWalk(next: me.start)
 
-routine CountdownWalk.emit!() -> Integer
+failable routine CountdownWalk.emit() -> Integer
     if me.next < 0
         throw AbsentValueError()
     var current = me.next

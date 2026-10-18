@@ -32,4 +32,4 @@ routine SkipIterable[T, TSource].iter() -> SkipEmittable[T, TSource/Iter]
 ### Values are discarded only until `remaining` reaches zero.
 ### :returns: The resulting `T` value.
 @rf("SkipEmittable.emit")
-routine SkipEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+failable routine SkipEmittable[T, TSourceIter].emit() -> TSourceIter/Item

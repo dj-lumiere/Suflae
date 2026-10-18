@@ -9,12 +9,12 @@ crashable DeepError
 routine DeepError.crash_message() -> Text
     return f"deep failure: {me.reason}"
 
-routine innermost!(n: Integer) -> Integer
+failable routine innermost(n: Integer) -> Integer
     if n > 2
         throw DeepError(reason: f"n is {n}")
     return n
 
-routine helper!(n: Integer) -> Integer
+failable routine helper(n: Integer) -> Integer
     when check innermost(n: n)
         is Integer as value => return value
         is Crashables as failure =>

@@ -11,7 +11,7 @@ module Numerics
 ### :param radix: The numeric base to use.
 ### :returns: The resulting `Integer` value.
 ### :throws: {ValueError} if `text` is not a valid integer in `radix`.
-routine Integer!(text: Text, radix: Integer = 10) -> Integer
+failable routine Integer(text: Text, radix: Integer = 10) -> Integer
     return Integer(text: text, radix: radix.to[S64]().to[S32]())
 
 ### Shifts this value left by `bits` positions (a negative count shifts right).
@@ -45,14 +45,14 @@ routine Integer.ashr(bits: Integer) -> Integer
 ### :param bits: The number of bit positions to shift, 0 or more (below 0 crashes).
 ### :returns: The resulting `Integer` value.
 ### :throws: {NumericDomainError} when this value is negative.
-routine Integer.lshr!(bits: Integer) -> Integer
+failable routine Integer.lshr(bits: Integer) -> Integer
     return me.lshr(bits: bits.to_shift_amount())
 
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Integer` value.
 ### :throws: {NumericDomainError} when `exp` is negative (the result would not be an integer).
-routine Integer.pow!(exp: Integer) -> Integer
+failable routine Integer.pow(exp: Integer) -> Integer
     if exp < 0
         throw NumericDomainError(description: "negative exponent: no integer result")
     return me.pow(exp: exp.to[U64]().to[U32]())

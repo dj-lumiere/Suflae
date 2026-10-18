@@ -35,21 +35,21 @@ routine S32.mul_with_overflow(you: S32) -> (S32, Bool)
 ### :returns: The sum `me + you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S32 range.
 @rf("S32.add")
-routine S32.add!(you: S32) -> S32
+failable routine S32.add(you: S32) -> S32
 
 ### Returns `me - you`, throwing on overflow.
 ### :param you: The value to subtract.
 ### :returns: The difference `me - you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S32 range.
 @rf("S32.sub")
-routine S32.sub!(you: S32) -> S32
+failable routine S32.sub(you: S32) -> S32
 
 ### Returns `me * you`, throwing on overflow.
 ### :param you: The right operand.
 ### :returns: The product `me * you`.
 ### :throws: {IntegerOverflowError} if the result is outside the S32 range.
 @rf("S32.mul")
-routine S32.mul!(you: S32) -> S32
+failable routine S32.mul(you: S32) -> S32
 
 ### Returns `me // you` (euclidean division), throwing on errors.
 ### Euclidean division: the remainder is always in `[0, |you|)`, consistent with `mod!`.
@@ -59,19 +59,19 @@ routine S32.mul!(you: S32) -> S32
 ### :throws: {DivisionByZeroError} if `you == 0`.
 ### :throws: {IntegerOverflowError} if `me == S32_MIN` and `you == -1`.
 @rf("S32.floordiv")
-routine S32.floordiv!(you: S32) -> S32
+failable routine S32.floordiv(you: S32) -> S32
 
 ### Returns `me % you` (euclidean modulo): the remainder is always in `[0, |you|)`.
 ### :param you: The divisor.
 ### :returns: The euclidean remainder — always non-negative.
 ### :throws: {DivisionByZeroError} if `you == 0`.
 @rf("S32.mod")
-routine S32.mod!(you: S32) -> S32
+failable routine S32.mod(you: S32) -> S32
 
 ### Returns `-me` (arithmetic negation), with wrapping behavior on `S32_MIN`.
 ### :returns: The negated value. `-S32_MIN` wraps to `S32_MIN` (−2147483648).
 @rf("S32.neg")
-routine S32.neg!() -> S32
+failable routine S32.neg() -> S32
 
 ### Returns `-me` in two's complement, wrapping `S32_MIN` to itself.
 ### :returns: The wrapped negation.
@@ -197,7 +197,7 @@ routine S32.borrowing_sub(you: S32, borrow: Bool) -> (S32, Bool)
 ### :returns: A tuple of `(wrapped_result, overflowed)`.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S32.pow_with_overflow")
-routine S32.pow_with_overflow!(exp: S32) -> (S32, Bool)
+failable routine S32.pow_with_overflow(exp: S32) -> (S32, Bool)
 
 ### Returns `me ** exp`, throwing on overflow.
 ### :param exp: The exponent (must be non-negative).
@@ -205,21 +205,21 @@ routine S32.pow_with_overflow!(exp: S32) -> (S32, Bool)
 ### :throws: {IntegerOverflowError} if the result is outside the S32 range.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S32.pow")
-routine S32.pow!(exp: S32) -> S32
+failable routine S32.pow(exp: S32) -> S32
 
 ### Returns `me ** exp` with wrapping arithmetic.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result modulo 2³² (signed wrap).
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S32.pow_wrap")
-routine S32.pow_wrap!(exp: S32) -> S32
+failable routine S32.pow_wrap(exp: S32) -> S32
 
 ### Returns `me ** exp`, clamped to `S32_MAX` or `S32_MIN` on overflow.
 ### :param exp: The exponent (must be non-negative).
 ### :returns: The result, or `2147483647` / `−2147483648` if it would overflow.
 ### :throws: {NumericDomainError} if `exp < 0`.
 @rf("S32.pow_clamp")
-routine S32.pow_clamp!(exp: S32) -> S32
+failable routine S32.pow_clamp(exp: S32) -> S32
 
 ### Returns the bitwise AND of this value and `you`.
 ### :param you: The right operand.
@@ -260,7 +260,7 @@ routine S32.cmp(you: S32) -> ComparisonSign
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.
 ### :throws: {IntegerOverflowError} when `me` is `S32_MIN` (its magnitude is not representable in S32).
 @rf("S32.abs")
-routine S32.abs!() -> S32
+failable routine S32.abs() -> S32
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.
@@ -292,14 +292,14 @@ routine S32.isqrt() -> S32
 ### :returns: The tuple `(root, remainder)`.
 ### :throws: {NumericDomainError} if `me < 0`.
 @rf("S32.sqrtrem")
-routine S32.sqrtrem!() -> (S32, S32)
+failable routine S32.sqrtrem() -> (S32, S32)
 
 ### Returns ⌊log_base me⌋. Throws if `me <= 0` or `base < 2`.
 ### :param base: The logarithm base (must be ≥ 2).
 ### :returns: The floor of the base-`base` logarithm.
 ### :throws: {NumericDomainError} if `me <= 0` or `base < 2`.
 @rf("S32.ilog")
-routine S32.ilog!(base: S32) -> S32
+failable routine S32.ilog(base: S32) -> S32
 
 ### Returns the absolute difference |me - you| as an unsigned value (no overflow).
 ### :param you: The other value.
@@ -400,13 +400,13 @@ routine S32.to[S32]() -> S32
 ### :returns: The lower 32 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-2147483648..=2147483647`.
 @rf("S64.to")
-routine S64.to![S32]() -> S32
+failable routine S64.to[S32]() -> S32
 
 ### Converts an `S128` to `S32`, throwing if the value is outside the S32 range.
 ### :returns: The lower 32 bits of this value interpreted as signed.
 ### :throws: {IntegerOverflowError} if this value is not in `-2147483648..=2147483647`.
 @rf("S128.to")
-routine S128.to![S32]() -> S32
+failable routine S128.to[S32]() -> S32
 
 ### Zero-extends a `U8` to `S32` (always succeeds — `U8` max 255 fits in S32).
 ### :returns: An `S32` equal in value to this value.
@@ -422,77 +422,77 @@ routine U16.to[S32]() -> S32
 ### :returns: The same bit pattern interpreted as `S32`.
 ### :throws: {IntegerOverflowError} if `me > 2147483647`.
 @rf("U32.to")
-routine U32.to![S32]() -> S32
+failable routine U32.to[S32]() -> S32
 
 ### Converts a `U64` to `S32`, throwing if the value exceeds S32_MAX.
 ### :returns: The lower 32 bits interpreted as a signed `S32`.
 ### :throws: {IntegerOverflowError} if `me > 2147483647`.
 @rf("U64.to")
-routine U64.to![S32]() -> S32
+failable routine U64.to[S32]() -> S32
 
 ### Converts a `U128` to `S32`, throwing if the value exceeds S32_MAX.
 ### :returns: The lower 32 bits interpreted as a signed `S32`.
 ### :throws: {IntegerOverflowError} if `me > 2147483647`.
 @rf("U128.to")
-routine U128.to![S32]() -> S32
+failable routine U128.to[S32]() -> S32
 
 ### Converts an `S256` to `S32`, throwing if outside −2147483648..2147483647.
 ### :returns: The lower 32 bits reinterpreted as an `S32`.
 ### :throws: {IntegerOverflowError} if this value is outside −2147483648..2147483647.
 @rf("S256.to")
-routine S256.to![S32]() -> S32
+failable routine S256.to[S32]() -> S32
 
 ### Converts a `U256` to `S32`, throwing if the value exceeds 2147483647.
 ### :returns: The lower 32 bits reinterpreted as an `S32`.
 ### :throws: {IntegerOverflowError} if `me > 2147483647`.
 @rf("U256.to")
-routine U256.to![S32]() -> S32
+failable routine U256.to[S32]() -> S32
 
 ### Converts an `B16` to `S32` by widening to `B32` first, then truncating toward zero.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
 @rf("B16.to")
-routine B16.to![S32]() -> S32
+failable routine B16.to[S32]() -> S32
 
 ### Converts an `B32` to `S32`, truncating toward zero.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the value is outside the S32 range.
 @rf("B32.to")
-routine B32.to![S32]() -> S32
+failable routine B32.to[S32]() -> S32
 
 ### Converts an `B64` to `S32`, truncating toward zero.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the value is outside the S32 range.
 @rf("B64.to")
-routine B64.to![S32]() -> S32
+failable routine B64.to[S32]() -> S32
 
 ### Converts an `B128` to `S32` by narrowing to `B64` first, then truncating.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
 @rf("B128.to")
-routine B128.to![S32]() -> S32
+failable routine B128.to[S32]() -> S32
 
 ### Converts a `D32` decimal to `S32` via its packed bit representation.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
 @rf("D32.to")
-routine D32.to![S32]() -> S32
+failable routine D32.to[S32]() -> S32
 
 ### Converts a `D64` decimal to `S32` via its packed bit representation.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
 @rf("D64.to")
-routine D64.to![S32]() -> S32
+failable routine D64.to[S32]() -> S32
 
 ### Converts a `D128` decimal to `S32` via its low/high 64-bit halves.
 ### :returns: The integer part of this value as an `S32`.
 ### :throws: {IntegerOverflowError} if the integer part is outside the S32 range.
 @rf("D128.to")
-routine D128.to![S32]() -> S32
+failable routine D128.to[S32]() -> S32
 
 ### Parses a decimal string into an `S32`, accepting an optional leading `+` or `−` sign.
 ### :returns: The parsed `S32` value.
 ### :throws: {InvalidValueError} if this value is empty, sign-only, or contains non-digit characters.
 ### :throws: {IntegerOverflowError} if the value does not fit in `S32`.
 @rf("Text.to")
-routine Text.to![S32]() -> S32
+failable routine Text.to[S32]() -> S32

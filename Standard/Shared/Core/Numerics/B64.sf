@@ -22,14 +22,14 @@ obeys Numeric, Comparable, Copyable
 ### :param you: The addend.
 ### :returns: The double-precision sum (always finite).
 @rf("B64.add")
-routine B64.add!(you: B64) -> B64
+failable routine B64.add(you: B64) -> B64
 
 ### Returns `me - you`. Checked: crashes if the IEEE result is non-finite.
 ### Use `sub_unchecked` for raw IEEE 754 propagation.
 ### :param you: The value to subtract.
 ### :returns: The double-precision difference (always finite).
 @rf("B64.sub")
-routine B64.sub!(you: B64) -> B64
+failable routine B64.sub(you: B64) -> B64
 
 ### Returns `me + you`, promoting the real `me` to complex (imaginary part 0). Only `+`/`-` allow
 ### real↔complex mixing; the component width must match (B64 pairs with C128).
@@ -49,7 +49,7 @@ routine B64.sub(you: C128) -> C128
 ### :param you: The multiplier.
 ### :returns: The double-precision product (always finite).
 @rf("B64.mul")
-routine B64.mul!(you: B64) -> B64
+failable routine B64.mul(you: B64) -> B64
 
 ### Returns `me / you`. Checked: `x / 0` crashes with DivisionByZeroError, `0 / 0` with a domain
 ### error, and an overflow to ±infinity with an overflow error. Use `truediv_unchecked` for raw
@@ -57,7 +57,7 @@ routine B64.mul!(you: B64) -> B64
 ### :param you: The divisor.
 ### :returns: The double-precision quotient (always finite).
 @rf("B64.truediv")
-routine B64.truediv!(you: B64) -> B64
+failable routine B64.truediv(you: B64) -> B64
 
 ### Returns `me` if it is finite; throws (RECOVERABLE) if it is ±infinity or NaN. The bridge from
 ### raw IEEE propagation back to a handled result: run the unchecked operators, then recover, e.g.
@@ -66,7 +66,7 @@ routine B64.truediv!(you: B64) -> B64
 ### :returns: `me`, when finite.
 ### :throws: {NumericOverflowError} if `me` is ±infinity or NaN.
 @rf("B64.finite")
-routine B64.finite!() -> B64
+failable routine B64.finite() -> B64
 
 ### Returns the arithmetic negation of this value.
 ### :returns: `-me` in double precision.
@@ -108,7 +108,7 @@ routine B64.cmp(you: B64) -> ComparisonSign
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
 ### :returns: The double-precision square root (always finite).
 @rf("B64.sqrt")
-routine B64.sqrt!() -> B64
+failable routine B64.sqrt() -> B64
 
 ### Returns the square root with raw IEEE 754 propagation (`sqrt(<0)` -> NaN).
 @rf("B64.sqrt_unchecked")
@@ -143,26 +143,26 @@ routine B64.int_truncate() -> B64
 ### Use `exp_unchecked` for raw IEEE 754 propagation.
 ### :returns: The double-precision exponential result (always finite).
 @rf("B64.exp")
-routine B64.exp!() -> B64
+failable routine B64.exp() -> B64
 
 ### Returns the natural logarithm. Checked: crashes on a non-finite result (`log(0)` -> -inf,
 ### `log(<0)` -> NaN). Use `log_unchecked` for raw IEEE 754 propagation.
 ### :returns: The double-precision natural-log result (always finite).
 @rf("B64.log")
-routine B64.log!() -> B64
+failable routine B64.log() -> B64
 
 ### Returns the base-10 logarithm. Checked: crashes on a non-finite result.
 ### Use `log10_unchecked` for raw IEEE 754 propagation.
 ### :returns: The double-precision common-log result (always finite).
 @rf("B64.log10")
-routine B64.log10!() -> B64
+failable routine B64.log10() -> B64
 
 ### `**` operator: raises this value to `exp`, checked (crashes on non-finite result).
 ### NOTE: contrary to mathematical convention, `0 ** 0 == 1` (IEEE 754 `pow`).
 ### :param exp: The exponent applied to `me`.
 ### :returns: `me` raised to `exp` (always finite).
 @rf("B64.pow")
-routine B64.pow!(exp: B64) -> B64
+failable routine B64.pow(exp: B64) -> B64
 
 ### Returns this value with its sign bit replaced by the sign of `sign`.
 ### :param sign: The value supplying the sign bit.
@@ -307,27 +307,27 @@ routine B64.hash(k0: U64, k1: U64) -> U64
 
 ### exp(me) - 1, accurate near 0. Checked: crashes on overflow. Use `expm1_unchecked` for raw IEEE.
 @rf("B64.expm1")
-routine B64.expm1!() -> B64
+failable routine B64.expm1() -> B64
 
 ### 2 raised to me. Checked: crashes on overflow. Use `exp2_unchecked` for raw IEEE.
 @rf("B64.exp2")
-routine B64.exp2!() -> B64
+failable routine B64.exp2() -> B64
 
 ### log(1 + me), accurate near 0. Checked: crashes on a non-finite result. Use `log1p_unchecked` for
 ### raw IEEE.
 @rf("B64.log1p")
-routine B64.log1p!() -> B64
+failable routine B64.log1p() -> B64
 
 ### Base-2 logarithm. Checked: crashes on a non-finite result. Use `log2_unchecked` for raw IEEE.
 @rf("B64.log2")
-routine B64.log2!() -> B64
+failable routine B64.log2() -> B64
 
 ### Euclidean distance sqrt(x^2 + y^2). Checked: crashes on overflow. Use `hypot_unchecked` for
 ### raw IEEE.
 ### :param x: One leg.
 ### :param y: The other leg.
 @rf("hypot")
-routine hypot!(x: B64, y: B64) -> B64
+failable routine hypot(x: B64, y: B64) -> B64
 
 ### 3D Euclidean distance sqrt(x^2 + y^2 + z^2). Checked: crashes on overflow. Use
 ### `hypot_unchecked` for raw IEEE.
@@ -335,7 +335,7 @@ routine hypot!(x: B64, y: B64) -> B64
 ### :param y: Second leg.
 ### :param z: Third leg.
 @rf("hypot")
-routine hypot!(x: B64, y: B64, z: B64) -> B64
+failable routine hypot(x: B64, y: B64, z: B64) -> B64
 
 ### 3D Euclidean distance with raw IEEE 754 propagation (overflow -> +infinity). Composed as
 ### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
@@ -348,7 +348,7 @@ routine hypot_unchecked(x: B64, y: B64, z: B64) -> B64
 ### Fused multiply-add me*b + c (single rounding). Checked: crashes on overflow. Use `fma_unchecked`
 ### for raw IEEE.
 @rf("B64.fma")
-routine B64.fma!(b: B64, c: B64) -> B64
+failable routine B64.fma(b: B64, c: B64) -> B64
 
 ### Fused multiply-add with raw IEEE 754 propagation.
 @rf("B64.fma_unchecked")
@@ -357,39 +357,39 @@ routine B64.fma_unchecked(b: B64, c: B64) -> B64
 ### Arc sine. Checked: crashes (domain) if `me` is outside [-1, 1]. Use `asin_unchecked` for raw
 ### IEEE.
 @rf("B64.asin")
-routine B64.asin!() -> B64
+failable routine B64.asin() -> B64
 
 ### Arc cosine. Checked: crashes (domain) if `me` is outside [-1, 1]. Use `acos_unchecked` for raw
 ### IEEE.
 @rf("B64.acos")
-routine B64.acos!() -> B64
+failable routine B64.acos() -> B64
 
 ### Hyperbolic sine. Checked: crashes on overflow. Use `sinh_unchecked` for raw IEEE.
 @rf("B64.sinh")
-routine B64.sinh!() -> B64
+failable routine B64.sinh() -> B64
 
 ### Hyperbolic cosine. Checked: crashes on overflow. Use `cosh_unchecked` for raw IEEE.
 @rf("B64.cosh")
-routine B64.cosh!() -> B64
+failable routine B64.cosh() -> B64
 
 ### Inverse hyperbolic cosine. Checked: crashes (domain) if `me < 1`. Use `acosh_unchecked` for raw
 ### IEEE.
 @rf("B64.acosh")
-routine B64.acosh!() -> B64
+failable routine B64.acosh() -> B64
 
 ### Inverse hyperbolic tangent. Checked: crashes if `|me| >= 1` (`±1` -> ±inf, `|me| > 1` -> NaN).
 ### Use `atanh_unchecked` for raw IEEE.
 @rf("B64.atanh")
-routine B64.atanh!() -> B64
+failable routine B64.atanh() -> B64
 
 ### Gamma function. Checked: crashes on a non-finite result (overflow or pole). Use
 ### `tgamma_unchecked` for raw IEEE.
 @rf("B64.tgamma")
-routine B64.tgamma!() -> B64
+failable routine B64.tgamma() -> B64
 
 ### Base-10 exponential 10**me. Checked: crashes on overflow. Use `exp10_unchecked` for raw IEEE.
 @rf("B64.exp10")
-routine B64.exp10!() -> B64
+failable routine B64.exp10() -> B64
 
 ### Next representable value after me toward you.
 @rf("B64.nextafter")
@@ -852,4 +852,4 @@ routine D128.to[B64]() -> B64
 ### :returns: The `B64` value parsed from the input.
 ### :throws: {InvalidValueError} if the text is not a valid float literal.
 @rf("Text.to")
-routine Text.to![B64]() -> B64
+failable routine Text.to[B64]() -> B64

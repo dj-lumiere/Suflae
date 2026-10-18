@@ -33,7 +33,7 @@ routine SkipWhileIterable[T, TSource].iter() -> SkipWhileEmittable[T, TSource/It
 ### After the first predicate failure, later values are yielded without rechecking earlier skip state.
 ### :returns: The resulting `T` value.
 @rf("SkipWhileEmittable.emit")
-routine SkipWhileEmittable[T, TSourceIter].emit!() -> TSourceIter/Item
+failable routine SkipWhileEmittable[T, TSourceIter].emit() -> TSourceIter/Item
 
 ### Returns a lazy adapter that skips values while `predicate` returns `true`.
 ### :param predicate: The predicate that controls the initial skipping phase.

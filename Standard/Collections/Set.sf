@@ -172,7 +172,7 @@ routine Set[T].iter() -> SetEmittable[T]
 
 ### Returns the next value.
 ### :throws: {AbsentValueError} The walk is over.
-routine SetEmittable[T].emit!() -> T
+failable routine SetEmittable[T].emit() -> T
     while me.left > 0
         me.left = me.left - 1
         if me.live.emit()
@@ -284,7 +284,7 @@ routine Set[T].serialize() -> SerialValue
 
 ### Builds the set from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-common routine Set[T].from_serial!(value: SerialValue) -> Set[T]
+failable common routine Set[T].from_serial(value: SerialValue) -> Set[T]
     var result = Set[T]()
     when value
         is RF::Core.List[SerialValue] as items =>

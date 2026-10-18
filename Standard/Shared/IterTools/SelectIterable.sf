@@ -36,7 +36,7 @@ routine SelectIterable[T, TResult, TSource].iter() -> SelectEmittable[T, TResult
 ### The transform runs once for each successfully yielded source value.
 ### :returns: The resulting `TResult` value.
 @rf("SelectEmittable.emit")
-routine SelectEmittable[T, TResult, TSourceIter].emit!() -> TResult
+failable routine SelectEmittable[T, TResult, TSourceIter].emit() -> TResult
 
 ### Returns a lazy projection of this iterable.
 ### The source sequence is not evaluated until the resulting iterator is

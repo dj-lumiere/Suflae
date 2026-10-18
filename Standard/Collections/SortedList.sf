@@ -134,7 +134,7 @@ routine SortedList[T].remove_all(value: T) -> Integer
 ### :param rank: Zero-based position in sorted order.
 ### :returns: The element at that rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-routine SortedList[T].get_by_rank!(rank: Integer) -> T
+failable routine SortedList[T].get_by_rank(rank: Integer) -> T
     var position = position_of(value: rank)
     var count = me.tree.count()
     if position >= count
@@ -160,26 +160,26 @@ routine SortedList[T].range(min_val: T, max_val: T) -> List[T]
 
 ### Returns the smallest element in the list.
 ### :throws: {AbsentValueError} The list is empty.
-routine SortedList[T].min!() -> T
+failable routine SortedList[T].min() -> T
     if me.is_empty()
         throw AbsentValueError()
     return me.tree.key_at(rank: 0)
 
 ### Returns the largest element in the list.
 ### :throws: {AbsentValueError} The list is empty.
-routine SortedList[T].max!() -> T
+failable routine SortedList[T].max() -> T
     if me.is_empty()
         throw AbsentValueError()
     return me.tree.key_at(rank: me.tree.count() - 1)
 
 ### Returns the smallest element. Alias for {SortedList[T].min()}.
 ### :throws: {AbsentValueError} The list is empty.
-routine SortedList[T].first!() -> T
+failable routine SortedList[T].first() -> T
     return me.min()
 
 ### Returns the largest element. Alias for {SortedList[T].max()}.
 ### :throws: {AbsentValueError} The list is empty.
-routine SortedList[T].last!() -> T
+failable routine SortedList[T].last() -> T
     return me.max()
 
 # ============================================================================
@@ -192,7 +192,7 @@ routine SortedList[T].iter() -> SortedListEmittable[T]
 
 ### Returns the next element.
 ### :throws: {AbsentValueError} The walk is over.
-routine SortedListEmittable[T].emit!() -> T
+failable routine SortedListEmittable[T].emit() -> T
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)
@@ -243,7 +243,7 @@ routine SortedList[T].serialize() -> SerialValue
 
 ### Builds the list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-common routine SortedList[T].from_serial!(value: SerialValue) -> SortedList[T]
+failable common routine SortedList[T].from_serial(value: SerialValue) -> SortedList[T]
     var result = SortedList[T]()
     when value
         is RF::Core.List[SerialValue] as items =>

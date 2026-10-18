@@ -55,13 +55,13 @@ secret routine make_shared_channel[T](capacity: U64) -> (Sender[T], SharedReceiv
 ### {ChannelClosedError} if the channel is already closed or has no consumers left.
 ### :param item: The value to send (ownership transfers in).
 @rf("Sender.send")
-secret routine Sender[T].send!(item: T)
+secret failable routine Sender[T].send(item: T)
 
 ### Sends one item only when the channel has room for it now, never waiting.
 ### :param item: The value to send.
 ### :returns: `true` when it went in, `false` when the channel was full.
 @rf("Sender.send_if_room")
-secret routine Sender[T].send_if_room!(item: T) -> Bool
+secret failable routine Sender[T].send_if_room(item: T) -> Bool
 
 ### Produces another sending handle on the same channel (fan-in: more producers).
 ### :returns: A new `Sender[T]` on the same channel.
@@ -135,4 +135,4 @@ secret routine SharedReceiver[T].capacity() -> U64
 ### Receives the next item, or throws `AbsentValueError` when the channel is closed and the buffer is empty.
 ### :returns: The next value. Throws `AbsentValueError` at end-of-stream.
 @rf("ChannelDrain.emit")
-secret routine ChannelDrain[T].emit!() -> T
+secret failable routine ChannelDrain[T].emit() -> T

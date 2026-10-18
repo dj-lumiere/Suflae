@@ -5,19 +5,19 @@ module Core
 
 ### Returns `e^me`.
 @rf("B128.exp")
-routine B128.exp!() -> B128
+failable routine B128.exp() -> B128
 
 ### Returns `ln(me)`.
 @rf("B128.log")
-routine B128.log!() -> B128
+failable routine B128.log() -> B128
 
 ### Returns `e^me - 1`.
 @rf("B128.expm1")
-routine B128.expm1!() -> B128
+failable routine B128.expm1() -> B128
 
 ### Returns `ln(1 + me)`.
 @rf("B128.log1p")
-routine B128.log1p!() -> B128
+failable routine B128.log1p() -> B128
 
 ### `ln(1+me)` with raw IEEE (NaN -> qNaN, me=-1 -> -inf, me<-1 -> qNaN, +inf -> +inf). No crash.
 @rf("B128.log1p_unchecked")
@@ -25,7 +25,7 @@ routine B128.log1p_unchecked() -> B128
 
 ### Returns `log2(me)`.
 @rf("B128.log2")
-routine B128.log2!() -> B128
+failable routine B128.log2() -> B128
 
 ### `log2(me)` with raw IEEE. No crash.
 @rf("B128.log2_unchecked")
@@ -33,7 +33,7 @@ routine B128.log2_unchecked() -> B128
 
 ### Returns `log10(me)`.
 @rf("B128.log10")
-routine B128.log10!() -> B128
+failable routine B128.log10() -> B128
 
 ### `log10(me)` with raw IEEE. No crash.
 @rf("B128.log10_unchecked")
@@ -41,15 +41,15 @@ routine B128.log10_unchecked() -> B128
 
 ### Returns `2^me`.
 @rf("B128.exp2")
-routine B128.exp2!() -> B128
+failable routine B128.exp2() -> B128
 
 ### Returns `10^me`.
 @rf("B128.exp10")
-routine B128.exp10!() -> B128
+failable routine B128.exp10() -> B128
 
 ### Returns `me ^ you`.
 @rf("B128.pow")
-routine B128.pow!(you: B128) -> B128
+failable routine B128.pow(you: B128) -> B128
 
 ### `me^you` with raw IEEE (the full C99 pow special-case ladder). No crash. The general case is
 ### exp(you * ln|me|) on the 384-bit tier when the fast path leaves the rounding open, the sign of an
@@ -59,15 +59,15 @@ routine B128.pow_unchecked(you: B128) -> B128
 
 ### Returns `asin(me)`.
 @rf("B128.asin")
-routine B128.asin!() -> B128
+failable routine B128.asin() -> B128
 
 ### Returns `acos(me)`.
 @rf("B128.acos")
-routine B128.acos!() -> B128
+failable routine B128.acos() -> B128
 
 ### Returns `sinh(me)`.
 @rf("B128.sinh")
-routine B128.sinh!() -> B128
+failable routine B128.sinh() -> B128
 
 ### `sinh(me)` with raw IEEE (large |me| -> signed inf). No crash.
 @rf("B128.sinh_unchecked")
@@ -75,7 +75,7 @@ routine B128.sinh_unchecked() -> B128
 
 ### Returns `cosh(me)`.
 @rf("B128.cosh")
-routine B128.cosh!() -> B128
+failable routine B128.cosh() -> B128
 
 ### `cosh(me)` with raw IEEE (large |me| -> +inf). No crash.
 @rf("B128.cosh_unchecked")
@@ -87,7 +87,7 @@ routine B128.tanh() -> B128
 
 ### Returns `atanh(me)`.
 @rf("B128.atanh")
-routine B128.atanh!() -> B128
+failable routine B128.atanh() -> B128
 
 ### `atanh(me)` with raw IEEE (|me|=1 -> signed inf, |me|>1 -> qNaN). No crash.
 @rf("B128.atanh_unchecked")
@@ -99,7 +99,7 @@ routine B128.asinh() -> B128
 
 ### Returns `acosh(me)`.
 @rf("B128.acosh")
-routine B128.acosh!() -> B128
+failable routine B128.acosh() -> B128
 
 ### `acosh(me)` with raw IEEE (me<1 -> qNaN). No crash.
 @rf("B128.acosh_unchecked")
@@ -111,7 +111,7 @@ routine B128.tan() -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding.
 @rf("B128.fma")
-routine B128.fma!(b: B128, c: B128) -> B128
+failable routine B128.fma(b: B128, c: B128) -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding, with raw IEEE 754 propagation.
 @rf("B128.fma_unchecked")
@@ -121,14 +121,14 @@ routine B128.fma_unchecked(b: B128, c: B128) -> B128
 ### :param x: One leg.
 ### :param y: The other leg.
 @rf("hypot")
-routine hypot!(x: B128, y: B128) -> B128
+failable routine hypot(x: B128, y: B128) -> B128
 
 ### Returns `sqrt(x^2 + y^2 + z^2)` without spurious overflow. Checked: crashes on non-finite.
 ### :param x: First leg.
 ### :param y: Second leg.
 ### :param z: Third leg.
 @rf("hypot")
-routine hypot!(x: B128, y: B128, z: B128) -> B128
+failable routine hypot(x: B128, y: B128, z: B128) -> B128
 
 ### `sqrt(x^2 + y^2 + z^2)`, correctly rounded, with raw IEEE (any inf -> +inf, any NaN -> qNaN). No crash.
 ### The squares are exact and their sum exact up to a sticky bit; the root of its top 229 or 230 bits (an
@@ -162,7 +162,7 @@ routine B128.erfc() -> B128
 
 ### Returns the gamma function `tgamma(me)`.
 @rf("B128.tgamma")
-routine B128.tgamma!() -> B128
+failable routine B128.tgamma() -> B128
 
 ### `tgamma(me)` with raw IEEE (poles at 0/negative integers -> inf/qNaN). No crash.
 @rf("B128.tgamma_unchecked")

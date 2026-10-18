@@ -144,21 +144,21 @@ common routine FileManager.is_directory(at: Directory) -> Bool
 ### :returns: The size in bytes.
 ### :throws: {IOError} when the file cannot be inspected.
 @rf("FileManager.size")
-common routine FileManager.size!(at: File) -> S64
+failable common routine FileManager.size(at: File) -> S64
 
 ### A file's metadata, captured in a single stat.
 ### :param at: The file.
 ### :returns: The resulting {FileMetadata}.
 ### :throws: {IOError} when the file cannot be inspected.
 @rf("FileManager.metadata")
-common routine FileManager.metadata!(at: File) -> FileMetadata
+failable common routine FileManager.metadata(at: File) -> FileMetadata
 
 ### A directory's metadata, captured in a single stat.
 ### :param at: The directory.
 ### :returns: The resulting {FileMetadata}.
 ### :throws: {IOError} when the directory cannot be inspected.
 @rf("FileManager.metadata")
-common routine FileManager.metadata!(at: Directory) -> FileMetadata
+failable common routine FileManager.metadata(at: Directory) -> FileMetadata
 
 ### Whether this process can read the path.
 ### :param at: The file.
@@ -201,28 +201,28 @@ common routine FileManager.can_execute(at: Directory) -> Bool
 ### :returns: A new `File` naming the absolute path.
 ### :throws: {IOError} when the path cannot be resolved.
 @rf("FileManager.absolute")
-common routine FileManager.absolute!(at: File) -> File
+failable common routine FileManager.absolute(at: File) -> File
 
 ### The directory at its absolute path (symlinks and other non-canonical components kept).
 ### :param at: The directory.
 ### :returns: A new `Directory` naming the absolute path.
 ### :throws: {IOError} when the path cannot be resolved.
 @rf("FileManager.absolute")
-common routine FileManager.absolute!(at: Directory) -> Directory
+failable common routine FileManager.absolute(at: Directory) -> Directory
 
 ### The file at its canonical location (casing normalized, links and relative segments resolved).
 ### :param at: The file.
 ### :returns: A new `File` naming the canonical path.
 ### :throws: {IOError} when the path cannot be resolved.
 @rf("FileManager.canonical")
-common routine FileManager.canonical!(at: File) -> File
+failable common routine FileManager.canonical(at: File) -> File
 
 ### The directory at its canonical location (casing normalized, links and relative segments resolved).
 ### :param at: The directory.
 ### :returns: A new `Directory` naming the canonical path.
 ### :throws: {IOError} when the path cannot be resolved.
 @rf("FileManager.canonical")
-common routine FileManager.canonical!(at: Directory) -> Directory
+failable common routine FileManager.canonical(at: Directory) -> Directory
 
 ### Makes the file. Its directory must exist. An existing file is an error, unless `replacing` is true: then it
 ### is emptied.
@@ -231,7 +231,7 @@ common routine FileManager.canonical!(at: Directory) -> Directory
 ### :returns: The file, made.
 ### :throws: {IOError} when it already exists (and `replacing` is false) or cannot be made.
 @rf("FileManager.make_file")
-common routine FileManager.make_file!(at: File, replacing: Bool = false) -> File
+failable common routine FileManager.make_file(at: File, replacing: Bool = false) -> File
 
 ### Makes the directory. An existing directory is an error. With `parents`, missing directories above it are made
 ### too, and one that already exists is kept.
@@ -240,25 +240,25 @@ common routine FileManager.make_file!(at: File, replacing: Bool = false) -> File
 ### :returns: The directory, made.
 ### :throws: {IOError} when the directory cannot be made.
 @rf("FileManager.make_directory")
-common routine FileManager.make_directory!(at: Directory, parents: Bool = false) -> Directory
+failable common routine FileManager.make_directory(at: Directory, parents: Bool = false) -> Directory
 
 ### Removes the file.
 ### :param at: The file.
 ### :throws: {IOError} when the file cannot be removed.
 @rf("FileManager.delete")
-common routine FileManager.delete!(at: File)
+failable common routine FileManager.delete(at: File)
 
 ### Removes the directory, which must be empty. `delete_all` removes one with contents.
 ### :param at: The directory.
 ### :throws: {IOError} when the directory cannot be removed.
 @rf("FileManager.delete")
-common routine FileManager.delete!(at: Directory)
+failable common routine FileManager.delete(at: Directory)
 
 ### Removes the directory and everything in it.
 ### :param at: The directory.
 ### :throws: {IOError} when the tree cannot be removed.
 @rf("FileManager.delete_all")
-common routine FileManager.delete_all!(at: Directory)
+failable common routine FileManager.delete_all(at: Directory)
 
 ### Moves (renames) the file. An existing destination is an error unless `replacing` is true.
 ### :param from: The file to move.
@@ -266,7 +266,7 @@ common routine FileManager.delete_all!(at: Directory)
 ### :param replacing: Whether an existing destination is replaced.
 ### :throws: {IOError} when the destination exists (and `replacing` is false) or the move fails.
 @rf("FileManager.move")
-common routine FileManager.move!(from: File, to: File, replacing: Bool = false)
+failable common routine FileManager.move(from: File, to: File, replacing: Bool = false)
 
 ### Moves (renames) the directory. An existing destination is an error unless `replacing` is true.
 ### :param from: The directory to move.
@@ -274,7 +274,7 @@ common routine FileManager.move!(from: File, to: File, replacing: Bool = false)
 ### :param replacing: Whether an existing destination is replaced.
 ### :throws: {IOError} when the destination exists (and `replacing` is false) or the move fails.
 @rf("FileManager.move")
-common routine FileManager.move!(from: Directory, to: Directory, replacing: Bool = false)
+failable common routine FileManager.move(from: Directory, to: Directory, replacing: Bool = false)
 
 ### Copies the file. An existing destination is an error unless `replacing` is true.
 ### :param from: The file to copy.
@@ -282,7 +282,7 @@ common routine FileManager.move!(from: Directory, to: Directory, replacing: Bool
 ### :param replacing: Whether an existing destination is replaced.
 ### :throws: {IOError} when the destination exists (and `replacing` is false) or the copy fails.
 @rf("FileManager.copy")
-common routine FileManager.copy!(from: File, to: File, replacing: Bool = false)
+failable common routine FileManager.copy(from: File, to: File, replacing: Bool = false)
 
 ### Copies the directory and everything in it. Symbolic links are not followed. An existing destination is an
 ### error unless `replacing` is true: then the tree is copied into it, replacing files of the same names.
@@ -291,21 +291,21 @@ common routine FileManager.copy!(from: File, to: File, replacing: Bool = false)
 ### :param replacing: Whether an existing destination is copied into.
 ### :throws: {IOError} when the destination exists (and `replacing` is false) or any entry cannot be copied.
 @rf("FileManager.copy")
-common routine FileManager.copy!(from: Directory, to: Directory, replacing: Bool = false)
+failable common routine FileManager.copy(from: Directory, to: Directory, replacing: Bool = false)
 
 ### Sets the readonly attribute of the file (file system metadata).
 ### :param at: The file.
 ### :param readonly: `true` to make it readonly, `false` to clear it.
 ### :throws: {IOError} when the attribute cannot be set.
 @rf("FileManager.set_readonly")
-common routine FileManager.set_readonly!(at: File, readonly: Bool = true)
+failable common routine FileManager.set_readonly(at: File, readonly: Bool = true)
 
 ### Sets the readonly attribute of the directory (file system metadata).
 ### :param at: The directory.
 ### :param readonly: `true` to make it readonly, `false` to clear it.
 ### :throws: {IOError} when the attribute cannot be set.
 @rf("FileManager.set_readonly")
-common routine FileManager.set_readonly!(at: Directory, readonly: Bool = true)
+failable common routine FileManager.set_readonly(at: Directory, readonly: Bool = true)
 
 ### Sets an existing file's size to exactly `bytes` (extending with zero bytes or truncating). Size a file before
 ### wielding it to produce output through a mapping.
@@ -313,7 +313,7 @@ common routine FileManager.set_readonly!(at: Directory, readonly: Bool = true)
 ### :param bytes: The exact size in bytes.
 ### :throws: {IOError} when the file doesn't exist or its size cannot be set.
 @rf("FileManager.set_size")
-common routine FileManager.set_size!(at: File, bytes: U64)
+failable common routine FileManager.set_size(at: File, bytes: U64)
 
 ### Reads a whole file as text (UTF-8, lossy). UNCOLORED, like `waitfor`: inside work an Agent runs as a fiber
 ### (`start_now()`/`start_here()`) the fiber PARKS while a worker thread does the blocking read (its siblings keep
@@ -322,14 +322,14 @@ common routine FileManager.set_size!(at: File, bytes: U64)
 ### :returns: Its contents as `Text`.
 ### :throws: {IOError} when the file doesn't exist or can't be read.
 @rf("FileManager.read_text")
-common routine FileManager.read_text!(at: File) -> Text
+failable common routine FileManager.read_text(at: File) -> Text
 
 ### Reads a whole file. UNCOLORED, like `read_text`.
 ### :param at: The file.
 ### :returns: Its contents.
 ### :throws: {IOError} when the file doesn't exist or can't be read.
 @rf("FileManager.read_bytes")
-common routine FileManager.read_bytes!(at: File) -> Bytes
+failable common routine FileManager.read_bytes(at: File) -> Bytes
 
 ### Writes `content` to an existing file, replacing what it held. UNCOLORED, like `read_text`. The text is encoded as
 ### UTF-8.
@@ -337,42 +337,42 @@ common routine FileManager.read_bytes!(at: File) -> Bytes
 ### :param content: The text to write.
 ### :throws: {IOError} when the file doesn't exist or can't be written.
 @rf("FileManager.write_text")
-common routine FileManager.write_text!(at: File, content: Text)
+failable common routine FileManager.write_text(at: File, content: Text)
 
 ### Writes `content` to an existing file, replacing what it held. UNCOLORED, like `read_text`.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :param content: The bytes to write.
 ### :throws: {IOError} when the file doesn't exist or can't be written.
 @rf("FileManager.write_bytes")
-common routine FileManager.write_bytes!(at: File, content: Bytes)
+failable common routine FileManager.write_bytes(at: File, content: Bytes)
 
 ### Adds `content` at the end of an existing file. The text is encoded as UTF-8.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :param content: The text to add.
 ### :throws: {IOError} when the file doesn't exist or can't be written.
 @rf("FileManager.append_text")
-common routine FileManager.append_text!(at: File, content: Text)
+failable common routine FileManager.append_text(at: File, content: Text)
 
 ### Opens the file for sequential reading, giving a {Source} consumed forward with `load`.
 ### :param at: The file.
 ### :returns: A {FileSource} over the file's content, to be bound by `using`.
 ### :throws: {IOError} when the file doesn't exist or can't be opened for reading.
 @rf("FileManager.open_read")
-common routine FileManager.open_read!(at: File) -> FileSource
+failable common routine FileManager.open_read(at: File) -> FileSource
 
 ### Opens an existing file for sequential writing, EMPTYING it first, giving a {Sink} filled with `store`.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :returns: A {FileSink} over the file's content, to be bound by `using`.
 ### :throws: {IOError} when the file doesn't exist or can't be opened for writing.
 @rf("FileManager.open_write")
-common routine FileManager.open_write!(at: File) -> FileSink
+failable common routine FileManager.open_write(at: File) -> FileSink
 
 ### Opens an existing file for sequential appending (writes land after its contents), giving a {Sink}.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :returns: A {FileSink} over the file's content, to be bound by `using`.
 ### :throws: {IOError} when the file doesn't exist or can't be opened for appending.
 @rf("FileManager.open_append")
-common routine FileManager.open_append!(at: File) -> FileSink
+failable common routine FileManager.open_append(at: File) -> FileSink
 
 ### The direct entries of the directory as bare names (`.` and `..` left out), in the platform's order. Use
 ### `Directory.file(name:)` / `subdir(name:)` to turn one into a path.
@@ -380,7 +380,7 @@ common routine FileManager.open_append!(at: File) -> FileSink
 ### :returns: The entry names.
 ### :throws: {IOError} when the directory cannot be listed.
 @rf("FileManager.list")
-common routine FileManager.list!(at: Directory) -> List[Text]
+failable common routine FileManager.list(at: Directory) -> List[Text]
 
 ### The direct entries of the directory WITH their kind and modification time, in one directory read.
 ### Prefer this over `list` + `is_directory` + `metadata` when walking a tree: on Windows the kind and
@@ -390,7 +390,7 @@ common routine FileManager.list!(at: Directory) -> List[Text]
 ### :returns: The entries.
 ### :throws: {IOError} when the directory cannot be listed.
 @rf("FileManager.entries")
-common routine FileManager.entries!(at: Directory) -> List[DirEntry]
+failable common routine FileManager.entries(at: Directory) -> List[DirEntry]
 
 ### Every path under the directory, at any depth, a directory before its contents. Symbolic links are not
 ### followed.
@@ -398,19 +398,19 @@ common routine FileManager.entries!(at: Directory) -> List[DirEntry]
 ### :returns: The full paths.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
 @rf("FileManager.walk")
-common routine FileManager.walk!(at: Directory) -> List[Text]
+failable common routine FileManager.walk(at: Directory) -> List[Text]
 
 ### The process's current working directory.
 ### :returns: The resulting `Directory`.
 ### :throws: {IOError} when the working directory cannot be read.
 @rf("FileManager.current_directory")
-common routine FileManager.current_directory!() -> Directory
+failable common routine FileManager.current_directory() -> Directory
 
 ### Changes the process's current working directory.
 ### :param to: The directory to switch to.
 ### :throws: {IOError} when the directory cannot be entered.
 @rf("FileManager.set_current_directory")
-common routine FileManager.set_current_directory!(to: Directory)
+failable common routine FileManager.set_current_directory(to: Directory)
 
 ### The platform's temporary directory. Honors the usual environment variables, never fails.
 ### :returns: The resulting `Directory`.
@@ -421,7 +421,7 @@ common routine FileManager.temp_directory() -> Directory
 ### :returns: The resulting `Directory`.
 ### :throws: {IOError} when the home directory cannot be determined.
 @rf("FileManager.home_directory")
-common routine FileManager.home_directory!() -> Directory
+failable common routine FileManager.home_directory() -> Directory
 
 ### Loads up to `max` bytes from the current position. Returns fewer when end-of-file is reached first;
 ### an empty `Bytes` signals EOF.
@@ -438,7 +438,7 @@ routine FileSource.close()
 ### Pass-through entry: the descriptor was already acquired by `FileManager.open_read`.
 ### :returns: This `FileSource`.
 @rf("FileSource.enter")
-routine FileSource.enter!() -> FileSource
+failable routine FileSource.enter() -> FileSource
 
 ### Closes the descriptor when leaving a `using` scope.
 @rf("FileSource.exit")
@@ -467,7 +467,7 @@ routine FileSink.close()
 ### Pass-through entry: the descriptor was already acquired by `FileManager.open_write`/`open_append`.
 ### :returns: This `FileSink`.
 @rf("FileSink.enter")
-routine FileSink.enter!() -> FileSink
+failable routine FileSink.enter() -> FileSink
 
 ### Flushes and closes the descriptor when leaving a `using` scope.
 @rf("FileSink.exit")

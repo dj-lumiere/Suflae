@@ -84,7 +84,7 @@ public class DocFindingsTests
                             return me.what
 
                         @crash_only
-                        routine boom!(n: Integer) -> Integer
+                        failable routine boom(n: Integer) -> Integer
                             if n < 0
                                 throw BadError(what: "negative")
                             return n
@@ -109,7 +109,7 @@ public class DocFindingsTests
                         import IO/Console
                         import Numerics
 
-                        routine find!(n: Integer) -> Integer
+                        failable routine find(n: Integer) -> Integer
                             if n < 0
                                 absent
                             return n
@@ -133,7 +133,7 @@ public class DocFindingsTests
     {
         string source = """
                         protocol Parsable
-                            routine Me!(text: Text)
+                            failable routine Me(text: Text)
 
                         record Num
                         obeys Parsable

@@ -124,7 +124,7 @@ routine SortedSet[T].remove(value: T) -> Bool
 ### :param rank: Zero-based position in sorted order.
 ### :returns: The element at that rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-routine SortedSet[T].get_by_rank!(rank: Integer) -> T
+failable routine SortedSet[T].get_by_rank(rank: Integer) -> T
     var position = position_of(value: rank)
     var count = me.tree.count()
     if position >= count
@@ -150,26 +150,26 @@ routine SortedSet[T].range(min_val: T, max_val: T) -> List[T]
 
 ### Returns the smallest element in the set.
 ### :throws: {AbsentValueError} The set is empty.
-routine SortedSet[T].min!() -> T
+failable routine SortedSet[T].min() -> T
     if me.is_empty()
         throw AbsentValueError()
     return me.tree.key_at(rank: 0)
 
 ### Returns the largest element in the set.
 ### :throws: {AbsentValueError} The set is empty.
-routine SortedSet[T].max!() -> T
+failable routine SortedSet[T].max() -> T
     if me.is_empty()
         throw AbsentValueError()
     return me.tree.key_at(rank: me.tree.count() - 1)
 
 ### Returns the smallest element. Alias for {SortedSet[T].min()}.
 ### :throws: {AbsentValueError} The set is empty.
-routine SortedSet[T].first!() -> T
+failable routine SortedSet[T].first() -> T
     return me.min()
 
 ### Returns the largest element. Alias for {SortedSet[T].max()}.
 ### :throws: {AbsentValueError} The set is empty.
-routine SortedSet[T].last!() -> T
+failable routine SortedSet[T].last() -> T
     return me.max()
 
 # ============================================================================
@@ -182,7 +182,7 @@ routine SortedSet[T].iter() -> SortedSetEmittable[T]
 
 ### Returns the next element.
 ### :throws: {AbsentValueError} The walk is over.
-routine SortedSetEmittable[T].emit!() -> T
+failable routine SortedSetEmittable[T].emit() -> T
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)
@@ -234,7 +234,7 @@ routine SortedSet[T].serialize() -> SerialValue
 
 ### Builds the set from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-common routine SortedSet[T].from_serial!(value: SerialValue) -> SortedSet[T]
+failable common routine SortedSet[T].from_serial(value: SerialValue) -> SortedSet[T]
     var result = SortedSet[T]()
     when value
         is RF::Core.List[SerialValue] as items =>

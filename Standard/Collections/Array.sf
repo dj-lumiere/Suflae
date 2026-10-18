@@ -13,21 +13,21 @@ routine Array[T, COUNT].count() -> Integer
 
 ### Returns the element at `index` (`a[i]`).
 ### :param index: The position to read, from 0.
-routine Array[T, COUNT].getitem!(index: Integer) -> T
+failable routine Array[T, COUNT].getitem(index: Integer) -> T
 needs RecordType T
     return me.at(position: position_of(value: index))
 
 ### Returns the element at `position`, counted with `U64`.
 ### :param position: The position to read, from 0.
 @inline
-routine Array[T, COUNT].at!(position: U64) -> T
+failable routine Array[T, COUNT].at(position: U64) -> T
 needs RecordType T
     return me.read(position: me.filled(position: position)).share()
 
 ### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
 ### :param index: The position to write, from 0.
 ### :param value: The new element.
-routine Array[T, COUNT].setitem!(index: Integer, value: T)
+failable routine Array[T, COUNT].setitem(index: Integer, value: T)
     me.put(position: position_of(value: index), value: value)
     return
 
@@ -35,7 +35,7 @@ routine Array[T, COUNT].setitem!(index: Integer, value: T)
 ### :param position: The position to write, from 0.
 ### :param value: The new element.
 @inline
-routine Array[T, COUNT].put!(position: U64, value: T)
+failable routine Array[T, COUNT].put(position: U64, value: T)
     danger
         var slot = me.slot(position: me.checked(position: position))
         slot.peek().destruct()
@@ -44,13 +44,13 @@ routine Array[T, COUNT].put!(position: U64, value: T)
 
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
-routine Array[T, COUNT].erase!(index: Integer)
+failable routine Array[T, COUNT].erase(index: Integer)
     me.erase_at(position: position_of(value: index))
     return
 
 ### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
 ### :param position: The position to empty.
-routine Array[T, COUNT].erase_at!(position: U64)
+failable routine Array[T, COUNT].erase_at(position: U64)
     var place = me.checked(position: position)
     danger
         me.slot(position: place).peek().destruct()
@@ -62,7 +62,7 @@ routine Array[T, COUNT].erase_at!(position: U64)
 ### :param from: The first place to carry from.
 ### :param into: The first place to carry into.
 ### :param count: How many places to carry.
-routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
+failable routine Array[T, COUNT].move(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     var n = count.to[U64]()
@@ -76,7 +76,7 @@ routine Array[T, COUNT].move!(from: Integer, into: Integer, count: Integer)
 ### :param source: The first place to carry from.
 ### :param target: The first place to carry into.
 ### :param count: How many places to carry.
-routine Array[T, COUNT].carry!(source: U64, target: U64, count: U64)
+failable routine Array[T, COUNT].carry(source: U64, target: U64, count: U64)
     var n = count
     if n == 0
         return
@@ -119,7 +119,7 @@ needs RecordType T
 ### Returns the position of the first element equal to `value`.
 ### :param value: The value to look for.
 ### :throws: {AbsentValueError} No element equals `value`.
-routine Array[T, COUNT].index_of!(value: T) -> Integer
+failable routine Array[T, COUNT].index_of(value: T) -> Integer
 needs T obeys Equatable
     var i: U64 = 0
     while i < COUNT
@@ -134,7 +134,7 @@ needs T obeys Equatable
 
 ### `position` checked against the places.
 @inline
-secret routine Array[T, COUNT].checked!(position: U64) -> U64
+secret failable routine Array[T, COUNT].checked(position: U64) -> U64
     if position >= COUNT
         throw IndexOutOfBoundsError(index: position, count: COUNT)
     return position
@@ -142,7 +142,7 @@ secret routine Array[T, COUNT].checked!(position: U64) -> U64
 ### `position` checked against the places and, in an array of entities, against a place that holds no entity yet (a
 ### zero place, which a read would hand out as no entity at all).
 @inline
-secret routine Array[T, COUNT].filled!(position: U64) -> U64
+secret failable routine Array[T, COUNT].filled(position: U64) -> U64
     var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger

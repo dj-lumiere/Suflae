@@ -22,14 +22,14 @@ routine SerialShapeError.crash_message() -> Text
 ### :returns: The member variable's serialized value.
 ### :throws: {SerialShapeError} when `value` is not a member-variable table or has no entry for `name`.
 @rf("serial_field")
-routine serial_field!(value: SerialValue, name: Text) -> SerialValue
+failable routine serial_field(value: SerialValue, name: Text) -> SerialValue
 
 ### The text inside a serialized `Text` value.
 ### :param value: The serialized value.
 ### :returns: The text.
 ### :throws: {SerialShapeError} when `value` is not text.
 @rf("serial_text")
-routine serial_text!(value: SerialValue) -> Text
+failable routine serial_text(value: SerialValue) -> Text
 
 ### The key a serialized dictionary entry names: a `Text` key is the name itself and any other key is read back
 ### from it.
@@ -38,7 +38,7 @@ routine serial_text!(value: SerialValue) -> Text
 ### :returns: The key.
 ### :throws: A parse error when `key` does not read as a `T`.
 @rf("serial_key")
-routine serial_key![T](key: Text) -> T
+failable routine serial_key[T](key: Text) -> T
 
 ### Builds a `T` from its serialized form: the generic entry point the builder-synthesized `from_serial`
 ### routines call for their member variables and arms. A part that does not fit fails the whole rebuild, so
@@ -48,7 +48,7 @@ routine serial_key![T](key: Text) -> T
 ### :returns: The rebuilt value.
 ### :throws: {SerialShapeError} or a parse error when `value` does not have the shape `T` needs.
 @rf("serial_decode")
-routine serial_decode![T](value: SerialValue) -> T
+failable routine serial_decode[T](value: SerialValue) -> T
 
 ### Builds a choice value from its serialized case name.
 ### :typeparam T: The choice type.
@@ -56,7 +56,7 @@ routine serial_decode![T](value: SerialValue) -> T
 ### :returns: The matching case.
 ### :throws: {SerialShapeError} when the name is not a case of `T`.
 @rf("choice_from_serial")
-routine choice_from_serial![T](value: SerialValue) -> T
+failable routine choice_from_serial[T](value: SerialValue) -> T
 needs ChoiceType T
 
 ### Builds a flags value from the serialized list of its set member names.
@@ -65,7 +65,7 @@ needs ChoiceType T
 ### :returns: The flags value with exactly those members set.
 ### :throws: {SerialShapeError} when `value` is not a list of names or a name is not a member of `T`.
 @rf("flags_from_serial")
-routine flags_from_serial![T](value: SerialValue) -> T
+failable routine flags_from_serial[T](value: SerialValue) -> T
 needs FlagsType T
 
 ### Builds a variant value from its serialized `{arm: payload}` table. (A variant with a `None` arm
@@ -75,23 +75,23 @@ needs FlagsType T
 ### :returns: The variant holding the rebuilt payload in the named arm.
 ### :throws: {SerialShapeError} when `value` is not a one-entry table naming an arm of `T`.
 @rf("variant_from_serial")
-routine variant_from_serial![T](value: SerialValue) -> T
+failable routine variant_from_serial[T](value: SerialValue) -> T
 needs VariantType T
 
 ### Rebuilds a value from its serialized form, the reverse of `serialize`: `sv.to[Point]()`,
-### `try sv.to[List[Integer]]()`. Each type rebuilds itself in `common routine T.from_serial!(value: SerialValue)`:
+### `try sv.to[List[Integer]]()`. Each type rebuilds itself in `failable common routine T.from_serial(value: SerialValue)`:
 ### the builder writes it for records, entities, choices, flags and variants, and a type may write its own.
 ### :returns: The rebuilt value.
 ### :throws: {SerialShapeError} when the value does not have the shape `T` needs.
 @rf("SerialValue.to")
-routine SerialValue.to![T]() -> T
+failable routine SerialValue.to[T]() -> T
 needs AnyType T
 
 ### Builds a `Byte` from its serialized form (a `U8`). :throws: {SerialShapeError} on any other arm.
 @rf("Byte.from_serial")
-common routine Byte.from_serial!(value: SerialValue) -> Byte
+failable common routine Byte.from_serial(value: SerialValue) -> Byte
 
 ### Builds a `Char` from its serialized form (a one-character `Text`).
 ### :throws: {SerialShapeError} when the value is not a one-character text.
 @rf("Char.from_serial")
-common routine Char.from_serial!(value: SerialValue) -> Char
+failable common routine Char.from_serial(value: SerialValue) -> Char
