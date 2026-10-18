@@ -246,10 +246,23 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
 @override
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
-    var result = Dict[Text, SerialValue]()
+    var result = RF::Core.Dict[Text, SerialValue]()
     each entry in me
         result[entry.key.represent()] = entry.value.serialize()
     return SerialValue(result.duplicate())
+
+### Builds the dictionary from its serialized entry table.
+### :throws: {SerialShapeError} when the value is not a table or an entry does not fit, or a parse error when a key
+### does not read as a `TKey`.
+common routine SortedDict[TKey, TValue].from_serial!(value: SerialValue) -> SortedDict[TKey, TValue]
+    var result = SortedDict[TKey, TValue]()
+    when value
+        is RF::Core.Dict[Text, SerialValue] as entries =>
+            each entry in entries
+                result[serial_key[TKey](key: entry.key)] = serial_decode[TValue](value: entry.value)
+        else =>
+            throw SerialShapeError(detail: "expected an entry table")
+    return result
 
 # ============================================================================
 # Inside the dictionary

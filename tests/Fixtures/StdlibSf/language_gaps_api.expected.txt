@@ -1,0 +1,13 @@
+5
+one two
+a-b-c
+1 red
+2 green
+3 blue
+2
+two
+true
+26
+1
+true
+not a dictionary of numbers

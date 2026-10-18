@@ -31,6 +31,15 @@ routine serial_field!(value: SerialValue, name: Text) -> SerialValue
 @rf("serial_text")
 routine serial_text!(value: SerialValue) -> Text
 
+### The key a serialized dictionary entry names: a `Text` key is the name itself and any other key is read back
+### from it.
+### :typeparam T: The key type.
+### :param key: The entry's name.
+### :returns: The key.
+### :throws: A parse error when `key` does not read as a `T`.
+@rf("serial_key")
+routine serial_key![T](key: Text) -> T
+
 ### Builds a `T` from its serialized form: the generic entry point the builder-synthesized `from_serial`
 ### routines call for their member variables and arms. A part that does not fit fails the whole rebuild, so
 ### `try sv.to[List[S64]]()` recovers a bad element too.

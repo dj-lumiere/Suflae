@@ -842,7 +842,11 @@ each entry in ages
 - `sv.to[List[Integer]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
   `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Integer]]()`). A type rebuilds itself in
   `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
-  builder's own: a program that writes or calls `from_serial` gets SF-S809 and uses `sv.to[T]()` instead.
+  builder's own: a program that writes or calls `from_serial` gets SF-S809 and uses `sv.to[T]()` instead. Every
+  collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `CircularList`), a dictionary's keys
+  from their text (`sv.to[Dict[Integer, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
+  read back: naming it in `sv.to[T]()` is SF-S813.
+- A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is SF-G250, which names that spelling.
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,

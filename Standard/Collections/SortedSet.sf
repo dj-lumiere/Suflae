@@ -225,10 +225,22 @@ routine SortedSet[T].eq(you: SortedSet[T]) -> Bool
 ### :returns: The `SerialValue.List` of each element's serialized form.
 @override
 routine SortedSet[T].serialize() -> SerialValue
-    var result = List[SerialValue]()
+    var result = RF::Core.List[SerialValue]()
     each value in me
         result.add_last(value: value.serialize())
     return SerialValue(result.duplicate())
+
+### Builds the set from its serialized element list.
+### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
+common routine SortedSet[T].from_serial!(value: SerialValue) -> SortedSet[T]
+    var result = SortedSet[T]()
+    when value
+        is RF::Core.List[SerialValue] as items =>
+            each item in items
+                result.add(value: serial_decode[T](value: item))
+        else =>
+            throw SerialShapeError(detail: "expected a list")
+    return result
 
 ### The elements as text: `1, 2, 3`.
 secret routine SortedSet[T].items_text() -> Text

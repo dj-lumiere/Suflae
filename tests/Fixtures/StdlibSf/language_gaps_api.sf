@@ -1,0 +1,46 @@
+module Tests/StdlibSf/LanguageGapsApi
+
+import IterTools
+import Collections
+
+routine start()
+    # An optional variable takes a value later.
+    var n: Integer? = none
+    n = 5
+    show(n)
+
+    # A tuple arm compares each member with a literal.
+    var p: (Integer, Integer) = (1, 2)
+    when p
+        (1, 2) => show("one two")
+        (1, y) => show(f"one {y}")
+        else => show("other")
+
+    # `join` and `enumerate` work on a list, and on one a call just made.
+    var words = ["a", "b", "c"]
+    show(words.join(separator: "-"))
+    var line = "red green blue"
+    each (i, w) in line.words().enumerate(start: 1)
+        show(f"{i} {w}")
+
+    # Collections are read back from their serialized form.
+    var d = {"a": 1, "b": 2}
+    var back = d.serialize().to[Dict[Text, Integer]]()
+    show(back["b"])
+    var numbered = {1: "one", 2: "two"}
+    show(numbered.serialize().to[Dict[Integer, Text]]()[2])
+    var s = {3, 4}
+    show(s.serialize().to[Set[Integer]]().has(4))
+    var sd = SortedDict[Text, Integer]()
+    sd["z"] = 26
+    show(sd.serialize().to[SortedDict[Text, Integer]]()["z"])
+    var sl = SortedList[Integer]()
+    sl.add(value: 9)
+    show(sl.serialize().to[SortedList[Integer]]().count())
+    var ss = SortedSet[Integer]()
+    ss.add(value: 5)
+    show(ss.serialize().to[SortedSet[Integer]]().has(5))
+    var bad = try numbered.serialize().to[Dict[Integer, Integer]]()
+    when bad
+        is None => show("not a dictionary of numbers")
+        else => show("read back")
