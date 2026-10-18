@@ -194,6 +194,9 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
+- `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
+  reads its members. An `Iterable[T]` user type gets its `Iter` from `iter()`, so IterTools adapters walk it.
+  `when_interrupted` works.
 - A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
   `enter`/`exit` on that entity. Agents giving no value can be gathered.

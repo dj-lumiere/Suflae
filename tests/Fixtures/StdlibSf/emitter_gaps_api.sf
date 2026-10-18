@@ -1,6 +1,8 @@
 module Tests/StdlibSf/EmitterGapsApi
 
 # Forms that once passed analysis and then stopped the LLVM emitter or ran wrong.
+import IterTools
+
 entity Session
     open: Bool
 
@@ -14,6 +16,32 @@ routine Session.exit()
 routine ping()
     show("ping")
 
+entity Cell[T]
+    value: T
+
+routine Cell[T].get() -> T
+    return me.value
+
+record Countdown obeys Iterable[Integer]
+    start: Integer
+
+entity CountdownWalk obeys Emittable[Integer]
+    next: Integer
+
+routine Countdown.iter() -> CountdownWalk
+    return CountdownWalk(next: me.start)
+
+routine CountdownWalk.emit!() -> Integer
+    if me.next < 0
+        throw AbsentValueError()
+    var current = me.next
+    me.next -= 1
+    return current
+
+record Pair[TFirst, TSecond]
+    first: TFirst
+    second: TSecond
+
 routine start()
     # `using` on an entity calls `enter` and `exit` on that entity.
     var s = Session(open: false)
@@ -25,3 +53,14 @@ routine start()
     var jobs = [ping.to[Agent](), ping.to[Agent]()]
     jobs.gather()
     show("gathered")
+
+    # A routine of a generic entity reads its member variable.
+    var c = Cell[Integer](value: 5)
+    show(c.get())
+
+    # An adapter walks a user's own Iterable.
+    show(Countdown(start: 5).where(predicate: (n: Integer) => n % 2 == 1).to[List]())
+
+    # A field-by-field construction infers the type arguments.
+    var pair = Pair(first: 1, second: "one")
+    show(pair.second)
