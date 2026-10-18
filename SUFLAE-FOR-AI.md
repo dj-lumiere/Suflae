@@ -1187,7 +1187,7 @@ name = "my-app"
 
 [target]
 executable = "MainModule"   # the entry MODULE name, not a file path
-library = ["../shared"]     # dependency directories (optional)
+module_paths = ["../shared"]  # folders whose modules join the solution (optional), a header-less file is named by its place
 mode = "debug"              # debug | debug-jit | release | release-time | release-space
 ```
 
