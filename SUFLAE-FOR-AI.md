@@ -166,7 +166,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
 |-------------------------|----------------------------------------------------------------------------|
 | Default numbers         | `Integer` (arbitrary precision), `Decimal` (base-10)                       |
 | Fixed-width integers    | `S8 S16 S32 S64 S128 S256`, `U8 U16 U32 U64 U128 U256`                    |
-| Binary floats           | `B16 B32 B64 B128` (`BF16` is a storage-only format)                       |
+| Binary floats           | `B16 B32 B64 B128 BF16` (`BF16` computes on B32 values, rounding once)     |
 | Decimal floats          | `D32 D64 D128`                                                             |
 | Complex / quaternion    | `C64 C128 C256`, `Q128 Q256`                                               |
 | Text and bytes          | `Text` (Unicode), `Char`, `Bytes`, `Byte`                             |

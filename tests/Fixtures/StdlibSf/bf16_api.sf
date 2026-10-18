@@ -1,0 +1,15 @@
+module Tests/StdlibSf/Bf16Api
+
+# BF16 arithmetic (worked on the B32 values, rounded once) and its correctly rounded library functions.
+
+import IO/Console
+
+routine start()
+    var x = "1.5".to[BF16]()
+    var y = "0.1".to[BF16]()
+    var two = "2".to[BF16]()
+    show(f"x + y: {x + y}  x * y: {x * y}  x / y: {x / y}  sqrt(2): {two.sqrt()}")
+    show(f"exp(1): {"1".to[BF16]().exp()}  sin(1): {"1".to[BF16]().sin()}  2^10: {two.pow("10".to[BF16]())}")
+    when try ("3e38".to[BF16]()).add("3e38".to[BF16]())
+        is None => show("3e38 + 3e38: overflow")
+        else as v => show(f"3e38 + 3e38: {v}")
