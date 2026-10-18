@@ -1,0 +1,28 @@
+module Tests/StdlibSf/GlobalAgentsApi
+
+# Four agents change the same globals at once. An S64 global and an Integer global both keep every update: the read
+# and the write of `visits = visits + 1` stay under one lock even where the update can fail.
+global visits: S64 = 0
+global big: Integer = 0
+
+routine visit(name: Text) -> Text
+    each _ in 1 to 10000
+        visits = visits + 1
+        big += 1
+        yield_now()
+    return name
+
+routine start()
+    var jobs = [visit.to[Agent](name: "a"), visit.to[Agent](name: "b"), visit.to[Agent](name: "c"), visit.to[Agent](name: "d")]
+    var done = jobs.gather()
+    show(visits)
+    show(big)
+    show(done.count())
+
+    # A variable declared without a value gets one on every path before it is read.
+    var greeting: Text
+    if visits > 0
+        greeting = "busy"
+    else
+        greeting = "idle"
+    show(greeting)

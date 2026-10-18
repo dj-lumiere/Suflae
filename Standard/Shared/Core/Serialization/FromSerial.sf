@@ -31,14 +31,15 @@ routine serial_field!(value: SerialValue, name: Text) -> SerialValue
 @rf("serial_text")
 routine serial_text!(value: SerialValue) -> Text
 
-### Builds a `T` from its serialized form: the generic entry point the builder-synthesized
-### `from_serial` routines call for their member variables and arms. Not failable itself:
-### the `T(from:)` it calls is, so a value that does not fit crashes loudly with a `SerialShapeError`.
+### Builds a `T` from its serialized form: the generic entry point the builder-synthesized `from_serial`
+### routines call for their member variables and arms. A part that does not fit fails the whole rebuild, so
+### `try sv.to[List[S64]]()` recovers a bad element too.
 ### :typeparam T: The type to build.
 ### :param value: The serialized value.
 ### :returns: The rebuilt value.
+### :throws: {SerialShapeError} or a parse error when `value` does not have the shape `T` needs.
 @rf("serial_decode")
-routine serial_decode[T](value: SerialValue) -> T
+routine serial_decode![T](value: SerialValue) -> T
 
 ### Builds a choice value from its serialized case name.
 ### :typeparam T: The choice type.

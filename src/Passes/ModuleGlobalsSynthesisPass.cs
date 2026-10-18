@@ -50,9 +50,19 @@ internal static class ModuleGlobalsSynthesisPass
             return true;
         }
 
+        // The synthesized declarations and the singleton's construction sit in the file of `start()` and carry
+        // its location, so their names resolve in that file, which declares them, even when the first global is
+        // in a module it imports.
+        if (ModuleGlobalOrder.FindStart(orderedFiles: orderedFiles, report: report, at: globals[index: 0].Loc) is not
+            ({ } startProgram, { } startBlock))
+        {
+            return false;
+        }
+
         if (!TryBuildModuleGlobalsSynthesis(globals: globals,
                 deps: deps,
                 order: order,
+                anchor: startBlock.Location,
                 report: report,
                 entityDecl: out EntityDeclaration entityDecl,
                 singletonDecl: out VariableDeclaration singletonDecl,
@@ -61,11 +71,12 @@ internal static class ModuleGlobalsSynthesisPass
             return false;
         }
 
-        return SpliceGlobalsIntoStart(orderedFiles: orderedFiles,
-            report: report,
-            entityDecl: entityDecl,
-            singletonDecl: singletonDecl,
-            initStmts: initStmts);
+        // Append (NOT prepend) the synthesized declarations: imports must stay at the top of the
+        // file (RF-S114). Declaration order does not matter for type collection.
+        startProgram.Declarations.Add(item: entityDecl);
+        startProgram.Declarations.Add(item: singletonDecl);
+        startBlock.Statements.InsertRange(index: 0, collection: initStmts);
+        return true;
     }
 
     /// <summary>Builds the synthesized entity declaration, singleton declaration, and the init-statement
@@ -73,12 +84,12 @@ internal static class ModuleGlobalsSynthesisPass
     /// field has a type with no synthesizable default.</summary>
     private static bool TryBuildModuleGlobalsSynthesis(
         List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals,
-        List<HashSet<int>> deps, List<int> order,
+        List<HashSet<int>> deps, List<int> order, SourceLocation anchor,
         Action<SemanticDiagnosticCode, string, SourceLocation> report, out EntityDeclaration entityDecl,
         out VariableDeclaration singletonDecl, out List<Statement> initStmts)
     {
         int n = globals.Count;
-        SourceLocation loc0 = globals[index: 0].Loc;
+        SourceLocation loc0 = anchor;
 
         // 3) Build the __ModuleGlobals entity — one field per global (`name: Type`, no initializer).
         var fieldDecls = new List<SyntaxTree.Declaration>(capacity: n);
@@ -167,27 +178,6 @@ internal static class ModuleGlobalsSynthesisPass
             Visibility: VisibilityModifier.Open,
             Location: loc0,
             IsGlobal: true);
-        return true;
-    }
-
-    /// <summary>Splices the synthesized entity/singleton declarations and init statements into the first
-    /// program that contains <c>routine start()</c>. Returns false (after reporting RF-S438) if none is
-    /// found.</summary>
-    private static bool SpliceGlobalsIntoStart(
-        List<(SyntaxTree.Program Program, string FilePath)> orderedFiles,
-        Action<SemanticDiagnosticCode, string, SourceLocation> report, EntityDeclaration entityDecl, VariableDeclaration singletonDecl, List<Statement> initStmts)
-    {
-        if (ModuleGlobalOrder.FindStart(orderedFiles: orderedFiles, report: report, at: singletonDecl.Location) is not
-            ({ } program, { } startBlock))
-        {
-            return false;
-        }
-
-        // Append (NOT prepend) the synthesized declarations: imports must stay at the top of the
-        // file (RF-S114). Declaration order does not matter for type collection.
-        program.Declarations.Add(item: entityDecl);
-        program.Declarations.Add(item: singletonDecl);
-        startBlock.Statements.InsertRange(index: 0, collection: initStmts);
         return true;
     }
 

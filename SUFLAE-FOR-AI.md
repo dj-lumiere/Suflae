@@ -194,6 +194,10 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
+- `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or SF-S202 (a `return`
+  path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
+  one-item tuple as `(1,)`. `try sv.to[List[Integer]]()` recovers a bad element too. A cancelled agent nothing
+  started is done (`is_done()` is true).
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
