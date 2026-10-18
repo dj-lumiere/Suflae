@@ -60,13 +60,6 @@ entity BytesUtf8LossyEmittable
 @rf("Bytes.duplicate")
 routine Bytes.duplicate() -> Bytes
 
-### Creates a byte sequence by copying a null-terminated C string as raw bytes.
-### No text decoding is performed.
-### :param ptr: The source C string.
-### :returns: The resulting `Bytes` value.
-@rf("Bytes")
-routine Bytes(ptr: CStr) -> Bytes
-
 ### Returns `true` when this byte sequence has no stored bytes.
 ### This is equivalent to checking whether `count()` is `0`.
 ### :returns: The resulting `Bool` value.
@@ -257,17 +250,6 @@ routine BytesUtf8Emittable.emit!() -> Char
 ### :throws: {AbsentValueError} Thrown when iteration is exhausted.
 @rf("BytesUtf8LossyEmittable.emit")
 routine BytesUtf8LossyEmittable.emit!() -> Char
-
-### Copies this byte sequence into a newly allocated null-terminated C buffer.
-### :returns: The resulting {CStr} value.
-@rf("Bytes.to_cstr")
-routine Bytes.to_cstr() -> CStr
-
-### Encodes this text as UTF-8 and returns a newly allocated null-terminated C
-### buffer.
-### :returns: The resulting {CStr} value.
-@rf("Text.to_cstr")
-routine Text.to_cstr() -> CStr
 
 ### Returns a SipHash-2-4 keyed hash of the underlying byte buffer's address.
 ### :param k0: The first 64-bit key word.

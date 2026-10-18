@@ -53,14 +53,6 @@ routine text_alloc(count: U64) -> Text
 @rf("int_to_text")
 routine int_to_text(mag: U64, negative: Bool) -> Text
 
-### Decodes UTF-8 text from a null-terminated C string.
-### A malformed sequence (a missing or stray continuation byte, an overlong encoding, a surrogate, or a
-### code point past U+10FFFF) becomes one U+FFFD replacement character per offending lead byte, the same
-### rule `Bytes.decode_as_utf8_lossy` follows.
-### :returns: The resulting `Text` value.
-@rf("CStr.to")
-routine CStr.to[Text]() -> Text
-
 ### Returns `true` when this text contains no characters.
 ### This is equivalent to checking whether `count()` is `0`.
 ### :returns: The resulting `Bool` value.

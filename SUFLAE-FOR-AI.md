@@ -244,8 +244,8 @@ var why: Check[S64] = check line.to()
   Converting a value to its own type is SF-S646 too (use the value as it is).
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
   they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: hp)` putting an `S64` in an arm);
-  a value computed from one value of another type is a conversion, `x.to[T]()` (`"hi".to[CStr]()`,
-  `local.to[Moment]()`, `ratio.to[Q128]()` from a `B32`). So `S64(from: x)` is not a routine. A variant's arm comes out
+  a value computed from one value of another type is a conversion, `x.to[T]()` (`local.to[Moment]()`,
+  `ratio.to[Q128]()` from a `B32`). So `S64(from: x)` is not a routine. A variant's arm comes out
   the same way: `sv.to[S64]()` / `sv.to[Dict]()` is failable (another arm is active → crash, `try` gives
   `None`). The old spellings `sv.S64()`, `S64(from: sv)`, `Dict[Text, SerialValue](from: sv)` are gone (SF-S458 /
   SF-S646 point at `.to[...]()`).
