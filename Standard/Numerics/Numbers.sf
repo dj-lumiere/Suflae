@@ -51,7 +51,10 @@ routine Integer.lshr!(bits: Integer) -> Integer
 ### Raises this value to a non-negative integer exponent.
 ### :param exp: The exponent value.
 ### :returns: The resulting `Integer` value.
-routine Integer.pow(exp: Integer) -> Integer
+### :throws: {NumericDomainError} when `exp` is negative (the result would not be an integer).
+routine Integer.pow!(exp: Integer) -> Integer
+    if exp < 0
+        throw NumericDomainError(description: "negative exponent: no integer result")
     return me.pow(exp: exp.to[U64]().to[U32]())
 
 ### Returns the sign of this value as `-1`, `0`, or `1`.

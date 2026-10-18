@@ -11,3 +11,14 @@ true
 1
 true
 not a dictionary of numbers
+["a", "b"]
+no integer power
+the dog says woof
+first: x
+[1, 2]
+2
+2
+Bo
+run failed
+deposit 2
+ran

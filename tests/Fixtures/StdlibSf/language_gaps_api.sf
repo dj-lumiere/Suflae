@@ -3,6 +3,94 @@ module Tests/StdlibSf/LanguageGapsApi
 import IterTools
 import Collections
 
+global log: List[Text] = []
+
+define Integer | Text as Key
+
+protocol Named
+    routine Me.name() -> Text
+
+protocol Animal
+obeys Named
+    routine Me.sound() -> Text
+
+record Dog
+obeys Animal
+    pass
+
+routine Dog.name() -> Text
+    return "dog"
+
+routine Dog.sound() -> Text
+    return "woof"
+
+routine speak(animal: Animal) -> Text
+    return f"the {animal.name()} says {animal.sound()}"
+
+protocol Source
+relates Item
+    routine Me.first_item() -> Me/Item
+
+record Words
+relates Text as Item
+obeys Source
+    all: List[Text]
+
+routine Words.first_item() -> Text
+    return me.all[0]
+
+routine lead[T](source: T) -> Text
+needs T obeys Source
+    var first = source.first_item()
+    return f"first: {first}"
+
+record Wrapped[T]
+    value: T
+
+routine List[Wrapped[T]].unwrapped() -> List[T]
+    var result = List[T]()
+    each w in me
+        result.add_last(w.value)
+    return result
+
+entity Player
+    name: Text
+    score: Integer
+
+variant Seat
+    Player
+    Text
+
+routine add_point(seat: Seat)
+    when seat
+        is Player as p => p.score += 1
+        is Text => show("empty seat")
+
+record Deposit
+    amount: Integer
+
+record Report
+    title: Text
+
+variant Command
+    Deposit
+    Report
+
+routine parse!(word: Text) -> Command
+    if word == "deposit"
+        return Deposit(amount: 2)
+    if word == "report"
+        return Report(title: "r")
+    throw AbsentValueError()
+
+routine run!(word: Text)
+    when parse(word: word)
+        is Deposit as d => show(f"deposit {d.amount}")
+        is Report as r => show(f"report {r.title}")
+
+routine note(line: Text)
+    log.add_last(value: line)
+
 routine start()
     # An optional variable takes a value later.
     var n: Integer? = none
@@ -44,3 +132,48 @@ routine start()
     when bad
         is None => show("not a dictionary of numbers")
         else => show("read back")
+
+    # A global list is changed through its own routines.
+    note(line: "a")
+    note(line: "b")
+    show(log)
+
+    # A negative exponent has no Integer result, and `try` says so.
+    var two: Integer = 2
+    var power = try two ** -1
+    when power
+        is None => show("no integer power")
+        else as v => show(v)
+
+    # A routine of an included protocol is called through the including one.
+    show(speak(animal: Dog()))
+
+    # An associated type stands for the obeying type's own.
+    show(lead(source: Words(all: ["x", "y"])))
+
+    # A loop inside a routine written for a list of a generic type.
+    show([Wrapped[Integer](value: 1), Wrapped[Integer](value: 2)].unwrapped())
+
+    # Values of different types go into a list of a variant.
+    var keys: List[Key] = [1, "two"]
+    show(keys.count())
+
+    # An entity is handed to a variant parameter as itself, and a matched variable takes a new value in its arm.
+    var ada = Player(name: "Ada", score: 0)
+    add_point(seat: ada)
+    add_point(seat: ada)
+    show(ada.score)
+    var seat: Seat = Player(name: "Bo", score: 0)
+    when seat
+        is Player as who =>
+            seat = "empty"
+            show(who.name)
+        is Text as t => show(t)
+
+    # A failure of a call matched directly by a `when` in a failable routine reaches the caller's `check`.
+    when check run(word: "zzz")
+        is None => show("ran")
+        is Crashables as e => show("run failed")
+    when check run(word: "deposit")
+        is None => show("ran")
+        is Crashables as e => show("run failed")

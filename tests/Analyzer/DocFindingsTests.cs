@@ -149,4 +149,20 @@ public class DocFindingsTests
             filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
                          e.Message.Contains(value: "creator"));
     }
+
+    /// <summary>Adding to the list an `each` loop goes through, written in the loop's body, doesn't build.</summary>
+    [Fact]
+    public void Analyze_ListChangedInItsOwnLoop_ReportsError()
+    {
+        string source = """
+                        routine start()
+                            var xs = [1, 2, 3]
+                            each x in xs
+                                xs.add_last(value: 9)
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.ReshapingDuringIteration);
+    }
 }

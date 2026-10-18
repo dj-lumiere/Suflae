@@ -847,6 +847,17 @@ each entry in ages
   from their text (`sv.to[Dict[Integer, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
   read back: naming it in `sv.to[T]()` is SF-S813.
 - A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is SF-G250, which names that spelling.
+- An entity goes into a variant parameter or variable as itself (`add_point(seat: ada)` with `variant Seat` holding
+  `Player`), and a list literal whose type the context gives takes values of every member type
+  (`var keys: List[Integer | Text] = [1, "two"]`). Inside a `when` arm the matched variable may take a new value
+  (`seat = "empty"`); the arm's name keeps the entity it matched, and later reads see the new value.
+- `n ** -1` on an `Integer` crashes with `NumericDomainError` (no integer result); `try n ** -1` gives `none`.
+- `import Collections.SortedDict` makes the whole module available, as `import Collections` does. A file's `module`
+  line names its module wherever it lives (`geometry/shapes.sf` with `module Geometry/Shapes` is imported as
+  `Geometry/Shapes`).
+- Inside a protocol-constrained routine, the routines of a protocol the constraint's protocol obeys can be called
+  (`animal.name()` with `protocol Animal obeys Named`), and an associated type (`T/Item`) stands for the obeying
+  type's own (`relates Text as Item`).
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
