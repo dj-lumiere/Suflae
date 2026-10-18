@@ -184,6 +184,13 @@ internal sealed class EntityLoweringPass
     internal RoutineDeclaration LowerRoutine(RoutineDeclaration r)
     {
         AssertNoBareEntityInSignature(r: r);
+        // A `using` becomes its `enter`/`exit` calls first: its hidden resource local and the name the body sees are
+        // then ordinary locals, which this pass turns into shared handles like any other.
+        if (r.Body != null)
+        {
+            r = r with { Body = UsingLoweringPass.LowerBody(body: r.Body, registry: _registry) };
+        }
+
         _roamedLocals.Clear();
         _borrowNames.Clear();
         _borrowNames.Add(item: "me");

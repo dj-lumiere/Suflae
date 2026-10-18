@@ -1,0 +1,27 @@
+module Tests/StdlibSf/EmitterGapsApi
+
+# Forms that once passed analysis and then stopped the LLVM emitter or ran wrong.
+entity Session
+    open: Bool
+
+routine Session.enter() -> Session
+    me.open = true
+    return me
+
+routine Session.exit()
+    me.open = false
+
+routine ping()
+    show("ping")
+
+routine start()
+    # `using` on an entity calls `enter` and `exit` on that entity.
+    var s = Session(open: false)
+    using s as t
+        show(t.open)
+    show(s.open)
+
+    # Agents that give no value can be gathered.
+    var jobs = [ping.to[Agent](), ping.to[Agent]()]
+    jobs.gather()
+    show("gathered")

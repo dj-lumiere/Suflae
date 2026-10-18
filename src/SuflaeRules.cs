@@ -147,7 +147,6 @@ public sealed class SuflaeRules : LanguageRules
     }
 
     public override bool RequiresLateinitForDeferredInit => false;
-    public override bool RequiresInferableLambdaParameters => false;
     public override bool RequiresEnterableForUsing => false;
     public override bool RewritesDisplayWrapperArguments => false;
 

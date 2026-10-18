@@ -194,6 +194,9 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
+- A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
+  is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
+  `enter`/`exit` on that entity. Agents giving no value can be gathered.
 - `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or SF-S202 (a `return`
   path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
   one-item tuple as `(1,)`. `try sv.to[List[Integer]]()` recovers a bad element too. A cancelled agent nothing

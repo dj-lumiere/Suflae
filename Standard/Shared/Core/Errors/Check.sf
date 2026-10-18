@@ -22,3 +22,11 @@ routine Check[T].represent() -> Text
 ### :returns: The resulting `Text` value.
 @rf("Check.diagnose")
 routine Check[T].diagnose() -> Text
+
+### Returns the success value, or throws the caught error again: `check parse(text) !!` is the value or the
+### failure it caught, passed on.
+### :returns: The success value.
+### :throws: The caught error.
+@rf("Check.unwrap")
+routine Check[T].unwrap!() -> T
+needs RecordType T
