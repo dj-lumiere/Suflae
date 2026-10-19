@@ -1,6 +1,5 @@
 module Collections
 
-import Numerics
 import BuilderQuery
 ### A growable, densely packed sequence of boolean values stored in machine words.
 ###

@@ -1,0 +1,34 @@
+module System/Temporal
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The clock: the date and time (`Clock.now()`) and a clock that only goes forward (`Clock.monotonic()`) for
+### measuring time and for deadlines. Every value is the same clock, so the routines are called on the type.
+### :see: {Moment}, {Duration}, {CpuClock}
+@rf("Clock")
+record Clock
+    pass
+
+### The processor time the program has used (`CpuClock.now()`), all its threads together. Every value is the same
+### clock, so the routines are called on the type.
+### :see: {Clock}, {Duration}
+@rf("CpuClock")
+record CpuClock
+    pass
+
+### Reads the date and time.
+### :returns: The current moment (UTC).
+@rf("Clock.now")
+common routine Clock.now() -> Moment
+
+### Reads a clock that only goes forward: the time since a start the operating system chooses. For measuring time and
+### for deadlines (`Clock.monotonic() + 30ms`), not for the date. Changing the system's date doesn't move it.
+### :returns: The reading. Subtract two readings to get the time between them.
+@rf("Clock.monotonic")
+common routine Clock.monotonic() -> Duration
+
+### Reads the processor time the program has used, all its threads together.
+### :returns: The reading. Subtract two readings to get the processor time between them.
+@rf("CpuClock.now")
+common routine CpuClock.now() -> Duration

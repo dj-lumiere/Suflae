@@ -1,0 +1,12 @@
+module IO/Console
+
+# Suflae's surface of the console readers that return lists: Suflae lists. A Suflae program calls these in place
+# of the RazorForge routines of the same names.
+
+### Reads all remaining input and splits it into lines. Windows line endings count as one.
+routine ask_lines() -> List[Text]
+    return ask_lines().to[List[Text]]()
+
+### Reads all remaining input and splits it into the words between runs of whitespace.
+routine ask_words() -> List[Text]
+    return ask_words().to[List[Text]]()

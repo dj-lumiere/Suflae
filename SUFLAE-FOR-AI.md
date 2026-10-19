@@ -8,7 +8,7 @@ When unsure, consult ground truth in the repo:
 
 - `Suflae/tests/Fixtures/StdlibSf/*.sf` — Suflae programs with their expected output (`.expected.txt`).
   Start from the closest one.
-- `RazorForge/Standard/` — the standard library every Suflae build reads (`Core`, `Collections`, `IO`,
+- `RazorForge/Standard/` — the standard library every Suflae build reads (`System`, `Collections`, `IO`,
   `IterTools`, `Signals`, …). It is written in RazorForge, the sibling language, but every public routine
   in it is callable from Suflae exactly as declared.
 - `Suflae/Standard/` — the modules only Suflae builds read (today: `ObjectHacker`).
@@ -127,12 +127,17 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 `tools/text utils.sf` → `Tools/TextUtils`). Declare `module` only to override that.
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
-`preset` or `global`) of module `Foo`. Always available without an import: `Core` (the basic types,
-`List`/`Dict`/`Set`, `Maybe`, errors, `Agent`, `Mailbox`), `Integer`, console output and input
+`preset` or `global`) of module `Foo`. An import brings the module it names, never the modules under it
+(`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
+it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
+`Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
+`System/Concurrency`: `Agent`, `Mailbox`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `Numerics`,
-`Signals`, `BuilderQuery` (`x.type_name()`), `ObjectHacker`. Writing an import that is
-already in the prelude (many fixtures write `import IO/Console`) is harmless.
+`PriorityQueue`, …), `IterTools` (iterator adapters), `Signals`, `BuilderQuery` (`x.type_name()`),
+`ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
+harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
+`module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
+`Numerics` and rewrites `Core.X` to `System.X`.
 
 ## 4. Naming and vocabulary
 
@@ -142,7 +147,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   bit set → **`flags`**; sum type → **`variant`**; error type → **`crashable`**; interface/trait →
   **`protocol`**, adopted with **`obeys`**.
 - field → **member variable**, a bare `name: Type` line in the type body (no `var`). Visibility is written
-  only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private).
+  only when restricted: `posted` (anyone reads, only the module writes) and `secret` (module-private: seen in its module and the modules under it).
   Giving a `secret` or `posted` member variable a value in `T(field: value, ...)` is allowed only inside the
   type's module (SF-S403 / SF-S404): outside, build it with a routine the module opens (`HttpResult.ok(body: b)`).
 - Generic constraints use **`needs`** (`needs T obeys Comparable`), never `where`.
@@ -205,7 +210,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   `Duration` that only goes forward, for measuring and deadlines), `CpuClock.now()` (processor time used). There is
   no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
-- A crash trace shows the program's types (`Core.List[Numerics.Integer]`, never a handle type) and a library frame as
+- A crash trace shows the program's types (`System.List[System.Integer]`, never a handle type) and a library frame as
   `(standard library)`, the crash line being where the program called in. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
@@ -769,7 +774,7 @@ logic limit** is fatal and cannot be caught.
 exits with **status 82** (`0x52`, `'R'`). A run that ended with 82 crashed: read stderr for the error and
 the stack trace. Status 1 is not a crash. A process killed from outside (SIGKILL, the OS out-of-memory
 killer) dies before Suflae gets control and reports nothing. A run that returns from `start` normally exits with 0,
-or with the status `set_exit_code(code)` (an `S32`, in Core) set last: one atomic value, so any task may set it
+or with the status `set_exit_code(code)` (an `S32`, in System) set last: one atomic value, so any task may set it
 and the last call wins. A crash keeps 82 whatever was set.
 
 ## 12. Generics and protocols

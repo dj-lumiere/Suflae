@@ -1,7 +1,6 @@
 module Collections
 
 import BuilderQuery
-import Numerics
 
 ### A growable ring of elements, counted and indexed with `Integer`, with O(1) adding and removing at both ends.
 ###
@@ -64,7 +63,7 @@ routine CircularList[T](count: Integer, fill_value: T) -> CircularList[T]
 failable common routine CircularList[T].from_serial(value: SerialValue) -> CircularList[T]
     var result = CircularList[T]()
     when value
-        is RF::Core.List[SerialValue] as items =>
+        is RF::System.List[SerialValue] as items =>
             each item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
@@ -380,7 +379,7 @@ routine CircularList[T].duplicate() -> CircularList[T]
 ### Returns the list as a `SerialValue.List` of its serialized elements.
 @override
 routine CircularList[T].serialize() -> SerialValue
-    var result = RF::Core.List[SerialValue]()
+    var result = RF::System.List[SerialValue]()
     each element in me
         result.add_last(value: element.serialize())
     return SerialValue(result.duplicate())

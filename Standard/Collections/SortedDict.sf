@@ -1,6 +1,5 @@
 module Collections
 
-import Numerics
 import BuilderQuery
 
 ### A sorted dictionary that maintains keys in ascending order, backed by a B-tree.
@@ -247,7 +246,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
 @override
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
-    var result = RF::Core.Dict[Text, SerialValue]()
+    var result = RF::System.Dict[Text, SerialValue]()
     each entry in me
         result[entry.key.represent()] = entry.value.serialize()
     return SerialValue(result.duplicate())
@@ -258,7 +257,7 @@ routine SortedDict[TKey, TValue].serialize() -> SerialValue
 failable common routine SortedDict[TKey, TValue].from_serial(value: SerialValue) -> SortedDict[TKey, TValue]
     var result = SortedDict[TKey, TValue]()
     when value
-        is RF::Core.Dict[Text, SerialValue] as entries =>
+        is RF::System.Dict[Text, SerialValue] as entries =>
             each entry in entries
                 result[serial_key[TKey](key: entry.key)] = serial_decode[TValue](value: entry.value)
         else =>

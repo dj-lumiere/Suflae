@@ -1,7 +1,5 @@
 module Math3D
 
-import Numerics
-
 # Suflae's surface of the fixed-width numbers: the values stay fixed-width, but the counts, positions,
 # shift amounts, radixes and places they take or give are `Integer`. A Suflae program calls these in
 # place of the RazorForge routines called the same way.

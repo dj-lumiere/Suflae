@@ -1,0 +1,51 @@
+module System
+
+### The values of an iterable, each paired with its position: `each (i, x) in xs.enumerate()`.
+### :typeparam T: The value type.
+### :typeparam TSource: The iterable.
+entity EnumerateIterable[T, TSource]
+relates EnumerateEmittable[T, TSource/Iter] as Iter
+obeys Iterable[Tuple[Integer, T]]
+needs TSource obeys Iterable[T]
+    ### The iterable (borrowed, not owned).
+    secret source: Hijacked[TSource]
+    ### The position of the first value.
+    secret start_index: Integer
+
+### Walks an `EnumerateIterable`.
+### :typeparam T: The value type.
+### :typeparam TSourceIter: The iterator of the source.
+entity EnumerateEmittable[T, TSourceIter]
+obeys Emittable[Tuple[Integer, T]]
+needs TSourceIter obeys Emittable[T]
+    ### The iterator over the source (owned).
+    secret source: TSourceIter
+    ### The position of the next value.
+    secret index: Integer
+
+### Returns a walk over the pairs.
+routine EnumerateIterable[T, TSource].iter() -> EnumerateEmittable[T, TSource/Iter]
+    danger
+        return EnumerateEmittable[T, TSource/Iter](
+            source: me.source.as_entity().iter(),
+            index: me.start_index,
+        )
+
+### Returns the next pair.
+### :throws: {AbsentValueError} The source has no more values.
+failable routine EnumerateEmittable[T, TSourceIter].emit() -> Tuple[Integer, TSourceIter/Item]
+    var position = me.index
+    me.index = me.index + 1
+    # The value goes into the pair straight from the source, so the pair is its only holder.
+    return (position, me.source.emit())
+
+### Returns the values paired with their positions, from 0.
+routine Iterable[T].enumerate() -> EnumerateIterable[T, Me]
+    danger
+        return EnumerateIterable[T, Me](source: me.hijack(), start_index: 0)
+
+### Returns the values paired with their positions, from `start`.
+### :param start: The position of the first value.
+routine Iterable[T].enumerate(start: Integer) -> EnumerateIterable[T, Me]
+    danger
+        return EnumerateIterable[T, Me](source: me.hijack(), start_index: start)

@@ -1,6 +1,5 @@
 module Collections
 
-import Numerics
 import BuilderQuery
 
 ### A sorted, duplicate-free collection backed by a B-tree.
@@ -227,7 +226,7 @@ routine SortedSet[T].eq(you: SortedSet[T]) -> Bool
 ### :returns: The `SerialValue.List` of each element's serialized form.
 @override
 routine SortedSet[T].serialize() -> SerialValue
-    var result = RF::Core.List[SerialValue]()
+    var result = RF::System.List[SerialValue]()
     each value in me
         result.add_last(value: value.serialize())
     return SerialValue(result.duplicate())
@@ -237,7 +236,7 @@ routine SortedSet[T].serialize() -> SerialValue
 failable common routine SortedSet[T].from_serial(value: SerialValue) -> SortedSet[T]
     var result = SortedSet[T]()
     when value
-        is RF::Core.List[SerialValue] as items =>
+        is RF::System.List[SerialValue] as items =>
             each item in items
                 result.add(value: serial_decode[T](value: item))
         else =>

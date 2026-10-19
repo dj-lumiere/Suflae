@@ -1,7 +1,5 @@
 module ObjectHacker
 
-import Numerics
-
 # Suflae's surface of ObjectHacker: what an object is made of comes back in Suflae's own list, and a member
 # variable's position is an `Integer`.
 

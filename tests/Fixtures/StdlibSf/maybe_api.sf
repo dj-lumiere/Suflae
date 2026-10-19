@@ -2,7 +2,6 @@ module Tests/StdlibSf/MaybeApi
 
 import BuilderQuery
 import IO/Console
-import Numerics
 # Record return type — exercises Maybe[Record] (no Owned auto-wrap).
 record Point
     x: S64

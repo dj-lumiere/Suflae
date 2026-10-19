@@ -1,7 +1,6 @@
 module Tests/StdlibSf/CoroSuspendedApi
 
 import IO/Console
-import Numerics
 # SF twin of Stdlib/coro_suspended_api.rf. `agent f(...)` over a plain routine yields an Agent[T]
 # handle, and `retrieve()` starts it, drives it to completion (through every yield) and returns its
 # value. SF spells the yield through the `yield_now()` surface (RF's fixture uses the raw

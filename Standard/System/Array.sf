@@ -1,0 +1,167 @@
+module System
+
+import BuilderQuery
+
+# Suflae's surface of the fixed-size `Array[T, COUNT]`: the same record as RazorForge's, counted and indexed with
+# `Integer`. A Suflae program calls these in place of the RazorForge routines of the same names.
+
+### Returns the number of elements, `COUNT`.
+routine Array[T, COUNT].count() -> Integer
+    var n: U64 = COUNT
+    return n.to[Integer]()
+
+### Returns the element at `index` (`a[i]`).
+### :param index: The position to read, from 0.
+failable routine Array[T, COUNT].getitem(index: Integer) -> T
+needs RecordType T
+    return me.at(position: position_of(value: index))
+
+### Returns the element at `position`, counted with `U64`.
+### :param position: The position to read, from 0.
+@inline
+failable routine Array[T, COUNT].at(position: U64) -> T
+needs RecordType T
+    return me.read(position: me.filled(position: position)).share()
+
+### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
+### :param index: The position to write, from 0.
+### :param value: The new element.
+failable routine Array[T, COUNT].setitem(index: Integer, value: T)
+    me.put(position: position_of(value: index), value: value)
+    return
+
+### Replaces the element at `position`, counted with `U64`. What the place held before is torn down.
+### :param position: The position to write, from 0.
+### :param value: The new element.
+@inline
+failable routine Array[T, COUNT].put(position: U64, value: T)
+    danger
+        var slot = me.slot(position: me.checked(position: position))
+        slot.peek().destruct()
+        slot.poke(value)
+    return
+
+### Tears down what the place at `index` holds and leaves the place zero.
+### :param index: The position to empty.
+failable routine Array[T, COUNT].erase(index: Integer)
+    me.erase_at(position: position_of(value: index))
+    return
+
+### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+failable routine Array[T, COUNT].erase_at(position: U64)
+    var place = me.checked(position: position)
+    danger
+        me.slot(position: place).peek().destruct()
+    me.clear_places(from: place, count: 1)
+    return
+
+### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
+### destination places held before is torn down, and the source places nothing was carried into become zero.
+### :param from: The first place to carry from.
+### :param into: The first place to carry into.
+### :param count: How many places to carry.
+failable routine Array[T, COUNT].move(from: Integer, into: Integer, count: Integer)
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    var n = count.to[U64]()
+    if n == 0
+        return
+    me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
+    return
+
+### Carries what `count` places from `source` hold into the places from `target`, as `move` does, counted with
+### `U64`.
+### :param source: The first place to carry from.
+### :param target: The first place to carry into.
+### :param count: How many places to carry.
+failable routine Array[T, COUNT].carry(source: U64, target: U64, count: U64)
+    var n = count
+    if n == 0
+        return
+    if source + n > COUNT
+        throw IndexOutOfBoundsError(index: source + n, count: COUNT)
+    if target + n > COUNT
+        throw IndexOutOfBoundsError(index: target + n, count: COUNT)
+    var i = target
+    while i < target + n
+        if i < source or i >= source + n
+            danger
+                me.slot(position: i).peek().destruct()
+        i = i +% 1
+    danger
+        rf_copy_bytes_at(
+            dest: me.slot(position: target).get_address(),
+            src: me.slot(position: source).get_address(),
+            size: T.data_size() * n,
+        )
+    i = source
+    while i < source + n
+        if i < target or i >= target + n
+            me.clear_places(from: i, count: 1)
+        i = i +% 1
+    return
+
+### Returns a list of the elements at the positions in `range` (`a[x til y]`). Positions outside the array are
+### skipped.
+### :param range: The positions to copy.
+routine Array[T, COUNT].getitem(range: Range[Integer]) -> List[T]
+needs RecordType T
+    var result = List[T]()
+    var n: U64 = COUNT
+    var count = n.to[Integer]()
+    each i in range
+        if not i.is_negative() and i < count
+            result.add_last(value: me.get_raw(index: i.to[U64]()).share())
+    return result
+
+### Returns the position of the first element equal to `value`.
+### :param value: The value to look for.
+### :throws: {AbsentValueError} No element equals `value`.
+failable routine Array[T, COUNT].index_of(value: T) -> Integer
+needs T obeys Equatable
+    var i: U64 = 0
+    while i < COUNT
+        if me.get_raw(index: i) == value
+            return i.to[Integer]()
+        i = i +% 1
+    throw AbsentValueError()
+
+# ============================================================================
+# Inside the array
+# ============================================================================
+
+### `position` checked against the places.
+@inline
+secret failable routine Array[T, COUNT].checked(position: U64) -> U64
+    if position >= COUNT
+        throw IndexOutOfBoundsError(index: position, count: COUNT)
+    return position
+
+### `position` checked against the places and, in an array of entities, against a place that holds no entity yet (a
+### zero place, which a read would hand out as no entity at all).
+@inline
+secret failable routine Array[T, COUNT].filled(position: U64) -> U64
+    var place = me.checked(position: position)
+    if T.type_kind() == TypeKind.ENTITY
+        danger
+            if me.slot(position: place).peek_as[Address]() == 0
+                throw EmptyPlaceError(index: place.to[Integer]())
+    return place
+
+### What a place already checked holds, as it sits in memory (no holder of its own).
+@inline
+secret routine Array[T, COUNT].read(position: U64) -> T
+    danger
+        return me.slot(position: position).peek()
+
+### The memory of the place at a position of this array.
+@inline
+secret routine Array[T, COUNT].slot(position: U64) -> Hijacked[T]
+    return me.hijack().recast_as[T]().offset(T.data_size() * position)
+
+### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
+secret routine Array[T, COUNT].clear_places(from: U64, count: U64)
+    danger
+        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
+    return

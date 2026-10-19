@@ -1,7 +1,6 @@
 module Tests/StdlibSf/VariantApi
 
 import IO/Console
-import Numerics
 # User-defined tagged union. Members are types; `None` is the absent arm.
 variant Number
     S64

@@ -2,7 +2,6 @@ module Tests/StdlibSf/BytesApi
 
 import BuilderQuery
 import IO/Console
-import Numerics
 routine start()
     var b = "hello".encode_as_utf8()
     show(f"b type: {b.type_name()}")

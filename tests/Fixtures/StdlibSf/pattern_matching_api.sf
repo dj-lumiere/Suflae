@@ -1,7 +1,6 @@
 module Tests/StdlibSf/PatternMatchingApi
 
 import IO/Console
-import Numerics
 # `when` patterns: literal, type, range, else fallthrough, binding.
 choice Color
     RED

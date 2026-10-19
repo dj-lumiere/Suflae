@@ -499,7 +499,7 @@ internal sealed class EntityLoweringPass
                 inner: LowerCreatorMembers(creator: creator),
                 entity: ce),
             // A collection literal (`[1,2,3]` / `{…}`) is an entity rvalue just like a constructor call —
-            // it resolves to a bare `Core.List`/`Set`/`Dict` entity, so an SF entity slot must `.roam()` it
+            // it resolves to a bare `System.List`/`Set`/`Dict` entity, so an SF entity slot must `.roam()` it
             // (else a bare-list pointer is bound to a `Roamed` handle and reinterpreted as a controller →
             // AccessViolation on first access). ExpressionLoweringPass later expands the literal to a
             // `create + add_last` temp; the `.roam()` wraps that temp reference.
@@ -1223,11 +1223,11 @@ internal sealed class EntityLoweringPass
     // Wrap a bare-entity-valued expression in `<expr>.roam()`, retyped to Roamed[E].
     // An `RF::`-qualified construction/call deliberately opts OUT of the Suflae entity->Roamed
     // lowering: the realm tag reaches the bare RazorForge realm, so its bare-entity result must NOT be
-    // `.roam()`-wrapped. This is what lets an SF wrapper entity hold a bare `RF::Core.List` inside
+    // `.roam()`-wrapped. This is what lets an SF wrapper entity hold a bare `RF::System.List` inside
     // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RF"`
     // gate on the type-annotation side; the realm survives on the construction callee's identifier
-    // (Parser.Expressions parses `RF::Core.List` into `IdentifierExpression { Realm = "RF" }`).
-    // A RazorForge entity (`RF::Core.List`) keeps its single owner in Suflae code for now, however it was
+    // (Parser.Expressions parses `RF::System.List` into `IdentifierExpression { Realm = "RF" }`).
+    // A RazorForge entity (`RF::System.List`) keeps its single owner in Suflae code for now, however it was
     // reached: by an `RF::` name or as what a routine hands back.
     private static bool IsRazorForgeEntity(EntityTypeSymbol entity)
     {
@@ -1236,7 +1236,7 @@ internal sealed class EntityLoweringPass
                Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge;
     }
 
-    // An entity of Suflae's own realm (`SF::Core.List`) is always held through a handle, whichever world's value the
+    // An entity of Suflae's own realm (`SF::System.List`) is always held through a handle, whichever world's value the
     // routine giving it back was called on (a RazorForge list's crossing `rf_list.to[List]()`).
     private static bool IsSuflaeRealmEntity(EntityTypeSymbol entity)
     {
@@ -1256,7 +1256,7 @@ internal sealed class EntityLoweringPass
     private static bool IsRfRealmRef(Expression callee)
     {
         return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared } ||
-               // A routine called on a RazorForge entity held as such (`RF::Core.List`) hands back that
+               // A routine called on a RazorForge entity held as such (`RF::System.List`) hands back that
                // world's value too.
                callee is MemberExpression { Object.ResolvedType: EntityTypeSymbol { Realm: TypeModel.Realms.Shared } };
     }

@@ -6,7 +6,7 @@ namespace Suflae.Passes;
 /// <summary>
 /// Auto-forwarding synthesis for the Suflae wrapper standard library.
 ///
-/// A Suflae-realm <c>entity X { secret inner: RF::Core.Y[..] }</c> re-surfaces the RazorForge-realm type
+/// A Suflae-realm <c>entity X { secret inner: RF::System.Y[..] }</c> re-surfaces the RazorForge-realm type
 /// <c>Y</c>: for every PUBLIC member routine <c>Y</c> declares that <c>X</c> does not hand-define, this
 /// synthesizes a transparent forwarder
 /// <code>routine X[..].m(args) -> ret
@@ -24,7 +24,7 @@ namespace Suflae.Passes;
 /// </summary>
 internal static class WrapperForwarderSynthesis
 {
-    /// <summary>Bare owner/type name: <c>Core.List[T]</c> → <c>List</c>, <c>List</c> → <c>List</c>.</summary>
+    /// <summary>Bare owner/type name: <c>System.List[T]</c> → <c>List</c>, <c>List</c> → <c>List</c>.</summary>
     private static string BareTypeName(string name)
     {
         int dot = name.LastIndexOf(value: '.');
@@ -104,14 +104,14 @@ internal static class WrapperForwarderSynthesis
     /// </summary>
     internal static void Run(IReadOnlyList<(Program Program, string FilePath, string Module)> programs)
     {
-        // ALL scanned stdlib programs — eager `module Core` AND the on-demand modules (e.g. `module
+        // ALL scanned stdlib programs — eager `module System` AND the on-demand modules (e.g. `module
         // Collections`), both fully parsed by the scan before this runs. Forwarders appended to an on-demand
         // program register when that module later loads. Without this, `Collections`-module wrappers
-        // (CircularList/SortedList/…) got NO forwarders (over-prune at codegen) while `Core`-module ones
+        // (CircularList/SortedList/…) got NO forwarders (over-prune at codegen) while `System`-module ones
         // (List/Dict/Set) worked.
         List<(Program Program, string FilePath, string Module)> allProgs = programs.ToList();
 
-        // Index RazorForge-realm member-routine declarations by MODULE-QUALIFIED owner (e.g. "Core.List" →
+        // Index RazorForge-realm member-routine declarations by MODULE-QUALIFIED owner (e.g. "System.List" →
         // List's own methods).
         Dictionary<string, List<RoutineDeclaration>> rfMembersByOwner =
             IndexRfMembersByOwner(allProgs: allProgs);
@@ -149,11 +149,11 @@ internal static class WrapperForwarderSynthesis
 
     /// <summary>
     /// Indexes RazorForge-realm member-routine declarations by MODULE-QUALIFIED owner (e.g.
-    /// "Core.List" → List's own methods). Keying by module (not bare owner) is load-bearing: an
+    /// "System.List" → List's own methods). Keying by module (not bare owner) is load-bearing: an
     /// EXTENSION method in another module — `Random.rf`'s `List[T].shuffle()` — has bare owner "List"
     /// too, but forwarding it onto the SF List produced a `me.inner.shuffle()` body that fails to
-    /// resolve (shuffle is not a Core.List member) → RF-S458 in the SF stdlib validation. The wrapper's
-    /// `inner: RF::Core.List` names module Core, so only Core-module List members are forwarded;
+    /// resolve (shuffle is not a System.List member) → RF-S458 in the SF stdlib validation. The wrapper's
+    /// `inner: RF::System.List` names module System, so only System-module List members are forwarded;
     /// `Random.List` is excluded.
     /// </summary>
     private static Dictionary<string, List<RoutineDeclaration>> IndexRfMembersByOwner(
@@ -226,7 +226,7 @@ internal static class WrapperForwarderSynthesis
         string filePath, Dictionary<string, List<RoutineDeclaration>> rfMembersByOwner,
         HashSet<string> sfWrapperNames, List<RoutineDeclaration> generated)
     {
-        // The wrapper's backing field: `secret inner: RF::Core.Y[..]`.
+        // The wrapper's backing field: `secret inner: RF::System.Y[..]`.
         VariableDeclaration? innerField = entity.Members
                                                 .OfType<VariableDeclaration>()
                                                 .FirstOrDefault(predicate: v =>
@@ -237,7 +237,7 @@ internal static class WrapperForwarderSynthesis
             return;
         }
 
-        // `inner.Type.Name` is the module-qualified owner ("Core.List", "Collections.CircularList") — a
+        // `inner.Type.Name` is the module-qualified owner ("System.List", "Collections.CircularList") — a
         // TypeExpression keeps its args in GenericArguments, so Name has no `[..]` to strip. This is
         // the exact key of the member index, so only that module's own members are forwarded.
         string innerModuleOwner = innerType.Name;
@@ -265,7 +265,7 @@ internal static class WrapperForwarderSynthesis
             }
 
             // A method whose return type IS the inner container type (`copy`/`sorted` → the same
-            // container; a value type's `trim`/`add` → itself) returns a bare `RF::Core.Y` that must
+            // container; a value type's `trim`/`add` → itself) returns a bare `RF::System.Y` that must
             // be RE-WRAPPED into the SF `X` before it re-surfaces — else the SF caller would receive
             // a raw RF value. `reWrap` drives the forwarder to build `return X[..](inner: <call>)`.
             bool reWrap = inner.ReturnType is { } rt &&
@@ -331,7 +331,7 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
-        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RF::Core.Y[T,..]`).
+        // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RF::System.Y[T,..]`).
         // A SPECIALIZED-receiver method (`List[Agent[V]].gather`, `List[U16]…`) targets a different
         // instantiation than the wrapper's inner field — skip (its `me.inner` would mistype).
         if (!IsPlainGenericReceiver(receiver: inner.ReceiverType, ownerParams: ownerParams))
@@ -364,7 +364,7 @@ internal static class WrapperForwarderSynthesis
     /// <param name="ownerParams">The generic parameter names of the wrapper entity (e.g. <c>["T"]</c> for <c>List[T]</c>).</param>
     /// <param name="inner">The RF inner-type member routine being forwarded.</param>
     /// <param name="filePath">The stdlib source file path, used as the forwarder's source location.</param>
-    /// <param name="reWrap">When true the inner call returns a bare <c>RF::Core.Y</c> that must be
+    /// <param name="reWrap">When true the inner call returns a bare <c>RF::System.Y</c> that must be
     /// re-surfaced as the SF wrapper — the body becomes <c>return X[..](inner: me.inner.m(args))</c>
     /// instead of returning the raw RF value.</param>
     private static RoutineDeclaration BuildForwarder(EntityDeclaration entity,
@@ -411,7 +411,7 @@ internal static class WrapperForwarderSynthesis
         Expression call =
             new CallExpression(Callee: callee, Arguments: forwardedArgs, Location: loc);
 
-        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RF::Core.Y`; surface it as
+        // Re-wrap a self-returning inner call: `me.inner.m(..)` yields a bare `RF::System.Y`; surface it as
         // the SF wrapper via the memberwise `X[..](inner: <call>)` constructor (mirrors the hand-written
         // ctor), at the return type's own generic arguments. The wrapper's name resolves to the Suflae type
         // because the forwarder carries the wrapper file's location.

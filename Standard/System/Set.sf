@@ -1,0 +1,348 @@
+module System
+
+import BuilderQuery
+
+### A hash-flooding-resistant insertion-ordered set of distinct values.
+###
+### `Set[T]` keeps its values in a `Memory` in insertion order, with a `HashIndex` probe table over them. It hashes
+### with SipHash-2-4 keyed by a per-instance secret, so the probe sequence is unpredictable to external attackers.
+###
+### **Complexity**
+### | Operation | Average | Worst case |
+### |---|---|---|
+### | `add` | O(1) | O(n) (rehash) |
+### | `remove` | O(1) | O(n) |
+### | `contains` | O(1) | O(n) |
+### | Iteration | O(n + removed) | O(n + removed) |
+###
+### :typeparam T: The element type. Must obey {Hashable} and {Equatable}.
+### :see: {Dict[TKey, TValue]} for the dictionary counterpart.
+entity Set[T]
+relates SetEmittable[T] as Iter
+obeys Iterable[T], Container, SetLiteral[T]
+needs T obeys Hashable, Equatable
+    ### The probe table from hashes to entry positions.
+    secret index: HashIndex
+    ### The values, in insertion order. A removed value's place is empty until the entries are packed again.
+    secret values: Memory[T]
+    ### Whether each entry place holds a live value.
+    secret live: Memory[Bool]
+    ### How many live values there are.
+    secret count: U64
+    ### How many entry places, from the front, have been used.
+    secret used: U64
+    ### The first SipHash key word.
+    secret k0: U64
+    ### The second SipHash key word.
+    secret k1: U64
+
+### Walks the values of a {Set[T]} in insertion order.
+entity SetEmittable[T]
+obeys Emittable[T]
+    ### The walk over which entry places are live.
+    secret live: MemoryEmittable[Bool]
+    ### The walk over the values.
+    secret values: MemoryEmittable[T]
+    ### How many entry places are left to walk.
+    secret left: U64
+
+# ============================================================================
+# Creators
+# ============================================================================
+
+### Creates a set containing the given `elements` (duplicates collapsed). Variadic constructor behind the
+### `{a, b, c}` set-literal syntax (the `SetLiteral` opt-in).
+### :param elements: The elements to insert; duplicates are ignored.
+### :returns: A set of the distinct given elements.
+common routine Set[T].from_literal(elements...: T) -> Set[T]
+needs T obeys Hashable, Equatable
+    var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Integer]())
+    var i: U64 = 0
+    while i < elements.count()
+        result.add(value: elements.get_raw(index: i))
+        i = i +% 1
+    return result
+
+### Creates an empty set with a random secret key.
+routine Set[T]() -> Set[T]
+    return Set[T](key: SecureHashKey.random(), capacity: 0)
+
+### Creates an empty set hashing with `key`.
+### :param key: The SipHash key.
+routine Set[T](key: SecureHashKey) -> Set[T]
+    return Set[T](key: key, capacity: 0)
+
+### Creates an empty set hashing with `key`, with room for `capacity` values.
+### :param key: The SipHash key.
+### :param capacity: How many values to make room for.
+routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
+    var room: U64 = 16
+    if capacity > 16
+        room = capacity.to[U64]()
+    return Set[T](
+        index: new_hash_index(capacity: room),
+        values: Memory[T](room: room),
+        live: Memory[Bool](room: room),
+        count: 0,
+        used: 0,
+        k0: key.k0,
+        k1: key.k1,
+    )
+
+# ============================================================================
+# Core Operations
+# ============================================================================
+
+### Returns the number of values.
+routine Set[T].count() -> Integer
+    return me.count.to[Integer]()
+
+### Returns whether the set has no values.
+routine Set[T].is_empty() -> Bool
+    return me.count == 0
+
+### Removes every value and keeps the room.
+routine Set[T].clear()
+    var i: U64 = 0
+    while i < me.used
+        if me.live.at(position: i)
+            me.values.erase_at(position: i)
+            me.live.put(position: i, value: false)
+        i = i + 1
+    me.index.reset(capacity: me.values.room)
+    me.count = 0
+    me.used = 0
+    return
+
+### Returns whether `value` is in the set (`s have v`).
+### :param value: The value to look for.
+routine Set[T].has(value: T) -> Bool
+    return me.index.holds(slot: me.find_slot(value: value))
+
+### Returns whether `value` is not in this value: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+routine Set[T].lacks(value: T) -> Bool
+    return not me.has(value)
+
+### Adds `value` unless it is already in the set.
+### :param value: The value to add.
+### :returns: `true` when the value was new.
+@discardable
+routine Set[T].add(value: T) -> Bool
+    if me.index.holds(slot: me.find_slot(value: value))
+        return false
+    me.make_room()
+    var at = me.used
+    me.values.put(position: at, value: value)
+    me.live.put(position: at, value: true)
+    me.used = at + 1
+    me.index.place(hash: value.hash(k0: me.k0, k1: me.k1), entry: at)
+    me.count = me.count + 1
+    return true
+
+### Removes `value` from the set.
+### :param value: The value to remove.
+### :returns: `true` when the value was in the set.
+@discardable
+routine Set[T].remove(value: T) -> Bool
+    var slot = me.find_slot(value: value)
+    if not me.index.holds(slot: slot)
+        return false
+    var at = me.index.entry(slot: slot)
+    me.index.retire(slot: slot)
+    me.values.erase_at(position: at)
+    me.live.put(position: at, value: false)
+    me.count = me.count - 1
+    return true
+
+# ============================================================================
+# Iteration
+# ============================================================================
+
+### Returns a walk over the values in insertion order.
+routine Set[T].iter() -> SetEmittable[T]
+    return SetEmittable[T](
+        live: me.live.walking(first: 0, count: me.used),
+        values: me.values.walking(first: 0, count: me.used),
+        left: me.used,
+    )
+
+### Returns the next value.
+### :throws: {AbsentValueError} The walk is over.
+failable routine SetEmittable[T].emit() -> T
+    while me.left > 0
+        me.left = me.left - 1
+        if me.live.emit()
+            return me.values.emit()
+        me.values.skip()
+    throw AbsentValueError()
+
+# ============================================================================
+# Set Operations
+# ============================================================================
+
+routine Set[T].union(other: Set[T]) -> Set[T]
+    var result = Set[T](key: SecureHashKey.random(), capacity: (me.count + other.count).to[Integer]())
+    each val in me
+        result.add(value: val)
+    each val in other
+        result.add(value: val)
+    return result
+
+routine Set[T].intersection(other: Set[T]) -> Set[T]
+    var result = Set[T]()
+    each val in me
+        if other.has(val)
+            result.add(value: val)
+    return result
+
+routine Set[T].difference(other: Set[T]) -> Set[T]
+    var result = Set[T]()
+    each val in me
+        if other.lacks(val)
+            result.add(value: val)
+    return result
+
+routine Set[T].symmetric_difference(other: Set[T]) -> Set[T]
+    var result = Set[T]()
+    each val in me
+        if other.lacks(val)
+            result.add(value: val)
+    each val in other
+        if me.lacks(val)
+            result.add(value: val)
+    return result
+
+routine Set[T].is_subset(other: Set[T]) -> Bool
+    if me.count > other.count
+        return false
+    each val in me
+        if other.lacks(val)
+            return false
+    return true
+
+routine Set[T].is_superset(other: Set[T]) -> Bool
+    if other.count > me.count
+        return false
+    each val in other
+        if me.lacks(val)
+            return false
+    return true
+
+routine Set[T].is_disjoint(other: Set[T]) -> Bool
+    each val in me
+        if other.has(val)
+            return false
+    return true
+
+# ============================================================================
+# Conversion
+# ============================================================================
+
+### Creates a {List[T]} from all elements of `from` in insertion order.
+### :returns: A new {List[T]} containing all elements of `from`.
+routine Set[T].to[List[T]]() -> List[T]
+    var result = List[T](capacity: me.count())
+    each val in me
+        result.add_last(value: val)
+    return result
+
+# ============================================================================
+# Display
+# ============================================================================
+
+@override
+routine Set[T].represent() -> Text
+    return f"{{{me.values_text()}}}"
+
+@override
+routine Set[T].diagnose() -> Text
+    return f"{me.full_type_name()}(count: {me.count}, {{{me.values_text()}}})"
+
+# ============================================================================
+# Comparison
+# ============================================================================
+
+routine Set[T].eq(other: Set[T]) -> Bool
+    if me.count != other.count
+        return false
+    each val in me
+        if other.lacks(val)
+            return false
+    return true
+
+### Serializes this collection to a `SerialValue.List`, serializing each element.
+@override
+routine Set[T].serialize() -> SerialValue
+    var result = RF::System.List[SerialValue]()
+    each val in me
+        result.add_last(value: val.serialize())
+    return SerialValue(result.duplicate())
+
+### Builds the set from its serialized element list.
+### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
+failable common routine Set[T].from_serial(value: SerialValue) -> Set[T]
+    var result = Set[T]()
+    when value
+        is RF::System.List[SerialValue] as items =>
+            each item in items
+                result.add(value: serial_decode[T](value: item))
+        else =>
+            throw SerialShapeError(detail: "expected a list")
+    return result
+
+# ============================================================================
+# Inside the set
+# ============================================================================
+
+### The probe slot whose entry is `value`, or the never-used slot the probe stopped at when there is none (see
+### `HashIndex.holds`).
+secret routine Set[T].find_slot(value: T) -> U64
+    var hash = value.hash(k0: me.k0, k1: me.k1)
+    var tag = me.index.tag_of(hash: hash)
+    var slot = me.index.home(hash: hash)
+    loop
+        var found = me.index.tag(slot: slot)
+        if found == 0
+            return slot
+        if found == tag and me.values.at(position: me.index.entry(slot: slot)) == value
+            return slot
+        slot = me.index.next(slot: slot)
+
+### Packs the values and rebuilds the probe table when there is no room for one more value.
+secret routine Set[T].make_room()
+    if me.used < me.values.room and not me.index.crowded(count: me.count)
+        return
+    var packed: U64 = 0
+    var i: U64 = 0
+    while i < me.used
+        if me.live.at(position: i)
+            if i != packed
+                me.values.carry(source: i, target: packed, count: 1)
+                me.live.put(position: packed, value: true)
+                me.live.put(position: i, value: false)
+            packed = packed + 1
+        i = i + 1
+    me.used = packed
+    var room = me.values.room
+    if me.count * 2 >= room
+        me.values.grow_to(room: room * 2)
+        me.live.grow_to(room: room * 2)
+    me.index.reset(capacity: me.values.room)
+    i = 0
+    while i < me.count
+        me.index.place(hash: me.values.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)
+        i = i + 1
+    return
+
+### The values as text: `1, 2, 3`.
+secret routine Set[T].values_text() -> Text
+    var result = ""
+    var first = true
+    each val in me
+        if not first
+            result = f"{result}, "
+        result = f"{result}{nested_repr(val)}"
+        first = false
+    return result

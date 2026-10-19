@@ -59,8 +59,6 @@ public class CompoundAssignmentTests
     public void Analyze_SuflaeIntegerPlusFixedWidthCompoundAssignment_ReportsError()
     {
         string source = """
-                        import Numerics
-
                         routine accumulate(start_value: Integer, v: S64)
                             var t = start_value
                             t += v

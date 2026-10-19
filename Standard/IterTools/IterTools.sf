@@ -1,7 +1,5 @@
 module IterTools
 
-import Numerics
-
 # Suflae's surface of the iterable terminals and adapters that count: counts are `Integer`, and the
 # collections they build are Suflae's own. A Suflae program calls these in place of the RazorForge routines of
 # the same names.

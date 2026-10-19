@@ -1,7 +1,6 @@
 module Tests/StdlibSf/OwnNumbersApi
 
 import IO/Console
-import Numerics
 
 # Suflae's surface of the numbers: counts, positions, shift amounts, radixes and places are Integer.
 routine start()

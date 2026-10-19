@@ -1,7 +1,6 @@
 module Tests/StdlibSf/ComparisonOpsApi
 
 import IO/Console
-import Numerics
 # Builder-generated lt/le/gt/ge from compare on types that obey Comparable.
 record Score
 obeys Comparable

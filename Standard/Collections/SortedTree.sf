@@ -1,7 +1,5 @@
 module Collections
 
-import Numerics
-
 # The B-tree under Suflae's SortedList, SortedSet and SortedDict. A node is an entity holding its entries and its
 # branches in fixed arrays, so one node is one allocation. A place no entry or branch uses is zero (empty), and an
 # entry or branch moves between nodes by being written into an empty place of one and erased from the other.

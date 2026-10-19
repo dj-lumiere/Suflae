@@ -1,6 +1,5 @@
 module Collections
 
-import Numerics
 import BuilderQuery
 ### A min-heap priority pool that always removes the entry with the smallest priority first.
 ###

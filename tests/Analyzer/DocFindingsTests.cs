@@ -75,7 +75,6 @@ public class DocFindingsTests
     {
         string source = """
                         import IO/Console
-                        import Numerics
 
                         crashable BadError
                             what: Text
@@ -107,7 +106,6 @@ public class DocFindingsTests
     {
         string source = """
                         import IO/Console
-                        import Numerics
 
                         failable routine find(n: Integer) -> Integer
                             if n < 0

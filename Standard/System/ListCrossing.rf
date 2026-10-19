@@ -1,0 +1,13 @@
+module System
+
+# The crossing from RazorForge's list to Suflae's, written in RazorForge because its receiver is RazorForge's list.
+# The other direction, `xs.to[RF::List]()`, is in List.sf.
+
+### Makes a Suflae list of the elements of a list from RazorForge code (a RazorForge library routine's result):
+### `rf_list.to[List]()`.
+### :returns: A new Suflae list of copies of the elements.
+routine List[T].to[SF::System.List[T]]() -> SF::System.List[T]
+    var result = SF::System.List[T](capacity: me.count.to[Integer]())
+    each element in me
+        result.add_last(value: element)
+    return steal result

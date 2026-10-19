@@ -35,15 +35,12 @@ public sealed class SuflaeRules : LanguageRules
     public override bool HasOwnStandardLibrary => true;
 
     /// <summary>
-    /// <c>Numerics</c> brings in only <c>Integer</c>: Suflae's bare numeric vocabulary is
-    /// <c>Integer</c>/<c>Decimal</c> (an unsuffixed <c>6</c> is an <c>Integer</c>, which lives in
-    /// <c>Numerics</c>, not Core; <c>Decimal</c> is in Core), the fixed-width scalars come with the Core
-    /// prelude, and the rest of <c>Numerics</c> (the <c>Integer</c>-argument forms of the integer
-    /// routines) still needs an explicit <c>import Numerics</c>. Console and file I/O are always available,
-    /// so <c>show(...)</c> needs no import.
+    /// Console and file I/O are always available, so <c>show(...)</c> needs no import. The numbers
+    /// (<c>Integer</c>, <c>Decimal</c> and the fixed-width types) are in <c>System/Numerics</c>, which every file
+    /// sees without one.
     /// </summary>
     public override IReadOnlyList<(string Module, IReadOnlyList<string>? Symbols)> PreludeImports { get; } =
-        [("Numerics", ["Integer"]), ("IO/Console", null), ("IO/File", null)];
+        [("IO/Console", null), ("IO/File", null)];
 
     public override List<Token> Tokenize(string source, string fileName)
     {

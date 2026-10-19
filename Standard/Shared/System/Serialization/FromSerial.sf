@@ -1,0 +1,97 @@
+module System/Serialization
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Raised when a `SerialValue` does not have the shape `sv.to[T]()` expects: a
+### missing member variable, a text where a number was expected, an unknown choice case, and so on.
+@rf("SerialShapeError")
+crashable SerialShapeError
+    ### What was expected and what was found.
+    detail: Text
+
+### Returns the message for a serialized value that does not fit its target type.
+### :returns: The resulting `Text` value.
+@rf("SerialShapeError.crash_message")
+routine SerialShapeError.crash_message() -> Text
+
+### The serialized value of member variable `name` inside a serialized record or entity (the
+### `Dict[Text, SerialValue]` that `serialize` produces).
+### :param value: The serialized record or entity.
+### :param name: The member variable to look up.
+### :returns: The member variable's serialized value.
+### :throws: {SerialShapeError} when `value` is not a member-variable table or has no entry for `name`.
+@rf("serial_field")
+failable routine serial_field(value: SerialValue, name: Text) -> SerialValue
+
+### The text inside a serialized `Text` value.
+### :param value: The serialized value.
+### :returns: The text.
+### :throws: {SerialShapeError} when `value` is not text.
+@rf("serial_text")
+failable routine serial_text(value: SerialValue) -> Text
+
+### The key a serialized dictionary entry names: a `Text` key is the name itself and any other key is read back
+### from it.
+### :typeparam T: The key type.
+### :param key: The entry's name.
+### :returns: The key.
+### :throws: A parse error when `key` does not read as a `T`.
+@rf("serial_key")
+failable routine serial_key[T](key: Text) -> T
+
+### Builds a `T` from its serialized form: the generic entry point the builder-synthesized `from_serial`
+### routines call for their member variables and arms. A part that does not fit fails the whole rebuild, so
+### `try sv.to[List[S64]]()` recovers a bad element too.
+### :typeparam T: The type to build.
+### :param value: The serialized value.
+### :returns: The rebuilt value.
+### :throws: {SerialShapeError} or a parse error when `value` does not have the shape `T` needs.
+@rf("serial_decode")
+failable routine serial_decode[T](value: SerialValue) -> T
+
+### Builds a choice value from its serialized case name.
+### :typeparam T: The choice type.
+### :param value: The serialized case name.
+### :returns: The matching case.
+### :throws: {SerialShapeError} when the name is not a case of `T`.
+@rf("choice_from_serial")
+failable routine choice_from_serial[T](value: SerialValue) -> T
+needs ChoiceType T
+
+### Builds a flags value from the serialized list of its set member names.
+### :typeparam T: The flags type.
+### :param value: The serialized list of member names.
+### :returns: The flags value with exactly those members set.
+### :throws: {SerialShapeError} when `value` is not a list of names or a name is not a member of `T`.
+@rf("flags_from_serial")
+failable routine flags_from_serial[T](value: SerialValue) -> T
+needs FlagsType T
+
+### Builds a variant value from its serialized `{arm: payload}` table. (A variant with a `None` arm
+### handles a serialized `None` in its builder-synthesized `from_serial` before calling this.)
+### :typeparam T: The variant type.
+### :param value: The serialized variant.
+### :returns: The variant holding the rebuilt payload in the named arm.
+### :throws: {SerialShapeError} when `value` is not a one-entry table naming an arm of `T`.
+@rf("variant_from_serial")
+failable routine variant_from_serial[T](value: SerialValue) -> T
+needs VariantType T
+
+### Rebuilds a value from its serialized form, the reverse of `serialize`: `sv.to[Point]()`,
+### `try sv.to[List[Integer]]()`. Each type rebuilds itself in `failable common routine T.from_serial(value: SerialValue)`:
+### the builder writes it for records, entities, choices, flags and variants, and a type may write its own.
+### :returns: The rebuilt value.
+### :throws: {SerialShapeError} when the value does not have the shape `T` needs.
+@rf("SerialValue.to")
+failable routine SerialValue.to[T]() -> T
+needs AnyType T
+
+### Builds a `Byte` from its serialized form (a `U8`). :throws: {SerialShapeError} on any other arm.
+@rf("Byte.from_serial")
+failable common routine Byte.from_serial(value: SerialValue) -> Byte
+
+### Builds a `Char` from its serialized form (a one-character `Text`).
+### :throws: {SerialShapeError} when the value is not a one-character text.
+@rf("Char.from_serial")
+failable common routine Char.from_serial(value: SerialValue) -> Char

@@ -1,6 +1,5 @@
 module Collections
 
-import Numerics
 import BuilderQuery
 ### A fixed-size, inline sequence of `BITS` boolean flags packed into bytes.
 ###
