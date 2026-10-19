@@ -669,16 +669,36 @@ routine D64.to[B128]() -> B128
 routine D128.to[B128]() -> B128
 
 ### Narrows this quadruple-precision value to single precision.
-### :returns: The nearest representable `B32` value.
+### Checked: a finite value past the `B32` range crashes. {B128.to_unchecked[B32]} gives the infinity instead. An
+### infinity stays infinite and a NaN stays a NaN.
+### :returns: The nearest `B32` value.
+### :throws: {NumericOverflowError} if a finite `me` rounds past the `B32` range.
 @rf("B128.to")
-routine B128.to[B32]() -> B32
+failable routine B128.to[B32]() -> B32
+
+### Narrows this quadruple-precision value to single precision.
+### Unchecked: a value past the `B32` range gives an infinity, where {B128.to[B32]} crashes.
+### :returns: The nearest `B32` value.
+@rf("B128.to_unchecked")
+routine B128.to_unchecked[B32]() -> B32
 
 ### Narrows this quadruple-precision value to double precision (correctly rounded,
 ### pure bit surgery — B128 is an i128 carrier, so no LLVM `fptrunc` is available).
 ### Handles inf/NaN, overflow to ±inf, the B64 subnormal range, and underflow to ±0.
-### :returns: The nearest representable `B64` value (round-to-nearest-ties-to-even).
+### Checked: a finite value past the `B64` range crashes. {B128.to_unchecked[B64]} gives the infinity instead. An
+### infinity stays infinite and a NaN stays a NaN.
+### :returns: The nearest `B64` value.
+### :throws: {NumericOverflowError} if a finite `me` rounds past the `B64` range.
 @rf("B128.to")
-routine B128.to[B64]() -> B64
+failable routine B128.to[B64]() -> B64
+
+### Narrows this quadruple-precision value to double precision (correctly rounded,
+### pure bit surgery — B128 is an i128 carrier, so no LLVM `fptrunc` is available).
+### Handles inf/NaN, overflow to ±inf, the B64 subnormal range, and underflow to ±0.
+### Unchecked: a value past the `B64` range gives an infinity, where {B128.to[B64]} crashes.
+### :returns: The nearest `B64` value.
+@rf("B128.to_unchecked")
+routine B128.to_unchecked[B64]() -> B64
 
 ### Parses decimal text into the correctly-rounded `B128` (round-to-nearest-even). Accepts standard
 ### decimal notation and the special values `nan`, `inf`, and `infinity` (case-insensitive, with

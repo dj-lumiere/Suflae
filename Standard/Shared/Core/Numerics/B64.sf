@@ -828,15 +828,34 @@ routine B32.to[B64]() -> B64
 routine B64.to[B64]() -> B64
 
 ### Converts a decimal64 value to double-precision binary floating point.
-### :returns: The closest representable `B64` value.
+### Checked: a finite value past the `B64` range crashes. {D64.to_unchecked[B64]} gives the infinity instead. An
+### infinity stays infinite and a NaN stays a NaN.
+### :returns: The nearest `B64` value.
+### :throws: {NumericOverflowError} if a finite `me` rounds past the `B64` range.
 @rf("D64.to")
-routine D64.to[B64]() -> B64
+failable routine D64.to[B64]() -> B64
+
+### Converts a decimal64 value to double-precision binary floating point.
+### Unchecked: a value past the `B64` range gives an infinity, where {D64.to[B64]} crashes.
+### :returns: The nearest `B64` value.
+@rf("D64.to_unchecked")
+routine D64.to_unchecked[B64]() -> B64
 
 ### Converts a decimal128 value to double-precision binary floating point, correctly rounded in one step (see
 ### B128(from: D128)).
-### :returns: The closest representable `B64` value.
+### Checked: a finite value past the `B64` range crashes. {D128.to_unchecked[B64]} gives the infinity instead. An
+### infinity stays infinite and a NaN stays a NaN.
+### :returns: The nearest `B64` value.
+### :throws: {NumericOverflowError} if a finite `me` rounds past the `B64` range.
 @rf("D128.to")
-routine D128.to[B64]() -> B64
+failable routine D128.to[B64]() -> B64
+
+### Converts a decimal128 value to double-precision binary floating point, correctly rounded in one step (see
+### B128(from: D128)).
+### Unchecked: a value past the `B64` range gives an infinity, where {D128.to[B64]} crashes.
+### :returns: The nearest `B64` value.
+@rf("D128.to_unchecked")
+routine D128.to_unchecked[B64]() -> B64
 
 ### Parses a decimal float literal into an `B64`.
 ###   the special values `nan`, `inf`, and `infinity` (case-insensitive, with
