@@ -56,8 +56,8 @@ routine hypot(x: Decimal, y: Decimal) -> Decimal
 routine hypot(x: Decimal, y: Decimal, z: Decimal) -> Decimal
 
 ### Fused multiply-add me*b + c with a single rounding.
-@rf("Decimal.fma")
-failable routine Decimal.fma(b: Decimal, c: Decimal) -> Decimal
+@rf("Decimal.mul_add")
+failable routine Decimal.mul_add(b: Decimal, c: Decimal) -> Decimal
 
 ### Sine of me (radians).
 @rf("Decimal.sin")
@@ -128,8 +128,8 @@ failable routine Decimal.gamma() -> Decimal
 routine Decimal.ln_gamma() -> Decimal
 
 ### True if me has its sign bit set (negative, including -0).
-@rf("Decimal.signbit")
-routine Decimal.signbit() -> Bool
+@rf("Decimal.is_sign_negative")
+routine Decimal.is_sign_negative() -> Bool
 
 ### True if me is finite and nonzero.
 @rf("Decimal.is_normal")
@@ -171,14 +171,6 @@ routine Decimal.neg() -> Decimal
 @rf("Decimal.copysign")
 routine Decimal.copysign(you: Decimal) -> Decimal
 
-### Larger of me and you (NaN-skipping, per C99 fmax).
-@rf("Decimal.fmax")
-routine Decimal.fmax(you: Decimal) -> Decimal
-
-### Smaller of me and you (NaN-skipping, per C99 fmin).
-@rf("Decimal.fmin")
-routine Decimal.fmin(you: Decimal) -> Decimal
-
 ### Positive difference max(me - you, 0).
 @rf("Decimal.fdim")
 routine Decimal.fdim(you: Decimal) -> Decimal
@@ -200,12 +192,12 @@ routine Decimal.minimum(you: Decimal) -> Decimal
 routine Decimal.maximum(you: Decimal) -> Decimal
 
 ### Floating remainder of me / you (C fmod; result has me's sign).
-@rf("Decimal.fmod")
-routine Decimal.fmod(you: Decimal) -> Decimal
+@rf("Decimal.mod_trunc")
+routine Decimal.mod_trunc(you: Decimal) -> Decimal
 
 ### IEEE remainder of me / you (result is the nearest, ties to even).
-@rf("Decimal.remainder")
-routine Decimal.remainder(you: Decimal) -> Decimal
+@rf("Decimal.rem")
+routine Decimal.rem(you: Decimal) -> Decimal
 
 ### The base-10 exponent of me (floor(log10(|me|)) as a Decimal).
 @rf("Decimal.logb")
@@ -236,8 +228,8 @@ routine Decimal.rint() -> Decimal
 routine Decimal.round_ties_away() -> Decimal
 
 ### The fractional part of me (me - trunc(me), carrying me's sign).
-@rf("Decimal.frac")
-routine Decimal.frac() -> Decimal
+@rf("Decimal.fract")
+routine Decimal.fract() -> Decimal
 
 ### Splits me into its integer and fractional parts, both carrying me's sign.
 @rf("Decimal.modf")
@@ -252,8 +244,8 @@ routine Decimal.same_quantum(you: Decimal) -> Bool
 routine Decimal.quantize(you: Decimal) -> Decimal
 
 ### IEEE totalOrder predicate (a total order over all values).
-@rf("Decimal.total_order")
-routine Decimal.total_order(you: Decimal) -> Bool
+@rf("Decimal.total_compare")
+routine Decimal.total_compare(you: Decimal) -> Bool
 
 ### IEEE totalOrderMag predicate (total order over magnitudes).
 @rf("Decimal.total_order_mag")

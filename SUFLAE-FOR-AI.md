@@ -353,7 +353,9 @@ routine start()
   (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
   `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
   The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `recip_sqrt`, `sin_cos`, `gamma`,
-  `ln_gamma`, and so on (`migrate --step names` rewrites the C names, `expm1`, `log`, `cmp`, `ashl`, ...).
+  `ln_gamma`, `mul_add`, `mod_trunc` (truncated remainder), `rem` (IEEE remainder), `fract`, `is_sign_negative`,
+  `total_compare`, and so on. Float/decimal `max`/`min` return the other operand when one is NaN (`migrate --step
+  names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
   (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
   (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: SF-S706.

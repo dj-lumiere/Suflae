@@ -199,15 +199,15 @@ routine B64.powi(n: S32) -> B64
 @rf("B64.midpoint")
 routine B64.midpoint(you: B64) -> B64
 
-### Returns the smaller of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The lower of the two values under the ordered comparison rules.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("B64.min")
 routine B64.min(you: B64) -> B64
 
-### Returns the larger of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The greater of the two values under the ordered comparison rules.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("B64.max")
 routine B64.max(you: B64) -> B64
 
@@ -345,14 +345,14 @@ failable routine hypot(x: B64, y: B64, z: B64) -> B64
 @rf("hypot_unchecked")
 routine hypot_unchecked(x: B64, y: B64, z: B64) -> B64
 
-### Fused multiply-add me*b + c (single rounding). Checked: crashes on overflow. Use `fma_unchecked`
+### Fused multiply-add me*b + c (single rounding). Checked: crashes on overflow. Use `mul_add_unchecked`
 ### for raw IEEE.
-@rf("B64.fma")
-failable routine B64.fma(b: B64, c: B64) -> B64
+@rf("B64.mul_add")
+failable routine B64.mul_add(b: B64, c: B64) -> B64
 
 ### Fused multiply-add with raw IEEE 754 propagation.
-@rf("B64.fma_unchecked")
-routine B64.fma_unchecked(b: B64, c: B64) -> B64
+@rf("B64.mul_add_unchecked")
+routine B64.mul_add_unchecked(b: B64, c: B64) -> B64
 
 ### Arc sine. Checked: crashes (domain) if `me` is outside [-1, 1]. Use `asin_unchecked` for raw
 ### IEEE.
@@ -404,28 +404,20 @@ routine B64.rint() -> B64
 routine B64.fdim(you: B64) -> B64
 
 ### Floating-point remainder of me/you (C fmod).
-@rf("B64.fmod")
-routine B64.fmod(you: B64) -> B64
+@rf("B64.mod_trunc")
+routine B64.mod_trunc(you: B64) -> B64
 
 ### IEEE remainder of me/you, ties to even (C remainder).
-@rf("B64.remainder")
-routine B64.remainder(you: B64) -> B64
-
-### Larger of me and you (C fmax).
-@rf("B64.fmax")
-routine B64.fmax(you: B64) -> B64
-
-### Smaller of me and you (C fmin).
-@rf("B64.fmin")
-routine B64.fmin(you: B64) -> B64
+@rf("B64.rem")
+routine B64.rem(you: B64) -> B64
 
 ### Truncates toward zero (C trunc; alias of int_truncate).
 @rf("B64.trunc")
 routine B64.trunc() -> B64
 
 ### Fractional part me - trunc(me).
-@rf("B64.frac")
-routine B64.frac() -> B64
+@rf("B64.fract")
+routine B64.fract() -> B64
 
 ### Integer and fractional parts (C modf); both carry me's sign.
 @rf("B64.modf")
@@ -436,8 +428,8 @@ routine B64.modf() -> (B64, B64)
 routine B64.frexp() -> (B64, S64)
 
 ### True if the sign bit is set (C signbit; true for -0 and -NaN).
-@rf("B64.signbit")
-routine B64.signbit() -> Bool
+@rf("B64.is_sign_negative")
+routine B64.is_sign_negative() -> Bool
 
 ### True for a subnormal (denormalized, nonzero) value.
 @rf("B64.is_subnormal")
@@ -460,10 +452,10 @@ routine b64_order_key(bits: U64) -> U64
 ### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
 ### :param you: The value to compare against.
 ### :returns: Whether `me` precedes or equals `you` in the total order.
-@rf("B64.total_order")
-routine B64.total_order(you: B64) -> Bool
+@rf("B64.total_compare")
+routine B64.total_compare(you: B64) -> Bool
 
-### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### IEEE 754 totalOrderMag: `total_compare` applied to the magnitudes (sign bit cleared).
 ### :param you: The value whose magnitude to compare against.
 ### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
 @rf("B64.total_order_mag")

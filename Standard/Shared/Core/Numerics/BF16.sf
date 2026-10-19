@@ -61,8 +61,8 @@ routine BF16.is_finite() -> Bool
 routine BF16.is_zero() -> Bool
 
 ### Returns `true` when the sign bit is set (negative values, -0 and negative NaNs).
-@rf("BF16.signbit")
-routine BF16.signbit() -> Bool
+@rf("BF16.is_sign_negative")
+routine BF16.is_sign_negative() -> Bool
 
 ### Returns whether both values are equal (IEEE: a NaN equals nothing, +0 equals -0).
 ### :param you: The other value to compare against.
@@ -241,8 +241,8 @@ routine BF16.int_truncate() -> BF16
 
 ### Returns the fractional part, `me - me.trunc()`.
 ### :returns: The result.
-@rf("BF16.frac")
-routine BF16.frac() -> BF16
+@rf("BF16.fract")
+routine BF16.fract() -> BF16
 
 ### Returns `1 / me`, rounded once to BF16.
 ### :returns: The result.
@@ -275,15 +275,15 @@ routine BF16.logb() -> BF16
 @rf("BF16.midpoint")
 routine BF16.midpoint(you: BF16) -> BF16
 
-### Returns the smaller value.
-### :param you: The other value.
-### :returns: The result.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("BF16.min")
 routine BF16.min(you: BF16) -> BF16
 
-### Returns the larger value.
-### :param you: The other value.
-### :returns: The result.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("BF16.max")
 routine BF16.max(you: BF16) -> BF16
 
@@ -311,18 +311,6 @@ routine BF16.minimum(you: BF16) -> BF16
 @rf("BF16.maximum")
 routine BF16.maximum(you: BF16) -> BF16
 
-### Returns the larger value, the other one when one is NaN (C `fmax`).
-### :param you: The other value.
-### :returns: The result.
-@rf("BF16.fmax")
-routine BF16.fmax(you: BF16) -> BF16
-
-### Returns the smaller value, the other one when one is NaN (C `fmin`).
-### :param you: The other value.
-### :returns: The result.
-@rf("BF16.fmin")
-routine BF16.fmin(you: BF16) -> BF16
-
 ### Returns `me - you` when it is positive, otherwise 0.
 ### :param you: The other value.
 ### :returns: The result.
@@ -332,14 +320,14 @@ routine BF16.fdim(you: BF16) -> BF16
 ### Returns the remainder of `me / you` truncated toward zero (C `fmod`).
 ### :param you: The other value.
 ### :returns: The result.
-@rf("BF16.fmod")
-routine BF16.fmod(you: BF16) -> BF16
+@rf("BF16.mod_trunc")
+routine BF16.mod_trunc(you: BF16) -> BF16
 
 ### Returns the remainder of `me / you` rounded to nearest (C `remainder`).
 ### :param you: The other value.
 ### :returns: The result.
-@rf("BF16.remainder")
-routine BF16.remainder(you: BF16) -> BF16
+@rf("BF16.rem")
+routine BF16.rem(you: BF16) -> BF16
 
 ### Returns `me * 2^n` with raw IEEE 754 results, rounded once to BF16.
 ### :param n: The power of two.
@@ -364,17 +352,17 @@ routine BF16.powi(n: S32) -> BF16
 ### :param b: The multiplier.
 ### :param c: The addend.
 ### :returns: The fused result.
-@rf("BF16.fma_unchecked")
-routine BF16.fma_unchecked(b: BF16, c: BF16) -> BF16
+@rf("BF16.mul_add_unchecked")
+routine BF16.mul_add_unchecked(b: BF16, c: BF16) -> BF16
 
-### Returns `me * b + c` with one rounding. Checked: crashes when the result isn't finite. Use `fma_unchecked` for raw IEEE 754 results.
+### Returns `me * b + c` with one rounding. Checked: crashes when the result isn't finite. Use `mul_add_unchecked` for raw IEEE 754 results.
 ### :param b: The multiplier.
 ### :param c: The addend.
 ### :returns: The result.
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
-@rf("BF16.fma")
-failable routine BF16.fma(b: BF16, c: BF16) -> BF16
+@rf("BF16.mul_add")
+failable routine BF16.mul_add(b: BF16, c: BF16) -> BF16
 
 ### Returns the whole part and the fractional part of this value, both with its sign.
 ### :returns: `(whole, fractional)`.
@@ -414,8 +402,8 @@ routine BF16.fpclassify() -> FpClass
 ### The IEEE 754 total order: -NaN, -infinity, ..., -0, +0, ..., +infinity, +NaN.
 ### :param you: The other value.
 ### :returns: True when `me` comes no later than `you` in that order.
-@rf("BF16.total_order")
-routine BF16.total_order(you: BF16) -> Bool
+@rf("BF16.total_compare")
+routine BF16.total_compare(you: BF16) -> Bool
 
 ### The IEEE 754 total order of the magnitudes.
 ### :param you: The other value.

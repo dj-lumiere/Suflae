@@ -79,15 +79,15 @@ failable routine Decimal.sub(you: Decimal) -> Decimal
 @rf("Decimal.truediv")
 failable routine Decimal.truediv(you: Decimal) -> Decimal
 
-### Returns the smaller of `me` and `you`.
-### :param you: The value to compare against.
-### :returns: `me` if `me <= you`, otherwise `you`.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("Decimal.min")
 routine Decimal.min(you: Decimal) -> Decimal
 
-### Returns the larger of `me` and `you`.
-### :param you: The value to compare against.
-### :returns: `me` if `me >= you`, otherwise `you`.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("Decimal.max")
 routine Decimal.max(you: Decimal) -> Decimal
 

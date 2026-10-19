@@ -184,15 +184,15 @@ routine B32.powi(n: S32) -> B32
 @rf("B32.midpoint")
 routine B32.midpoint(you: B32) -> B32
 
-### Returns the smaller of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The lower of the two values under the ordered comparison rules.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("B32.min")
 routine B32.min(you: B32) -> B32
 
-### Returns the larger of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The greater of the two values under the ordered comparison rules.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("B32.max")
 routine B32.max(you: B32) -> B32
 
@@ -351,12 +351,12 @@ failable routine hypot(x: B32, y: B32, z: B32) -> B32
 routine hypot_unchecked(x: B32, y: B32, z: B32) -> B32
 
 ### Fused multiply-add me*b + c with a single rounding.
-@rf("B32.fma")
-failable routine B32.fma(b: B32, c: B32) -> B32
+@rf("B32.mul_add")
+failable routine B32.mul_add(b: B32, c: B32) -> B32
 
-### Fused multiply-add me*b + c with raw IEEE 754 propagation. Thin wrapper over LLVM `fma` (single rounding).
-@rf("B32.fma_unchecked")
-routine B32.fma_unchecked(b: B32, c: B32) -> B32
+### Fused multiply-add me*b + c with raw IEEE 754 propagation. Thin wrapper over LLVM `mul_add` (single rounding).
+@rf("B32.mul_add_unchecked")
+routine B32.mul_add_unchecked(b: B32, c: B32) -> B32
 
 ### Floating-point remainder of me/you (C fmod), exact. Taken in B64 without a division instruction's remainder:
 ### |me| is reduced by |you| 2^k (k keeping the quotient below 2^29) with q = trunc(|me| / (|you| 2^k)), whose
@@ -364,24 +364,16 @@ routine B32.fma_unchecked(b: B32, c: B32) -> B32
 ### divisor's B32 grid below twice it); q off by one from the division's rounding is corrected, and each round
 ### takes up to 28 bits of exponent difference. (LLVM narrows a widened frem back to the C runtime's fmodf,
 ### several times slower than this.) Special cases take the frem.
-@rf("B32.fmod")
-routine B32.fmod(you: B32) -> B32
+@rf("B32.mod_trunc")
+routine B32.mod_trunc(you: B32) -> B32
 
 ### IEEE remainder of me/you (C remainder).
-@rf("B32.remainder")
-routine B32.remainder(you: B32) -> B32
+@rf("B32.rem")
+routine B32.rem(you: B32) -> B32
 
 ### Positive difference max(me - you, 0) (C fdim).
 @rf("B32.fdim")
 routine B32.fdim(you: B32) -> B32
-
-### Larger of me and you (C fmax).
-@rf("B32.fmax")
-routine B32.fmax(you: B32) -> B32
-
-### Smaller of me and you (C fmin).
-@rf("B32.fmin")
-routine B32.fmin(you: B32) -> B32
 
 ### Next representable value after me toward you.
 @rf("B32.nextafter")
@@ -400,8 +392,8 @@ failable routine B32.gamma() -> B32
 routine B32.trunc() -> B32
 
 ### Fractional part me - trunc(me).
-@rf("B32.frac")
-routine B32.frac() -> B32
+@rf("B32.fract")
+routine B32.fract() -> B32
 
 ### Integer and fractional parts (C modf); both carry me's sign.
 @rf("B32.modf")
@@ -412,8 +404,8 @@ routine B32.modf() -> (B32, B32)
 routine B32.frexp() -> (B32, S64)
 
 ### True if the sign bit is set (C signbit).
-@rf("B32.signbit")
-routine B32.signbit() -> Bool
+@rf("B32.is_sign_negative")
+routine B32.is_sign_negative() -> Bool
 
 ### True for a subnormal (denormalized, nonzero) value.
 @rf("B32.is_subnormal")
@@ -436,10 +428,10 @@ routine b32_order_key(bits: U32) -> U32
 ### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
 ### :param you: The value to compare against.
 ### :returns: Whether `me` precedes or equals `you` in the total order.
-@rf("B32.total_order")
-routine B32.total_order(you: B32) -> Bool
+@rf("B32.total_compare")
+routine B32.total_compare(you: B32) -> Bool
 
-### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### IEEE 754 totalOrderMag: `total_compare` applied to the magnitudes (sign bit cleared).
 ### :param you: The value whose magnitude to compare against.
 ### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
 @rf("B32.total_order_mag")

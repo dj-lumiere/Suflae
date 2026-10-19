@@ -212,16 +212,16 @@ failable routine hypot(x: D64, y: D64, z: D64) -> D64
 routine hypot_unchecked(x: D64, y: D64, z: D64) -> D64
 
 ### Fused multiply-add me*b + c with a single rounding. Crashes on a non-finite result.
-@rf("D64.fma")
-failable routine D64.fma(b: D64, c: D64) -> D64
+@rf("D64.mul_add")
+failable routine D64.mul_add(b: D64, c: D64) -> D64
 
 ### me*b + c with a single rounding, raw IEEE.
-@rf("D64.fma_unchecked")
-routine D64.fma_unchecked(b: D64, c: D64) -> D64
+@rf("D64.mul_add_unchecked")
+routine D64.mul_add_unchecked(b: D64, c: D64) -> D64
 
 ### IEEE 754 signbit: the raw sign bit (true for negatives, -0, and -NaN). Never crashes.
-@rf("D64.signbit")
-routine D64.signbit() -> Bool
+@rf("D64.is_sign_negative")
+routine D64.is_sign_negative() -> Bool
 
 ### True if me is negative (sign bit set, which includes -0 and -NaN).
 @rf("D64.is_negative")
@@ -256,10 +256,10 @@ routine D64.abs() -> D64
 ### member precedes when positive (the reverse when negative).
 ### :param you: The value to compare against.
 ### :returns: Whether `me` precedes or equals `you` in the total order.
-@rf("D64.total_order")
-routine D64.total_order(you: D64) -> Bool
+@rf("D64.total_compare")
+routine D64.total_compare(you: D64) -> Bool
 
-### IEEE 754 totalOrderMag for decimals: `total_order` applied to the magnitudes.
+### IEEE 754 totalOrderMag for decimals: `total_compare` applied to the magnitudes.
 ### :param you: The value whose magnitude to compare against.
 ### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
 @rf("D64.total_order_mag")
@@ -283,18 +283,8 @@ routine D64.signum() -> D64
 failable routine D64.finite() -> D64
 
 ### C99 fmod: me - trunc(me/you)*you, exact, with me's sign (NaN for an infinite me or a zero you).
-@rf("D64.fmod")
-routine D64.fmod(you: D64) -> D64
-
-### C99 fmax: the larger of me and you, treating NaN as missing (returns the non-NaN operand).
-### :param you: The value to compare against.
-@rf("D64.fmax")
-routine D64.fmax(you: D64) -> D64
-
-### C99 fmin: the smaller of me and you, treating NaN as missing (returns the non-NaN operand).
-### :param you: The value to compare against.
-@rf("D64.fmin")
-routine D64.fmin(you: D64) -> D64
+@rf("D64.mod_trunc")
+routine D64.mod_trunc(you: D64) -> D64
 
 ### C99 fdim: the positive difference max(me - you, 0), NaN if either operand is NaN.
 ### :param you: The value to subtract.
@@ -361,8 +351,8 @@ routine D64.quantize(you: D64) -> D64
 ### is infinite or `you` is zero, `me` if `you` is infinite. Never crashes.
 ### :param you: The divisor.
 ### :returns: The IEEE remainder of `me / you`.
-@rf("D64.remainder")
-routine D64.remainder(you: D64) -> D64
+@rf("D64.rem")
+routine D64.rem(you: D64) -> D64
 
 ### IEEE 754 normalize (the `reduce` operation): the value with trailing zeros stripped to the simplest member of
 ### its cohort (`3.00` -> `3`, `100` -> `1E+2`, `0.00` -> `0`). Specials pass through. Never crashes.
@@ -395,5 +385,5 @@ routine D64.round() -> D64
 routine D64.rint() -> D64
 
 ### Fractional part me - trunc(me), with me's sign. A NaN propagates, ±inf gives ±0. Never crashes.
-@rf("D64.frac")
-routine D64.frac() -> D64
+@rf("D64.fract")
+routine D64.fract() -> D64

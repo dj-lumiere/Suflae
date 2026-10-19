@@ -150,15 +150,15 @@ routine B16.powi(n: S32) -> B16
 @rf("B16.midpoint")
 routine B16.midpoint(you: B16) -> B16
 
-### Returns the smaller of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The lower of the two values under the ordered comparison rules.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("B16.min")
 routine B16.min(you: B16) -> B16
 
-### Returns the larger of this value and `you`.
-### :param you: The value to compare against.
-### :returns: The greater of the two values under the ordered comparison rules.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("B16.max")
 routine B16.max(you: B16) -> B16
 
@@ -336,33 +336,25 @@ failable routine hypot(x: B16, y: B16, z: B16) -> B16
 routine hypot_unchecked(x: B16, y: B16, z: B16) -> B16
 
 ### Fused multiply-add me*b + c with a single rounding.
-@rf("B16.fma")
-failable routine B16.fma(b: B16, c: B16) -> B16
+@rf("B16.mul_add")
+failable routine B16.mul_add(b: B16, c: B16) -> B16
 
 ### Fused multiply-add me*b + c with raw IEEE 754 propagation, correctly rounded (one rounding to
 ### nearest, ties to even).
-@rf("B16.fma_unchecked")
-routine B16.fma_unchecked(b: B16, c: B16) -> B16
+@rf("B16.mul_add_unchecked")
+routine B16.mul_add_unchecked(b: B16, c: B16) -> B16
 
 ### Floating-point remainder (C fmod).
-@rf("B16.fmod")
-routine B16.fmod(you: B16) -> B16
+@rf("B16.mod_trunc")
+routine B16.mod_trunc(you: B16) -> B16
 
 ### IEEE remainder (C remainder).
-@rf("B16.remainder")
-routine B16.remainder(you: B16) -> B16
+@rf("B16.rem")
+routine B16.rem(you: B16) -> B16
 
 ### Positive difference max(me - you, 0) (C fdim).
 @rf("B16.fdim")
 routine B16.fdim(you: B16) -> B16
-
-### Larger of me and you (C fmax).
-@rf("B16.fmax")
-routine B16.fmax(you: B16) -> B16
-
-### Smaller of me and you (C fmin).
-@rf("B16.fmin")
-routine B16.fmin(you: B16) -> B16
 
 ### Next representable value after me toward you. Steps the 16-bit sign-magnitude
 ### pattern directly (a B32 step would narrow back to the same B16 value).
@@ -382,8 +374,8 @@ failable routine B16.gamma() -> B16
 routine B16.trunc() -> B16
 
 ### Fractional part me - trunc(me).
-@rf("B16.frac")
-routine B16.frac() -> B16
+@rf("B16.fract")
+routine B16.fract() -> B16
 
 ### Integer and fractional parts (C modf); both carry the sign of me.
 @rf("B16.modf")
@@ -394,8 +386,8 @@ routine B16.modf() -> (B16, B16)
 routine B16.frexp() -> (B16, S64)
 
 ### True if the sign bit is set (C signbit).
-@rf("B16.signbit")
-routine B16.signbit() -> Bool
+@rf("B16.is_sign_negative")
+routine B16.is_sign_negative() -> Bool
 
 ### True for a subnormal (denormalized, nonzero) value.
 @rf("B16.is_subnormal")
@@ -418,10 +410,10 @@ routine b16_order_key(bits: U16) -> U16
 ### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
 ### :param you: The value to compare against.
 ### :returns: Whether `me` precedes or equals `you` in the total order.
-@rf("B16.total_order")
-routine B16.total_order(you: B16) -> Bool
+@rf("B16.total_compare")
+routine B16.total_compare(you: B16) -> Bool
 
-### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### IEEE 754 totalOrderMag: `total_compare` applied to the magnitudes (sign bit cleared).
 ### :param you: The value whose magnitude to compare against.
 ### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
 @rf("B16.total_order_mag")

@@ -73,9 +73,9 @@ routine B128.is_zero() -> Bool
 @rf("B128.is_subnormal")
 routine B128.is_subnormal() -> Bool
 
-### Returns `true` when the sign bit is set (C `signbit`; true for -0 and -NaN too).
-@rf("B128.signbit")
-routine B128.signbit() -> Bool
+### Returns `true` when the sign bit is set (C `is_sign_negative`; true for -0 and -NaN too).
+@rf("B128.is_sign_negative")
+routine B128.is_sign_negative() -> Bool
 
 ### Returns `true` for a finite, normal value (nonzero and not subnormal).
 @rf("B128.is_normal")
@@ -94,10 +94,10 @@ routine b128_order_key(bits: U128) -> U128
 ### (-NaN < -inf < negatives < -0 < +0 < positives < +inf < +NaN). Never crashes.
 ### :param you: The value to compare against.
 ### :returns: Whether `me` precedes or equals `you` in the total order.
-@rf("B128.total_order")
-routine B128.total_order(you: B128) -> Bool
+@rf("B128.total_compare")
+routine B128.total_compare(you: B128) -> Bool
 
-### IEEE 754 totalOrderMag: `total_order` applied to the magnitudes (sign bit cleared).
+### IEEE 754 totalOrderMag: `total_compare` applied to the magnitudes (sign bit cleared).
 ### :param you: The value whose magnitude to compare against.
 ### :returns: Whether `|me|` precedes or equals `|you|` in the total order.
 @rf("B128.total_order_mag")
@@ -149,28 +149,14 @@ routine B128.minimum(you: B128) -> B128
 @rf("B128.maximum")
 routine B128.maximum(you: B128) -> B128
 
-### C `fmax`: the larger operand, treating NaN as missing (alias of `max_num`). Provided for
-### parity with B16/B32/B64 and the decimal types. Never crashes.
-### :param you: The value to compare against.
-### :returns: The maximum of `me` and `you`, ignoring NaN.
-@rf("B128.fmax")
-routine B128.fmax(you: B128) -> B128
-
-### C `fmin`: the smaller operand, treating NaN as missing (alias of `min_num`). Provided for
-### parity with B16/B32/B64 and the decimal types. Never crashes.
-### :param you: The value to compare against.
-### :returns: The minimum of `me` and `you`, ignoring NaN.
-@rf("B128.fmin")
-routine B128.fmin(you: B128) -> B128
-
 ### IEEE 754 roundToIntegralTiesToAway: rounds to nearest integer, halves away from zero.
 ### :returns: `me` rounded to an integral value with ties away from zero.
 @rf("B128.round_ties_away")
 routine B128.round_ties_away() -> B128
 
 ### Returns the fractional part `me - trunc(me)`, preserving sign (frac(±inf) = ±0).
-@rf("B128.frac")
-routine B128.frac() -> B128
+@rf("B128.fract")
+routine B128.fract() -> B128
 
 ### Returns the arithmetic negation (sign bit flipped).
 ### :returns: The negated value.
@@ -273,13 +259,13 @@ routine B128.rint() -> B128
 @rf("b128_round_to_int")
 routine b128_round_to_int(bits: U128, half_even: Bool) -> U128
 
-### Returns the smaller of two values (C `fmin`: NaN-agnostic, -0 < +0).
+### The smaller of `me` and `you`. If one operand is NaN, the other one. -0 counts below +0.
 ### :param you: The value to compare against.
 ### :returns: The minimum.
 @rf("B128.min")
 routine B128.min(you: B128) -> B128
 
-### Returns the larger of two values (C `fmax`: NaN-agnostic, -0 < +0).
+### The larger of `me` and `you`. If one operand is NaN, the other one. -0 counts below +0.
 ### :param you: The value to compare against.
 ### :returns: The maximum.
 @rf("B128.max")
@@ -421,19 +407,19 @@ routine b128_norm_pack(sign: U64, sig: U128, exp_lsb: S64) -> U128
 @rf("b128_fmod_core")
 routine b128_fmod_core(abits: U128, bbits: U128) -> (U128, Bool)
 
-### Returns `me mod you` truncated toward zero (C `fmod`): result has the sign of
+### Returns `me mod you` truncated toward zero (C `mod_trunc`): result has the sign of
 ### `me` and magnitude strictly less than `|you|`.
 ### :param you: The divisor.
 ### :returns: The truncated remainder.
-@rf("B128.fmod")
-routine B128.fmod(you: B128) -> B128
+@rf("B128.mod_trunc")
+routine B128.mod_trunc(you: B128) -> B128
 
 ### Returns the IEEE 754 remainder `me - n*you` where `n` is `me/you` rounded to
-### the nearest integer, ties to even (C `remainder`).
+### the nearest integer, ties to even (C `rem`).
 ### :param you: The divisor.
 ### :returns: The remainder in `[-|you|/2, |you|/2]`.
-@rf("B128.remainder")
-routine B128.remainder(you: B128) -> B128
+@rf("B128.rem")
+routine B128.rem(you: B128) -> B128
 
 ### Returns the shortest decimal text that reads back as this exact value (`B128(from_text:)`
 ### round-trips it bit for bit).

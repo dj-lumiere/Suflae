@@ -110,12 +110,12 @@ routine B128.acosh_unchecked() -> B128
 routine B128.tan() -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding.
-@rf("B128.fma")
-failable routine B128.fma(b: B128, c: B128) -> B128
+@rf("B128.mul_add")
+failable routine B128.mul_add(b: B128, c: B128) -> B128
 
 ### Returns the fused multiply-add `me*b + c` with a single rounding, with raw IEEE 754 propagation.
-@rf("B128.fma_unchecked")
-routine B128.fma_unchecked(b: B128, c: B128) -> B128
+@rf("B128.mul_add_unchecked")
+routine B128.mul_add_unchecked(b: B128, c: B128) -> B128
 
 ### Returns `sqrt(x^2 + y^2)` without spurious overflow.
 ### :param x: One leg.

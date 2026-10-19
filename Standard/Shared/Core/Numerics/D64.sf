@@ -138,15 +138,15 @@ routine D64.represent() -> Text
 @rf("D64.diagnose")
 routine D64.diagnose() -> Text
 
-### Returns the smaller of `me` and `you` under decimal ordering.
-### :param you: The value to compare against.
-### :returns: `me` if `me <= you`, otherwise `you`.
+### The smaller of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The smaller value, the other operand when one is NaN, and NaN when both are.
 @rf("D64.min")
 routine D64.min(you: D64) -> D64
 
-### Returns the larger of `me` and `you` under decimal ordering.
-### :param you: The value to compare against.
-### :returns: `me` if `me >= you`, otherwise `you`.
+### The larger of `me` and `you`. If one operand is NaN, the other one.
+### :param you: The value to compare with.
+### :returns: The larger value, the other operand when one is NaN, and NaN when both are.
 @rf("D64.max")
 routine D64.max(you: D64) -> D64
 
