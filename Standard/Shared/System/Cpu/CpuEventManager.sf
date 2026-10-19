@@ -1,0 +1,29 @@
+module System/Cpu
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The process's events from the operating system: one handler per kind, held until its event comes. Its routines
+### are called on the type.
+### :see: {CpuEventManager.when_terminated}, {CpuEventManager.when_interrupted}
+@rf("CpuEventManager")
+record CpuEventManager
+    pass
+
+### Sets the handler of a request to end the process: SIGTERM on Linux and macOS, a console window closed, a logoff
+### or a shutdown on Windows. The handler runs beside the rest of the program, and when it returns the process ends
+### with the status {set_exit_code} stored last. A second request while it runs ends the process at once.
+### :param handler: The handler, or `none` to let the system end the process.
+### :returns: The handler before, `none` for none: pass it back to put it back.
+@rf("CpuEventManager.when_terminated")
+@discardable
+common routine CpuEventManager.when_terminated(handler: Callable[(), None]?) -> Callable[(), None]?
+
+### Sets the handler of an interrupt from the keyboard: SIGINT, Ctrl+C or Ctrl+Break on Windows. The handler runs
+### beside the rest of the program, and when it returns the program goes on. An interrupt that comes while it runs
+### ends the process, as it would without a handler.
+### :param handler: The handler, or `none` to let the system end the process.
+### :returns: The handler before, `none` for none: pass it back to put it back.
+@rf("CpuEventManager.when_interrupted")
+@discardable
+common routine CpuEventManager.when_interrupted(handler: Callable[(), None]?) -> Callable[(), None]?

@@ -9,7 +9,7 @@ When unsure, consult ground truth in the repo:
 - `Suflae/tests/Fixtures/StdlibSf/*.sf` — Suflae programs with their expected output (`.expected.txt`).
   Start from the closest one.
 - `RazorForge/Standard/` — the standard library every Suflae build reads (`System`, `Collections`, `IO`,
-  `IterTools`, `Signals`, …). It is written in RazorForge, the sibling language, but every public routine
+  `IterTools`, …). It is written in RazorForge, the sibling language, but every public routine
   in it is callable from Suflae exactly as declared.
 - `Suflae/Standard/` — the modules only Suflae builds read (today: `ObjectHacker`).
 
@@ -131,9 +131,9 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 (`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
-`System/Concurrency`: `Agent`, `Mailbox`; `System/Memory`, `System/Serialization`), console output and input
+`System/Concurrency`: `Agent`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `Signals`, `BuilderQuery` (`x.type_name()`),
+`PriorityQueue`, …), `IterTools` (iterator adapters), `BuilderQuery` (`x.type_name()`),
 `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
 `module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
@@ -215,7 +215,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Iterable[T]` user type gets its `Iter` from `iter()`, so IterTools adapters walk it.
-  `when_interrupted` works.
+  `CpuEventManager.when_interrupted` works.
 - A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
   `enter`/`exit` on that entity. Agents giving no value can be gathered.
@@ -1110,29 +1110,40 @@ shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` a
 and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
 of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another agent adds or removes an entry during the walk).
 
-## 17. Process signals
+## 17. Process events
 
-`import Signals`; `when_interrupted(handler:)` (Ctrl-C) and `when_terminated(handler:)` register a named
-routine with no parameters and no result. Registering replaces the default termination (the program no
-longer dies on Ctrl-C), the handler runs on its own dispatch thread, and the program must keep running its
-own loop. A `global` flag is the natural hand-off:
+`CpuEventManager` (System/Cpu, no import) holds one handler per kind of event the operating system sends when it
+asks the process to stop. Its routines are called on the type:
 
 ```suflae
-import Signals
+global stop_requests: Integer = 0
 
-global should_quit: Bool = false
-
-routine on_interrupt()
-    should_quit = true
-    return
+routine on_stop()
+    show("stopping")
+    stop_requests += 1
 
 routine start()
-    when_interrupted(handler: on_interrupt)
-    while not should_quit
+    CpuEventManager.when_interrupted(on_stop)     # Ctrl+C, SIGINT
+    while stop_requests == 0
         waitfor(200ms)
-    show("exiting gracefully")
-    return
+    show("cleaned up")
 ```
+
+- `CpuEventManager.when_terminated(h)`: a request to end (SIGTERM, a console window closed, a logoff or a shutdown
+  on Windows). When `h` returns, the process ends at once with the status `set_exit_code` stored last, so the
+  cleanup that must happen is the handler's.
+- `CpuEventManager.when_interrupted(h)`: SIGINT, Ctrl+C or Ctrl+Break. When `h` returns, the program goes on.
+- The handler is a `Callable[(), None]` (a named routine or a lambda, taking nothing). It runs beside the rest of the
+  program, so `show` and everything else work in it, and the state it changes is a `global`.
+- One slot per kind: setting a handler returns the one before as `Callable[(), None]?`, `none` when the system's
+  action held the slot (the result may be dropped silently). Setting it again puts it back, and `none` gives the
+  event back to the system. A library that adds its own handling calls the one it got back from its handler.
+- An event of a kind whose handler is still running takes the system's action: a second Ctrl+C ends a program whose
+  handler is stuck.
+- A forced end (SIGKILL, the OOM killer, Windows ending the program after a timeout) can't be caught, and a fault
+  ends the program as a crash.
+- The `Signals` module is gone: `migrate --step cpu-events` drops `import Signals` and writes
+  `CpuEventManager.when_interrupted(h)`.
 
 ## 18. C and other machine-level code
 
