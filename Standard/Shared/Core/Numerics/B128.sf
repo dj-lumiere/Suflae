@@ -397,15 +397,6 @@ routine b128_round_subnormal(sign: U64, v: U256, sh: S64, sticky: Bool) -> U128
 @rf("b128_finish_subnormal")
 routine b128_finish_subnormal(sign: U64, sig: U128, under: S64) -> U128
 
-### floor(sqrt(n)) for n below 2^240 (the callers stay below 2^238: B128 hypot of three, D128 sqrt and hypot). The
-### B128 square root of n truncated to 113 bits is within s 2^-111 + 1 of the root s (at most 2^9 units, 3 below
-### 2^226), one Newton step s + (n - s^2) / (2s), its quotient taken in B128, brings a larger error within a unit,
-### and s^2 <= n < (s + 1)^2 settles it. No wide division.
-### :param n: The radicand.
-### :returns: floor(sqrt(n)).
-@rf("b128_isqrt256")
-routine b128_isqrt256(n: U256) -> U256
-
 ### Returns the square root. Checked: crashes (domain error) if `me` is negative (`sqrt(<0)` ->
 ### NaN).
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.

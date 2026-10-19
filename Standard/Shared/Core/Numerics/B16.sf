@@ -327,8 +327,8 @@ failable routine hypot(x: B16, y: B16) -> B16
 @rf("hypot")
 failable routine hypot(x: B16, y: B16, z: B16) -> B16
 
-### 3D hypotenuse with raw IEEE 754 propagation (overflow -> +inf). Composed as
-### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
+### sqrt(x^2 + y^2 + z^2), correctly rounded, with raw IEEE 754 results: overflow gives +infinity, an infinite leg
+### gives +infinity (also next to a quiet NaN), and a NaN leg otherwise gives a quiet NaN.
 ### :param x: First leg.
 ### :param y: Second leg.
 ### :param z: Third leg.

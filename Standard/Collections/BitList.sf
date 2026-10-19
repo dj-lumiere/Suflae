@@ -24,8 +24,8 @@ import BuilderQuery
 ### | `getitem!` / `setitem!` | O(1) |
 ### | `flip!` | O(1) |
 ### | `set_all` / `flip_all` | O(capacity / 64) |
-### | `count_ones` / `count_zeros` | O(N) |
-### | `any` / `all` / `none` | O(N) best/worst |
+### | `count_trues` / `count_falses` | O(N) |
+### | `is_any_true` / `is_all_true` / `is_none_true` | O(N) best/worst |
 ### | `bitand` / `bitor` / `bitxor` / `bitnot` | O(N) |
 ### | Iteration | O(N) |
 ###
@@ -323,7 +323,7 @@ routine BitList.flip_all()
         i = i +% 1
     return
 
-secret routine BitList.count_ones_raw() -> U64
+secret routine BitList.count_trues_raw() -> U64
     # Count number of bits set to 1 (popcount)
     var count: U64 = 0
     var i: U64 = 0
@@ -335,21 +335,21 @@ secret routine BitList.count_ones_raw() -> U64
 
 ### Counts how many stored bits are set to `true`.
 ### :returns: The number of one-bits in the logical sequence.
-routine BitList.count_ones() -> Integer
-    return me.count_ones_raw().to[Integer]()
+routine BitList.count_trues() -> Integer
+    return me.count_trues_raw().to[Integer]()
 
-secret routine BitList.count_zeros_raw() -> U64
+secret routine BitList.count_falses_raw() -> U64
     # Count number of bits set to 0
-    return me.count -% me.count_ones_raw()
+    return me.count -% me.count_trues_raw()
 
 ### Counts how many stored bits are set to `false`.
 ### :returns: `count()` minus the number of one-bits.
-routine BitList.count_zeros() -> Integer
-    return me.count_zeros_raw().to[Integer]()
+routine BitList.count_falses() -> Integer
+    return me.count_falses_raw().to[Integer]()
 
 ### Returns `true` when at least one stored bit is set.
 ### :returns: `true` if any bit is `true`; `false` if all bits are clear.
-routine BitList.any() -> Bool
+routine BitList.is_any_true() -> Bool
     # Check if any bit is set to 1
     var i: U64 = 0
     while i < me.count
@@ -361,7 +361,7 @@ routine BitList.any() -> Bool
 ### Returns `true` when every stored bit is set.
 ### An empty list vacuously returns `true`.
 ### :returns: `true` if all bits are set; `false` if any bit is clear.
-routine BitList.all() -> Bool
+routine BitList.is_all_true() -> Bool
     # Check if all bits are set to 1
     var i: U64 = 0
     while i < me.count
@@ -372,9 +372,61 @@ routine BitList.all() -> Bool
 
 ### Returns `true` when no stored bit is set.
 ### :returns: `true` if all bits are clear; `false` if any bit is set.
-routine BitList.none() -> Bool
+routine BitList.is_none_true() -> Bool
     # Check if no bits are set to 1
-    return not me.any()
+    return not me.is_any_true()
+
+### Returns the position of the first `true` bit.
+### :returns: The lowest index whose bit is `true`.
+### :throws: {AbsentValueError} when no bit is `true`.
+failable routine BitList.first_true() -> Integer
+    var i: U64 = 0
+    while i < me.count
+        if me.get_bit_internal(i)
+            return i.to[Integer]()
+        i = i +% 1
+    throw AbsentValueError()
+
+### Returns the position of the next `true` bit after `after`.
+### :param after: The index to look past.
+### :returns: The lowest index above `after` whose bit is `true`.
+### :throws: {AbsentValueError} when no bit after `after` is `true`.
+failable routine BitList.next_true(after: Integer) -> Integer
+    var start: U64 = position_of(value: after)
+    if start >= me.count
+        throw AbsentValueError()
+    var i: U64 = start + 1
+    while i < me.count
+        if me.get_bit_internal(i)
+            return i.to[Integer]()
+        i = i +% 1
+    throw AbsentValueError()
+
+### Returns the position of the first `false` bit.
+### :returns: The lowest index whose bit is `false`.
+### :throws: {AbsentValueError} when no bit is `false`.
+failable routine BitList.first_false() -> Integer
+    var i: U64 = 0
+    while i < me.count
+        if not me.get_bit_internal(i)
+            return i.to[Integer]()
+        i = i +% 1
+    throw AbsentValueError()
+
+### Returns the position of the next `false` bit after `after`.
+### :param after: The index to look past.
+### :returns: The lowest index above `after` whose bit is `false`.
+### :throws: {AbsentValueError} when no bit after `after` is `false`.
+failable routine BitList.next_false(after: Integer) -> Integer
+    var start: U64 = position_of(value: after)
+    if start >= me.count
+        throw AbsentValueError()
+    var i: U64 = start + 1
+    while i < me.count
+        if not me.get_bit_internal(i)
+            return i.to[Integer]()
+        i = i +% 1
+    throw AbsentValueError()
 
 # ============================================================================
 # Bitwise Operations (returns new BitList)

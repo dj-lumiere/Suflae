@@ -337,8 +337,8 @@ failable routine hypot(x: B64, y: B64) -> B64
 @rf("hypot")
 failable routine hypot(x: B64, y: B64, z: B64) -> B64
 
-### 3D Euclidean distance with raw IEEE 754 propagation (overflow -> +infinity). Composed as
-### `hypot(hypot(x, y), z)` — overflow-safe, libm has no 3-arg hypot.
+### sqrt(x^2 + y^2 + z^2), correctly rounded, with raw IEEE 754 results: overflow gives +infinity, an infinite leg
+### gives +infinity (also next to a quiet NaN), and a NaN leg otherwise gives a quiet NaN.
 ### :param x: First leg.
 ### :param y: Second leg.
 ### :param z: Third leg.
