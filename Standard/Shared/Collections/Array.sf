@@ -39,7 +39,7 @@ module Core
 @rf("Array")
 record Array[T, COUNT]
 relates ArrayEmittable[T, COUNT] as Iter
-obeys Comparable, Iterable[T], MutableIndexable[T], Sized, Container
+obeys Comparable, Iterable[T], ModifyingIndexable[T], Sized, Container
 needs U64 COUNT
     pass
 
