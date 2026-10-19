@@ -1,0 +1,26 @@
+module Tests/ExitCode/SharedEntityDeadlock
+
+import IO/Console
+# Two agents each use two shared entities in one statement, in opposite orders, until they wait on each other. A debug
+# build has `deadlock-check` on: the program stops with a crash that says which agent waits for which, instead of
+# hanging.
+
+entity Tally
+    count: Integer
+
+routine mix(a: Tally, b: Tally, times: Integer) -> Integer
+    each _ in 1 to times
+        a.count += b.count
+    return times
+
+routine start()
+    var x = Tally(count: 1)
+    var y = Tally(count: 1)
+    show("starting")
+    var jobs = [
+        mix.to[Agent](a: x, b: y, times: 1000000),
+        mix.to[Agent](a: y, b: x, times: 1000000),
+    ]
+    var done = jobs.gather()
+    show("not reached")
+    return

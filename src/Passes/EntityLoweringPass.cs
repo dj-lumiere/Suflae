@@ -292,12 +292,8 @@ internal sealed class EntityLoweringPass
     private Statement LowerUsingStatement(Statement stmt, UsingStatement u)
     {
         Statement b = LowerStatement(stmt: u.Body);
-        Statement? fb = u.FallbackBody != null
-            ? LowerStatement(stmt: u.FallbackBody)
-            : null;
-        return !ReferenceEquals(objA: b, objB: u.Body) ||
-               !ReferenceEquals(objA: fb, objB: u.FallbackBody)
-            ? u with { Body = b, FallbackBody = fb }
+        return !ReferenceEquals(objA: b, objB: u.Body)
+            ? u with { Body = b }
             : stmt;
     }
 

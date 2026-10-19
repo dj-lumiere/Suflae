@@ -88,6 +88,23 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "Range step zero error", actualString: stdout + stderr);
     }
 
+    /// <summary>Two agents that use two shared entities in opposite orders wait on each other: a debug build's
+    /// deadlock check stops the program with status 82 and says which agent waits for which, instead of hanging. The
+    /// report speaks of agents and entities, never of the runtime's access manager.</summary>
+    [Fact]
+    public void SharedEntityDeadlock_CrashesLoudly()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "shared_entity_deadlock.sf");
+
+        Assert.True(condition: exit == 82,
+            userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Contains(expectedSubstring: "starting", actualString: stdout);
+        Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+        Assert.Contains(expectedSubstring: "These agents wait on each other for the entities they share",
+            actualString: stdout + stderr);
+        Assert.DoesNotContain(expectedSubstring: "AccessManager", actualString: stdout + stderr);
+    }
+
     /// <summary>An entity from an imported `.rf` module works as a local and as a member variable of a Suflae entity:
     /// its routines are built as RazorForge code and it is released once.</summary>
     [Fact]

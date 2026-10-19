@@ -1035,6 +1035,11 @@ routine start()
   that reaches another job gets an atomic reference count and a lock taken around each access, with no
   code from you. As with globals, one statement is atomic; a read-then-write spread over several
   statements is not.
+- **Agents waiting on each other stop the program.** Two agents that use two shared entities in one statement
+  each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`
+  build, off in the release modes, `= false` / `= true` in config.toml overrides) then stops the program with a
+  `Deadlock error` that says which agent waits for an entity which other agent is using, instead of hanging. The
+  message names agents and entities only.
 - There is no thread type in Suflae.
 
 ```suflae

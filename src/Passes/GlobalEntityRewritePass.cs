@@ -185,10 +185,7 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
             UsingStatement s => s with
             {
                 Resource = RW(e: s.Resource),
-                Body = RewriteStmt(stmt: s.Body),
-                FallbackBody = s.FallbackBody is null
-                    ? null
-                    : RewriteStmt(stmt: s.FallbackBody)
+                Body = RewriteStmt(stmt: s.Body)
             },
             BlockStatement s => s with
             {

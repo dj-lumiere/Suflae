@@ -116,10 +116,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                 [
                     usingStmt with
                     {
-                        Body = LowerNested(stmt: usingStmt.Body),
-                        FallbackBody = usingStmt.FallbackBody is { } fallback
-                            ? LowerNested(stmt: fallback)
-                            : null
+                        Body = LowerNested(stmt: usingStmt.Body)
                     }
                 ];
 
