@@ -171,8 +171,8 @@ routine LocalMoment.eq(you: LocalMoment) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("LocalMoment.cmp")
-routine LocalMoment.cmp(you: LocalMoment) -> ComparisonSign
+@rf("LocalMoment.compare")
+routine LocalMoment.compare(you: LocalMoment) -> ComparisonSign
 
 ### Returns the display form of this local moment including its UTC offset.
 ### :returns: The resulting `Text` value.

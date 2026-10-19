@@ -253,8 +253,8 @@ routine S32.eq(you: S32) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("S32.cmp")
-routine S32.cmp(you: S32) -> ComparisonSign
+@rf("S32.compare")
+routine S32.compare(you: S32) -> ComparisonSign
 
 ### Returns the absolute value of this integer.
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.

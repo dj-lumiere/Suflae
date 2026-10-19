@@ -14,12 +14,12 @@ routine D128.exp_unchecked() -> D128
 
 ### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D128.expm1")
-failable routine D128.expm1() -> D128
+@rf("D128.exp_m1")
+failable routine D128.exp_m1() -> D128
 
 ### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D128.expm1_unchecked")
-routine D128.expm1_unchecked() -> D128
+@rf("D128.exp_m1_unchecked")
+routine D128.exp_m1_unchecked() -> D128
 
 ### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
@@ -41,21 +41,21 @@ routine D128.exp10_unchecked() -> D128
 
 ### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D128.log")
-failable routine D128.log() -> D128
+@rf("D128.ln")
+failable routine D128.ln() -> D128
 
 ### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D128.log_unchecked")
-routine D128.log_unchecked() -> D128
+@rf("D128.ln_unchecked")
+routine D128.ln_unchecked() -> D128
 
 ### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D128.log1p")
-failable routine D128.log1p() -> D128
+@rf("D128.ln_1p")
+failable routine D128.ln_1p() -> D128
 
 ### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D128.log1p_unchecked")
-routine D128.log1p_unchecked() -> D128
+@rf("D128.ln_1p_unchecked")
+routine D128.ln_1p_unchecked() -> D128
 
 ### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
@@ -176,16 +176,16 @@ routine D128.erfc() -> D128
 
 ### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D128.tgamma")
-failable routine D128.tgamma() -> D128
+@rf("D128.gamma")
+failable routine D128.gamma() -> D128
 
 ### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D128.tgamma_unchecked")
-routine D128.tgamma_unchecked() -> D128
+@rf("D128.gamma_unchecked")
+routine D128.gamma_unchecked() -> D128
 
-### ln|tgamma(me)| (+inf at the poles and at ±inf), correctly rounded.
-@rf("D128.lgamma")
-routine D128.lgamma() -> D128
+### ln|gamma(me)| (+inf at the poles and at ±inf), correctly rounded.
+@rf("D128.ln_gamma")
+routine D128.ln_gamma() -> D128
 
 ### `me^you` with raw IEEE (the C99 pow special cases), correctly rounded.
 @rf("D128.pow_unchecked")

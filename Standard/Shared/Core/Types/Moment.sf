@@ -179,8 +179,8 @@ routine Moment.eq(you: Moment) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Moment.cmp")
-routine Moment.cmp(you: Moment) -> ComparisonSign
+@rf("Moment.compare")
+routine Moment.compare(you: Moment) -> ComparisonSign
 
 ### Returns the display form of this moment in a compact UTC civil-time style.
 ### :returns: The resulting `Text` value.

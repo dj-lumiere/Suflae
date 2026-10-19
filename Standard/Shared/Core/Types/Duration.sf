@@ -228,8 +228,8 @@ routine Duration.eq(you: Duration) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Duration.cmp")
-routine Duration.cmp(you: Duration) -> ComparisonSign
+@rf("Duration.compare")
+routine Duration.compare(you: Duration) -> ComparisonSign
 
 ### Returns the textual representation of this value.
 ### :returns: The resulting `Text` value.

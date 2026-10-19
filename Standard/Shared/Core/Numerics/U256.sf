@@ -212,22 +212,22 @@ routine U256.bitnot() -> U256
 ### 256 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-@rf("U256.ashl")
-routine U256.ashl(bits: U32) -> U256
+@rf("U256.shift_left")
+routine U256.shift_left(bits: U32) -> U256
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 256 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-@rf("U256.ashr")
-routine U256.ashr(bits: U32) -> U256
+@rf("U256.arith_shift_right")
+routine U256.arith_shift_right(bits: U32) -> U256
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 256 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-@rf("U256.lshr")
-routine U256.lshr(bits: U32) -> U256
+@rf("U256.logical_shift_right")
+routine U256.logical_shift_right(bits: U32) -> U256
 
 ### Returns `true` when both values are equal.
 ### :param you: The value to compare against.
@@ -238,8 +238,8 @@ routine U256.eq(you: U256) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("U256.cmp")
-routine U256.cmp(you: U256) -> ComparisonSign
+@rf("U256.compare")
+routine U256.compare(you: U256) -> ComparisonSign
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.

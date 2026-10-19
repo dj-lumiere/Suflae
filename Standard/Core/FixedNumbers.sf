@@ -57,22 +57,22 @@ failable routine S8.ilog10() -> Integer
 ### 8 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine S8.ashl(bits: Integer) -> S8
-    return me.ashl(bits: bits.to_shift_amount())
+routine S8.shift_left(bits: Integer) -> S8
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
 ### (arithmetic shift right). Shifting by 8 or more gives -1 for a negative value, else 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine S8.ashr(bits: Integer) -> S8
-    return me.ashr(bits: bits.to_shift_amount())
+routine S8.arith_shift_right(bits: Integer) -> S8
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
 ### sign (logical shift right). Shifting by 8 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine S8.lshr(bits: Integer) -> S8
-    return me.lshr(bits: bits.to_shift_amount())
+routine S8.logical_shift_right(bits: Integer) -> S8
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine S8.rotate_left(bits: Integer) -> S8
@@ -140,22 +140,22 @@ failable routine S16.ilog10() -> Integer
 ### 16 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine S16.ashl(bits: Integer) -> S16
-    return me.ashl(bits: bits.to_shift_amount())
+routine S16.shift_left(bits: Integer) -> S16
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
 ### (arithmetic shift right). Shifting by 16 or more gives -1 for a negative value, else 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine S16.ashr(bits: Integer) -> S16
-    return me.ashr(bits: bits.to_shift_amount())
+routine S16.arith_shift_right(bits: Integer) -> S16
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
 ### sign (logical shift right). Shifting by 16 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine S16.lshr(bits: Integer) -> S16
-    return me.lshr(bits: bits.to_shift_amount())
+routine S16.logical_shift_right(bits: Integer) -> S16
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine S16.rotate_left(bits: Integer) -> S16
@@ -223,22 +223,22 @@ failable routine S32.ilog10() -> Integer
 ### 32 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine S32.ashl(bits: Integer) -> S32
-    return me.ashl(bits: bits.to_shift_amount())
+routine S32.shift_left(bits: Integer) -> S32
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
 ### (arithmetic shift right). Shifting by 32 or more gives -1 for a negative value, else 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine S32.ashr(bits: Integer) -> S32
-    return me.ashr(bits: bits.to_shift_amount())
+routine S32.arith_shift_right(bits: Integer) -> S32
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
 ### sign (logical shift right). Shifting by 32 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine S32.lshr(bits: Integer) -> S32
-    return me.lshr(bits: bits.to_shift_amount())
+routine S32.logical_shift_right(bits: Integer) -> S32
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine S32.rotate_left(bits: Integer) -> S32
@@ -306,22 +306,22 @@ failable routine S64.ilog10() -> Integer
 ### 64 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine S64.ashl(bits: Integer) -> S64
-    return me.ashl(bits: bits.to_shift_amount())
+routine S64.shift_left(bits: Integer) -> S64
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
 ### (arithmetic shift right). Shifting by 64 or more gives -1 for a negative value, else 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine S64.ashr(bits: Integer) -> S64
-    return me.ashr(bits: bits.to_shift_amount())
+routine S64.arith_shift_right(bits: Integer) -> S64
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
 ### sign (logical shift right). Shifting by 64 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine S64.lshr(bits: Integer) -> S64
-    return me.lshr(bits: bits.to_shift_amount())
+routine S64.logical_shift_right(bits: Integer) -> S64
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine S64.rotate_left(bits: Integer) -> S64
@@ -389,22 +389,22 @@ failable routine S128.ilog10() -> Integer
 ### 128 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine S128.ashl(bits: Integer) -> S128
-    return me.ashl(bits: bits.to_shift_amount())
+routine S128.shift_left(bits: Integer) -> S128
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, copying the sign bit into vacated positions
 ### (arithmetic shift right). Shifting by 128 or more gives -1 for a negative value, else 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine S128.ashr(bits: Integer) -> S128
-    return me.ashr(bits: bits.to_shift_amount())
+routine S128.arith_shift_right(bits: Integer) -> S128
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero regardless of
 ### sign (logical shift right). Shifting by 128 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine S128.lshr(bits: Integer) -> S128
-    return me.lshr(bits: bits.to_shift_amount())
+routine S128.logical_shift_right(bits: Integer) -> S128
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine S128.rotate_left(bits: Integer) -> S128
@@ -467,22 +467,22 @@ failable routine U8.ilog10() -> Integer
 ### 8 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine U8.ashl(bits: Integer) -> U8
-    return me.ashl(bits: bits.to_shift_amount())
+routine U8.shift_left(bits: Integer) -> U8
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 8 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine U8.ashr(bits: Integer) -> U8
-    return me.ashr(bits: bits.to_shift_amount())
+routine U8.arith_shift_right(bits: Integer) -> U8
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 8 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine U8.lshr(bits: Integer) -> U8
-    return me.lshr(bits: bits.to_shift_amount())
+routine U8.logical_shift_right(bits: Integer) -> U8
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine U8.rotate_left(bits: Integer) -> U8
@@ -545,22 +545,22 @@ failable routine U16.ilog10() -> Integer
 ### 16 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine U16.ashl(bits: Integer) -> U16
-    return me.ashl(bits: bits.to_shift_amount())
+routine U16.shift_left(bits: Integer) -> U16
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 16 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine U16.ashr(bits: Integer) -> U16
-    return me.ashr(bits: bits.to_shift_amount())
+routine U16.arith_shift_right(bits: Integer) -> U16
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 16 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine U16.lshr(bits: Integer) -> U16
-    return me.lshr(bits: bits.to_shift_amount())
+routine U16.logical_shift_right(bits: Integer) -> U16
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine U16.rotate_left(bits: Integer) -> U16
@@ -623,22 +623,22 @@ failable routine U32.ilog10() -> Integer
 ### 32 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine U32.ashl(bits: Integer) -> U32
-    return me.ashl(bits: bits.to_shift_amount())
+routine U32.shift_left(bits: Integer) -> U32
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 32 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine U32.ashr(bits: Integer) -> U32
-    return me.ashr(bits: bits.to_shift_amount())
+routine U32.arith_shift_right(bits: Integer) -> U32
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 32 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine U32.lshr(bits: Integer) -> U32
-    return me.lshr(bits: bits.to_shift_amount())
+routine U32.logical_shift_right(bits: Integer) -> U32
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine U32.rotate_left(bits: Integer) -> U32
@@ -701,22 +701,22 @@ failable routine U64.ilog10() -> Integer
 ### 64 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine U64.ashl(bits: Integer) -> U64
-    return me.ashl(bits: bits.to_shift_amount())
+routine U64.shift_left(bits: Integer) -> U64
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 64 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine U64.ashr(bits: Integer) -> U64
-    return me.ashr(bits: bits.to_shift_amount())
+routine U64.arith_shift_right(bits: Integer) -> U64
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 64 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine U64.lshr(bits: Integer) -> U64
-    return me.lshr(bits: bits.to_shift_amount())
+routine U64.logical_shift_right(bits: Integer) -> U64
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 ### :param bits: The number of bit positions to rotate.
@@ -783,22 +783,22 @@ failable routine U128.ilog10() -> Integer
 ### 128 or more gives 0.
 ### :param bits: The number of bit positions to shift left.
 ### :returns: `me << bits`.
-routine U128.ashl(bits: Integer) -> U128
-    return me.ashl(bits: bits.to_shift_amount())
+routine U128.shift_left(bits: Integer) -> U128
+    return me.shift_left(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>>` for an unsigned type). Shifting by 128 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >> bits`.
-routine U128.ashr(bits: Integer) -> U128
-    return me.ashr(bits: bits.to_shift_amount())
+routine U128.arith_shift_right(bits: Integer) -> U128
+    return me.arith_shift_right(bits: bits.to_shift_amount())
 
 ### Right-shifts this value by `bits` positions, filling vacated bits with zero (the same as
 ### `>>` for an unsigned type). Shifting by 128 or more gives 0.
 ### :param bits: The number of bit positions to shift right.
 ### :returns: `me >>> bits`.
-routine U128.lshr(bits: Integer) -> U128
-    return me.lshr(bits: bits.to_shift_amount())
+routine U128.logical_shift_right(bits: Integer) -> U128
+    return me.logical_shift_right(bits: bits.to_shift_amount())
 
 ### Returns this value rotated left by `bits` positions.
 routine U128.rotate_left(bits: Integer) -> U128

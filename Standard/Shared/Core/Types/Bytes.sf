@@ -92,8 +92,8 @@ routine Bytes.eq(other: Bytes) -> Bool
 ### prefix of a longer one sorts first. Lets `Bytes` be sorted and used as a map key.
 ### :param you: The other byte sequence to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Bytes.cmp")
-routine Bytes.cmp(you: Bytes) -> ComparisonSign
+@rf("Bytes.compare")
+routine Bytes.compare(you: Bytes) -> ComparisonSign
 
 ### Returns a SipHash-2-4 keyed hash of this value.
 ### Each byte is folded into the keyed hash so equal sequences under the same key

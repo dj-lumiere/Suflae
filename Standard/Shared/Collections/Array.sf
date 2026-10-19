@@ -119,11 +119,11 @@ routine Array[T, COUNT].eq(you: Array[T, COUNT]) -> Bool
 needs T obeys Equatable
 
 ### Lexicographic comparison of two arrays of equal length.
-### Compares element by element from index 0 using `T.cmp`; returns at the
+### Compares element by element from index 0 using `T.compare`; returns at the
 ### first non-equal pair, or `SAME` when every pair is equal.
 ### :param you: The other array to compare against.
 ### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
 ### :note: Requires `T` to obey `Comparable`.
-@rf("Array.cmp")
-routine Array[T, COUNT].cmp(you: Array[T, COUNT]) -> ComparisonSign
+@rf("Array.compare")
+routine Array[T, COUNT].compare(you: Array[T, COUNT]) -> ComparisonSign
 needs T obeys Comparable

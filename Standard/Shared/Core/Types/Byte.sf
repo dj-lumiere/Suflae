@@ -25,8 +25,8 @@ routine Byte.eq(you: Byte) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Byte.cmp")
-routine Byte.cmp(you: Byte) -> ComparisonSign
+@rf("Byte.compare")
+routine Byte.compare(you: Byte) -> ComparisonSign
 
 ### Returns `true` when this byte falls within the inclusive range
 ### `[low, high]`.

@@ -87,8 +87,8 @@ routine Integer.eq(you: Integer) -> Bool
 ### Compares this value with `you` using numeric ordering.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Integer.cmp")
-routine Integer.cmp(you: Integer) -> ComparisonSign
+@rf("Integer.compare")
+routine Integer.compare(you: Integer) -> ComparisonSign
 
 ### Computes the bitwise AND of this value and `other` (two's-complement form).
 ### :param other: The other operand.
@@ -111,22 +111,22 @@ routine Integer.bitxor(other: Integer) -> Integer
 ### Shifts this value left by `bits` positions (`me << bits`): `me * 2^bits`.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
-@rf("Integer.ashl")
-routine Integer.ashl(bits: U32) -> Integer
+@rf("Integer.shift_left")
+routine Integer.shift_left(bits: U32) -> Integer
 
 ### Shifts this value right by `bits` positions (`me >> bits`): `floor(me / 2^bits)`, so `-5 >> 1` is `-3`.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
-@rf("Integer.ashr")
-routine Integer.ashr(bits: U32) -> Integer
+@rf("Integer.arith_shift_right")
+routine Integer.arith_shift_right(bits: U32) -> Integer
 
 ### Shifts this value right by `bits` positions filling with zeros (`me >>> bits`). An `Integer` has no fixed
 ### width, so a negative value has no zero-filled form: this is `>>` for a value that is not negative.
 ### :param bits: The number of bit positions to shift.
 ### :returns: The resulting `Integer` value.
 ### :throws: {NumericDomainError} when this value is negative.
-@rf("Integer.lshr")
-failable routine Integer.lshr(bits: U32) -> Integer
+@rf("Integer.logical_shift_right")
+failable routine Integer.logical_shift_right(bits: U32) -> Integer
 
 ### Returns the absolute magnitude of this value.
 ### :returns: The resulting `Integer` value.

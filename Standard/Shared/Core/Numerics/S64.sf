@@ -243,8 +243,8 @@ routine S64.eq(you: S64) -> Bool
 ### Returns the ordering relationship between this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("S64.cmp")
-routine S64.cmp(you: S64) -> ComparisonSign
+@rf("S64.compare")
+routine S64.compare(you: S64) -> ComparisonSign
 
 ### Returns the absolute value of this value.
 ### :returns: `me` if non-negative; `-me` otherwise.

@@ -14,12 +14,12 @@ routine D64.exp_unchecked() -> D64
 
 ### e^me - 1 (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D64.expm1")
-failable routine D64.expm1() -> D64
+@rf("D64.exp_m1")
+failable routine D64.exp_m1() -> D64
 
 ### e^me - 1 (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D64.expm1_unchecked")
-routine D64.expm1_unchecked() -> D64
+@rf("D64.exp_m1_unchecked")
+routine D64.exp_m1_unchecked() -> D64
 
 ### 2^me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
@@ -41,21 +41,21 @@ routine D64.exp10_unchecked() -> D64
 
 ### ln(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D64.log")
-failable routine D64.log() -> D64
+@rf("D64.ln")
+failable routine D64.ln() -> D64
 
 ### ln(me), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D64.log_unchecked")
-routine D64.log_unchecked() -> D64
+@rf("D64.ln_unchecked")
+routine D64.ln_unchecked() -> D64
 
 ### ln(1 + me) (accurate near 0). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D64.log1p")
-failable routine D64.log1p() -> D64
+@rf("D64.ln_1p")
+failable routine D64.ln_1p() -> D64
 
 ### ln(1 + me) (accurate near 0), raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D64.log1p_unchecked")
-routine D64.log1p_unchecked() -> D64
+@rf("D64.ln_1p_unchecked")
+routine D64.ln_1p_unchecked() -> D64
 
 ### log2(me). Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
@@ -176,16 +176,16 @@ routine D64.erfc() -> D64
 
 ### The gamma function of me. Crashes on a non-finite result (NumericDomainError for a NaN, NumericOverflowError for an
 ### infinity).
-@rf("D64.tgamma")
-failable routine D64.tgamma() -> D64
+@rf("D64.gamma")
+failable routine D64.gamma() -> D64
 
 ### The gamma function of me, raw IEEE (an infinity or a NaN where the result has no finite value).
-@rf("D64.tgamma_unchecked")
-routine D64.tgamma_unchecked() -> D64
+@rf("D64.gamma_unchecked")
+routine D64.gamma_unchecked() -> D64
 
-### ln|tgamma(me)| (+inf at the poles and at ±inf), correctly rounded.
-@rf("D64.lgamma")
-routine D64.lgamma() -> D64
+### ln|gamma(me)| (+inf at the poles and at ±inf), correctly rounded.
+@rf("D64.ln_gamma")
+routine D64.ln_gamma() -> D64
 
 ### `me^you` with raw IEEE (the C99 pow special cases), correctly rounded.
 @rf("D64.pow_unchecked")

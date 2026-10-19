@@ -56,8 +56,8 @@ routine Decimal.is_infinite() -> Bool
 routine Decimal.is_nan() -> Bool
 
 ### Three-way comparison under IEEE ordered semantics (delegated to D128).
-@rf("Decimal.cmp")
-routine Decimal.cmp(you: Decimal) -> ComparisonSign
+@rf("Decimal.compare")
+routine Decimal.compare(you: Decimal) -> ComparisonSign
 
 ### Value equality (delegated to D128): 1.0 and 1.00 are equal; +0 and -0 are equal.
 @rf("Decimal.eq")

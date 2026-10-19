@@ -197,8 +197,8 @@ routine B128.eq(you: B128) -> Bool
 ### Compares this value with `you` under IEEE ordered semantics (pure bit logic).
 ### :param you: The value to compare against.
 ### :returns: The comparison sign (SAME for unordered/NaN).
-@rf("B128.cmp")
-routine B128.cmp(you: B128) -> ComparisonSign
+@rf("B128.compare")
+routine B128.compare(you: B128) -> ComparisonSign
 
 ### Returns `me + you` (software IEEE 754, round-to-nearest-even). Checked: crashes if the result is
 ### non-finite. Use `add_unchecked` for raw IEEE 754 propagation.

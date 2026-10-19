@@ -202,8 +202,8 @@ routine U16.eq(you: U16) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("U16.cmp")
-routine U16.cmp(you: U16) -> ComparisonSign
+@rf("U16.compare")
+routine U16.compare(you: U16) -> ComparisonSign
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.

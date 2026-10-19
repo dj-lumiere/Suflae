@@ -364,7 +364,7 @@ routine BitArray[BITS].eq(you: BitArray[BITS]) -> Bool
 ### Compares bit by bit from index 0; `false` sorts before `true`.
 ### :param you: The other bit array to compare against.
 ### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
-routine BitArray[BITS].cmp(you: BitArray[BITS]) -> ComparisonSign
+routine BitArray[BITS].compare(you: BitArray[BITS]) -> ComparisonSign
     each i in 0 til BITS
         var a = me.getitem_raw(index: i)
         var b = you.getitem_raw(index: i)

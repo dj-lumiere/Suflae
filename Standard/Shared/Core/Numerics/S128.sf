@@ -275,8 +275,8 @@ routine S128.eq(you: S128) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("S128.cmp")
-routine S128.cmp(you: S128) -> ComparisonSign
+@rf("S128.compare")
+routine S128.compare(you: S128) -> ComparisonSign
 
 ### Returns the absolute value of this integer.
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.

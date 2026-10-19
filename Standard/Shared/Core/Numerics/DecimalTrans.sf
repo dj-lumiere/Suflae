@@ -8,8 +8,8 @@ module Core
 failable routine Decimal.exp() -> Decimal
 
 ### e^me - 1, accurate for small me.
-@rf("Decimal.expm1")
-failable routine Decimal.expm1() -> Decimal
+@rf("Decimal.exp_m1")
+failable routine Decimal.exp_m1() -> Decimal
 
 ### 2^me.
 @rf("Decimal.exp2")
@@ -20,12 +20,12 @@ failable routine Decimal.exp2() -> Decimal
 failable routine Decimal.exp10() -> Decimal
 
 ### Natural logarithm ln(me).
-@rf("Decimal.log")
-failable routine Decimal.log() -> Decimal
+@rf("Decimal.ln")
+failable routine Decimal.ln() -> Decimal
 
 ### ln(1 + me), accurate for small me.
-@rf("Decimal.log1p")
-failable routine Decimal.log1p() -> Decimal
+@rf("Decimal.ln_1p")
+failable routine Decimal.ln_1p() -> Decimal
 
 ### Base-2 logarithm log2(me).
 @rf("Decimal.log2")
@@ -119,13 +119,13 @@ routine Decimal.erf() -> Decimal
 @rf("Decimal.erfc")
 routine Decimal.erfc() -> Decimal
 
-### Gamma function tgamma(me).
-@rf("Decimal.tgamma")
-failable routine Decimal.tgamma() -> Decimal
+### Gamma function gamma(me).
+@rf("Decimal.gamma")
+failable routine Decimal.gamma() -> Decimal
 
-### Natural logarithm of the absolute value of the gamma function, lgamma(me).
-@rf("Decimal.lgamma")
-routine Decimal.lgamma() -> Decimal
+### Natural logarithm of the absolute value of the gamma function, ln_gamma(me).
+@rf("Decimal.ln_gamma")
+routine Decimal.ln_gamma() -> Decimal
 
 ### True if me has its sign bit set (negative, including -0).
 @rf("Decimal.signbit")

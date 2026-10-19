@@ -95,8 +95,8 @@ routine Char.eq(you: Char) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Char.cmp")
-routine Char.cmp(you: Char) -> ComparisonSign
+@rf("Char.compare")
+routine Char.compare(you: Char) -> ComparisonSign
 
 ### Converts this value to byte.
 ### This is only meaningful for characters in the ASCII range and currently

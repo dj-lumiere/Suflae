@@ -254,8 +254,8 @@ routine S16.eq(you: S16) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("S16.cmp")
-routine S16.cmp(you: S16) -> ComparisonSign
+@rf("S16.compare")
+routine S16.compare(you: S16) -> ComparisonSign
 
 ### Returns the absolute value of this integer.
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.

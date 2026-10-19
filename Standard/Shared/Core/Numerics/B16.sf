@@ -78,8 +78,8 @@ routine B16.eq(you: B16) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("B16.cmp")
-routine B16.cmp(you: B16) -> ComparisonSign
+@rf("B16.compare")
+routine B16.compare(you: B16) -> ComparisonSign
 
 ### Returns the square root of this value in half precision.
 ### :returns: The intrinsic square-root result for `me`.
@@ -284,16 +284,16 @@ failable routine B16.exp() -> B16
 failable routine B16.exp2() -> B16
 
 ### exp(me) - 1, accurate near zero.
-@rf("B16.expm1")
-failable routine B16.expm1() -> B16
+@rf("B16.exp_m1")
+failable routine B16.exp_m1() -> B16
 
 ### Base-10 exponential.
 @rf("B16.exp10")
 failable routine B16.exp10() -> B16
 
 ### Natural logarithm.
-@rf("B16.log")
-failable routine B16.log() -> B16
+@rf("B16.ln")
+failable routine B16.ln() -> B16
 
 ### Base-2 logarithm.
 @rf("B16.log2")
@@ -304,8 +304,8 @@ failable routine B16.log2() -> B16
 failable routine B16.log10() -> B16
 
 ### log(1 + me), accurate near zero.
-@rf("B16.log1p")
-failable routine B16.log1p() -> B16
+@rf("B16.ln_1p")
+failable routine B16.ln_1p() -> B16
 
 ### Raises this value to `exp`, checked: crashes on a non-finite result (overflow -> inf, domain ->
 ### NaN). Use `pow_unchecked` for raw IEEE 754 propagation.
@@ -374,8 +374,8 @@ routine B16.nextafter(you: B16) -> B16
 routine B16.rint() -> B16
 
 ### Gamma function.
-@rf("B16.tgamma")
-failable routine B16.tgamma() -> B16
+@rf("B16.gamma")
+failable routine B16.gamma() -> B16
 
 ### Truncates toward zero (alias of int_truncate).
 @rf("B16.trunc")
@@ -552,8 +552,8 @@ routine B16.cosh_unchecked() -> B16
 ### Returns cos(pi * this value), correctly rounded: the exact value rounded to the nearest `B16`
 ### (ties to even), identical on every platform. A zero result is +0; ±infinity and NaN give NaN.
 ### :returns: The correctly rounded cos(pi * x).
-@rf("B16.cospi")
-routine B16.cospi() -> B16
+@rf("B16.cos_pi")
+routine B16.cos_pi() -> B16
 
 ### Error function, correctly rounded: the exact erf rounded to the nearest `B16` (ties to even),
 ### identical on every platform. ±infinity gives ±1 and NaN gives NaN.
@@ -593,8 +593,8 @@ routine B16.exp2_unchecked() -> B16
 ### identical on every platform, and accurate near zero. Overflows to +infinity, tends to -1 for large
 ### negative inputs, and a NaN input gives a NaN.
 ### :returns: The correctly rounded `exp(me) - 1`.
-@rf("B16.expm1_unchecked")
-routine B16.expm1_unchecked() -> B16
+@rf("B16.exp_m1_unchecked")
+routine B16.exp_m1_unchecked() -> B16
 
 ### Hypotenuse sqrt(x^2 + y^2) with raw IEEE 754 propagation (overflow -> +inf), correctly rounded (one
 ### rounding to nearest, ties to even). An infinite leg gives +inf even when the other leg is a quiet NaN.
@@ -608,15 +608,15 @@ routine hypot_unchecked(x: B16, y: B16) -> B16
 ### rounded to the nearest `B16` (ties to even), identical on every platform. Poles (zero and the
 ### negative integers) and ±infinity give +infinity, NaN gives NaN.
 ### :returns: The correctly rounded log-gamma.
-@rf("B16.lgamma")
-routine B16.lgamma() -> B16
+@rf("B16.ln_gamma")
+routine B16.ln_gamma() -> B16
 
 ### Returns the natural logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
-### identical on every platform. `log(±0)` is -infinity, a negative input gives NaN, `log(+infinity)`
+### identical on every platform. `ln(±0)` is -infinity, a negative input gives NaN, `ln(+infinity)`
 ### is +infinity and a NaN input gives a quiet NaN.
 ### :returns: The correctly rounded log.
-@rf("B16.log_unchecked")
-routine B16.log_unchecked() -> B16
+@rf("B16.ln_unchecked")
+routine B16.ln_unchecked() -> B16
 
 ### Returns the base-10 logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
 ### identical on every platform. `log10(±0)` is -infinity, a negative input gives NaN, `log10(+infinity)`
@@ -625,12 +625,12 @@ routine B16.log_unchecked() -> B16
 @rf("B16.log10_unchecked")
 routine B16.log10_unchecked() -> B16
 
-### Returns `log(1 + me)`, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
-### identical on every platform, and accurate near zero. `log1p(-1)` is -infinity, an input below -1
-### gives NaN, `log1p(+infinity)` is +infinity and a NaN input gives a NaN.
-### :returns: The correctly rounded `log(1 + me)`.
-@rf("B16.log1p_unchecked")
-routine B16.log1p_unchecked() -> B16
+### Returns `ln(1 + me)`, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
+### identical on every platform, and accurate near zero. `ln_1p(-1)` is -infinity, an input below -1
+### gives NaN, `ln_1p(+infinity)` is +infinity and a NaN input gives a NaN.
+### :returns: The correctly rounded `ln(1 + me)`.
+@rf("B16.ln_1p_unchecked")
+routine B16.ln_1p_unchecked() -> B16
 
 ### Returns the base-2 logarithm of this value, correctly rounded: the exact result rounded to the nearest `B16` (ties to even),
 ### identical on every platform. `log2(±0)` is -infinity, a negative input gives NaN, `log2(+infinity)`
@@ -664,8 +664,8 @@ routine B16.sinh_unchecked() -> B16
 ### (ties to even), identical on every platform. An integer gives +0 when it is positive and -0 when
 ### it is negative; ±infinity and NaN give NaN.
 ### :returns: The correctly rounded sin(pi * x).
-@rf("B16.sinpi")
-routine B16.sinpi() -> B16
+@rf("B16.sin_pi")
+routine B16.sin_pi() -> B16
 
 ### Returns the tangent of this value (in radians), correctly rounded: the exact tangent rounded to the
 ### nearest `B16` (ties to even), identical on every platform. ±infinity and NaN give NaN.
@@ -684,15 +684,15 @@ routine B16.tanh() -> B16
 ### odd and negative, else -0; a half-integer n + 1/2 gives +infinity when n is even and x positive or
 ### n odd and x negative, else -infinity; ±infinity and NaN give NaN.
 ### :returns: The correctly rounded tan(pi * x).
-@rf("B16.tanpi")
-routine B16.tanpi() -> B16
+@rf("B16.tan_pi")
+routine B16.tan_pi() -> B16
 
 ### Gamma function with raw IEEE 754 propagation, correctly rounded: the exact gamma(x) rounded to the
 ### nearest `B16` (ties to even), identical on every platform. Overflow and the pole at ±0 give
 ### ±infinity, the negative integers and -infinity give NaN.
 ### :returns: The correctly rounded gamma function.
-@rf("B16.tgamma_unchecked")
-routine B16.tgamma_unchecked() -> B16
+@rf("B16.gamma_unchecked")
+routine B16.gamma_unchecked() -> B16
 
 ### Converts an `S8` into half-precision floating-point form.
 ### :returns: The corresponding `B16` value.

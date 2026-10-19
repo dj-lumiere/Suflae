@@ -123,8 +123,8 @@ routine D64.eq(you: D64) -> Bool
 
 ### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
 ### maps to `SAME` (matching the B128 engine convention).
-@rf("D64.cmp")
-routine D64.cmp(you: D64) -> ComparisonSign
+@rf("D64.compare")
+routine D64.compare(you: D64) -> ComparisonSign
 
 ### Raises this value to the `you` power (IEEE semantics: inf/NaN on overflow/domain error).
 @rf("D64.pow")

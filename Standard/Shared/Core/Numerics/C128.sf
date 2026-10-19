@@ -180,17 +180,17 @@ routine C128.atanh() -> C128
 routine C128.exp_unchecked() -> C128
 
 ### Returns the principal natural logarithm of this complex value.
-### :returns: `log(|me|) + i·arg(me)`.
-@rf("C128.log_unchecked")
-routine C128.log_unchecked() -> C128
+### :returns: `ln(|me|) + i·arg(me)`.
+@rf("C128.ln_unchecked")
+routine C128.ln_unchecked() -> C128
 
 ### Returns the base-10 logarithm of this complex value.
-### :returns: `log(me) / ln(10)`.
+### :returns: `ln(me) / ln(10)`.
 @rf("C128.log10")
 routine C128.log10() -> C128
 
 ### Returns the base-2 logarithm of this complex value.
-### :returns: `log(me) / ln(2)`.
+### :returns: `ln(me) / ln(2)`.
 @rf("C128.log2")
 routine C128.log2() -> C128
 
@@ -216,7 +216,7 @@ routine C128.sqrt_unchecked() -> C128
 routine C128.pow(you: C128) -> C128
 
 ### Crashes unless both parts of `r` are finite: a NaN part is a domain error, an infinite part an
-### overflow. The check behind the `!` forms of `exp`/`log`/`sqrt`/`sinh`/`cosh`.
+### overflow. The check behind the `!` forms of `exp`/`ln`/`sqrt`/`sinh`/`cosh`.
 @rf("c128_checked")
 failable routine c128_checked(r: C128) -> C128
 
@@ -226,11 +226,11 @@ failable routine c128_checked(r: C128) -> C128
 @rf("C128.exp")
 failable routine C128.exp() -> C128
 
-### Returns the principal natural logarithm. Checked: crashes on `log(0)` (an infinite real part).
-### Use `log_unchecked` for raw IEEE 754 propagation.
-### :returns: `log(|me|) + i·arg(me)`.
-@rf("C128.log")
-failable routine C128.log() -> C128
+### Returns the principal natural logarithm. Checked: crashes on `ln(0)` (an infinite real part).
+### Use `ln_unchecked` for raw IEEE 754 propagation.
+### :returns: `ln(|me|) + i·arg(me)`.
+@rf("C128.ln")
+failable routine C128.ln() -> C128
 
 ### Returns the principal square root. Checked: crashes if a part of the result is not finite.
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
@@ -249,7 +249,7 @@ failable routine C128.sinh() -> C128
 failable routine C128.cosh() -> C128
 
 ### Returns this value raised to the integer power `exp` by repeated squaring (exact up to rounding of
-### each product, no `log`/`exp` round trip). A negative `exp` inverts first; `exp` 0 gives `1`.
+### each product, no `ln`/`exp` round trip). A negative `exp` inverts first; `exp` 0 gives `1`.
 ### :param exp: The integer exponent.
 ### :returns: `me ** exp`.
 @rf("C128.pow")

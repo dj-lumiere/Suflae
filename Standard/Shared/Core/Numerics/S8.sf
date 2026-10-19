@@ -253,8 +253,8 @@ routine S8.eq(you: S8) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("S8.cmp")
-routine S8.cmp(you: S8) -> ComparisonSign
+@rf("S8.compare")
+routine S8.compare(you: S8) -> ComparisonSign
 
 ### Returns the absolute value of this integer.
 ### :returns: `-me` if `me < 0`; `me` if `me >= 0`.

@@ -132,8 +132,8 @@ routine ByteSize.eq(you: ByteSize) -> Bool
 ### Compares this value with the other value.
 ### :param you: The other value to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("ByteSize.cmp")
-routine ByteSize.cmp(you: ByteSize) -> ComparisonSign
+@rf("ByteSize.compare")
+routine ByteSize.compare(you: ByteSize) -> ComparisonSign
 
 ### Returns the display form of this byte size.
 ### Breaks the raw byte count into binary unit components (PiB, TiB, GiB, MiB,

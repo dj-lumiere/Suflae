@@ -202,8 +202,8 @@ routine U64.eq(you: U64) -> Bool
 ### Returns the ordering relationship between this value and `you`.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("U64.cmp")
-routine U64.cmp(you: U64) -> ComparisonSign
+@rf("U64.compare")
+routine U64.compare(you: U64) -> ComparisonSign
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare.

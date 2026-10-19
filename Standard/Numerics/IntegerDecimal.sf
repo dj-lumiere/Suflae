@@ -41,8 +41,8 @@ failable routine Integer.eq(you: Decimal) -> Bool
 ### How `me` orders against `you`.
 ### :param you: The other side.
 ### :returns: The order.
-failable routine Integer.cmp(you: Decimal) -> ComparisonSign
-    return me.exact_decimal().cmp(you: you)
+failable routine Integer.compare(you: Decimal) -> ComparisonSign
+    return me.exact_decimal().compare(you: you)
 
 ### `me + you` as a `Decimal`.
 ### :param you: The other side.
@@ -81,5 +81,5 @@ failable routine Decimal.eq(you: Integer) -> Bool
 ### How `me` orders against `you`.
 ### :param you: The other side.
 ### :returns: The order.
-failable routine Decimal.cmp(you: Integer) -> ComparisonSign
-    return me.cmp(you: you.exact_decimal())
+failable routine Decimal.compare(you: Integer) -> ComparisonSign
+    return me.compare(you: you.exact_decimal())

@@ -2,7 +2,7 @@ module Tests/StdlibSf/ComparisonOpsApi
 
 import IO/Console
 import Numerics
-# Builder-generated lt/le/gt/ge from cmp on types that obey Comparable.
+# Builder-generated lt/le/gt/ge from compare on types that obey Comparable.
 record Score
 obeys Comparable
     value: S64
@@ -10,9 +10,9 @@ obeys Comparable
 routine Score.eq(you: Score) -> Bool
     return me.value == you.value
 
-# Score auto-derives Equatable/Hashable; we expose cmp manually so lt/le/gt/ge
+# Score auto-derives Equatable/Hashable; we expose compare manually so lt/le/gt/ge
 # can be derived from it.
-routine Score.cmp(you: Score) -> ComparisonSign
+routine Score.compare(you: Score) -> ComparisonSign
     if me.value < you.value
         return ComparisonSign.ME_SMALL
     if me.value > you.value

@@ -91,8 +91,8 @@ routine Text.eq(other: Text) -> Bool
 ### Comparison is lexicographic over stored characters.
 ### :param you: The other text to compare against.
 ### :returns: The resulting `ComparisonSign` value.
-@rf("Text.cmp")
-routine Text.cmp(you: Text) -> ComparisonSign
+@rf("Text.compare")
+routine Text.compare(you: Text) -> ComparisonSign
 
 ### Returns a SipHash-2-4 keyed hash of this value.
 ### Each code point is folded into the keyed hash so equal texts under the same

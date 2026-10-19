@@ -27,11 +27,11 @@ routine start()
     bits.add_last(value: false)
     bits.add_last(value: true)
     bits[1] = true
-    show(f"bits={bits} count={bits.count()} ones={bits.count_ones()} b0={bits[0]}")
+    show(f"bits={bits} count={bits.count()} ones={bits.count_trues()} b0={bits[0]}")
     var fixed = BitArray[8]()
     fixed[0] = true
     fixed[7] = true
-    show(f"fixed={fixed} count={fixed.count()} ones={fixed.count_ones()} f7={fixed[7]}")
+    show(f"fixed={fixed} count={fixed.count()} ones={fixed.count_trues()} f7={fixed[7]}")
 
     var pq = PriorityQueue[Integer, Text]()
     pq.add(element: "low", priority: 5)

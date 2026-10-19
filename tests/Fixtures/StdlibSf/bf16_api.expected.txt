@@ -1,6 +1,6 @@
 x + y: 1.6  x * y: 0.15  x / y: 15  sqrt(2): 1.414
 exp(1): 2.72  sin(1): 0.84  2^10: 1.024e+03
-exp2m1(1): 1  log10p1(9): 1  acospi(0.5): 0.334  atan2pi(1, 1): 0.25
-sincos(1): 0.84 0.54  rsqrt(2): 0.707  compound(0.5, 2): 2.25
+exp2_m1(1): 1  log10_1p(9): 1  acos_pi(0.5): 0.334  atan2_pi(1, 1): 0.25
+sin_cos(1): 0.84 0.54  recip_sqrt(2): 0.707  compound(0.5, 2): 2.25
 hypot(2, 3, 6): 7
 3e38 + 3e38: overflow

@@ -157,7 +157,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   type, and SCREAMING marks a buildtime constant like a `preset`, so case alone tells type, type parameter, buildtime
   constant and runtime value apart. A receiver pattern's own parameter shadows the owner's parameter of the same name
   (`routine List[Agent[T]].gather() -> List[T]`: that `T` is the pattern's).
-- Builder-written per-type routines (the constructor, `represent`, `diagnose`, `eq`, `cmp`, `hash`, …) are
+- Builder-written per-type routines (the constructor, `represent`, `diagnose`, `eq`, `compare`, `hash`, …) are
   **wired routines**. They carry no sigil; you may write your own to replace one.
 - Say "build error" and "builder", not "compile error" and "compiler".
 
@@ -177,7 +177,7 @@ already in the prelude (many fixtures write `import IO/Console`) is harmless.
   `B128` and `C256` are the widest, and exact arithmetic is `Integer` and the decimals.
 - **Counts, positions, widths and amounts are always `Integer`**, whatever the value's type: a fixed-width
   number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
-  `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.ashr(bits: 1)`), radixes
+  `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes
   (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Integer`.
 - **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
   safe) with 34 significant digits; a result needing more digits (`1 / 3`) is rounded to 34, and a result
@@ -350,7 +350,10 @@ routine start()
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
   sign fill for `>>`). A shift amount and a subscript index may be an `Integer` or any fixed-width integer
-  (`xs[i]` with `i: S64`); a negative one crashes.
+  (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
+  `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
+  The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `recip_sqrt`, `sin_cos`, `gamma`,
+  `ln_gamma`, and so on (`migrate --step names` rewrites the C names, `expm1`, `log`, `cmp`, `ashl`, ...).
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
   (`a dot b` = `a.dot(b)`), left to right, looser than ranges and tighter than comparisons
   (`(a dot b) / n` needs the parentheses, `a dot b > 0` does not). Unmarked: SF-S706.
@@ -577,7 +580,7 @@ routine start()
   number they are a build error (SF-S440): values have no identity, use `==`.
 - **Equality and order are opt-in.** `obeys Equatable` gives `==`/`!=` (the builder compares member by
   member unless you write `routine T.eq(you: T) -> Bool`); `obeys Hashable` lets the type be a `Dict` key
-  or `Set` element; `obeys Comparable` with a `routine T.cmp(you: T) -> ComparisonSign` (returning
+  or `Set` element; `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
   `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`. Text and numbers already have all
   of these.
 - Every type gets `represent()` (what `show` and `f"{x}"` print, e.g. `Point(x: 3, y: 4)`) and

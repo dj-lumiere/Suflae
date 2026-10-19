@@ -203,8 +203,8 @@ routine U32.eq(you: U32) -> Bool
 ### Compares this value with `you`, returning the ordering relationship.
 ### :param you: The value to compare against.
 ### :returns: `ME_SMALL` if `me < you`, `ME_LARGE` if `me > you`, `SAME` if equal.
-@rf("U32.cmp")
-routine U32.cmp(you: U32) -> ComparisonSign
+@rf("U32.compare")
+routine U32.compare(you: U32) -> ComparisonSign
 
 ### Returns the smaller of this value and `you`.
 ### :param you: The value to compare against.

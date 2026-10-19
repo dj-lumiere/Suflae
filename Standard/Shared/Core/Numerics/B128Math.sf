@@ -8,20 +8,20 @@ module Core
 failable routine B128.exp() -> B128
 
 ### Returns `ln(me)`.
-@rf("B128.log")
-failable routine B128.log() -> B128
+@rf("B128.ln")
+failable routine B128.ln() -> B128
 
 ### Returns `e^me - 1`.
-@rf("B128.expm1")
-failable routine B128.expm1() -> B128
+@rf("B128.exp_m1")
+failable routine B128.exp_m1() -> B128
 
 ### Returns `ln(1 + me)`.
-@rf("B128.log1p")
-failable routine B128.log1p() -> B128
+@rf("B128.ln_1p")
+failable routine B128.ln_1p() -> B128
 
 ### `ln(1+me)` with raw IEEE (NaN -> qNaN, me=-1 -> -inf, me<-1 -> qNaN, +inf -> +inf). No crash.
-@rf("B128.log1p_unchecked")
-routine B128.log1p_unchecked() -> B128
+@rf("B128.ln_1p_unchecked")
+routine B128.ln_1p_unchecked() -> B128
 
 ### Returns `log2(me)`.
 @rf("B128.log2")
@@ -140,17 +140,17 @@ failable routine hypot(x: B128, y: B128, z: B128) -> B128
 routine hypot_unchecked(x: B128, y: B128, z: B128) -> B128
 
 ### Returns `sin(pi*me)`: sin(pi*n) is ±0 with the sign of me.
-@rf("B128.sinpi")
-routine B128.sinpi() -> B128
+@rf("B128.sin_pi")
+routine B128.sin_pi() -> B128
 
 ### Returns `cos(pi*me)`: cos(pi*(n + 1/2)) is +0.
-@rf("B128.cospi")
-routine B128.cospi() -> B128
+@rf("B128.cos_pi")
+routine B128.cos_pi() -> B128
 
 ### Returns `tan(pi*me)`. At an integer n it is +0 for a positive even n and -0 for a positive odd one (IEEE
-### 754 tanPi), with the opposite signs for negative n since tanpi is odd.
-@rf("B128.tanpi")
-routine B128.tanpi() -> B128
+### 754 tanPi), with the opposite signs for negative n since tan_pi is odd.
+@rf("B128.tan_pi")
+routine B128.tan_pi() -> B128
 
 ### Returns the error function `erf(me)`.
 @rf("B128.erf")
@@ -160,17 +160,17 @@ routine B128.erf() -> B128
 @rf("B128.erfc")
 routine B128.erfc() -> B128
 
-### Returns the gamma function `tgamma(me)`.
-@rf("B128.tgamma")
-failable routine B128.tgamma() -> B128
+### Returns the gamma function `gamma(me)`.
+@rf("B128.gamma")
+failable routine B128.gamma() -> B128
 
-### `tgamma(me)` with raw IEEE (poles at 0/negative integers -> inf/qNaN). No crash.
-@rf("B128.tgamma_unchecked")
-routine B128.tgamma_unchecked() -> B128
+### `gamma(me)` with raw IEEE (poles at 0/negative integers -> inf/qNaN). No crash.
+@rf("B128.gamma_unchecked")
+routine B128.gamma_unchecked() -> B128
 
-### Returns the log-gamma function `lgamma(me)` (= ln|gamma(me)|).
-@rf("B128.lgamma")
-routine B128.lgamma() -> B128
+### Returns the log-gamma function `ln_gamma(me)` (= ln|gamma(me)|).
+@rf("B128.ln_gamma")
+routine B128.ln_gamma() -> B128
 
 ### `acos(me)`, correctly rounded: the exact arc cosine rounded to the nearest `B128` (ties to even),
 ### identical on every platform. The result lies in [0, pi]. |me| > 1, ±infinity and a signaling NaN give
@@ -242,8 +242,8 @@ routine B128.exp2_unchecked() -> B128
 ### every platform, and accurate near 0. Raw IEEE 754 propagation, no crash: NaN -> quiet NaN,
 ### -infinity -> -1, +infinity -> +infinity, overflow -> +infinity.
 ### :returns: The correctly rounded `e^me - 1`.
-@rf("B128.expm1_unchecked")
-routine B128.expm1_unchecked() -> B128
+@rf("B128.exp_m1_unchecked")
+routine B128.exp_m1_unchecked() -> B128
 
 ### `sqrt(x^2 + y^2)`, correctly rounded: the exact Euclidean distance rounded to the nearest `B128` (ties
 ### to even), identical on every platform, without spurious overflow or underflow. Raw IEEE 754
@@ -259,8 +259,8 @@ routine hypot_unchecked(x: B128, y: B128) -> B128
 ### identical on every platform. Raw IEEE 754 propagation, no crash: ±0 -> -infinity, x < 0 -> NaN,
 ### +infinity -> +infinity, NaN -> quiet NaN.
 ### :returns: The correctly rounded natural logarithm.
-@rf("B128.log_unchecked")
-routine B128.log_unchecked() -> B128
+@rf("B128.ln_unchecked")
+routine B128.ln_unchecked() -> B128
 
 ### Returns the sine, correctly rounded: the exact sine of this value (in radians) rounded to the nearest
 ### `B128` (ties to even), identical on every platform. `sin(-x) == -sin(x)`, ±0 maps to itself, and
@@ -272,8 +272,8 @@ routine B128.sin() -> B128
 ### Returns the sine and the cosine together, each correctly rounded exactly as `sin()` and `cos()` return
 ### them. They share the argument reduction, so the pair costs little more than one of them.
 ### :returns: `(sin(me), cos(me))`.
-@rf("B128.sincos")
-routine B128.sincos() -> (B128, B128)
+@rf("B128.sin_cos")
+routine B128.sin_cos() -> (B128, B128)
 
 ### Returns the square root, correctly rounded: the exact square root rounded to the nearest `B128` (ties to
 ### even), identical on every platform, with raw IEEE 754 propagation (C `sqrt`): NaN for negatives and

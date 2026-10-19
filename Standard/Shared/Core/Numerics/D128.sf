@@ -136,8 +136,8 @@ routine D128.eq(you: D128) -> Bool
 
 ### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
 ### maps to `SAME` (matching the B128 engine convention).
-@rf("D128.cmp")
-routine D128.cmp(you: D128) -> ComparisonSign
+@rf("D128.compare")
+routine D128.compare(you: D128) -> ComparisonSign
 
 ### Returns `me` raised to the `you` power. Delegates to the transcendental `pow`;
 ### follows IEEE semantics (overflow/domain errors yield inf/NaN, never throw), so the
