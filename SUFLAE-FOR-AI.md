@@ -754,7 +754,13 @@ category: only a crashable can be thrown.
   `AbsentValueError` → "Absent value error"); write it only to say something else.
 - `Crashables` (plural) is the standard record for "any caught error". On it, `crash_title()`,
   `crash_message()`, `represent()` (also `f"{e}"`), `diagnose()` and `crash_type_id()` reach the actual
-  error's own routines.
+  error's own routines. The caught error is held in the `Check` itself, and which routine runs is decided
+  by the error's type among the errors the program throws: nothing is looked up while the program runs.
+- **A crashable holds a few values** (numbers, a `Text`): at most 64 bytes, a bigger one is SF-S711.
+- The builder collects the errors each routine can throw (its own `throw`s and those of the failable
+  routines it calls). `@throws([NopeError, AbsentValueError])` above a failable routine fixes that list:
+  an error the routine can throw that the list leaves out is SF-S712, and the annotation on a routine
+  that isn't failable is SF-S713. The editor marks a bare call of a failable routine with `may stop`.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
   `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
@@ -1312,7 +1318,9 @@ number). At most 20 are shown per batch.
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
 | SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
-| SF-S750       | `throw` in a routine without `!`                    | declare it `routine name!(...)`                   |
+| SF-S711       | crashable bigger than 64 bytes                      | keep a few values in it                           |
+| SF-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
+| SF-S750       | `throw` in a routine not declared `failable`        | declare it `failable routine name(...)`           |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
