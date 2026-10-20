@@ -1,0 +1,21 @@
+module IO/Environment
+
+# Suflae's surface of the environment: Suflae lists and dictionaries. A Suflae program calls these in place of the
+# shared routines of the same names.
+
+### The arguments the program was started with, its own name left out.
+### :returns: The arguments, in order.
+common routine OsEnvironment.arguments() -> List[Text]
+    return OsEnvironment.arguments().to[List[Text]]()
+
+### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
+### when it changes.
+### :returns: The variables by name.
+common routine OsEnvironment.to[Dict[Text, Text]]() -> Dict[Text, Text]
+    var parts = environment_parts().to[List[Text]]()
+    var result = Dict[Text, Text]()
+    var i = 0
+    while i + 1 < parts.count()
+        result[parts[i]] = parts[i + 1]
+        i += 2
+    return result

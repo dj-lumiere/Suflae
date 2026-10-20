@@ -1,0 +1,37 @@
+module Subprocess
+
+import IO/File
+
+# Suflae's surface of running a program directly: it takes Suflae lists and dictionaries. A Suflae program calls these
+# in place of the shared routines of the same names.
+
+### Runs `file` directly with `args`, with no shell, so each argument reaches the program as it is (the safe form for
+### text from outside the program). It runs in `working_directory`: the way to give a child program a working
+### directory of its own. It waits for the program to end and captures what it writes.
+### :param file: The program to run.
+### :param args: The arguments after the program's name.
+### :param working_directory: The child's working directory, this program's own when left out.
+### :param env: Environment variables added to this program's for the child (the empty default changes nothing).
+### :returns: A `ProcessResult` with the exit code, the signal, and the captured output and errors.
+routine run_program(
+    file: Text,
+    args: List[Text],
+    working_directory: Directory = Directory(at: ""),
+    env: Dict[Text, Text] = {:},
+) -> ProcessResult
+    var shared_args = args.to[RF::List]()
+    return run_program(
+        file: file,
+        args: shared_args,
+        working_directory: working_directory,
+        env: shared_env(env: env),
+    )
+
+### The environment additions as the shared library's dictionary.
+### :param env: The additions.
+### :returns: The same names and values.
+secret routine shared_env(env: Dict[Text, Text]) -> RF::System.Dict[Text, Text]
+    var result = RF::System.Dict[Text, Text]()
+    each name in env.keys()
+        result[name] = env[name]
+    return result

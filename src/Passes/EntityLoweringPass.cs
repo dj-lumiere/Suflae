@@ -573,6 +573,12 @@ internal sealed class EntityLoweringPass
                                                         !ReferenceEquals(objA: value, objB: compound.Value)) =>
                 compound with { Target = target, Value = value },
             UnaryExpression un => LowerUnaryExpression(un: un),
+            // `0 til cells.count()`: the bounds and the step are values like any other, so a handle in them is
+            // reached through the handle (else `cells` stays bare-typed and `count` reads the handle itself).
+            RangeExpression range => LowerRangeExpression(range: range),
+            // `a < b.count() < c` and `if ... then x.f() else y.g()`: each part is lowered the same way.
+            ChainedComparisonExpression chain => LowerChainedComparison(chain: chain),
+            ConditionalExpression conditional => LowerConditionalExpression(conditional: conditional),
             NamedArgumentExpression namedArg => LowerNamedArgumentExpression(namedArg: namedArg),
             // An analyzed `try`/`check`/`lookup` is its recovery-variant call: lower that call in its place
             // (as AstRewriter splices it) so a Roamed receiver inside it retypes.
@@ -581,6 +587,42 @@ internal sealed class EntityLoweringPass
                 : recovery with { Inner = LowerExpression(expr: recovery.Inner) },
             _ => expr
         };
+    }
+
+    private RangeExpression LowerRangeExpression(RangeExpression range)
+    {
+        Expression start = LowerExpression(expr: range.Start);
+        Expression end = LowerExpression(expr: range.End);
+        Expression? step = range.Step is { } written
+            ? LowerExpression(expr: written)
+            : null;
+        return ReferenceEquals(objA: start, objB: range.Start) && ReferenceEquals(objA: end, objB: range.End) &&
+               ReferenceEquals(objA: step, objB: range.Step)
+            ? range
+            : range with { Start = start, End = end, Step = step };
+    }
+
+    private ChainedComparisonExpression LowerChainedComparison(ChainedComparisonExpression chain)
+    {
+        List<Expression> operands = chain.Operands.Select(selector: LowerExpression).ToList();
+        return operands.Where(predicate: (o, i) => !ReferenceEquals(objA: o, objB: chain.Operands[index: i])).Any()
+            ? chain with { Operands = operands }
+            : chain;
+    }
+
+    private ConditionalExpression LowerConditionalExpression(ConditionalExpression conditional)
+    {
+        Expression condition = LowerExpression(expr: conditional.Condition);
+        Expression whenTrue = LowerExpression(expr: conditional.TrueExpression);
+        Expression whenFalse = LowerExpression(expr: conditional.FalseExpression);
+        return ReferenceEquals(objA: condition, objB: conditional.Condition) &&
+               ReferenceEquals(objA: whenTrue, objB: conditional.TrueExpression) &&
+               ReferenceEquals(objA: whenFalse, objB: conditional.FalseExpression)
+            ? conditional
+            : conditional with
+            {
+                Condition = condition, TrueExpression = whenTrue, FalseExpression = whenFalse
+            };
     }
 
     private CreatorExpression LowerCreatorMembers(CreatorExpression creator)

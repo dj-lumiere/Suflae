@@ -132,7 +132,7 @@ relative to `config.toml` (each folder and the file name PascalCased, joined wit
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Agent`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
-(`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
+(`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
 `PriorityQueue`, …), `IterTools` (iterator adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
 (`x.type_name()`), `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
@@ -757,7 +757,8 @@ category: only a crashable can be thrown.
   error's own routines.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
-  `NumericDomainError`, `InvalidValueError`, `IOError`, `TaskTimeoutError`, `AgentStartError`,
+  `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
+  `NotEnoughSpaceError`, `StorageFaultError`, `TaskTimeoutError`, `AgentStartError`,
   `CancelRequested`, `ChannelClosedError`, `ReshapingWhileInUseError`. `stop()` and `breach()` crash on purpose (`UserTerminationError`,
   `LogicBreachedError`).
 
@@ -983,23 +984,42 @@ routine start()
   `ask_lines()`, `ask_words()`. A blank line is `""`. At the end of the input `ask_line()`/`ask_word()` crash with
   `EndOfInputError` (`IO/Errors`): read until the end with `when check ask_line()` + `is EndOfInputError => break`.
   An `ask_line()` right after `ask_word()` skips the line end the word left.
-- Files: `FileManager` is the one place that touches the disk, its routines called on the type. `File(at:
-  "notes.txt")` and `Directory(at: "data")` only say where (no I/O at construction), with path members `name`,
-  `stem`, `extension` (no leading dot), `parent`, `with_extension(ext:)`, `with_name(name:)`, `file(name:)`,
-  `subdir(name:)`. `FileManager.read_text(at:)`, `write_text(at:, content:)`, `append_text`, `read_bytes`,
-  `write_bytes`, `open_read`/`open_write`/`open_append`, `size`, `metadata`, `exists`, `is_file`, `is_directory`,
-  `delete`, `delete_all`, `move(from:, to:)`, `copy(from:, to:)`, `list`, `entries`, `walk`, `current_directory()`,
-  `home_directory()`, `temp_directory()`. **A file must exist before it is read, written or opened**: a missing one
-  is an `IOError`, nothing is created silently. `FileManager.make_file(at:, replacing: false)` makes one (an
-  existing file is an `IOError` unless `replacing: true`, which empties it), `make_directory(at:, parents: false)`
-  makes a directory. `move`/`copy` refuse an existing destination unless `replacing: true`. There is no `touch`
-  and no `IO/FileSystem`. Failures are recovered with `try`/`check`.
-- `FileManager.read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
+- Files: `OsFileManager` (the operating system's file manager) is the one place that touches the disk, its routines
+  called on the type. Storage has three layers: `StorageManager` (one storage device), `PartitionManager` (one
+  partition of it) and `FileManager`, the role of the file system on one partition (a partition has exactly one, a
+  second one over it fails). `OsFileManager.partition(at: dir)`, `PartitionManager.all()`, `StorageManager.all()`
+  and `device.partitions()` only ask. `File(at: "notes.txt")` and `Directory(at: "data")` only say where (no I/O at
+  construction), with path members `name`, `stem`, `extension` (no leading dot), `parent`, `with_extension(ext:)`,
+  `with_name(name:)`, `file(name:)`, `go_to(name:)`. `OsFileManager.read_text(at:)`, `write_text(at:, content:)`,
+  `append_text`, `read_bytes`, `write_bytes`, `open_read`/`open_write`/`open_append`, `size`, `metadata`, `exists`,
+  `is_file`, `is_directory`, `delete`, `delete_all`, `copy(from:, to:)`, `list`, `entries`, `walk`.
+  `rename(at:, to: name)` changes a file's or directory's NAME (a separator in it fails), `move(at:, into:
+  directory)` puts it into another directory under its own name: a copy then a delete (the operating system renames
+  instead on the same partition), not atomic: a failed copy deletes nothing, a failed delete leaves both and says
+  so. **A file must exist before it is read, written or opened**: a missing one is a `NotFoundError`, nothing is
+  created silently. `OsFileManager.make_file(at:, replacing: false)` makes one (an existing file is an `IOError`
+  unless `replacing: true`, which empties it), `make_directory(at:, parents: false)` makes a directory.
+  `rename`/`move`/`copy` refuse an existing destination unless `replacing: true`. There is no `touch` and no
+  `IO/FileSystem`. Failures are recovered with `try`/`check`: `NotFoundError`, `NotEnoughPermissionError`,
+  `NotEnoughSpaceError`, `StorageFaultError` (the device failed to read or write), and `IOError` for the rest, each
+  its own error (`is IOError` doesn't take the other four, `is Crashables` takes all).
+- A file as cells: `var s = OsFileManager.open_storage[Byte](at: f)` (or `[Char]`, one Unicode scalar per 4-byte
+  cell, UTF-32LE, a UTF-8 file is not one) gives a `FileStorage[T]`: `s[i]`, `s[i] = v`, `s.count()`, `s.flush()`,
+  `s.close()`, `open_storage_range[T](at:, start:, count:)` for a window. It can't grow the file (`set_size` first).
+- The environment (`OsEnvironment`, always available): `arguments()` (a list, the program's own name left out),
+  `variable(name:)` (`try` gives a `Maybe`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
+  `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
+  `Directory` and build paths from it. `OsEntropy.next_u64()` gives random bits from the operating system,
+  `Random.from_entropy()` a generator seeded with them.
+- `OsFileManager.read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
+- `migrate --step files` rewrites `FileManager.x` → `OsFileManager.x`, the directory routines → `OsEnvironment`,
+  `subdir` → `go_to`, `move(from:, to:)` → `rename` or `move(at:, into:)` when the paths show which, and lists the
+  rest.
 - **`using`** binds a resource for a block and releases it at the block's end, however the block is left:
 
 ```suflae
-var out = FileManager.make_file(at: File(at: "out.txt"), replacing: true)
-using FileManager.open_write(at: out) as sink
+var out = OsFileManager.make_file(at: File(at: "out.txt"), replacing: true)
+using OsFileManager.open_write(at: out) as sink
     sink.store(data: "hello\n".encode_as_utf8())
 ```
 

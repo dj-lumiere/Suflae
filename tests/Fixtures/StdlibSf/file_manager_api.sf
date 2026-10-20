@@ -1,20 +1,40 @@
 module Tests/StdlibSf/FileManagerApi
 
+import IO/Environment
 import IO/Errors
 
-# FileManager in Suflae: a file is made before it is written, a missing one fails, and listings are Suflae lists.
+# OsFileManager in Suflae: a file is made before it is written, a missing one fails, listings are Suflae lists, rename
+# changes only a name and move puts a file into another directory.
 routine start()
-    var root = FileManager.make_directory(at: FileManager.temp_directory().subdir(name: "sf_fixture_file_manager"),
-        parents: true)
-    var notes = FileManager.make_file(at: root.file(name: "notes.txt"), replacing: true)
-    FileManager.write_text(at: notes, content: "hello")
-    show(FileManager.read_text(at: notes))
-    FileManager.make_file(at: root.file(name: "a.txt"), replacing: true)
-    show(FileManager.list(at: root).sorted())
-    show(FileManager.entries(at: root).count())
-    show(try FileManager.read_text(at: root.file(name: "missing.txt")))
-    when check FileManager.make_file(at: notes)
+    var place = OsEnvironment.temp_directory().go_to(name: "sf_fixture_file_manager")
+    if OsFileManager.exists(at: place)
+        OsFileManager.delete_all(at: place)
+    var root = OsFileManager.make_directory(at: place, parents: true)
+    var notes = OsFileManager.make_file(at: root.file(name: "notes.txt"), replacing: true)
+    OsFileManager.write_text(at: notes, content: "hello")
+    show(OsFileManager.read_text(at: notes))
+    OsFileManager.make_file(at: root.file(name: "a.txt"), replacing: true)
+    show(OsFileManager.list(at: root).sorted())
+    show(OsFileManager.entries(at: root).count())
+    show(try OsFileManager.read_text(at: root.file(name: "missing.txt")))
+    when check OsFileManager.make_file(at: notes)
         is File => show("made again")
         is IOError => show("already exists")
-    FileManager.delete_all(at: root)
-    show(FileManager.exists(at: root))
+    when check OsFileManager.write_text(at: root.file(name: "missing.txt"), content: "x")
+        is None => show("written")
+        is NotFoundError => show("not found")
+    var renamed = OsFileManager.rename(at: notes, to: "renamed.txt")
+    show(renamed.name())
+    var inner = OsFileManager.make_directory(at: root.go_to(name: "inner"))
+    var moved = OsFileManager.move(at: renamed, into: inner)
+    show(f"{moved.parent().name()} {OsFileManager.exists(at: moved)} {OsFileManager.exists(at: renamed)}")
+    var storage = OsFileManager.open_storage[Byte](at: moved)
+    storage[0] = b'H'
+    show(storage.count())
+    storage.close()
+    show(OsFileManager.read_text(at: moved))
+    show(f"PATH set: {(try OsEnvironment.variable(name: "PATH")).is_present()}")
+    show(f"PATH in the snapshot: {OsEnvironment.to[Dict[Text, Text]]().has_key(key: "PATH")}")
+    show(OsEnvironment.arguments().count())
+    OsFileManager.delete_all(at: root)
+    show(OsFileManager.exists(at: root))
