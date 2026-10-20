@@ -9,4 +9,4 @@ crashable EmptyPlaceError
 ### Returns the message the crash shows.
 @override
 routine EmptyPlaceError.crash_message() -> Text
-    return f"Place {me.index} of the buffer holds no entity yet: write it before reading it"
+    return f"Place {me.index} of the memory holds no entity yet: write it before reading it"

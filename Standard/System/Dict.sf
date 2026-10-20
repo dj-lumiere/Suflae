@@ -123,7 +123,7 @@ routine Dict[TKey, TValue].clear()
             me.vals.erase_at(position: i)
             me.live.put(position: i, value: false)
         i = i + 1
-    me.index.reset(capacity: me.keys.room)
+    me.index.reset(capacity: me.keys.room())
     me.count = 0
     me.used = 0
     return
@@ -365,7 +365,7 @@ secret routine Dict[TKey, TValue].find_slot(key: TKey) -> U64
 
 ### Packs the entries and rebuilds the probe table when there is no room for one more entry.
 secret routine Dict[TKey, TValue].make_room()
-    if me.used < me.keys.room and not me.index.crowded(count: me.count)
+    if me.used < me.keys.room() and not me.index.crowded(count: me.count)
         return
     # Pack the live entries to the front, oldest first.
     var packed: U64 = 0
@@ -380,12 +380,12 @@ secret routine Dict[TKey, TValue].make_room()
             packed = packed + 1
         i = i + 1
     me.used = packed
-    var room = me.keys.room
+    var room = me.keys.room()
     if me.count * 2 >= room
         me.keys.grow_to(room: room * 2)
         me.vals.grow_to(room: room * 2)
         me.live.grow_to(room: room * 2)
-    me.index.reset(capacity: me.keys.room)
+    me.index.reset(capacity: me.keys.room())
     i = 0
     while i < me.count
         me.index.place(hash: me.keys.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)

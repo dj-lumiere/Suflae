@@ -145,7 +145,7 @@ secret failable routine Array[T, COUNT].filled(position: U64) -> U64
     var place = me.checked(position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if me.slot(position: place).peek_as[Address]() == 0
+            if me.slot(position: place).peek_as[Addr]().is_hollow()
                 throw EmptyPlaceError(index: place.to[Integer]())
     return place
 

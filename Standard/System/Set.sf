@@ -109,7 +109,7 @@ routine Set[T].clear()
             me.values.erase_at(position: i)
             me.live.put(position: i, value: false)
         i = i + 1
-    me.index.reset(capacity: me.values.room)
+    me.index.reset(capacity: me.values.room())
     me.count = 0
     me.used = 0
     return
@@ -312,7 +312,7 @@ secret routine Set[T].find_slot(value: T) -> U64
 
 ### Packs the values and rebuilds the probe table when there is no room for one more value.
 secret routine Set[T].make_room()
-    if me.used < me.values.room and not me.index.crowded(count: me.count)
+    if me.used < me.values.room() and not me.index.crowded(count: me.count)
         return
     var packed: U64 = 0
     var i: U64 = 0
@@ -325,11 +325,11 @@ secret routine Set[T].make_room()
             packed = packed + 1
         i = i + 1
     me.used = packed
-    var room = me.values.room
+    var room = me.values.room()
     if me.count * 2 >= room
         me.values.grow_to(room: room * 2)
         me.live.grow_to(room: room * 2)
-    me.index.reset(capacity: me.values.room)
+    me.index.reset(capacity: me.values.room())
     i = 0
     while i < me.count
         me.index.place(hash: me.values.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)

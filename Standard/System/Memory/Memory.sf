@@ -2,16 +2,16 @@ module System/Memory
 
 import BuilderQuery
 
-### A row of `capacity` places for elements, fixed in size when it is made, every place starting as zero (an empty
-### value: 0, `""`, `false`, no entity). Every Suflae collection keeps its elements in one, and keeps track itself of
-### which places hold its elements.
+### A row of `capacity` places for elements, every place starting as zero (an empty value: 0, `""`, `false`, no entity).
+### Every Suflae collection keeps its elements in one, and keeps track itself of which places hold its elements.
 ###
 ### Writing a place replaces what it held, `take` hands out what a place holds and leaves it zero, and `move`
 ### carries places to other places. `grow` moves everything into a bigger row.
 ###
-### A range of the places, `mem[a til b]`, is a view that shares the same memory with no copy: writing through the
-### view changes the memory, and a view can be kept as long as you like, since it keeps the storage alive. The storage
-### goes away when the last memory or view that uses it does, or when the cycle collector finds it unreachable.
+### A range of the places, `mem[a til b]`, is a `Span[T]`: a view that shares the same places with no copy. Writing
+### through the span changes the memory, and a span can be kept as long as you like, since it keeps the memory alive.
+### The memory goes away when the last name or span that uses it does, or when the cycle collector finds it
+### unreachable.
 ###
 ### Reading a place hands back a value of its own (a record is copied, an entity is shared). Positions count from 0.
 ### A negative position crashes with `NegativeIndexError`, one at or past `capacity()` with `IndexOutOfBoundsError`,
@@ -21,7 +21,7 @@ import BuilderQuery
 ### | Operation | Time |
 ### |---|---|
 ### | `mem[i]` / `mem[i] = v` / `take` | O(1) |
-### | `mem[a til b]` (a view) | O(1) |
+### | `mem[a til b]` (a span) | O(1) |
 ### | `move` | O(count) |
 ### | `grow` / `rotate_left` | O(capacity) |
 ### | `sort` | O(n log n) |
@@ -31,32 +31,43 @@ import BuilderQuery
 entity Memory[T]
 relates MemoryEmittable[T] as Iter
 obeys Iterable[T], Container
-    ### The storage the places live in, a handle shared with every view and walk of it.
-    secret storage: MemoryStorage[T]
-    ### The storage's place this memory starts at (0 for a whole memory).
+    ### The places, a handle shared with every span and walk of this memory.
+    secret block: MemoryBlock[T]
+
+### A view of a run of places of a `Memory[T]`, made by `mem[a til b]`: it shares the memory's places with no copy,
+### so writing through the span changes the memory, and it keeps the memory alive as long as it is kept. A span has
+### the reading, writing and arranging routines of a memory, over its own places only, counted from 0, and a range
+### of a span is a span of the same memory. A span covers a fixed run of places, so it does not grow.
+### :typeparam T: The element type stored in the memory.
+entity Span[T]
+relates MemoryEmittable[T] as Iter
+obeys Iterable[T], Container
+    ### The places of the memory, a handle shared with the memory and every span and walk of it.
+    secret block: MemoryBlock[T]
+    ### The block's place this span starts at.
     secret start: U64
-    ### How many places this memory spans.
+    ### How many places this span covers.
     secret room: U64
 
-### The storage under one memory and all of its views: places for elements in a row.
+### The places under a memory and its spans: a row of `room` places, allocated when the memory is made or grows.
 ### :typeparam T: The element type stored.
-entity MemoryStorage[T]
+secret entity MemoryBlock[T]
     ### The places.
     secret data: Hijacked[T]
     ### How many places there are.
     secret room: U64
 
-### Walks places of a `Memory[T]` in order, from a first place, wrapping past the end of the memory to its start.
+### Walks places of a `Memory[T]` or a `Span[T]` in order, from a first place, wrapping past the end to the start.
 ### :typeparam T: The element type produced.
 entity MemoryEmittable[T]
 obeys Emittable[T]
-    ### The storage being walked, kept alive by the walk.
-    secret storage: MemoryStorage[T]
-    ### The storage's place the walked memory starts at.
+    ### The places being walked, kept alive by the walk.
+    secret block: MemoryBlock[T]
+    ### The block's place the walked places start at.
     secret base: U64
-    ### How many places the walked memory spans.
+    ### How many places the walked memory or span has.
     secret room: U64
-    ### The memory's place the walk starts at.
+    ### The place the walk starts at, counted from `base`.
     secret first: U64
     ### How many places have been read.
     secret index: U64
@@ -75,7 +86,7 @@ routine Memory[T](capacity: Integer) -> Memory[T]
 ### Creates a memory of `room` places, all zero, counted with `U64`.
 ### :param room: How many places it has.
 routine Memory[T](room: U64) -> Memory[T]
-    return Memory[T](storage: new_memory_storage[T](room: room), start: 0, room: room)
+    return Memory[T](block: new_memory_block[T](room: room))
 
 ### Creates a memory of `count` places, each holding `fill`.
 ### :param count: The number of places.
@@ -83,19 +94,19 @@ routine Memory[T](room: U64) -> Memory[T]
 routine Memory[T](count: Integer, fill: T) -> Memory[T]
     var result = Memory[T](capacity: count)
     var i: U64 = 0
-    while i < result.room
+    while i < result.room()
         danger
-            result.slot(position: i).poke(fill)
+            place_at[T](base: result.block.data, position: i).poke(fill)
         i = i +% 1
     return result
 
-### Memory with `room` places, all zero.
-secret routine new_memory_storage[T](room: U64) -> MemoryStorage[T]
+### A block of `room` places, all zero.
+secret routine new_memory_block[T](room: U64) -> MemoryBlock[T]
     var data = hijacked_none[T]()
     if room > 0
         danger
             data = hijacked_from[T](rf_allocate_dynamic(T.data_size() * room))
-    return MemoryStorage[T](data: data, room: room)
+    return MemoryBlock[T](data: data, room: room)
 
 # ============================================================================
 # Size
@@ -103,10 +114,18 @@ secret routine new_memory_storage[T](room: U64) -> MemoryStorage[T]
 
 ### Returns how many places the memory has.
 routine Memory[T].capacity() -> Integer
-    return me.room.to[Integer]()
+    return me.block.room.to[Integer]()
 
 ### Returns how many places the memory has, as a `U64`.
 routine Memory[T].room() -> U64
+    return me.block.room
+
+### Returns how many places the span covers.
+routine Span[T].capacity() -> Integer
+    return me.room.to[Integer]()
+
+### Returns how many places the span covers, as a `U64`.
+routine Span[T].room() -> U64
     return me.room
 
 # ============================================================================
@@ -118,6 +137,11 @@ routine Memory[T].room() -> U64
 failable routine Memory[T].getitem(index: Integer) -> T
     return me.at(position: position_of(value: index))
 
+### Returns what the place at `index` holds (`span[i]`).
+### :param index: The position to read.
+failable routine Span[T].getitem(index: Integer) -> T
+    return me.at(position: position_of(value: index))
+
 ### Replaces what the place at `index` holds (`mem[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new value.
@@ -125,52 +149,71 @@ failable routine Memory[T].setitem(index: Integer, value: T)
     me.put(position: position_of(value: index), value: value)
     return
 
+### Replaces what the place at `index` holds (`span[i] = v`).
+### :param index: The position to write.
+### :param value: The new value.
+failable routine Span[T].setitem(index: Integer, value: T)
+    me.put(position: position_of(value: index), value: value)
+    return
+
 ### Returns what the place at `position` holds, counted with `U64`.
 ### :param position: The position to read.
 @inline
 failable routine Memory[T].at(position: U64) -> T
-    return me.read(position: me.filled(position: position)).share()
+    return places_at[T](base: me.block.data, room: me.block.room, position: position)
+
+### Returns what the place at `position` holds, counted with `U64`.
+### :param position: The position to read.
+@inline
+failable routine Span[T].at(position: U64) -> T
+    return places_at[T](base: me.base(), room: me.room, position: position)
 
 ### Replaces what the place at `position` holds, counted with `U64`.
 ### :param position: The position to write.
 ### :param value: The new value.
 @inline
 failable routine Memory[T].put(position: U64, value: T)
-    danger
-        var slot = me.slot(position: me.checked(position: position))
-        slot.peek().destruct()
-        slot.poke(value)
+    places_put[T](base: me.block.data, room: me.block.room, position: position, value: value)
+    return
+
+### Replaces what the place at `position` holds, counted with `U64`.
+### :param position: The position to write.
+### :param value: The new value.
+@inline
+failable routine Span[T].put(position: U64, value: T)
+    places_put[T](base: me.base(), room: me.room, position: position, value: value)
     return
 
 ### Hands out what the place at `position` holds and leaves the place zero, counted with `U64`.
 ### :param position: The position to empty.
 failable routine Memory[T].take_at(position: U64) -> T
-    var place = me.filled(position: position)
-    var value = me.read(position: place)
-    me.clear_places(from: place, count: 1)
-    return value
+    return places_take[T](base: me.block.data, room: me.block.room, position: position)
+
+### Hands out what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+failable routine Span[T].take_at(position: U64) -> T
+    return places_take[T](base: me.base(), room: me.room, position: position)
 
 ### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
 ### :param position: The position to empty.
 failable routine Memory[T].erase_at(position: U64)
-    var place = me.checked(position: position)
-    danger
-        me.slot(position: place).peek().destruct()
-    me.clear_places(from: place, count: 1)
+    places_erase[T](base: me.block.data, room: me.block.room, position: position)
     return
 
-### Returns a view of `room` places from `first`, counted with `U64`: a memory that shares this one's memory, as
-### `mem[a til b]` is.
-### :param first: The first place of the view.
-### :param room: How many places the view spans.
-failable routine Memory[T].view(first: U64, room: U64) -> Memory[T]
-    if first + room > me.room
-        throw IndexOutOfBoundsError(index: first + room, count: me.room)
-    return Memory[T](storage: me.storage, start: me.start + first, room: room)
+### Tears down what the place at `position` holds and leaves the place zero, counted with `U64`.
+### :param position: The position to empty.
+failable routine Span[T].erase_at(position: U64)
+    places_erase[T](base: me.base(), room: me.room, position: position)
+    return
 
 ### Hands out what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
 failable routine Memory[T].take(index: Integer) -> T
+    return me.take_at(position: position_of(value: index))
+
+### Hands out what the place at `index` holds and leaves the place zero.
+### :param index: The position to empty.
+failable routine Span[T].take(index: Integer) -> T
     return me.take_at(position: position_of(value: index))
 
 ### Tears down what the place at `index` holds and leaves the place zero.
@@ -178,6 +221,68 @@ failable routine Memory[T].take(index: Integer) -> T
 failable routine Memory[T].erase(index: Integer)
     me.erase_at(position: position_of(value: index))
     return
+
+### Tears down what the place at `index` holds and leaves the place zero.
+### :param index: The position to empty.
+failable routine Span[T].erase(index: Integer)
+    me.erase_at(position: position_of(value: index))
+    return
+
+# ============================================================================
+# Spans
+# ============================================================================
+
+### Returns a span of `room` places from `first`, counted with `U64`, as `mem[a til b]` is.
+### :param first: The first place of the span.
+### :param room: How many places the span covers.
+failable routine Memory[T].view(first: U64, room: U64) -> Span[T]
+    if first + room > me.block.room
+        throw IndexOutOfBoundsError(index: first + room, count: me.block.room)
+    return Span[T](block: me.block, start: first, room: room)
+
+### Returns a span of `room` places from `first` of this span, counted with `U64`, as `span[a til b]` is.
+### :param first: The first place of the new span.
+### :param room: How many places the new span covers.
+failable routine Span[T].view(first: U64, room: U64) -> Span[T]
+    if first + room > me.room
+        throw IndexOutOfBoundsError(index: first + room, count: me.room)
+    return Span[T](block: me.block, start: me.start + first, room: room)
+
+### Returns a span of the places at the positions in `range` (`mem[a til b]`): it shares this memory's places, so
+### writing through it changes this memory. The range must run forward one position at a time and stay inside the
+### memory.
+### :param range: The positions to view.
+failable routine Memory[T].getitem(range: Range[Integer]) -> Span[T]
+    var last = span_end(range: range, room: me.block.room)
+    var first = range.start.to[U64]()
+    return Span[T](block: me.block, start: first, room: last - first)
+
+### Returns a span of the places at the positions in `range` of this span (`span[a til b]`), sharing the same
+### memory. The range must run forward one position at a time and stay inside the span.
+### :param range: The positions to view.
+failable routine Span[T].getitem(range: Range[Integer]) -> Span[T]
+    var last = span_end(range: range, room: me.room)
+    var first = range.start.to[U64]()
+    return Span[T](block: me.block, start: me.start + first, room: last - first)
+
+### The place after the last one `range` covers among `room` places, once the range is checked: it runs forward one
+### position at a time, from a position that is not negative, and stays inside the `room` places.
+secret failable routine span_end(range: Range[Integer], room: U64) -> U64
+    if range.step != 1 or not range.is_ascending()
+        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
+    if range.start.is_negative()
+        throw NegativeIndexError(index: range.start)
+    var first = range.start.to[U64]()
+    var last = if range.inclusive then range.end.to[U64]() + 1 else range.end.to[U64]()
+    if last < first
+        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
+    if last > room
+        throw IndexOutOfBoundsError(index: last, count: room)
+    return last
+
+# ============================================================================
+# Arranging places
+# ============================================================================
 
 ### Carries what `count` places from `from` hold into the places from `into` (the ranges may overlap). What the
 ### destination places held before is torn down, and the source places nothing was carried into become zero.
@@ -187,10 +292,17 @@ failable routine Memory[T].erase(index: Integer)
 failable routine Memory[T].move(from: Integer, into: Integer, count: Integer)
     if count.is_negative()
         throw NegativeIndexError(index: count)
-    var n = count.to[U64]()
-    if n == 0
-        return
-    me.carry(source: position_of(value: from), target: position_of(value: into), count: n)
+    me.carry(source: position_of(value: from), target: position_of(value: into), count: count.to[U64]())
+    return
+
+### Carries what `count` places from `from` hold into the places from `into`, as `Memory.move` does.
+### :param from: The first place to carry from.
+### :param into: The first place to carry into.
+### :param count: How many places to carry.
+failable routine Span[T].move(from: Integer, into: Integer, count: Integer)
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    me.carry(source: position_of(value: from), target: position_of(value: into), count: count.to[U64]())
     return
 
 ### Carries what `count` places from `source` hold into the places from `target`, as `move` does, counted with
@@ -199,25 +311,16 @@ failable routine Memory[T].move(from: Integer, into: Integer, count: Integer)
 ### :param target: The first place to carry into.
 ### :param count: How many places to carry.
 failable routine Memory[T].carry(source: U64, target: U64, count: U64)
-    var n = count
-    if n == 0
-        return
-    if source + n > me.room
-        throw IndexOutOfBoundsError(index: source + n, count: me.room)
-    if target + n > me.room
-        throw IndexOutOfBoundsError(index: target + n, count: me.room)
-    var i = target
-    while i < target + n
-        if i < source or i >= source + n
-            danger
-                me.slot(position: i).peek().destruct()
-        i = i +% 1
-    me.move_places(target: target, source: source, count: n)
-    i = source
-    while i < source + n
-        if i < target or i >= target + n
-            me.clear_places(from: i, count: 1)
-        i = i +% 1
+    places_carry[T](base: me.block.data, room: me.block.room, source: source, target: target, count: count)
+    return
+
+### Carries what `count` places from `source` hold into the places from `target`, as `move` does, counted with
+### `U64`.
+### :param source: The first place to carry from.
+### :param target: The first place to carry into.
+### :param count: How many places to carry.
+failable routine Span[T].carry(source: U64, target: U64, count: U64)
+    places_carry[T](base: me.base(), room: me.room, source: source, target: target, count: count)
     return
 
 ### Swaps what the places at `first` and `second` hold.
@@ -227,48 +330,45 @@ failable routine Memory[T].swap(first: Integer, second: Integer)
     me.swap_at(first: position_of(value: first), second: position_of(value: second))
     return
 
+### Swaps what the places at `first` and `second` hold.
+### :param first: One position.
+### :param second: The other position.
+failable routine Span[T].swap(first: Integer, second: Integer)
+    me.swap_at(first: position_of(value: first), second: position_of(value: second))
+    return
+
 ### Swaps what the places at `first` and `second` hold, counted with `U64`.
 ### :param first: One position.
 ### :param second: The other position.
 failable routine Memory[T].swap_at(first: U64, second: U64)
-    me.swap_places(a: me.checked(position: first), b: me.checked(position: second))
+    var a = places_checked(room: me.block.room, position: first)
+    var b = places_checked(room: me.block.room, position: second)
+    places_swap[T](base: me.block.data, a: a, b: b)
     return
 
-### Returns a view of the places at the positions in `range` (`mem[a til b]`): a memory that shares this one's
-### memory, so writing through it changes this memory. The range must run forward one position at a time and stay
-### inside the memory.
-### :param range: The positions to view.
-failable routine Memory[T].getitem(range: Range[Integer]) -> Memory[T]
-    if range.step != 1 or not range.is_ascending()
-        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
-    if range.start.is_negative()
-        throw NegativeIndexError(index: range.start)
-    var first = range.start.to[U64]()
-    var last = if range.inclusive then range.end.to[U64]() + 1 else range.end.to[U64]()
-    if last < first
-        throw InvalidValueError(input: range.represent(), target: "a forward range with step 1")
-    if last > me.room
-        throw IndexOutOfBoundsError(index: last, count: me.room)
-    return Memory[T](storage: me.storage, start: me.start + first, room: last - first)
+### Swaps what the places at `first` and `second` hold, counted with `U64`.
+### :param first: One position.
+### :param second: The other position.
+failable routine Span[T].swap_at(first: U64, second: U64)
+    var a = places_checked(room: me.room, position: first)
+    var b = places_checked(room: me.room, position: second)
+    places_swap[T](base: me.base(), a: a, b: b)
+    return
 
 ### Sets every place to `value`.
 ### :param value: The value every place becomes.
 routine Memory[T].fill(value: T)
-    var i: U64 = 0
-    while i < me.room
-        danger
-            var slot = me.slot(position: i)
-            slot.peek().destruct()
-            slot.poke(value)
-        i = i +% 1
+    places_fill[T](base: me.block.data, room: me.block.room, value: value)
     return
 
-# ============================================================================
-# Arranging places
-# ============================================================================
+### Sets every place of the span to `value`.
+### :param value: The value every place becomes.
+routine Span[T].fill(value: T)
+    places_fill[T](base: me.base(), room: me.room, value: value)
+    return
 
 ### Moves everything into a new row of `capacity` places, the first ones holding what this memory holds and the rest
-### zero. Views made before keep the old memory, which is left all zero. Only a whole memory grows, not a view.
+### zero. Spans made before keep the old row, which is left all zero.
 ### :param capacity: How many places the new row has, at least `capacity()`.
 failable routine Memory[T].grow(capacity: Integer)
     me.grow_to(room: capacity.to[U64]())
@@ -277,21 +377,19 @@ failable routine Memory[T].grow(capacity: Integer)
 ### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.
 ### :param room: How many places the new row has, at least `room()`.
 failable routine Memory[T].grow_to(room: U64)
-    if me.start != 0 or me.room != me.storage.room
-        throw MemoryViewShapeError(operation: "grow")
-    if room < me.room
-        throw IndexOutOfBoundsError(index: room, count: me.room)
-    var moved = new_memory_storage[T](room: room)
-    if me.room > 0
+    var old = me.block.room
+    if room < old
+        throw IndexOutOfBoundsError(index: room, count: old)
+    var moved = new_memory_block[T](room: room)
+    if old > 0
         danger
             rf_copy_bytes_at(
                 dest: moved.data.get_address(),
-                src: me.slot(position: 0).get_address(),
-                size: T.data_size() * me.room,
+                src: me.block.data.get_address(),
+                size: T.data_size() * old,
             )
-        me.clear_places(from: 0, count: me.room)
-    me.storage = moved
-    me.room = room
+        places_clear[T](base: me.block.data, from: 0, count: old)
+    me.block = moved
     return
 
 ### Moves every place `count` positions toward the front, the first ones going round to the back.
@@ -302,266 +400,63 @@ failable routine Memory[T].rotate_left(count: Integer)
     me.turn(count: count.to[U64]())
     return
 
+### Moves every place of the span `count` positions toward the front, the first ones going round to the back.
+### :param count: How many positions to rotate by.
+failable routine Span[T].rotate_left(count: Integer)
+    if count.is_negative()
+        throw NegativeIndexError(index: count)
+    me.turn(count: count.to[U64]())
+    return
+
 ### Moves every place `count` positions toward the front, as `rotate_left` does, counted with `U64`.
 ### :param count: How many positions to rotate by.
 routine Memory[T].turn(count: U64)
-    if me.room == 0
-        return
-    var shift = LLVM::unsigned_rem(count, me.room)
-    if shift == 0
-        return
-    var size = T.data_size()
-    var rest = me.room - shift
-    danger
-        var held = hijacked_from[T](rf_allocate_dynamic_uninit(size * me.room))
-        rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: shift).get_address(), size: size * rest)
-        rf_copy_bytes_at(
-            dest: held.offset(size * rest).get_address(),
-            src: me.slot(position: 0).get_address(),
-            size: size * shift,
-        )
-        rf_copy_bytes_at(dest: me.slot(position: 0).get_address(), src: held.get_address(), size: size * me.room)
-        held.invalidate()
+    places_turn[T](base: me.block.data, room: me.block.room, count: count)
+    return
+
+### Moves every place of the span `count` positions toward the front, as `rotate_left` does, counted with `U64`.
+### :param count: How many positions to rotate by.
+routine Span[T].turn(count: U64)
+    places_turn[T](base: me.base(), room: me.room, count: count)
     return
 
 ### Reverses the order of the places.
 routine Memory[T].reverse()
-    if me.room <= 1
-        return
-    var lo: U64 = 0
-    var hi = me.room - 1
-    while lo < hi
-        me.swap_places(a: lo, b: hi)
-        lo = lo +% 1
-        hi = hi -% 1
+    places_reverse[T](base: me.block.data, room: me.block.room)
+    return
+
+### Reverses the order of the span's places.
+routine Span[T].reverse()
+    places_reverse[T](base: me.base(), room: me.room)
     return
 
 # ============================================================================
 # Ordering
 # ============================================================================
 
-### The longest run sorted by insertion before the merge passes begin.
-secret preset BUFFER_SORT_MIN_RUN: U64 = 32
-
 ### Sorts what the places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
 routine Memory[T].sort_by(compare: Callable[(T, T), Bool])
-    var n = me.room
-    if n <= 1
-        return
-    var size = T.data_size()
-    var start: U64 = 0
-    var held = hijacked_none[T]()
-    danger
-        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-    while start < n
-        var end = start + BUFFER_SORT_MIN_RUN
-        if end > n
-            end = n
-        me.insertion_sort(start: start, end: end, held: held, compare: compare)
-        start = start + BUFFER_SORT_MIN_RUN
-    danger
-        held.invalidate()
-    if n <= BUFFER_SORT_MIN_RUN
-        return
-    var scratch = hijacked_none[T]()
-    danger
-        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
-    var width = BUFFER_SORT_MIN_RUN
-    while width < n
-        var left: U64 = 0
-        while left < n
-            var mid = left + width
-            if mid > n
-                mid = n
-            var right = left + width *% 2
-            if right > n
-                right = n
-            if mid < right
-                me.merge(left: left, mid: mid, right: right, scratch: scratch, compare: compare)
-            left = left + width *% 2
-        width = width *% 2
-    # The scratch memory only held copies of the elements' bits: free it without tearing anything down.
-    danger
-        scratch.invalidate()
+    me.block.places_sort_by(base: me.block.data, room: me.block.room, compare: compare)
     return
 
-### Insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
-### element being placed.
-secret routine Memory[T].insertion_sort(start: U64, end: U64, held: Hijacked[T], compare: Callable[(T, T), Bool])
-    var size = T.data_size()
-    var i = start + 1
-    while i < end
-        danger
-            rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: i).get_address(), size: size)
-        var j = i
-        while j > start and me.goes_before(held: held, position: j - 1, compare: compare)
-            me.move_places(target: j, source: j - 1, count: 1)
-            j = j - 1
-        danger
-            rf_copy_bytes_at(dest: me.slot(position: j).get_address(), src: held.get_address(), size: size)
-        i = i + 1
+### Sorts what the span's places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
+### :param compare: Returns whether its first argument goes before its second.
+routine Span[T].sort_by(compare: Callable[(T, T), Bool])
+    me.block.places_sort_by(base: me.base(), room: me.room, compare: compare)
     return
 
-### Whether the element kept in `held` goes before the element at `position`.
-secret routine Memory[T].goes_before(held: Hijacked[T], position: U64, compare: Callable[(T, T), Bool]) -> Bool
-    danger
-        return compare(held.peek(), me.slot(position: position).peek())
-
-### Merges the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
-secret routine Memory[T].merge(left: U64, mid: U64, right: U64, scratch: Hijacked[T], compare: Callable[(T, T), Bool])
-    var size = T.data_size()
-    danger
-        rf_copy_bytes_at(
-            dest: scratch.offset(size * left).get_address(),
-            src: me.slot(position: left).get_address(),
-            size: size * (right - left),
-        )
-    var a = left
-    var b = mid
-    var out = left
-    while a < mid and b < right
-        var take_b = false
-        danger
-            take_b = compare(scratch.offset(size * b).peek(), scratch.offset(size * a).peek())
-        var from = if take_b then b else a
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out).get_address(),
-                src: scratch.offset(size * from).get_address(),
-                size: size,
-            )
-        if take_b
-            b = b + 1
-        else
-            a = a + 1
-        out = out + 1
-    if a < mid
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out).get_address(),
-                src: scratch.offset(size * a).get_address(),
-                size: size * (mid - a),
-            )
-    if b < right
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out + (mid - a)).get_address(),
-                src: scratch.offset(size * b).get_address(),
-                size: size * (right - b),
-            )
-    return
-
-### Sorts what the places hold in ascending order (sort a view, `mem[a til b]`, to sort part of it). The sort is stable: equal elements keep their order.
+### Sorts what the places hold in ascending order (sort a span, `mem[a til b]`, to sort part of it). The sort is
+### stable: equal elements keep their order.
 routine Memory[T].sort()
 needs T obeys Comparable
-    var n = me.room
-    if n <= 1
-        return
-    var size = T.data_size()
-    var start: U64 = 0
-    var held = hijacked_none[T]()
-    danger
-        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-    while start < n
-        var end = start + BUFFER_SORT_MIN_RUN
-        if end > n
-            end = n
-        me.insertion_sort_less(start: start, end: end, held: held)
-        start = start + BUFFER_SORT_MIN_RUN
-    danger
-        held.invalidate()
-    if n <= BUFFER_SORT_MIN_RUN
-        return
-    var scratch = hijacked_none[T]()
-    danger
-        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
-    var width = BUFFER_SORT_MIN_RUN
-    while width < n
-        var left: U64 = 0
-        while left < n
-            var mid = left + width
-            if mid > n
-                mid = n
-            var right = left + width *% 2
-            if right > n
-                right = n
-            if mid < right
-                me.merge_less(left: left, mid: mid, right: right, scratch: scratch)
-            left = left + width *% 2
-        width = width *% 2
-    # The scratch memory only held copies of the elements' bits: free it without tearing anything down.
-    danger
-        scratch.invalidate()
+    places_sort[T](base: me.block.data, room: me.block.room)
     return
 
-### The `<` insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
-### element being placed.
-secret routine Memory[T].insertion_sort_less(start: U64, end: U64, held: Hijacked[T])
+### Sorts what the span's places hold in ascending order. The sort is stable: equal elements keep their order.
+routine Span[T].sort()
 needs T obeys Comparable
-    var size = T.data_size()
-    var i = start + 1
-    while i < end
-        danger
-            rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: i).get_address(), size: size)
-        var j = i
-        while j > start and me.less_than(held: held, position: j - 1)
-            me.move_places(target: j, source: j - 1, count: 1)
-            j = j - 1
-        danger
-            rf_copy_bytes_at(dest: me.slot(position: j).get_address(), src: held.get_address(), size: size)
-        i = i + 1
-    return
-
-### Whether the element kept in `held` is less than the element at `position`.
-secret routine Memory[T].less_than(held: Hijacked[T], position: U64) -> Bool
-needs T obeys Comparable
-    danger
-        return held.peek() < me.slot(position: position).peek()
-
-### The `<` merge of the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
-secret routine Memory[T].merge_less(left: U64, mid: U64, right: U64, scratch: Hijacked[T])
-needs T obeys Comparable
-    var size = T.data_size()
-    danger
-        rf_copy_bytes_at(
-            dest: scratch.offset(size * left).get_address(),
-            src: me.slot(position: left).get_address(),
-            size: size * (right - left),
-        )
-    var a = left
-    var b = mid
-    var out = left
-    while a < mid and b < right
-        var take_b = false
-        danger
-            take_b = scratch.offset(size * b).peek() < scratch.offset(size * a).peek()
-        var from = if take_b then b else a
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out).get_address(),
-                src: scratch.offset(size * from).get_address(),
-                size: size,
-            )
-        if take_b
-            b = b + 1
-        else
-            a = a + 1
-        out = out + 1
-    if a < mid
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out).get_address(),
-                src: scratch.offset(size * a).get_address(),
-                size: size * (mid - a),
-            )
-    if b < right
-        danger
-            rf_copy_bytes_at(
-                dest: me.slot(position: out + (mid - a)).get_address(),
-                src: scratch.offset(size * b).get_address(),
-                size: size * (right - b),
-            )
+    places_sort[T](base: me.base(), room: me.room)
     return
 
 # ============================================================================
@@ -570,6 +465,10 @@ needs T obeys Comparable
 
 ### Returns a walk over every place, front to back.
 routine Memory[T].iter() -> MemoryEmittable[T]
+    return me.walking(first: 0, count: me.block.room)
+
+### Returns a walk over every place of the span, front to back.
+routine Span[T].iter() -> MemoryEmittable[T]
     return me.walking(first: 0, count: me.room)
 
 ### Returns a walk over `count` places from `first`, wrapping past the end of the memory to its start: the elements
@@ -590,13 +489,17 @@ failable routine Memory[T].walk(first: Integer, count: Integer) -> MemoryEmittab
 failable routine Memory[T].walk_at(first: U64, count: U64) -> MemoryEmittable[T]
     if count == 0
         return me.walking(first: 0, count: 0)
-    if count > me.room
-        throw IndexOutOfBoundsError(index: count, count: me.room)
-    return me.walking(first: me.checked(position: first), count: count)
+    if count > me.block.room
+        throw IndexOutOfBoundsError(index: count, count: me.block.room)
+    return me.walking(first: places_checked(room: me.block.room, position: first), count: count)
 
 ### A walk over `count` places from `first`, both already checked.
 secret routine Memory[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
-    return MemoryEmittable[T](storage: me.storage, base: me.start, room: me.room, first: first, index: 0, count: count)
+    return MemoryEmittable[T](block: me.block, base: 0, room: me.block.room, first: first, index: 0, count: count)
+
+### A walk over `count` places of the span from `first`, both already checked.
+secret routine Span[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
+    return MemoryEmittable[T](block: me.block, base: me.start, room: me.room, first: first, index: 0, count: count)
 
 ### Returns what the next place holds.
 ### :throws: {AbsentValueError} The walk is over.
@@ -607,7 +510,7 @@ failable routine MemoryEmittable[T].emit() -> T
     if place >= me.room
         place = place - me.room
     danger
-        var result = me.storage.data.offset(T.data_size() * (me.base + place)).peek()
+        var result = me.block.data.offset(T.data_size() * (me.base + place)).peek()
         me.index = me.index +% 1
         return result
 
@@ -617,122 +520,519 @@ routine MemoryEmittable[T].skip()
         me.index = me.index +% 1
     return
 
-### Returns whether some place holds a value equal to `value` (`buf have v`).
+### Returns whether some place holds a value equal to `value` (`mem.has(v)`).
 ### :param value: The value to look for.
 routine Memory[T].has(value: T) -> Bool
 needs T obeys Equatable
-    var i: U64 = 0
-    while i < me.room
-        if me.read(position: i) == value
-            return true
-        i = i +% 1
-    return false
+    return places_have[T](base: me.block.data, room: me.block.room, value: value)
 
-### Returns whether `value` is not in this value: the opposite of `has`.
+### Returns whether some place of the span holds a value equal to `value` (`span.has(v)`).
+### :param value: The value to look for.
+routine Span[T].has(value: T) -> Bool
+needs T obeys Equatable
+    return places_have[T](base: me.base(), room: me.room, value: value)
+
+### Returns whether `value` is not in this memory: the opposite of `has`.
 ### :param value: The value to look for.
 ### :returns: `true` when `value` is absent.
 routine Memory[T].lacks(value: T) -> Bool
 needs T obeys Equatable
     return not me.has(value)
 
+### Returns whether `value` is not in this span: the opposite of `has`.
+### :param value: The value to look for.
+### :returns: `true` when `value` is absent.
+routine Span[T].lacks(value: T) -> Bool
+needs T obeys Equatable
+    return not me.has(value)
+
 ### Returns the memory as text: `Memory([1, 2, 0])`.
 @override
 routine Memory[T].represent() -> Text
-    return f"Memory({me.places_text(first: 0, count: me.room)})"
+    return f"Memory({places_text[T](base: me.block.data, room: me.block.room)})"
+
+### Returns the span as text: `Span([1, 2, 0])`.
+@override
+routine Span[T].represent() -> Text
+    return f"Span({places_text[T](base: me.base(), room: me.room)})"
 
 ### Returns the memory as text for debugging, with its size: `Memory[Integer](capacity: 3, [1, 2, 0])`.
 @override
 routine Memory[T].diagnose() -> Text
-    return f"{me.type_name()}(capacity: {me.room}, {me.places_text(first: 0, count: me.room)})"
+    return f"{me.type_name()}(capacity: {me.block.room}, {places_text[T](base: me.block.data, room: me.block.room)})"
 
-### What `count` places from `first` hold, as text (`[1, 2, 3]`), wrapping past the end of the memory to its start.
-secret routine Memory[T].places_text(first: U64, count: U64) -> Text
-    var result = "["
-    var i: U64 = 0
-    while i < count
-        if i > 0
-            result = f"{result}, "
-        result = f"{result}{nested_repr(me.read(position: me.wrap(position: first + i)))}"
-        i = i +% 1
-    return f"{result}]"
+### Returns the span as text for debugging, with its size: `Span[Integer](capacity: 3, [1, 2, 0])`.
+@override
+routine Span[T].diagnose() -> Text
+    return f"{me.type_name()}(capacity: {me.room}, {places_text[T](base: me.base(), room: me.room)})"
 
 # ============================================================================
 # Inside the memory
 # ============================================================================
 
-### A position brought back into the memory: one at or past the end wraps to the start.
+### The span's first place in its memory.
 @inline
-secret routine Memory[T].wrap(position: U64) -> U64
-    return if position >= me.room then position - me.room else position
-### What a place already checked holds, as it sits in memory (no holder of its own).
-@inline
-secret routine Memory[T].read(position: U64) -> T
-    danger
-        return me.slot(position: position).peek()
+secret routine Span[T].base() -> Hijacked[T]
+    return place_at[T](base: me.block.data, position: me.start)
 
-### `position` checked against the places.
+### The place at `position` of the places from `base`.
 @inline
-secret failable routine Memory[T].checked(position: U64) -> U64
-    if position >= me.room
-        throw IndexOutOfBoundsError(index: position, count: me.room)
+secret routine place_at[T](base: Hijacked[T], position: U64) -> Hijacked[T]
+    return base.offset(T.data_size() * position)
+
+### `position` checked against `room` places.
+@inline
+secret failable routine places_checked(room: U64, position: U64) -> U64
+    if position >= room
+        throw IndexOutOfBoundsError(index: position, count: room)
     return position
 
-### `position` checked against the places and, in a memory of entities, against a place that holds no entity yet.
+### `position` checked against `room` places and, for places of entities, against a place that holds no entity yet.
 @inline
-secret failable routine Memory[T].filled(position: U64) -> U64
-    var place = me.checked(position: position)
+secret failable routine places_filled[T](base: Hijacked[T], room: U64, position: U64) -> U64
+    var place = places_checked(room: room, position: position)
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if me.slot(position: place).peek_as[Address]() == 0
+            if place_at[T](base: base, position: place).peek_as[Addr]().is_hollow()
                 throw EmptyPlaceError(index: place.to[Integer]())
     return place
 
-### The storage of the place at a position of this memory.
+### What a place already checked holds, as it sits in memory (no holder of its own).
 @inline
-secret routine Memory[T].slot(position: U64) -> Hijacked[T]
-    return me.storage.data.offset(T.data_size() * (me.start + position))
+secret routine places_read[T](base: Hijacked[T], position: U64) -> T
+    danger
+        return place_at[T](base: base, position: position).peek()
+
+### What the place at `position` holds, a value of its own.
+@inline
+secret failable routine places_at[T](base: Hijacked[T], room: U64, position: U64) -> T
+    return places_read[T](base: base, position: places_filled[T](base: base, room: room, position: position)).share()
+
+### Replaces what the place at `position` holds.
+@inline
+secret failable routine places_put[T](base: Hijacked[T], room: U64, position: U64, value: T)
+    danger
+        var slot = place_at[T](base: base, position: places_checked(room: room, position: position))
+        slot.peek().destruct()
+        slot.poke(value)
+    return
+
+### Hands out what the place at `position` holds and leaves the place zero.
+secret failable routine places_take[T](base: Hijacked[T], room: U64, position: U64) -> T
+    var place = places_filled[T](base: base, room: room, position: position)
+    var value = places_read[T](base: base, position: place)
+    places_clear[T](base: base, from: place, count: 1)
+    return value
+
+### Tears down what the place at `position` holds and leaves the place zero.
+secret failable routine places_erase[T](base: Hijacked[T], room: U64, position: U64)
+    var place = places_checked(room: room, position: position)
+    danger
+        place_at[T](base: base, position: place).peek().destruct()
+    places_clear[T](base: base, from: place, count: 1)
+    return
+
+### Carries what `count` places from `source` hold into the places from `target`, tearing down what the destination
+### held and zeroing the source places nothing was carried into.
+secret failable routine places_carry[T](base: Hijacked[T], room: U64, source: U64, target: U64, count: U64)
+    var n = count
+    if n == 0
+        return
+    if source + n > room
+        throw IndexOutOfBoundsError(index: source + n, count: room)
+    if target + n > room
+        throw IndexOutOfBoundsError(index: target + n, count: room)
+    var i = target
+    while i < target + n
+        if i < source or i >= source + n
+            danger
+                place_at[T](base: base, position: i).peek().destruct()
+        i = i +% 1
+    places_move[T](base: base, target: target, source: source, count: n)
+    i = source
+    while i < source + n
+        if i < target or i >= target + n
+            places_clear[T](base: base, from: i, count: 1)
+        i = i +% 1
+    return
+
+### Sets every place to `value`.
+secret routine places_fill[T](base: Hijacked[T], room: U64, value: T)
+    var i: U64 = 0
+    while i < room
+        danger
+            var slot = place_at[T](base: base, position: i)
+            slot.peek().destruct()
+            slot.poke(value)
+        i = i +% 1
+    return
+
+### Moves every place `count` positions toward the front, the first ones going round to the back.
+secret routine places_turn[T](base: Hijacked[T], room: U64, count: U64)
+    if room == 0
+        return
+    var shift = LLVM::unsigned_rem(count, room)
+    if shift == 0
+        return
+    var size = T.data_size()
+    var rest = room - shift
+    danger
+        var held = hijacked_from[T](rf_allocate_dynamic_uninit(size * room))
+        rf_copy_bytes_at(
+            dest: held.get_address(),
+            src: place_at[T](base: base, position: shift).get_address(),
+            size: size * rest,
+        )
+        rf_copy_bytes_at(
+            dest: held.offset(size * rest).get_address(),
+            src: base.get_address(),
+            size: size * shift,
+        )
+        rf_copy_bytes_at(dest: base.get_address(), src: held.get_address(), size: size * room)
+        held.invalidate()
+    return
+
+### Reverses the order of the places.
+secret routine places_reverse[T](base: Hijacked[T], room: U64)
+    if room <= 1
+        return
+    var lo: U64 = 0
+    var hi = room - 1
+    while lo < hi
+        places_swap[T](base: base, a: lo, b: hi)
+        lo = lo +% 1
+        hi = hi -% 1
+    return
+
+### Whether some place holds a value equal to `value`.
+secret routine places_have[T](base: Hijacked[T], room: U64, value: T) -> Bool
+needs T obeys Equatable
+    var i: U64 = 0
+    while i < room
+        if places_read[T](base: base, position: i) == value
+            return true
+        i = i +% 1
+    return false
+
+### What the places hold, as text (`[1, 2, 3]`).
+secret routine places_text[T](base: Hijacked[T], room: U64) -> Text
+    var result = "["
+    var i: U64 = 0
+    while i < room
+        if i > 0
+            result = f"{result}, "
+        result = f"{result}{nested_repr(places_read[T](base: base, position: i))}"
+        i = i +% 1
+    return f"{result}]"
 
 ### Moves the bits of `count` places from `source` to `target` (the ranges may overlap). The places left behind still
 ### hold the same bits: the caller overwrites or clears them.
-secret routine Memory[T].move_places(target: U64, source: U64, count: U64)
+secret routine places_move[T](base: Hijacked[T], target: U64, source: U64, count: U64)
     if count == 0
         return
     danger
         rf_copy_bytes_at(
-            dest: me.slot(position: target).get_address(),
-            src: me.slot(position: source).get_address(),
+            dest: place_at[T](base: base, position: target).get_address(),
+            src: place_at[T](base: base, position: source).get_address(),
             size: T.data_size() * count,
         )
     return
 
 ### Zeroes `count` places from `from`, forgetting what they held without tearing it down.
-secret routine Memory[T].clear_places(from: U64, count: U64)
+secret routine places_clear[T](base: Hijacked[T], from: U64, count: U64)
     if count == 0
         return
     danger
-        rf_set_bytes_at(dest: me.slot(position: from).get_address(), value: 0, size: T.data_size() * count)
+        rf_set_bytes_at(
+            dest: place_at[T](base: base, position: from).get_address(),
+            value: 0,
+            size: T.data_size() * count,
+        )
     return
 
 ### Swaps the bits of the places at `a` and `b`.
-secret routine Memory[T].swap_places(a: U64, b: U64)
+secret routine places_swap[T](base: Hijacked[T], a: U64, b: U64)
     if a == b
         return
     var size = T.data_size()
     danger
         var held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-        rf_copy_bytes_at(dest: held.get_address(), src: me.slot(position: a).get_address(), size: size)
-        rf_copy_bytes_at(dest: me.slot(position: a).get_address(), src: me.slot(position: b).get_address(), size: size)
-        rf_copy_bytes_at(dest: me.slot(position: b).get_address(), src: held.get_address(), size: size)
+        var first = place_at[T](base: base, position: a)
+        var second = place_at[T](base: base, position: b)
+        rf_copy_bytes_at(dest: held.get_address(), src: first.get_address(), size: size)
+        rf_copy_bytes_at(dest: first.get_address(), src: second.get_address(), size: size)
+        rf_copy_bytes_at(dest: second.get_address(), src: held.get_address(), size: size)
         held.invalidate()
+    return
+
+# ============================================================================
+# Sorting the places
+# ============================================================================
+
+### The longest run sorted by insertion before the merge passes begin.
+secret preset BUFFER_SORT_MIN_RUN: U64 = 32
+
+### Sorts what `room` places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
+secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compare: Callable[(T, T), Bool])
+    var n = room
+    if n <= 1
+        return
+    var size = T.data_size()
+    var start: U64 = 0
+    var held = hijacked_none[T]()
+    danger
+        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
+    while start < n
+        var end = start + BUFFER_SORT_MIN_RUN
+        if end > n
+            end = n
+        me.places_insertion_sort(base: base, start: start, end: end, held: held, compare: compare)
+        start = start + BUFFER_SORT_MIN_RUN
+    danger
+        held.invalidate()
+    if n <= BUFFER_SORT_MIN_RUN
+        return
+    var scratch = hijacked_none[T]()
+    danger
+        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
+    var width = BUFFER_SORT_MIN_RUN
+    while width < n
+        var left: U64 = 0
+        while left < n
+            var mid = left + width
+            if mid > n
+                mid = n
+            var right = left + width *% 2
+            if right > n
+                right = n
+            if mid < right
+                me.places_merge(base: base, left: left, mid: mid, right: right, scratch: scratch, compare: compare)
+            left = left + width *% 2
+        width = width *% 2
+    # The scratch memory only held copies of the elements' bits: free it without tearing anything down.
+    danger
+        scratch.invalidate()
+    return
+
+### Insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
+### element being placed.
+secret routine MemoryBlock[T].places_insertion_sort(
+    base: Hijacked[T],
+    start: U64,
+    end: U64,
+    held: Hijacked[T],
+    compare: Callable[(T, T), Bool],
+)
+    var size = T.data_size()
+    var i = start + 1
+    while i < end
+        danger
+            rf_copy_bytes_at(
+                dest: held.get_address(),
+                src: place_at[T](base: base, position: i).get_address(),
+                size: size,
+            )
+        var j = i
+        while j > start and me.places_go_before(base: base, held: held, position: j - 1, compare: compare)
+            places_move[T](base: base, target: j, source: j - 1, count: 1)
+            j = j - 1
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: j).get_address(),
+                src: held.get_address(),
+                size: size,
+            )
+        i = i + 1
+    return
+
+### Whether the element kept in `held` goes before the element at `position`.
+secret routine MemoryBlock[T].places_go_before(
+    base: Hijacked[T],
+    held: Hijacked[T],
+    position: U64,
+    compare: Callable[(T, T), Bool],
+) -> Bool
+    danger
+        return compare(held.peek(), place_at[T](base: base, position: position).peek())
+
+### Merges the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
+secret routine MemoryBlock[T].places_merge(
+    base: Hijacked[T],
+    left: U64,
+    mid: U64,
+    right: U64,
+    scratch: Hijacked[T],
+    compare: Callable[(T, T), Bool],
+)
+    var size = T.data_size()
+    danger
+        rf_copy_bytes_at(
+            dest: scratch.offset(size * left).get_address(),
+            src: place_at[T](base: base, position: left).get_address(),
+            size: size * (right - left),
+        )
+    var a = left
+    var b = mid
+    var out = left
+    while a < mid and b < right
+        var take_b = false
+        danger
+            take_b = compare(scratch.offset(size * b).peek(), scratch.offset(size * a).peek())
+        var from = if take_b then b else a
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out).get_address(),
+                src: scratch.offset(size * from).get_address(),
+                size: size,
+            )
+        if take_b
+            b = b + 1
+        else
+            a = a + 1
+        out = out + 1
+    if a < mid
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out).get_address(),
+                src: scratch.offset(size * a).get_address(),
+                size: size * (mid - a),
+            )
+    if b < right
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out + (mid - a)).get_address(),
+                src: scratch.offset(size * b).get_address(),
+                size: size * (right - b),
+            )
+    return
+
+### Sorts what `room` places hold in ascending order. Stable.
+secret routine places_sort[T](base: Hijacked[T], room: U64)
+needs T obeys Comparable
+    var n = room
+    if n <= 1
+        return
+    var size = T.data_size()
+    var start: U64 = 0
+    var held = hijacked_none[T]()
+    danger
+        held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
+    while start < n
+        var end = start + BUFFER_SORT_MIN_RUN
+        if end > n
+            end = n
+        places_insertion_sort_less[T](base: base, start: start, end: end, held: held)
+        start = start + BUFFER_SORT_MIN_RUN
+    danger
+        held.invalidate()
+    if n <= BUFFER_SORT_MIN_RUN
+        return
+    var scratch = hijacked_none[T]()
+    danger
+        scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
+    var width = BUFFER_SORT_MIN_RUN
+    while width < n
+        var left: U64 = 0
+        while left < n
+            var mid = left + width
+            if mid > n
+                mid = n
+            var right = left + width *% 2
+            if right > n
+                right = n
+            if mid < right
+                places_merge_less[T](base: base, left: left, mid: mid, right: right, scratch: scratch)
+            left = left + width *% 2
+        width = width *% 2
+    # The scratch memory only held copies of the elements' bits: free it without tearing anything down.
+    danger
+        scratch.invalidate()
+    return
+
+### The `<` insertion sort of the positions `start` up to `end`, moving bits only. `held` is one place to keep the
+### element being placed.
+secret routine places_insertion_sort_less[T](base: Hijacked[T], start: U64, end: U64, held: Hijacked[T])
+needs T obeys Comparable
+    var size = T.data_size()
+    var i = start + 1
+    while i < end
+        danger
+            rf_copy_bytes_at(
+                dest: held.get_address(),
+                src: place_at[T](base: base, position: i).get_address(),
+                size: size,
+            )
+        var j = i
+        while j > start and places_less_than[T](base: base, held: held, position: j - 1)
+            places_move[T](base: base, target: j, source: j - 1, count: 1)
+            j = j - 1
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: j).get_address(),
+                src: held.get_address(),
+                size: size,
+            )
+        i = i + 1
+    return
+
+### Whether the element kept in `held` is less than the element at `position`.
+secret routine places_less_than[T](base: Hijacked[T], held: Hijacked[T], position: U64) -> Bool
+needs T obeys Comparable
+    danger
+        return held.peek() < place_at[T](base: base, position: position).peek()
+
+### The `<` merge of the sorted runs `left` up to `mid` and `mid` up to `right`, through `scratch`, moving bits only.
+secret routine places_merge_less[T](base: Hijacked[T], left: U64, mid: U64, right: U64, scratch: Hijacked[T])
+needs T obeys Comparable
+    var size = T.data_size()
+    danger
+        rf_copy_bytes_at(
+            dest: scratch.offset(size * left).get_address(),
+            src: place_at[T](base: base, position: left).get_address(),
+            size: size * (right - left),
+        )
+    var a = left
+    var b = mid
+    var out = left
+    while a < mid and b < right
+        var take_b = false
+        danger
+            take_b = scratch.offset(size * b).peek() < scratch.offset(size * a).peek()
+        var from = if take_b then b else a
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out).get_address(),
+                src: scratch.offset(size * from).get_address(),
+                size: size,
+            )
+        if take_b
+            b = b + 1
+        else
+            a = a + 1
+        out = out + 1
+    if a < mid
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out).get_address(),
+                src: scratch.offset(size * a).get_address(),
+                size: size * (mid - a),
+            )
+    if b < right
+        danger
+            rf_copy_bytes_at(
+                dest: place_at[T](base: base, position: out + (mid - a)).get_address(),
+                src: scratch.offset(size * b).get_address(),
+                size: size * (right - b),
+            )
     return
 
 # ============================================================================
 # Lifetime
 # ============================================================================
 
-### Destroys what every place holds (a zero place holds nothing to tear down), then frees the storage.
+### Destroys what every place holds (a zero place holds nothing to tear down), then frees the places.
 @override
-routine MemoryStorage[T].destruct()
+routine MemoryBlock[T].destruct()
     danger
         var i: U64 = 0
         while i < me.room
@@ -743,13 +1043,13 @@ routine MemoryStorage[T].destruct()
 
 ### Cycle-collector trace: reports what every place holds to the collector.
 @override
-dangerous routine MemoryStorage[T].roam_trace()
+dangerous routine MemoryBlock[T].roam_trace()
     me.data.cyclic_trace_buffer(count: me.room)
     return
 
-### Cycle-collector free: frees the storage and the storage's own box, not the elements (the collector frees the
+### Cycle-collector free: frees the places and the block's own box, not the elements (the collector frees the
 ### whole cycle itself).
 @override
-dangerous routine MemoryStorage[T].roam_free()
+dangerous routine MemoryBlock[T].roam_free()
     me.data.invalidate()
     return

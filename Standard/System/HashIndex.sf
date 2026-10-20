@@ -30,7 +30,7 @@ secret routine hash_index_slots(wanted: U64) -> U64
 
 ### The slot a hash starts probing at.
 secret routine HashIndex.home(hash: U64) -> U64
-    return (hash >> 7) & (me.tags.room - 1)
+    return (hash >> 7) & (me.tags.room() - 1)
 
 ### The tag a used slot of this hash carries.
 secret routine HashIndex.tag_of(hash: U64) -> U8
@@ -51,7 +51,7 @@ secret routine HashIndex.entry(slot: U64) -> U64
 
 ### The slot probed after `slot`.
 secret routine HashIndex.next(slot: U64) -> U64
-    return (slot + 1) & (me.tags.room - 1)
+    return (slot + 1) & (me.tags.room() - 1)
 
 ### Records that the entry at `entry` has hash `hash`, in the first free slot of its probe.
 secret routine HashIndex.place(hash: U64, entry: U64)
@@ -74,12 +74,12 @@ secret routine HashIndex.retire(slot: U64)
 
 ### Whether a table holding `count` entries is too full to take another.
 secret routine HashIndex.crowded(count: U64) -> Bool
-    return (count + me.removed + 1) * 8 >= me.tags.room * 7
+    return (count + me.removed + 1) * 8 >= me.tags.room() * 7
 
 ### Empties the table, giving it enough slots for `capacity` entries.
 secret routine HashIndex.reset(capacity: U64)
     var slots = hash_index_slots(wanted: capacity)
-    if slots > me.tags.room
+    if slots > me.tags.room()
         me.tags.grow_to(room: slots)
         me.entries.grow_to(room: slots)
     me.tags.fill(value: 0)

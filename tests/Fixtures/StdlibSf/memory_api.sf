@@ -3,7 +3,7 @@ module Tests/StdlibSf/MemoryApi
 import IO/Console
 import ObjectHacker
 
-# Suflae's Memory: a fixed row of places that start as zero, and ranges that are views sharing the same memory.
+# Suflae's Memory: a row of places that start as zero, and its ranges, spans that share the same places.
 
 entity Counter
     hits: Integer
@@ -15,10 +15,10 @@ entity Box
 entity Holder
     kids: Memory[Box]
 
-routine keep_view() -> Memory[Integer]
+routine keep_view() -> Span[Integer]
     var whole = Memory[Integer](count: 6, fill: 0)
     whole[4] = 40
-    # The view outlives the name `whole`: it keeps the memory alive.
+    # The span outlives the name `whole`: it keeps the memory alive.
     return whole[3 til 6]
 
 routine start()
@@ -73,8 +73,6 @@ routine start()
     show(f"rotated: {row}")
     row.grow(capacity: 7)
     show(f"grown: {row} capacity={row.capacity()}")
-    var grow_view = try part.grow(capacity: 10)
-    show(f"grow a view: {not grow_view}")
 
     var nums = Memory[Integer](capacity: 40)
     var k = 0

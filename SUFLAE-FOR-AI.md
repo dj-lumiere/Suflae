@@ -934,6 +934,16 @@ each entry in ages
   a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
 - Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
+- `Memory[T]` (`System/Memory`) is the row of places every collection keeps its elements in, and a program can use
+  it too: `Memory[Integer](capacity: 5)` makes five places that start as zero (`0`, `""`, `false`, no entity),
+  `Memory[Text](count: 3, fill: "a")` fills them. `mem[i]`, `mem[i] = v`, `take(index:)`, `erase(index:)`,
+  `move(from:, into:, count:)`, `swap`, `fill`, `rotate_left`, `reverse`, `sort()`, `sort_by(compare:)` and
+  `grow(capacity:)` work on it. A range `mem[1 til 4]` is a `Span[T]`: a view that shares the places with no copy
+  (writing through it changes the memory) and keeps the memory alive. A span has the same reading, writing and
+  arranging routines over its own places, counted from 0, and a range of a span is a span, but a span does not
+  grow. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
+  holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
+  `Memory[T]`).
 - Iterator adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
   `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `.to[List]()` or `each`:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.

@@ -21,7 +21,7 @@ entity Agent[T]
 # ============================================================================
 
 ### Builds the Agent of an `agent` call: the work that will run `entry(recipe)`, not started.
-routine agent_recipe[T](entry: CPtr, recipe: Address) -> Agent[T]
+routine agent_recipe[T](entry: Addr, recipe: Addr) -> Agent[T]
     danger
         return Agent[T](work: agent_work[T](entry: entry, recipe: recipe),
             deadline: Duration(seconds: 0, nanoseconds: 0), has_deadline: false)
@@ -84,7 +84,7 @@ secret routine Agent[T].wind_down()
     return
 
 ### Enters the work in a race.
-secret routine Agent[T].join_race(race: CPtr)
+secret routine Agent[T].join_race(race: Addr)
     danger
         if me.work.is_coro()
             C::rf_race_add_coro(race: race, coro: me.work.coro_handle())
