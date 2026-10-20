@@ -1,0 +1,42 @@
+module Text/Patterns
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A pattern over bytes, for input that isn't UTF-8 text: a file's header, a packet, a log with broken characters.
+### It is made once from bytes pieces and then looked for in `Bytes`:
+###
+### It runs on the same engine as `TextPattern`, with the same rules: a `preset` pattern is compiled when the program
+### is built, a search takes time in proportion to the input's length times the pattern's size, and every
+### repetition takes as many rounds as it can.
+@rf("BytesPattern")
+record BytesPattern
+    ### The compiled program, as the engine reads it. Written by `of` and `from_regex`.
+    program: Text
+
+### A bytes pattern from the usual regular expression syntax: `BytesPattern.from_regex("\\x89PNG")`.
+### :param regex: The expression.
+### :returns: The pattern.
+### :throws: {PatternSyntaxError} The expression can't be read, or asks for what the patterns don't do.
+@rf("BytesPattern.from_regex")
+failable common routine BytesPattern.from_regex(regex: Text) -> BytesPattern
+
+### Whether all of `bytes` match the pattern.
+### :param bytes: The bytes.
+### :returns: `true` when all of them do.
+@rf("BytesPattern.matches")
+routine BytesPattern.matches(bytes: Bytes) -> Bool
+
+### The leftmost place the pattern matches in `bytes`.
+### :param bytes: The bytes.
+### :returns: The match.
+### :throws: {AbsentValueError} The pattern matches nowhere (`try p.find(b)` gives `none`).
+@rf("BytesPattern.find")
+failable routine BytesPattern.find(bytes: Bytes) -> BytesMatch
+
+### `bytes` with every match replaced by `with`.
+### :param bytes: The bytes.
+### :param with: What each match becomes.
+### :returns: The new bytes.
+@rf("BytesPattern.replace")
+routine BytesPattern.replace(bytes: Bytes, `with`: Bytes) -> Bytes

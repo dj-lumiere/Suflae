@@ -1,0 +1,62 @@
+module Text/Patterns
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### One piece of a bytes pattern: what it matches, written as a value. Pieces are put together into a
+### `BytesPattern` with `BytesPattern.of([...])`. A bytes piece matches bytes (`byte(0x89)`, `bytes(b"PNG")`,
+### `any_byte`, `byte_range(0x00 to 0x1F)`), a `TextPiece` characters, and the two never mix.
+@rf("BytesPiece")
+record BytesPiece
+    ### What the piece matches, as the engine reads it. Written by the piece routines.
+    code: Text
+
+### One byte equal to `value`: `byte(0x89)`.
+### :param value: The byte.
+### :returns: The piece.
+@rf("byte")
+routine byte(value: U8) -> BytesPiece
+
+### The bytes of `value`, in a row: `bytes(b"PNG")`.
+### :param value: The bytes.
+### :returns: The piece.
+@rf("bytes")
+routine bytes(value: Bytes) -> BytesPiece
+
+### One byte in a range: `byte_range(0x00 to 0x1F)`.
+### :param range: The bytes, `to` including its end and `til` leaving it out.
+### :returns: The piece.
+### :throws: {InvalidPatternError} The range holds no byte or doesn't count up by 1.
+@rf("byte_range")
+failable routine byte_range(range: Range[U8]) -> BytesPiece
+
+### The piece once or not at all, once when it can.
+### :param piece: The piece.
+### :returns: The new piece.
+@rf("optional")
+routine optional(piece: BytesPiece) -> BytesPiece
+
+### The piece any number of times in a row, none included, as many as it can.
+### :param piece: The piece.
+### :returns: The new piece.
+@rf("any_number_of")
+routine any_number_of(piece: BytesPiece) -> BytesPiece
+
+### The piece once or more in a row, as many as it can.
+### :param piece: The piece.
+### :returns: The new piece.
+@rf("one_or_more")
+routine one_or_more(piece: BytesPiece) -> BytesPiece
+
+### The piece, with the bytes it matches kept under `name`: a match's `group(name)` gives them.
+### :param name: The capture's name.
+### :param piece: The piece.
+### :returns: The new piece.
+@rf("capture")
+routine capture(name: Text, piece: BytesPiece) -> BytesPiece
+
+### The piece, with each ASCII letter byte matching in either case.
+### :param piece: The piece.
+### :returns: The new piece.
+@rf("ignoring_case")
+routine ignoring_case(piece: BytesPiece) -> BytesPiece

@@ -1,0 +1,29 @@
+module Text/Patterns
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Where a `BytesPattern` matched: its place in the bytes (`start()`, `end()`), the bytes it took (`bytes()`), and the
+### bytes each capture took (`group("name")`). Positions count bytes from 0, and `end()` is the position just past
+### the match.
+@rf("BytesMatch")
+record BytesMatch
+    pass
+
+### The bytes the match took.
+### :returns: The bytes.
+@rf("BytesMatch.bytes")
+routine BytesMatch.bytes() -> Bytes
+
+### The bytes a capture took.
+### :param name: The capture's name.
+### :returns: The bytes.
+### :throws: {CaptureNameError} The pattern has no capture of that name.
+### :throws: {AbsentValueError} The capture took no part in the match.
+@rf("BytesMatch.group")
+failable routine BytesMatch.group(name: Text) -> Bytes
+
+### The match as its place and what it took: `0 til 10: 2026-10-20`.
+### :returns: The text.
+@rf("BytesMatch.represent")
+routine BytesMatch.represent() -> Text

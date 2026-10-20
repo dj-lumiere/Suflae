@@ -1,0 +1,57 @@
+module Text/Patterns
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A pattern over text, made once from pieces and then looked for in texts:
+###
+### ```suflae
+### import Text/Patterns
+###
+### preset DATE: TextPattern = TextPattern.of([
+###     capture("year", digit.repeat(4)),
+###     text("-"),
+###     capture("month", digit.repeat(2)),
+###     text("-"),
+###     capture("day", digit.repeat(2)),
+### ])
+### ```
+###
+### A `preset` pattern is compiled when the program is built. A search takes time in proportion to the text's
+### length times the pattern's size, never by trying the text again and again: no pattern and no text make it blow
+### up. A match is the leftmost one, and from there every repetition takes as many rounds as it can and each either
+### chooses by its rule (`either_longer`, `either_shorter`).
+@rf("TextPattern")
+record TextPattern
+    ### The compiled program, as the engine reads it. Written by `of` and `from_regex`.
+    program: Text
+
+### A pattern from the usual regular expression syntax, for a pattern that comes from outside the program (a
+### setting, a user's input): `TextPattern.from_regex("(?<year>\\d{4})-(?<month>\\d{2})")`. Groups without a name
+### capture under "1", "2", ...; `|` takes the alternative that matches the longest text.
+### :param regex: The expression.
+### :returns: The pattern.
+### :throws: {PatternSyntaxError} The expression can't be read, or asks for what the patterns don't do: a
+###   backreference, lookahead or lookbehind, a shortest repetition (`*?`).
+@rf("TextPattern.from_regex")
+failable common routine TextPattern.from_regex(regex: Text) -> TextPattern
+
+### Whether all of `text` matches the pattern.
+### :param text: The text.
+### :returns: `true` when the whole text matches.
+@rf("TextPattern.matches")
+routine TextPattern.matches(text: Text) -> Bool
+
+### The leftmost place the pattern matches in `text`.
+### :param text: The text.
+### :returns: The match.
+### :throws: {AbsentValueError} The pattern matches nowhere in the text (`try p.find(t)` gives `none`).
+@rf("TextPattern.find")
+failable routine TextPattern.find(text: Text) -> TextMatch
+
+### `text` with every match (as `find_all` finds them) replaced by `with`.
+### :param text: The text.
+### :param with: What each match becomes.
+### :returns: The new text.
+@rf("TextPattern.replace")
+routine TextPattern.replace(text: Text, `with`: Text) -> Text

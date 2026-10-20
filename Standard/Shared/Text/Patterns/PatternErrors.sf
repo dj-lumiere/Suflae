@@ -1,0 +1,40 @@
+module Text/Patterns
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### The crashable thrown when pieces don't make a pattern: two captures with one name, a repetition whose range holds
+### no count, an either with no alternatives, a character range that runs backward.
+@rf("InvalidPatternError")
+crashable InvalidPatternError
+    ### Says what is wrong.
+    message: Text
+
+### The crashable thrown when `TextPattern.from_regex` or `BytesPattern.from_regex` is given an expression the
+### patterns can't match: a backreference, lookahead or lookbehind, a shortest repetition, or a syntax error. The
+### message names the position.
+@rf("PatternSyntaxError")
+crashable PatternSyntaxError
+    ### Says what is wrong and where.
+    message: Text
+
+### The crashable thrown when a match is asked for a capture name its pattern doesn't have.
+@rf("CaptureNameError")
+crashable CaptureNameError
+    ### The name asked for.
+    name: Text
+
+### Returns what is wrong with the pieces.
+### :returns: The message.
+@rf("InvalidPatternError.crash_message")
+routine InvalidPatternError.crash_message() -> Text
+
+### Returns what is wrong with the expression and where.
+### :returns: The message.
+@rf("PatternSyntaxError.crash_message")
+routine PatternSyntaxError.crash_message() -> Text
+
+### Returns the name the pattern has no capture of.
+### :returns: The message.
+@rf("CaptureNameError.crash_message")
+routine CaptureNameError.crash_message() -> Text

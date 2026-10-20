@@ -133,8 +133,8 @@ it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Num
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Agent`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), and files (`IO/File`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `BuilderQuery` (`x.type_name()`),
-`ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
+`PriorityQueue`, …), `IterTools` (iterator adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
+(`x.type_name()`), `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
 `module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
 `Numerics` and rewrites `Core.X` to `System.X`.
@@ -847,6 +847,31 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
 - `Char` has `codepoint()`, `is_alphabetic()`, `is_digit()`, `is_whitespace()`, `to_uppercase()`, ….
 - A binary float shows as the shortest decimal that reads back to the same value
   (`x + 0.2` with `var x: B64 = 0.1` shows `0.30000000000000004`); a `Decimal` shows exactly (`0.1 + 0.2` shows `0.3`).
+
+**Text patterns** (`import Text/Patterns`, one engine for every language). A pattern is
+built from named pieces, one after another: `preset DATE: TextPattern = TextPattern.of([capture("year",
+digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pattern is compiled at build time).
+- Pieces (`TextPiece`): `text("-")`, `digit`/`letter`/`space`/`word_char` (ASCII), `unicode_digit`/`unicode_letter`/
+  `unicode_space`/`unicode_word_char`, `any_char` (line feed included), `one_of("aeiou")`, `none_of(",;")`,
+  `char_range(from: 'a', to: 'z')`, anchors `start_of_text`, `end_of_text`, `start_of_line`, `end_of_line`,
+  `word_boundary`. The bare ones are presets (no parentheses).
+- Repetition: `p.repeat(4)`, `p.repeat(2 to 4)` (`til` excludes the end), `p.repeat_at_least(1)`, `optional(p)`,
+  `any_number_of(p)`, `one_or_more(p)`. Every repetition is greedy (takes as many rounds as it can); there is no
+  shortest repetition. To take text up to a delimiter, repeat a piece that can't be it (`any_number_of(none_of("<"))`),
+  since `any_number_of(any_char)` runs to the last delimiter.
+- Alternatives name their rule, there is no default: `either_longer([...])` (the longest match there),
+  `either_shorter([...])` (the shortest), the first written winning a tie.
+- `capture("name", p)`, `ignoring_case(p)`, and `TextPattern.of(pieces: [...], ignore_case: true)`.
+- Searches: `p.matches(text)` (whole text), failable `p.find(text)` (`try p.find(t)` gives `none`), `p.find_all(text)`
+  (non-overlapping, `List[TextMatch]`), `p.replace(text: t, with: "#")`, `p.split(text)`. A `TextMatch` has `start()`,
+  `end()` (character positions, `Integer`), `text()`, failable `group("name")` (`CaptureNameError` for an unknown name,
+  `AbsentValueError` for a capture that took no part).
+- `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes(b"PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
+  `end_of_bytes`; `BytesMatch.bytes()`. Text and bytes pieces never mix (a type error).
+- Failable `TextPattern.from_regex(text)` / `BytesPattern.from_regex` read the usual regex syntax (unnamed groups
+  capture as `"1"`, `"2"`, `|` is the longest alternative, `(?i)` `(?m)` `(?s)` at the start). Backreferences,
+  lookaround, `*?` and `*+` throw `PatternSyntaxError` with the position; malformed pieces throw `InvalidPatternError`.
+- A search takes time linear in the text times the pattern size (no backtracking blow-up).
 
 ## 14. Collections
 

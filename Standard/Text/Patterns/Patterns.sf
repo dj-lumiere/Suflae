@@ -1,0 +1,186 @@
+module Text/Patterns
+
+# Suflae's surface of the text patterns: the pieces every pattern starts from, counts and positions as `Integer`,
+# and lists as Suflae lists. A Suflae program calls these in place of the shared routines of the same names.
+
+### One ASCII digit, `0` to `9`. `unicode_digit` takes the digits of every script.
+preset digit: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010000\u010000\u010000")
+### One ASCII letter, `a` to `z` or `A` to `Z`. `unicode_letter` takes the letters of every script.
+preset letter: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010001\u010000\u010000")
+### One ASCII whitespace character: space, tab, line feed, vertical tab, form feed or carriage return.
+preset space: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010002\u010000\u010000")
+### One ASCII word character: a letter, a digit or `_`.
+preset word_char: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010003\u010000\u010000")
+### Any one character, a line feed included.
+preset any_char: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010004\u010000\u010000")
+### One Unicode decimal digit (category Nd): `7`, `٧`, `७`.
+preset unicode_digit: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010005\u010000\u010000")
+### One Unicode letter (category L): `a`, `é`, `한`.
+preset unicode_letter: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010006\u010000\u010000")
+### One Unicode whitespace character: the ASCII ones, no-break spaces, the line and paragraph separators.
+preset unicode_space: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010007\u010000\u010000")
+### One Unicode word character: a letter, a mark, a decimal digit or connector punctuation.
+preset unicode_word_char: TextPiece = TextPiece(code: "\u010000\u01000A\u010000\u010008\u010000\u010000")
+### The beginning of the text. It matches no characters.
+preset start_of_text: TextPiece = TextPiece(code: "\u010000\u010008\u010000\u010000")
+### The end of the text. It matches no characters.
+preset end_of_text: TextPiece = TextPiece(code: "\u010000\u010008\u010000\u010001")
+### The beginning of a line: the beginning of the text or the place after a line feed.
+preset start_of_line: TextPiece = TextPiece(code: "\u010000\u010008\u010000\u010002")
+### The end of a line: the end of the text or the place before a line feed.
+preset end_of_line: TextPiece = TextPiece(code: "\u010000\u010008\u010000\u010003")
+### A place between a word character and a character that isn't one, or the start or end of the text next to a
+### word character. It matches no characters.
+preset word_boundary: TextPiece = TextPiece(code: "\u010000\u010008\u010000\u010004")
+### Any one byte.
+preset any_byte: BytesPiece = BytesPiece(code: "\u010000\u01000A\u010000\u010004\u010000\u010000")
+### The beginning of the bytes. It matches none.
+preset start_of_bytes: BytesPiece = BytesPiece(code: "\u010000\u010008\u010000\u010000")
+### The end of the bytes. It matches none.
+preset end_of_bytes: BytesPiece = BytesPiece(code: "\u010000\u010008\u010000\u010001")
+
+### The piece exactly `count` times in a row.
+### :param count: How many times.
+### :returns: The new piece.
+routine TextPiece.repeat(count: Integer) -> TextPiece
+    return me.repeat(count: position_of(value: count))
+
+### The piece a number of times in a row in a range, as many as it can: `digit.repeat(2 to 4)`.
+### :param range: The counts, `to` including its end and `til` leaving it out.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
+failable routine TextPiece.repeat(range: Range[Integer]) -> TextPiece
+    return me.repeat(range: positions_of(range: range))
+
+### The piece `count` times in a row or more, as many as it can.
+### :param count: The fewest times.
+### :returns: The new piece.
+routine TextPiece.repeat_at_least(count: Integer) -> TextPiece
+    return me.repeat_at_least(count: position_of(value: count))
+
+### The piece exactly `count` times in a row.
+### :param count: How many times.
+### :returns: The new piece.
+routine BytesPiece.repeat(count: Integer) -> BytesPiece
+    return me.repeat(count: position_of(value: count))
+
+### The piece a number of times in a row in a range, as many as it can.
+### :param range: The counts, `to` including its end and `til` leaving it out.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
+failable routine BytesPiece.repeat(range: Range[Integer]) -> BytesPiece
+    return me.repeat(range: positions_of(range: range))
+
+### The piece `count` times in a row or more, as many as it can.
+### :param count: The fewest times.
+### :returns: The new piece.
+routine BytesPiece.repeat_at_least(count: Integer) -> BytesPiece
+    return me.repeat_at_least(count: position_of(value: count))
+
+### One of the pieces: the one that matches the longest text at that place (the first one written, of those as
+### long): `either_longer([text("cat"), text("category")])` takes "category" in "category".
+### :param pieces: The alternatives.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The list is empty.
+failable routine either_longer(pieces: List[TextPiece]) -> TextPiece
+    return either_longer(pieces: pieces.to[RF::List]())
+
+### One of the pieces: the one that matches the shortest text at that place (the first one written, of those as
+### short): `either_shorter([text("category"), text("cat")])` takes "cat" in "category".
+### :param pieces: The alternatives.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The list is empty.
+failable routine either_shorter(pieces: List[TextPiece]) -> TextPiece
+    return either_shorter(pieces: pieces.to[RF::List]())
+
+### One of the pieces: the one that matches the most bytes at that place (the first one written, of those as long).
+### :param pieces: The alternatives.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The list is empty.
+failable routine either_longer(pieces: List[BytesPiece]) -> BytesPiece
+    return either_longer(pieces: pieces.to[RF::List]())
+
+### One of the pieces: the one that matches the fewest bytes at that place (the first one written, of those as
+### short).
+### :param pieces: The alternatives.
+### :returns: The new piece.
+### :throws: {InvalidPatternError} The list is empty.
+failable routine either_shorter(pieces: List[BytesPiece]) -> BytesPiece
+    return either_shorter(pieces: pieces.to[RF::List]())
+
+### A pattern of pieces matched one after another.
+### :param pieces: The pieces, in order.
+### :returns: The pattern.
+### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
+failable common routine TextPattern.of(pieces: List[TextPiece]) -> TextPattern
+    return TextPattern.of(pieces: pieces.to[RF::List]())
+
+### A pattern of pieces matched one after another, every letter in either case when `ignore_case` is true.
+### :param pieces: The pieces, in order.
+### :param ignore_case: Whether letters match in either case.
+### :returns: The pattern.
+### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
+failable common routine TextPattern.of(pieces: List[TextPiece], ignore_case: Bool) -> TextPattern
+    return TextPattern.of(pieces: pieces.to[RF::List](), ignore_case: ignore_case)
+
+### Every place the pattern matches in `text`, in order and none overlapping: after a match the search goes on where
+### it ended (one character further after a match of no characters).
+### :param text: The text.
+### :returns: The matches.
+routine TextPattern.find_all(text: Text) -> List[TextMatch]
+    return me.find_all(text: text).to[List[TextMatch]]()
+
+### The parts of `text` between the matches (as `find_all` finds them), the part before the first match and the part
+### after the last included. A text with no match is one part.
+### :param text: The text.
+### :returns: The parts.
+routine TextPattern.split(text: Text) -> List[Text]
+    return me.split(text: text).to[List[Text]]()
+
+### A pattern of bytes pieces matched one after another.
+### :param pieces: The pieces, in order.
+### :returns: The pattern.
+### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
+failable common routine BytesPattern.of(pieces: List[BytesPiece]) -> BytesPattern
+    return BytesPattern.of(pieces: pieces.to[RF::List]())
+
+### A pattern of bytes pieces matched one after another, every ASCII letter in either case when `ignore_case` is
+### true.
+### :param pieces: The pieces, in order.
+### :param ignore_case: Whether ASCII letters match in either case.
+### :returns: The pattern.
+### :throws: {InvalidPatternError} The pieces don't make a pattern: two captures share a name.
+failable common routine BytesPattern.of(pieces: List[BytesPiece], ignore_case: Bool) -> BytesPattern
+    return BytesPattern.of(pieces: pieces.to[RF::List](), ignore_case: ignore_case)
+
+### Every place the pattern matches in `bytes`, in order and none overlapping.
+### :param bytes: The bytes.
+### :returns: The matches.
+routine BytesPattern.find_all(bytes: Bytes) -> List[BytesMatch]
+    return me.find_all(bytes: bytes).to[List[BytesMatch]]()
+
+### The parts of `bytes` between the matches.
+### :param bytes: The bytes.
+### :returns: The parts.
+routine BytesPattern.split(bytes: Bytes) -> List[Bytes]
+    return me.split(bytes: bytes).to[List[Bytes]]()
+
+### Where the match starts.
+### :returns: The position of its first character, from 0.
+routine TextMatch.start() -> Integer
+    return me.start().to[Integer]()
+
+### Where the match ends.
+### :returns: The position just past its last character.
+routine TextMatch.end() -> Integer
+    return me.end().to[Integer]()
+
+### Where the match starts.
+### :returns: The position of its first byte, from 0.
+routine BytesMatch.start() -> Integer
+    return me.start().to[Integer]()
+
+### Where the match ends.
+### :returns: The position just past its last byte.
+routine BytesMatch.end() -> Integer
+    return me.end().to[Integer]()
