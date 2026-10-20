@@ -211,7 +211,9 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
 - A crash trace shows the program's types (`System.List[System.Integer]`, never a handle type) and a library frame as
-  `(standard library)`, the crash line being where the program called in. A lambda may capture an entity (it keeps
+  `(standard library)`, the crash line being where the program called in. Of the library it shows only the routine
+  the program called, and only when the program can name it (not `secret`, bound by an open `@rf` declaration):
+  the library's own helpers push no frame. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Iterable[T]` user type gets its `Iter` from `iter()`, so IterTools adapters walk it.
