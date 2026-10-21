@@ -280,8 +280,7 @@ public partial class SuflaeLexer
             [key: "everywhere"] = TokenType.Everywhere,
             // Reserved for keywords a later release uses: none of them can name anything now.
             [key: "until"] = TokenType.Until,
-            [key: "becomes"] = TokenType.Becomes,
-            [key: "agent"] = TokenType.Agent
+            [key: "becomes"] = TokenType.Becomes
         };
 
         // The standard library's own Suflae files are builder-internal code, analyzed as RazorForge: they write

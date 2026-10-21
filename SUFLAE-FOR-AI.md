@@ -1057,8 +1057,7 @@ routine start()
 ```
 
 - The routine is named, not called, and the conversion takes the routine's own arguments. Only that routine is the
-  work: `f.to[Agent](x).retrieve()` makes the Agent and collects it at once. `agent f(x)` is the old spelling
-  (SF-G220, `migrate --step agent`).
+  work: `f.to[Agent](x).retrieve()` makes the Agent and collects it at once. `agent` is an ordinary name.
 - A failure is recovered where the Agent is collected: `try job.retrieve()`, `check job.retrieve()`.
 - An agent of a routine that returns nothing is `Agent[None]`, and the type can be inferred:
   `var jobs = [work.to[Agent](), work.to[Agent]()]` then `jobs.gather()`.
