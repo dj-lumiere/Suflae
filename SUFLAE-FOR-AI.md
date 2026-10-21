@@ -1042,11 +1042,14 @@ routine start()
 ```suflae
 var out = FileManager.make_file(at: File(at: "out.txt"), replacing: true)
 using FileManager.open_write(at: out) as sink
-    sink.store(data: "hello\n".encode_as_utf8())
+    sink.push(data: "hello\n".encode_as_utf8())
 ```
 
   A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
   There is no `defer`.
+- A byte flow (`FileSource`, `FileSink`, `stdin()`, `stdout()`) is read with `pull(max:)` and written with
+  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places such as `Atomic`, where
+  reading again gives the same value. `migrate --step verbs` rewrites the old `load` / `store` on a flow.
 
 ## 16. Concurrency
 

@@ -15,8 +15,8 @@ module System/Concurrency
 entity Mailbox[T]
 relates RF::System.ChannelDrain[T] as Iter
 obeys Iterable[T]
-    ### The sending side, kept open until `close()`.
-    secret sender: RF::System.Sender[T]
+    ### The transmitting side, kept open until `close()`.
+    secret transmitter: RF::System.Transmitter[T]
     ### The taking side, shared by every reader.
     secret receiver: RF::System.SharedReceiver[T]
 
@@ -25,14 +25,14 @@ obeys Iterable[T]
 ### :param capacity: How many values it holds.
 ### :returns: The new mailbox.
 routine Mailbox[T](capacity: Integer) -> Mailbox[T]
-    var (sender, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
-    return Mailbox[T](sender: sender, receiver: receiver)
+    var (transmitter, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
+    return Mailbox[T](transmitter: transmitter, receiver: receiver)
 
 ### Adds `value` at the end, waiting while the mailbox is full.
 ### :param value: The value that goes in.
 ### :throws: {ChannelClosedError} when the mailbox was closed.
 failable routine Mailbox[T].add_last(value: T)
-    me.sender.send(item: value)
+    me.transmitter.transmit(item: value)
     return
 
 ### Adds `value` at the end only when the mailbox has room for it now, never waiting: the step a broadcast takes per
@@ -42,7 +42,7 @@ failable routine Mailbox[T].add_last(value: T)
 ### :returns: `true` when it went in, `false` when the mailbox was full.
 ### :throws: {ChannelClosedError} when the mailbox was closed.
 failable routine Mailbox[T].add_last_if_room(value: T) -> Bool
-    return me.sender.send_if_room(item: value)
+    return me.transmitter.transmit_if_room(item: value)
 
 ### Takes the first value out, waiting while the mailbox is empty.
 ### :returns: The value that was first.
@@ -53,13 +53,13 @@ failable routine Mailbox[T].remove_first() -> T
 
 ### Ends the mailbox: a later `add_last` crashes, and `each` takes what is left and then ends.
 routine Mailbox[T].close()
-    me.sender.close()
+    me.transmitter.close()
     return
 
 ### Whether the mailbox was closed.
 ### :returns: `true` once `close()` ran.
 routine Mailbox[T].is_closed() -> Bool
-    return me.sender.is_closed()
+    return me.transmitter.is_closed()
 
 ### How many values wait in the mailbox right now. Another agent can change it at once, so it is for showing, not
 ### for deciding.

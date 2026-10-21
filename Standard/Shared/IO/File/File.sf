@@ -7,8 +7,8 @@ module IO/File
 ### handle. It is a cheap value (just the path), constructing one opens nothing. {FileManager} opens one of
 ### three sessions over its content:
 ###   * `FileManager.open_storage[T](at:)` — a random-access {FileStorage} of fixed-size cells, no cursor,
-###   * `FileManager.open_read(at:)` — a sequential {Source} (consume forward with `load`),
-###   * `FileManager.open_write(at:)` / `open_append(at:)` — a sequential {Sink} (emit forward with `store`).
+###   * `FileManager.open_read(at:)` — a sequential {Source} (consume forward with `pull`),
+###   * `FileManager.open_write(at:)` / `open_append(at:)` — a sequential {Sink} (emit forward with `push`).
 ### The content outlives every session (closing a session leaves the file intact — criterion: a file
 ### persists beyond the program). Things that are NOT files — a socket, pipe, or console — have no such
 ### content layer: they are born as {Source}/{Sink} with nothing addressable underneath, so they can
@@ -35,7 +35,7 @@ needs T obeys StorageCell
 
 ### A sequential read session over a {File}'s content. It holds one OS descriptor with a `close`
 ### teardown, so it is an `entity` (never copied, so the descriptor is never closed twice). Consume
-### it forward with `load`, there is no length, index, or seek — the file's spatial extent lives on
+### it forward with `pull`, there is no length, index, or seek — the file's spatial extent lives on
 ### {FileStorage}, not here.
 @rf("FileSource")
 entity FileSource
@@ -44,7 +44,7 @@ obeys Source, Enterable
 
 ### A sequential write session over a {File}'s content (truncating via `open_write`, or appending via
 ### `open_append`). It holds one OS descriptor with a `close` teardown, so it is an `entity`. Emit into
-### it forward with `store`, there is no length, index, or seek.
+### it forward with `push`, there is no length, index, or seek.
 @rf("FileSink")
 entity FileSink
 obeys Sink, Enterable
@@ -469,14 +469,14 @@ failable common routine FileManager.write_bytes(at: File, content: Bytes)
 @rf("FileManager.append_text")
 failable common routine FileManager.append_text(at: File, content: Text)
 
-### Opens the file for sequential reading, giving a {Source} consumed forward with `load`.
+### Opens the file for sequential reading, giving a {Source} consumed forward with `pull`.
 ### :param at: The file.
 ### :returns: A {FileSource} over the file's content, to be bound by `using`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened for reading.
 @rf("FileManager.open_read")
 failable common routine FileManager.open_read(at: File) -> FileSource
 
-### Opens an existing file for sequential writing, EMPTYING it first, giving a {Sink} filled with `store`.
+### Opens an existing file for sequential writing, EMPTYING it first, giving a {Sink} filled with `push`.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :returns: A {FileSink} over the file's content, to be bound by `using`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened for writing.
@@ -580,12 +580,12 @@ routine FileStorage[T].close()
 @rf("FileStorage.destruct")
 routine FileStorage[T].destruct()
 
-### Loads up to `max` bytes from the current position. Returns fewer when end-of-file is reached first,
+### Pulls up to `max` bytes from the current position. Returns fewer when end-of-file is reached first,
 ### an empty `Bytes` signals EOF.
-### :param max: The maximum byte count to load.
-### :returns: The bytes loaded.
-@rf("FileSource.load")
-routine FileSource.load(max: U64) -> Bytes
+### :param max: The maximum byte count to pull.
+### :returns: The bytes pulled.
+@rf("FileSource.pull")
+routine FileSource.pull(max: U64) -> Bytes
 
 ### Closes the descriptor. Idempotent — `close()`, scope-exit `exit`, and teardown `destruct` never
 ### double-close.
@@ -606,11 +606,11 @@ routine FileSource.exit()
 @rf("FileSource.destruct")
 routine FileSource.destruct()
 
-### Stores `data` at the current position, returning the number of bytes accepted.
-### :param data: The bytes to store.
+### Pushes `data` at the current position, returning the number of bytes accepted.
+### :param data: The bytes to push.
 ### :returns: The number of bytes accepted.
-@rf("FileSink.store")
-routine FileSink.store(data: Bytes) -> U64
+@rf("FileSink.push")
+routine FileSink.push(data: Bytes) -> U64
 
 ### Flushes buffered output to the underlying file.
 @rf("FileSink.flush")

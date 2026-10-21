@@ -3,10 +3,10 @@ module System/Concurrency
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match. They are the library's own: a program passes values through a `Mailbox[T]`.
 
-### The sending end of a channel. Clone it for multiple producers; the last one dropping (or an
+### The transmitting end of a channel. Clone it for multiple producers; the last one dropping (or an
 ### explicit `close`) closes the channel.
-@rf("Sender")
-secret entity Sender[T]
+@rf("Transmitter")
+secret entity Transmitter[T]
     pass
 
 ### The single-consumer receiving end. Obeys `Iterable[T]`: `for x in hop` drains it until the
@@ -34,50 +34,50 @@ secret entity ChannelDrain[T]
 obeys Emittable[T]
     pass
 
-### Creates a single-consumer channel and returns its `(Sender, Receiver)` pair. `capacity` is the
-### buffered depth: 0 = rendezvous (send waits for a taker), N = a bounded buffer (send blocks when
-### full = backpressure). Clone the `Sender` for multiple producers (fan-in).
+### Creates a single-consumer channel and returns its `(Transmitter, Receiver)` pair. `capacity` is the
+### buffered depth: 0 = rendezvous (transmit waits for a taker), N = a bounded buffer (transmit blocks when
+### full = backpressure). Clone the `Transmitter` for multiple producers (fan-in).
 ### :param capacity: The buffer depth (0 = rendezvous).
-### :returns: A `(Sender[T], Receiver[T])` tuple sharing one channel.
+### :returns: A `(Transmitter[T], Receiver[T])` tuple sharing one channel.
 @rf("make_channel")
-secret routine make_channel[T](capacity: U64) -> (Sender[T], Receiver[T])
+secret routine make_channel[T](capacity: U64) -> (Transmitter[T], Receiver[T])
 
-### Creates a multi-consumer channel and returns its `(Sender, SharedReceiver)` pair. Clone the
+### Creates a multi-consumer channel and returns its `(Transmitter, SharedReceiver)` pair. Clone the
 ### `SharedReceiver` (one per consumer) for a worker pool — any free worker takes the next item (consumer
 ### fan-out, not broadcast). `capacity` as in `make_channel`.
 ### :param capacity: The buffer depth (0 = rendezvous).
-### :returns: A `(Sender[T], SharedReceiver[T])` tuple sharing one channel.
+### :returns: A `(Transmitter[T], SharedReceiver[T])` tuple sharing one channel.
 @rf("make_shared_channel")
-secret routine make_shared_channel[T](capacity: U64) -> (Sender[T], SharedReceiver[T])
+secret routine make_shared_channel[T](capacity: U64) -> (Transmitter[T], SharedReceiver[T])
 
-### Sends one item, moving its ownership into the channel. Blocks/parks while the buffer is full
+### Transmits one item, moving its ownership into the channel. Blocks/parks while the buffer is full
 ### (backpressure); for a rendezvous channel waits until a consumer takes it. FAILABLE: throws
 ### {ChannelClosedError} if the channel is already closed or has no consumers left.
-### :param item: The value to send (ownership transfers in).
-@rf("Sender.send")
-secret failable routine Sender[T].send(item: T)
+### :param item: The value to transmit (ownership transfers in).
+@rf("Transmitter.transmit")
+secret failable routine Transmitter[T].transmit(item: T)
 
-### Sends one item only when the channel has room for it now, never waiting.
-### :param item: The value to send.
+### Transmits one item only when the channel has room for it now, never waiting.
+### :param item: The value to transmit.
 ### :returns: `true` when it went in, `false` when the channel was full.
-@rf("Sender.send_if_room")
-secret failable routine Sender[T].send_if_room(item: T) -> Bool
+@rf("Transmitter.transmit_if_room")
+secret failable routine Transmitter[T].transmit_if_room(item: T) -> Bool
 
-### Produces another sending handle on the same channel (fan-in: more producers).
-### :returns: A new `Sender[T]` on the same channel.
-@rf("Sender.duplicate")
-secret routine Sender[T].duplicate() -> Sender[T]
+### Produces another transmitting handle on the same channel (fan-in: more producers).
+### :returns: A new `Transmitter[T]` on the same channel.
+@rf("Transmitter.duplicate")
+secret routine Transmitter[T].duplicate() -> Transmitter[T]
 
-### Closes the channel early (dropping the last Sender also closes it). Receivers drain the buffer
+### Closes the channel early (dropping the last Transmitter also closes it). Receivers drain the buffer
 ### then finish. Not dangerous — closing is the normal end-of-stream signal; double-close is a no-op.
-@rf("Sender.close")
-secret routine Sender[T].close()
+@rf("Transmitter.close")
+secret routine Transmitter[T].close()
 
-### Whether the channel has been closed (a subsequent `send!` would throw). Racy: another agent could
-### close it the instant after you check, so prefer handling `send!`'s failure to gating on this.
+### Whether the channel has been closed (a subsequent `transmit` would throw). Racy: another agent could
+### close it the instant after you check, so prefer handling `transmit`'s failure to gating on this.
 ### :returns: `true` if the channel is closed.
-@rf("Sender.is_closed")
-secret routine Sender[T].is_closed() -> Bool
+@rf("Transmitter.is_closed")
+secret routine Transmitter[T].is_closed() -> Bool
 
 ### Returns an iterator that draws items from the channel (receive == iterate).
 ### :returns: A `ChannelDrain[T]` over this channel.

@@ -3,7 +3,7 @@ module IO/Console
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
-### stdin as a {Source}. Consume forward with `load`; an empty result signals EOF.
+### stdin as a {Source}. Consume forward with `pull`; an empty result signals EOF.
 @rf("ConsoleIn")
 record ConsoleIn
 obeys Source
@@ -108,17 +108,17 @@ routine stdout() -> ConsoleOut
 @rf("stderr")
 routine stderr() -> ConsoleOut
 
-### Loads up to `max` bytes from standard input; an empty `Bytes` signals EOF.
-### :param max: The maximum byte count to load.
-### :returns: The bytes loaded, or empty at EOF.
-@rf("ConsoleIn.load")
-routine ConsoleIn.load(max: U64) -> Bytes
+### Pulls up to `max` bytes from standard input; an empty `Bytes` signals EOF.
+### :param max: The maximum byte count to pull.
+### :returns: The bytes pulled, or empty at EOF.
+@rf("ConsoleIn.pull")
+routine ConsoleIn.pull(max: U64) -> Bytes
 
-### Stores `data` to the underlying standard stream, returning the number of bytes accepted.
-### :param data: The bytes to store.
+### Pushes `data` to the underlying standard stream, returning the number of bytes accepted.
+### :param data: The bytes to push.
 ### :returns: The number of bytes accepted (always `data.count()`).
-@rf("ConsoleOut.store")
-routine ConsoleOut.store(data: Bytes) -> U64
+@rf("ConsoleOut.push")
+routine ConsoleOut.push(data: Bytes) -> U64
 
 ### Flushes the standard stream. No-op — the runtime flushes stdout/stderr for you.
 @rf("ConsoleOut.flush")
