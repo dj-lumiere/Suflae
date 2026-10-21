@@ -69,7 +69,7 @@ through a `.rf` module the program imports (section 18).
 9. **Changing a collection while `each`-looping it is banned.** `each x in xs` with `xs.add_last(...)` in the
    body is a build error (SF-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
-10. **A result you do not need takes no marker**: `seen.add(value: v)` on its own line simply drops the `Bool`.
+10. **A result you do not need takes no marker** (`drop` and `discard` are SF-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
     `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Atomic.fetch_*`/`swap`), which get none.
@@ -349,8 +349,8 @@ routine start()
 
 ## 7. Operators
 
-- Arithmetic: `+ - * / // % **`. On `Integer`, `+ - *` never fail; `/` does not exist. On fixed-width
-  integers, `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
+- Arithmetic: `+ - * / // % **`. On `Integer`, `+ - *` never fail and `/` gives a `Decimal`. On fixed-width
+  integers `/` is SF-S065, whose message points to `a // b` or `a.to[Decimal]() / b.to[Decimal]()`, and `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
   `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
   Division by zero crashes (`DivisionByZeroError`), on the complex types too. On the floats, `Decimal`
