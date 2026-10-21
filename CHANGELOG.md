@@ -112,6 +112,8 @@ build error says what to write instead.
   for.
 - Byte flows (`FileSource`, `FileSink`, `stdin()`, `stdout()`) read with `pull(max:)` and write with `push(data:)`
   (`migrate --step verbs`).
+- The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
+  `all_off()` is gone, and its build error names `none`.
 
 ### Added
 
@@ -122,7 +124,8 @@ build error says what to write instead.
 - `global name: Type = init`: module-level state. Changes to a global from several agents are serialized.
 - Loops carry values: `until c with total = 0`, `continue with total: v`, and `then` sees them.
 - A `when` that gives a value ends a block arm with `becomes value`. One arm can match several values
-  (`== 4, 6, 9, 11 =>`).
+  (`== 4, 6, 9, 11 =>`). An arm can be `throw ...` in a `failable` routine (SF-S750 elsewhere, with a quick fix that
+  writes `failable`).
 - Backtick names, tuple swap `(a, b) = (b, a)`, record patterns, inline variants `A | B`, `define` type aliases,
   generic variants, `@infix` routines, named and short arguments mixed (`area(width, height: 4)`), `todo`.
 - Presets are computed at buildtime. Hex float literals (`0x1.8p3`) for binary floats.
@@ -171,6 +174,10 @@ build error says what to write instead.
 - `Integer ** -n` crashes with `NumericDomainError`.
 - `each (i, xs) in make().enumerate()` crashed. `.List()` now points to `x.to[List]()` (SF-S458).
 - `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (SF-S502).
+- `flags.lacks(A and B)` answered "not all of them on" instead of "none of them on".
+- A `Random` from `Random.from_entropy()` crashed when passed to a routine, and gave a false
+  `ReshapingWhileInUseError` as an entity's member variable.
+- A syntax error inside a value `when` no longer reports the rest of the routine as top-level statements.
 
 ### Removed
 - `Result[T]`, `Lookup[T]`, `Crashable`, `absent`, `discard`, and the `try_` / `check_` / `lookup_` routines.
@@ -180,6 +187,7 @@ build error says what to write instead.
 - `Real`, arbitrary-precision `Complex`, the `?.` operator.
 - `@readonly`, `@reshaping`, `import Numerics`.
 - Number type suffixes and the `B*_INFINITY` / `B*_NAN` presets.
+- Flags' `all_off()` (write `none`).
 
 ## [0.1.0] — 2026-08-28
 

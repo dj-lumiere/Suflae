@@ -519,7 +519,9 @@ var label = when
 
 - In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
   as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
-  `becomes value`, the arm's value (without it, SF-S307).
+  `becomes value`, the arm's value (without it, SF-S307). An arm may also be `throw ...` (`else => throw
+  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type, and it is allowed only
+  in a `failable` routine (otherwise SF-S750, whose quick fix writes `failable` on the declaration).
 
 ```suflae
 when terrain
@@ -652,7 +654,9 @@ variant Number
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
   `has` / `has_any` / `lacks` / `==` (`perms.has(WRITE)`, `perms.has(READ and WRITE)` is all of them,
   `perms.has_any(READ and WRITE)` at least one, `perms.lacks(READ and WRITE)` none), and taken off with `without` (`perms.without(WRITE)`: where a
-  value of the flags type goes, its members are named bare).
+  value of the flags type goes, its members are named bare). The flags value with no member on is `none` where the
+  flags type is expected (`var marks: CellMarks = none`, `marks == none`, a preset or record preset). A `CellMarks?`
+  slot takes `none` as the absent value. There is no `all_off()`.
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
   `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Integer | Text`,
   `List[Circle | Square]` (same types in any order = one type; a smaller one goes where a larger one is expected;
