@@ -29,6 +29,45 @@ public class DocFindingsTests
                          e.Message.Contains(value: "'/'"));
     }
 
+    /// <summary><c>/</c> on a fixed-width integer is an error whose message points to <c>//</c> and to the
+    /// <c>Decimal</c> quotient.</summary>
+    [Fact]
+    public void Analyze_FixedWidthTrueDivision_PointsToFloorAndDecimal()
+    {
+        string source = """
+                        routine start()
+                            var a: S64 = 7
+                            var b: S64 = 2
+                            show(a / b)
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.BinaryOperatorNotFound &&
+                         e.Message.Contains(value: "a // b") && e.Message.Contains(value: "to[Decimal]()"));
+    }
+
+    /// <summary>A creator argument of the wrong type names the creator and the argument, not the member variables
+    /// a memberwise construction would need.</summary>
+    [Fact]
+    public void Analyze_CreatorArgumentOfWrongType_NamesTheCreator()
+    {
+        string source = """
+                        routine start()
+                            var x: S64 = 4
+                            var xs = List[S64](capacity: x)
+                            show(xs)
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch &&
+                         e.Message.Contains(value: "'capacity' takes an 'Integer'"));
+        Assert.DoesNotContain(collection: result.Errors,
+            filter: e => e.Code is SemanticDiagnosticCode.MissingRequiredMemberVariable
+                or SemanticDiagnosticCode.MemberVariableNotFound);
+    }
+
     /// <summary>A memberwise construction whose values the member variables cannot hold is reported (no creator
     /// of <c>Label</c> takes two <c>Integer</c>s).</summary>
     [Fact]
