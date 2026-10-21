@@ -46,6 +46,10 @@ through a `.rf` module the program imports (section 18).
 3. **Entities are shared; records are copied.** `var b = a` on an entity gives a second name for the same
    object (no `steal`, no copy, no error). On a record it makes an independent copy. Collections (`List`,
    `Dict`, `Set`, …) are entities, so they are shared too: copy one explicitly with `xs.duplicate()`.
+   A manager type (`FileManager`, `PartitionManager`, `StorageManager`, `CpuEventManager`) is always an `entity`
+   (a copy would keep its own record and diverge), a service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
+   `record` with no member variables (body `nothing`, routines `common`, called on the type). The console is the
+   free routines `show` / `ask` / `alert`.
 4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`, and a whole number written in base 10
    to a float or decimal type: `price: 5` for a `Decimal` parameter, but not `0xFF`), but variables of different

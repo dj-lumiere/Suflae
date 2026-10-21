@@ -78,7 +78,7 @@ record FileMetadata
 ### One storage device (a disk, an SD card), as the operating system reports it: its blocks and its partition table.
 ### The OS manages it, and this is what the program can ask about it.
 @rf("StorageManager")
-record StorageManager
+entity StorageManager
     ### The OS's name for the device (`/dev/sda`, `\\.\PhysicalDrive0`).
     name: Text
     ### Its size in bytes, 0 when the OS doesn't say.
@@ -87,7 +87,7 @@ record StorageManager
 ### One partition, a slice of a storage device, as the operating system reports it. A partition with a file system
 ### has exactly one file manager, the OS's, reached through {FileManager}.
 @rf("PartitionManager")
-record PartitionManager
+entity PartitionManager
     ### The OS's name for the partition (`/dev/sda1`, `C:\`).
     name: Text
     ### The name of the {StorageManager} it is on, empty when the OS doesn't say.
@@ -104,7 +104,7 @@ record PartitionManager
 ### one file manager per mounted partition, and `FileManager` reaches all of them: `partition(at:)` tells which
 ### partition a path is on.
 @rf("FileManager")
-record FileManager
+entity FileManager
     nothing
 
 ### This file's extension, without the leading dot (empty when absent).

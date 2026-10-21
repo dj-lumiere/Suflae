@@ -7,7 +7,7 @@ module System/Cpu
 ### are called on the type.
 ### :see: {CpuEventManager.when_terminated}, {CpuEventManager.when_interrupted}
 @rf("CpuEventManager")
-record CpuEventManager
+entity CpuEventManager
     nothing
 
 ### Sets the handler of a request to end the process: SIGTERM on Linux and macOS, a console window closed, a logoff
