@@ -18,7 +18,7 @@ module System/Text
 record Bytes
 relates BytesEmittable as Iter
 obeys Copyable, Addable, Iterable[Byte], Comparable, Hashable
-    pass
+    nothing
 
 ### Represents the iterator used to traverse a `Bytes` value.
 @rf("BytesEmittable")
@@ -34,7 +34,7 @@ entity BytesEmittable
 record BytesUtf8View
 relates BytesUtf8Emittable as Iter
 obeys Iterable[Char]
-    pass
+    nothing
 
 ### Represents the iterator backing {BytesUtf8View}.
 @rf("BytesUtf8Emittable")
@@ -48,7 +48,7 @@ entity BytesUtf8Emittable
 record BytesUtf8LossyView
 relates BytesUtf8LossyEmittable as Iter
 obeys Iterable[Char]
-    pass
+    nothing
 
 ### Represents the iterator backing {BytesUtf8LossyView}.
 @rf("BytesUtf8LossyEmittable")

@@ -9,7 +9,7 @@ module System/Memory
 @rf("ByteSize")
 record ByteSize
 obeys Comparable, Addable, Subtractable, FloorDivisible, Scalable, ScalarFloorDivisible, Copyable
-    pass
+    nothing
 
 ### Creates a `ByteSize` from a raw byte count.
 ### :param bytes: The number of bytes.

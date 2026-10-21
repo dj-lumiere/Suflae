@@ -14,7 +14,7 @@ relates ExtendEmittable[T, TFirstSource/Iter, TSecondSource/Iter] as Iter
 obeys Iterable[T]
 needs TFirstSource obeys Iterable[T]
 needs TSecondSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over an `ExtendIterable` by exhausting the first source before moving to the second.
 ### :typeparam T: The element type produced by the concatenated sequence.
@@ -25,7 +25,7 @@ entity ExtendEmittable[T, TFirstIter, TSecondIter]
 obeys Emittable[T]
 needs TFirstIter obeys Emittable[T]
 needs TSecondIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that concatenates the two source sequences.
 ### The returned emitter walks `first` to completion before switching to `second`.

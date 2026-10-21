@@ -18,7 +18,7 @@ module System/Numerics
 @rf("Integer")
 record Integer
 obeys Copyable, Integral, Negatable, Comparable, Hashable
-    pass
+    nothing
 
 ### Creates the integer value `0`.
 ### Use this overload when the surrounding context needs an explicit `Integer`

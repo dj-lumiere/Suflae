@@ -19,7 +19,7 @@ module Random
 ### a seed gives the same stream on every platform.
 @rf("Random")
 entity Random
-    pass
+    nothing
 
 ### Runs one round of the splitmix64 mixer, used to expand a seed into the
 ### four xoshiro256** state words.

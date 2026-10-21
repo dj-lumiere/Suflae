@@ -7,7 +7,7 @@ module System
 ### mathematically meaningful result in the current domain.
 @rf("IndeterminateResultError")
 crashable IndeterminateResultError
-    pass
+    nothing
 
 ### Returns the default message for indeterminate arithmetic results.
 ### :returns: The resulting `Text` value.

@@ -8,7 +8,7 @@ module ObjectHacker
 ### :typeparam T: The type of the watched object.
 @rf("Watched")
 record Watched[T]
-    pass
+    nothing
 
 ### Whether the watched object is still alive.
 ### :returns: `true` until the object has been freed.

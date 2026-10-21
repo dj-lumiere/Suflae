@@ -7,7 +7,7 @@ module System
 ### divisor.
 @rf("DivisionByZeroError")
 crashable DivisionByZeroError
-    pass
+    nothing
 
 ### Returns the default message for division-by-zero failures.
 ### :returns: The resulting `Text` value.

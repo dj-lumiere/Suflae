@@ -16,7 +16,7 @@ obeys Named
 
 record Dog
 obeys Animal
-    pass
+    nothing
 
 routine Dog.name() -> Text
     return "dog"

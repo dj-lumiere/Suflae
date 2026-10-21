@@ -9,7 +9,7 @@ module System
 ### read out of it is valid while the carrier holds the error.
 @rf("Crashables")
 record Crashables
-    pass
+    nothing
 
 ### The caught error's title: its type's name in sentence case, unless the crashable writes its own.
 ### :returns: The title.

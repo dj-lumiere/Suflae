@@ -31,7 +31,7 @@ record File
 @rf("FileStorage")
 entity FileStorage[T]
 needs T obeys StorageCell
-    pass
+    nothing
 
 ### A sequential read session over a {File}'s content. It holds one OS descriptor with a `close`
 ### teardown, so it is an `entity` (never copied, so the descriptor is never closed twice). Consume
@@ -40,7 +40,7 @@ needs T obeys StorageCell
 @rf("FileSource")
 entity FileSource
 obeys Source, Enterable
-    pass
+    nothing
 
 ### A sequential write session over a {File}'s content (truncating via `open_write`, or appending via
 ### `open_append`). It holds one OS descriptor with a `close` teardown, so it is an `entity`. Emit into
@@ -48,7 +48,7 @@ obeys Source, Enterable
 @rf("FileSink")
 entity FileSink
 obeys Sink, Enterable
-    pass
+    nothing
 
 ### A `Directory` names a directory in the filesystem — a container of entries, NOT byte content (that
 ### is what {File} is). Like `File` it is a cheap value (just the path), constructing one creates
@@ -105,7 +105,7 @@ record PartitionManager
 ### partition a path is on.
 @rf("FileManager")
 record FileManager
-    pass
+    nothing
 
 ### This file's extension, without the leading dot (empty when absent).
 ### :returns: The extension `Text`.

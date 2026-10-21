@@ -8,7 +8,7 @@ module System
 ### more specific crashable type.
 @rf("RuntimeError")
 crashable RuntimeError
-    pass
+    nothing
 
 ### Returns the default message for an unclassified runtime error.
 ### This message is intentionally generic and should be overridden by more

@@ -7,7 +7,7 @@ module System/Numerics
 @rf("Decimal")
 record Decimal
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Views this Decimal as its underlying `D128` (bit-for-bit; a Decimal is always finite).
 @rf("dec_to_d128")

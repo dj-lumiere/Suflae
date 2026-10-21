@@ -238,7 +238,7 @@ public partial class SuflaeLexer
             [key: "using"] = TokenType.Using,
             [key: "as"] = TokenType.As,
             [key: "define"] = TokenType.Define,
-            [key: "pass"] = TokenType.Pass,
+            [key: "nothing"] = TokenType.Nothing,
             [key: "given"] = TokenType.Given,
             [key: "in"] = TokenType.In,
             [key: "isnot"] = TokenType.IsNot,

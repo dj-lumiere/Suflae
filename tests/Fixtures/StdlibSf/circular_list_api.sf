@@ -70,8 +70,8 @@ routine start()
     show(f"released: {not seen.is_alive()}")
 
     var empty = CircularList[Integer]()
-    var nothing = try empty.remove_first()
-    show(f"empty remove: {nothing is None}")
+    var removed = try empty.remove_first()
+    show(f"empty remove: {removed is None}")
 
     var words: CircularList[Text] = ["alpha", "beta", "gamma"]
     words.rotate_left(n: 1)

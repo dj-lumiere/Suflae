@@ -11,7 +11,7 @@ module System/Numerics
 @rf("B128")
 record B128
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Reinterprets this value as its raw IEEE 754 bit pattern.
 ### :returns: The underlying 128-bit encoding.

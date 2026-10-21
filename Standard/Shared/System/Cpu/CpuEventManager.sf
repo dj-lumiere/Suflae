@@ -8,7 +8,7 @@ module System/Cpu
 ### :see: {CpuEventManager.when_terminated}, {CpuEventManager.when_interrupted}
 @rf("CpuEventManager")
 record CpuEventManager
-    pass
+    nothing
 
 ### Sets the handler of a request to end the process: SIGTERM on Linux and macOS, a console window closed, a logoff
 ### or a shutdown on Windows. The handler runs beside the rest of the program, and when it returns the process ends

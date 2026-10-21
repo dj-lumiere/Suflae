@@ -10,7 +10,7 @@ module System/Temporal
 @rf("LocalMoment")
 record LocalMoment
 obeys Comparable, DurationAddable, DurationSubtractable
-    pass
+    nothing
 
 ### Creates a `LocalMoment` from local civil date-time components and a UTC offset.
 ### The supplied civil time is interpreted in the local offset and converted to the equivalent UTC `Moment`.

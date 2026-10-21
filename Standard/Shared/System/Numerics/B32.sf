@@ -10,7 +10,7 @@ module System/Numerics
 @rf("B32")
 record B32
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns `me + you`. Checked: crashes if the IEEE result is non-finite. Use `add_unchecked` for
 ### raw IEEE.

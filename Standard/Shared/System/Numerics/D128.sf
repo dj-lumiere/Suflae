@@ -7,7 +7,7 @@ module System/Numerics
 @rf("D128")
 record D128
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Reinterprets this value as its raw decimal128 bit pattern.
 @rf("D128.to_bits")

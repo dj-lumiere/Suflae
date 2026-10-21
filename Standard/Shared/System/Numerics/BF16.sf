@@ -12,7 +12,7 @@ module System/Numerics
 @rf("BF16")
 record BF16
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the raw bfloat16 bit pattern of this value.
 ### :returns: The underlying `U16` encoding.

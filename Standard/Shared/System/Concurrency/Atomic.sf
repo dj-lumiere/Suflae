@@ -28,7 +28,7 @@ module System/Concurrency
 record Atomic[T]
 needs RecordType T
 needs T obeys AtomicType
-    pass
+    nothing
 
 ### Atomically reads the current value.
 ### :returns: The value observed.

@@ -11,7 +11,7 @@ entity SkipIterable[T, TSource]
 relates SkipEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence after discarding an initial prefix.
 ### :typeparam T: The element type produced by the source sequence.
@@ -20,7 +20,7 @@ needs TSource obeys Iterable[T]
 entity SkipEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that discards the configured prefix lazily.
 ### The returned emitter defers the actual skipping until iteration begins.

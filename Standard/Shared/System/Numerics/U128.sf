@@ -13,7 +13,7 @@ module System/Numerics
 @rf("U128")
 record U128
 obeys UnsignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the sum and a flag indicating whether the result wrapped around.
 ### :param you: The right operand.

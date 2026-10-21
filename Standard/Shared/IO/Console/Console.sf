@@ -7,13 +7,13 @@ module IO/Console
 @rf("ConsoleIn")
 record ConsoleIn
 obeys Source
-    pass
+    nothing
 
 ### stdout or stderr as a {Sink}, discriminated by `fd` (1 = stdout, 2 = stderr).
 @rf("ConsoleOut")
 record ConsoleOut
 obeys Sink
-    pass
+    nothing
 
 ### Writes text to standard output.
 ### `end` is appended after `value`.

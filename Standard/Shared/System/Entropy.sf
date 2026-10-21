@@ -8,7 +8,7 @@ module System
 ### seeds a generator with it. Its routines are called on the type (`Entropy.next_u64()`).
 @rf("Entropy")
 record Entropy
-    pass
+    nothing
 
 ### 64 random bits from the operating system's random source.
 ### :returns: The random bits.

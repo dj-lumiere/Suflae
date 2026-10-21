@@ -12,7 +12,7 @@ entity ReverseIterable[T, TSource]
 relates ReverseEmittable[T] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a pre-materialized buffer from back to front.
 ### The buffer holds the source's values as read, not copies it owns: an adapter is used only in the statement
@@ -22,7 +22,7 @@ needs TSource obeys Iterable[T]
 @rf("ReverseEmittable")
 entity ReverseEmittable[T]
 obeys Emittable[T]
-    pass
+    nothing
 
 ### Materializes the source into a buffer and returns an iterator that walks it backwards.
 ### :returns: The resulting `ReverseEmittable[T]` value.

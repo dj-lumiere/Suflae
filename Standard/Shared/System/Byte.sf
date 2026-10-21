@@ -9,7 +9,7 @@ module System
 @rf("Byte")
 record Byte
 obeys Copyable
-    pass
+    nothing
 
 ### Reads an unsigned 8-bit integer as a `Byte` with the same bits: `0x41u8.to[Byte]()`.
 ### :returns: The byte.

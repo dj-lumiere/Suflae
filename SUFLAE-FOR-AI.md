@@ -87,7 +87,7 @@ through a `.rf` module the program imports (section 18).
     keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
-    `null`, `print`, `main` or `pass` statement.** The words are `entity`/`record`, `routine`, `var`,
+    `null`, `print`, `main` or `pass` statement.** A line with no work is `nothing`. The words are `entity`/`record`, `routine`, `var`,
     `preset`, `each`, `when`, `to[Agent]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
@@ -730,7 +730,7 @@ routine start()
 - **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
   running it crashes with `NotImplementedError` naming the routine, like `pierce`. It does not make the routine
   failable and ends its path, so a body that is only `todo` needs no `return`. The build warns once per routine
-  that still has one (SF-W303). `pass` is an empty body on purpose, a different thing.
+  that still has one (SF-W303). `nothing` is an empty body on purpose, a different thing.
 - Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
   the arm `is AbsentValueError` of a `check` result, so it can be told apart from every other failure.
 - A routine that returns nothing gives `Check[None]` under `check` (its success arm is `is None`) and `Bool`
@@ -1343,6 +1343,7 @@ number). At most 20 are shown per batch.
 | SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
+| SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Agent]` on a non-routine, or over generic values | convert a routine, with concrete types           |
@@ -1364,7 +1365,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`
-- **Other**: `using` `as` `define` `given` `pass` (an empty body: a type's, or a block's that
+- **Other**: `using` `as` `define` `given` `nothing` (an empty body: a type's, or a block's that
   does nothing)
 - **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`

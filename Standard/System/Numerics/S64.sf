@@ -7,7 +7,7 @@ module System/Numerics
 ### crashes; `+%` wraps around and `+^` stops at the end instead. Write one as `5_s64`.
 @rf("S64")
 record S64
-    pass
+    nothing
 
 ### Returns the larger of this number and `you`.
 ### :param you: The other number.

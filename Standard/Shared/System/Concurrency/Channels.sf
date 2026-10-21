@@ -7,7 +7,7 @@ module System/Concurrency
 ### explicit `close`) closes the channel.
 @rf("Transmitter")
 secret entity Transmitter[T]
-    pass
+    nothing
 
 ### The single-consumer receiving end. Obeys `Iterable[T]`: `for x in hop` drains it until the
 ### channel closes and the buffer empties. There is only ever one `Receiver` per channel (it is not
@@ -16,7 +16,7 @@ secret entity Transmitter[T]
 secret entity Receiver[T]
 relates ChannelDrain[T] as Iter
 obeys Iterable[T]
-    pass
+    nothing
 
 ### A multi-consumer receiving handle. Clone one per consumer for a worker pool; any free worker
 ### takes the next item. Obeys `Iterable[T]` like `Receiver`.
@@ -24,7 +24,7 @@ obeys Iterable[T]
 secret entity SharedReceiver[T]
 relates ChannelDrain[T] as Iter
 obeys Iterable[T]
-    pass
+    nothing
 
 ### The iterator a receiving end hands to a `for` loop. It references the channel without owning it (the
 ### owning `Receiver`/`SharedReceiver` holds the consumer reference); `emit!` receives one item, parking
@@ -32,7 +32,7 @@ obeys Iterable[T]
 @rf("ChannelDrain")
 secret entity ChannelDrain[T]
 obeys Emittable[T]
-    pass
+    nothing
 
 ### Creates a single-consumer channel and returns its `(Transmitter, Receiver)` pair. `capacity` is the
 ### buffered depth: 0 = rendezvous (transmit waits for a taker), N = a bounded buffer (transmit blocks when

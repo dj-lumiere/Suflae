@@ -15,7 +15,7 @@ relates ZipEmittable[TFirst, TSecond, TFirstSource/Iter, TSecondSource/Iter] as 
 obeys Iterable[Tuple[TFirst, TSecond]]
 needs TFirstSource obeys Iterable[TFirst]
 needs TSecondSource obeys Iterable[TSecond]
-    pass
+    nothing
 
 ### Iterates over two source sequences simultaneously, pairing one element from each.
 ### Iteration ends when either source is exhausted.
@@ -28,7 +28,7 @@ entity ZipEmittable[TFirst, TSecond, TFirstIter, TSecondIter]
 obeys Emittable[Tuple[TFirst, TSecond]]
 needs TFirstIter obeys Emittable[TFirst]
 needs TSecondIter obeys Emittable[TSecond]
-    pass
+    nothing
 
 ### Represents a lazy adapter that pairs elements from three sources into triples.
 ### Iteration stops as soon as any source is exhausted.
@@ -45,7 +45,7 @@ obeys Iterable[Tuple[TFirst, TSecond, TThird]]
 needs TFirstSource obeys Iterable[TFirst]
 needs TSecondSource obeys Iterable[TSecond]
 needs TThirdSource obeys Iterable[TThird]
-    pass
+    nothing
 
 ### Iterates over three source sequences simultaneously, pairing one element from each.
 ### Iteration ends when any source is exhausted.
@@ -61,7 +61,7 @@ obeys Emittable[Tuple[TFirst, TSecond, TThird]]
 needs TFirstIter obeys Emittable[TFirst]
 needs TSecondIter obeys Emittable[TSecond]
 needs TThirdIter obeys Emittable[TThird]
-    pass
+    nothing
 
 ### Represents a lazy adapter that pairs elements from four sources into quadruples.
 ### Iteration stops as soon as any source is exhausted.
@@ -81,7 +81,7 @@ needs TFirstSource obeys Iterable[TFirst]
 needs TSecondSource obeys Iterable[TSecond]
 needs TThirdSource obeys Iterable[TThird]
 needs TFourthSource obeys Iterable[TFourth]
-    pass
+    nothing
 
 ### Iterates over four source sequences simultaneously, pairing one element from each.
 ### Iteration ends when any source is exhausted.
@@ -100,7 +100,7 @@ needs TFirstIter obeys Emittable[TFirst]
 needs TSecondIter obeys Emittable[TSecond]
 needs TThirdIter obeys Emittable[TThird]
 needs TFourthIter obeys Emittable[TFourth]
-    pass
+    nothing
 
 ### Returns the stateful iterator that produces paired tuples lazily.
 ### :returns: The resulting `ZipEmittable[TFirst, TSecond, TFirstSource/Iter, TSecondSource/Iter]` value.

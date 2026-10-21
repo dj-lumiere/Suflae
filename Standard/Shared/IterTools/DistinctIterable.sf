@@ -12,7 +12,7 @@ entity DistinctIterable[T, TSource]
 relates DistinctEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence while suppressing values already produced.
 ### :typeparam T: The element type of the source sequence.
@@ -21,7 +21,7 @@ needs TSource obeys Iterable[T]
 entity DistinctEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Represents a lazy adapter that suppresses elements whose key has already been seen.
 ### Two elements are considered duplicates when their computed keys produce the same hash
@@ -34,7 +34,7 @@ entity DistinctByIterable[T, TKey, TSource]
 relates DistinctByEmittable[T, TKey, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence while suppressing elements whose key has already been produced.
 ### :typeparam T: The source element type.
@@ -44,7 +44,7 @@ needs TSource obeys Iterable[T]
 entity DistinctByEmittable[T, TKey, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that tracks already-seen values across calls.
 ### :returns: The resulting `DistinctEmittable[T, TSource/Iter]` value.

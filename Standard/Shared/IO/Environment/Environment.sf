@@ -8,7 +8,7 @@ module IO/Environment
 ### read.
 @rf("Environment")
 record Environment
-    pass
+    nothing
 
 ### The arguments the program was started with, its own name left out.
 ### :returns: The arguments, in order.

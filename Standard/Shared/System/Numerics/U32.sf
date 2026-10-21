@@ -11,7 +11,7 @@ module System/Numerics
 @rf("U32")
 record U32
 obeys UnsignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the sum and a flag indicating whether the result wrapped around.
 ### :param you: The right operand.

@@ -7,7 +7,7 @@ module System/Numerics
 @rf("D32")
 record D32
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Reinterprets the 32-bit BID storage as a raw U32 (no decode).
 @rf("D32.to_bits")

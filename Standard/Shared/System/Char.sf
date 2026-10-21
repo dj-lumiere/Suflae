@@ -9,7 +9,7 @@ module System
 @rf("Char")
 record Char
 obeys Comparable, Copyable
-    pass
+    nothing
 
 ### Reads a byte value (0 to 255) as the character with that codepoint: `65u8.to[Char]()` is `'A'`.
 ### :returns: The character.

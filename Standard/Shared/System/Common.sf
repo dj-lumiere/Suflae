@@ -7,26 +7,26 @@ module System
 ### result as though a value were present.
 @rf("AbsentValueError")
 crashable AbsentValueError
-    pass
+    nothing
 
 ### Represents the crashable used when program execution is terminated by the
 ### user or hosting environment.
 @rf("UserTerminationError")
 crashable UserTerminationError
-    pass
+    nothing
 
 ### Represents the crashable raised when a runtime verification check fails.
 ### This is used by generic verification surfaces that enforce invariants and
 ### preconditions explicitly.
 @rf("VerificationFailedError")
 crashable VerificationFailedError
-    pass
+    nothing
 
 ### Represents the crashable raised when code reaches a state that should be
 ### impossible if surrounding logic is correct.
 @rf("LogicBreachedError")
 crashable LogicBreachedError
-    pass
+    nothing
 
 ### Represents the crashable raised when a lookup cannot find a requested key.
 @rf("KeyNotFoundError")
@@ -37,7 +37,7 @@ crashable KeyNotFoundError
 ### Raised when an Agent's work could not be started (thread or allocation failure).
 @rf("TaskSpawnError")
 crashable TaskSpawnError
-    pass
+    nothing
 
 ### Raised when an Agent is started a second time.
 @rf("AgentStartError")
@@ -48,19 +48,19 @@ crashable AgentStartError
 ### Raised when an agent that was cancelled is retrieved: its work stopped, or never ran, so it has no value.
 @rf("CancelRequested")
 crashable CancelRequested
-    pass
+    nothing
 
 ### Raised when an Agent's work did not finish before its `waitfor` deadline.
 @rf("TaskTimeoutError")
 crashable TaskTimeoutError
-    pass
+    nothing
 
 ### Raised when transmitting to a channel that has been closed, or whose every consumer has gone — the item
 ### can never be delivered. Closing itself is not an error (it is the normal end-of-stream signal);
 ### only a `transmit` after close is.
 @rf("ChannelClosedError")
 crashable ChannelClosedError
-    pass
+    nothing
 
 ### Returns the default message for absent-value failures.
 ### :returns: The resulting `Text` value.

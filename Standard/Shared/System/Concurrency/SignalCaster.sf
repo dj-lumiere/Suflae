@@ -6,7 +6,7 @@ module System/Concurrency
 ### A condition-variable monitor: a lock plus a wait set. See the module notes for the pattern.
 @rf("SignalCaster")
 entity SignalCaster
-    pass
+    nothing
 
 ### Creates a new monitor.
 ### :returns: A fresh `SignalCaster`.

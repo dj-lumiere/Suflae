@@ -41,7 +41,7 @@ record Array[T, COUNT]
 relates ArrayEmittable[T, COUNT] as Iter
 obeys Comparable, Iterable[T], ModifyingIndexable[T], Sized, Container
 needs U64 COUNT
-    pass
+    nothing
 
 ### Walks the elements of a fixed-size `Array[T, COUNT]` from index 0 to N - 1.
 ### Because `Array` is a record type, the iterator holds its own copy of the array data.
@@ -51,7 +51,7 @@ needs U64 COUNT
 entity ArrayEmittable[T, COUNT]
 obeys Emittable[T]
 needs U64 COUNT
-    pass
+    nothing
 
 ### Returns the element at `index` as the array holds it, without bounds checking and without a holder of
 ### its own. Only call this when the index is already proven to be in range.

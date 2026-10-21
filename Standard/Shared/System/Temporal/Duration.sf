@@ -10,7 +10,7 @@ module System/Temporal
 @rf("Duration")
 record Duration
 obeys Comparable, Addable, Subtractable, FloorDivisible, Negatable, Scalable, ScalarFloorDivisible
-    pass
+    nothing
 
 ### Normalizes raw second and nanosecond parts into canonical `Duration` storage.
 ### The result always has nanoseconds in the range `[0, 1_000_000_000)`.

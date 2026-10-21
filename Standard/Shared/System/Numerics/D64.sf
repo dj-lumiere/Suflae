@@ -7,7 +7,7 @@ module System/Numerics
 @rf("D64")
 record D64
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Reinterprets the 64-bit BID storage as a raw U64 (no decode).
 @rf("D64.to_bits")

@@ -15,7 +15,7 @@ module System/Numerics
 @rf("B64")
 record B64
 obeys Numeric, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns `me + you`. Checked: crashes if the IEEE result is ±infinity (overflow) or NaN
 ### (domain). Use `add_unchecked` for raw IEEE 754 propagation.

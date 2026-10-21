@@ -9,7 +9,7 @@ module System
 ### :typeparam T: The wrapped value type.
 @rf("Maybe")
 record Maybe[T]
-    pass
+    nothing
 
 ### Returns the display form of this optional value.
 ### Present values are rendered using the wrapped value's text form.

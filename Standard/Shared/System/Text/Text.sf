@@ -18,7 +18,7 @@ module System/Text
 record Text
 relates TextEmittable as Iter
 obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Iterable[Char], Container
-    pass
+    nothing
 
 ### Represents the iterator used to traverse a `Text` value.
 ### The iterator reads the text sequentially from the first character to the

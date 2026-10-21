@@ -7,7 +7,7 @@ module System
 ### moves, so the range would never reach its end. The sign of a step sets the direction: `by -1` counts down.
 @rf("RangeStepZeroError")
 crashable RangeStepZeroError
-    pass
+    nothing
 
 ### Returns the default message for a range whose step is zero.
 ### :returns: The resulting `Text` value.

@@ -90,7 +90,7 @@
         {
           "comment": "Special keywords",
           "name": "keyword.other.sf",
-          "match": "\\b(as|pass|given)\\b"
+          "match": "\\b(as|nothing|given)\\b"
         },
         {
           "comment": "Boolean literals",

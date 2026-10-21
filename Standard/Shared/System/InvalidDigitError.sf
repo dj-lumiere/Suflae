@@ -6,7 +6,7 @@ module System
 ### Represents the crashable raised when a byte is not a valid ASCII decimal digit.
 @rf("InvalidDigitError")
 crashable InvalidDigitError
-    pass
+    nothing
 
 ### Returns the default message for invalid ASCII decimal digit failures.
 ### :returns: The resulting `Text` value.

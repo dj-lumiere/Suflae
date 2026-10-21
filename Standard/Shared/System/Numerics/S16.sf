@@ -10,7 +10,7 @@ module System/Numerics
 @rf("S16")
 record S16
 obeys SignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the sum and a flag indicating whether the result overflowed.
 ### :param you: The right operand.

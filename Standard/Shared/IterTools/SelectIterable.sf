@@ -13,7 +13,7 @@ entity SelectIterable[T, TResult, TSource]
 relates SelectEmittable[T, TResult, TSource/Iter] as Iter
 obeys Iterable[TResult]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence and projects each yielded value through a transform routine.
 ### :typeparam T: The source element type.
@@ -23,7 +23,7 @@ needs TSource obeys Iterable[T]
 entity SelectEmittable[T, TResult, TSourceIter]
 obeys Emittable[TResult]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that drives this projection adapter.
 ### The emitted iterator reuses the same transform routine for every yielded

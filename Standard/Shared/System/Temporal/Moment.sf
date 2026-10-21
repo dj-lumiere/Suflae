@@ -10,7 +10,7 @@ module System/Temporal
 @rf("Moment")
 record Moment
 obeys Comparable, DurationAddable, DurationSubtractable
-    pass
+    nothing
 
 ### Normalizes raw second and nanosecond parts into canonical `Moment` storage.
 ### The result always has nanoseconds in the range `[0, 1_000_000_000)`.

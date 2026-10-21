@@ -12,7 +12,7 @@ entity TakeWhileIterable[T, TSource]
 relates TakeWhileEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence until the continuation predicate fails.
 ### :typeparam T: The element type produced by the source sequence.
@@ -21,7 +21,7 @@ needs TSource obeys Iterable[T]
 entity TakeWhileEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that enforces the continuation predicate.
 ### The emitted iterator remembers when the predicate has already failed so it

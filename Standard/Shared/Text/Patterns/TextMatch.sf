@@ -8,7 +8,7 @@ module Text/Patterns
 ### past the match.
 @rf("TextMatch")
 record TextMatch
-    pass
+    nothing
 
 ### The text the match took.
 ### :returns: The text.

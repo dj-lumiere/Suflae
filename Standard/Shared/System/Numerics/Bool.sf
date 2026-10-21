@@ -11,7 +11,7 @@ module System/Numerics
 @rf("Bool")
 record Bool
 obeys Equatable, Copyable
-    pass
+    nothing
 
 ### Returns `true` when both values are equal.
 ### :param you: The value to compare against.

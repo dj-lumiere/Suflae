@@ -12,7 +12,7 @@ entity WhereIterable[T, TSource]
 relates WhereEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence while yielding only values that satisfy the effective filter.
 ### :typeparam T: The element type produced by the source sequence.
@@ -21,7 +21,7 @@ needs TSource obeys Iterable[T]
 entity WhereEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that applies the filter lazily.
 ### Source values are examined only as the caller requests more output values.

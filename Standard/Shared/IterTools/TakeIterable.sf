@@ -11,7 +11,7 @@ entity TakeIterable[T, TSource]
 relates TakeEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over at most the configured number of values from the source sequence.
 ### :typeparam T: The element type produced by the source sequence.
@@ -20,7 +20,7 @@ needs TSource obeys Iterable[T]
 entity TakeEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Returns the stateful iterator that enforces the configured take limit.
 ### The emitted iterator decrements its remaining budget on each successful

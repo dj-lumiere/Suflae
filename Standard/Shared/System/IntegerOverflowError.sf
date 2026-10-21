@@ -7,7 +7,7 @@ module System
 ### in the requested destination type.
 @rf("IntegerOverflowError")
 crashable IntegerOverflowError
-    pass
+    nothing
 
 ### Returns the default message for integer conversion overflow.
 ### :returns: The resulting `Text` value.

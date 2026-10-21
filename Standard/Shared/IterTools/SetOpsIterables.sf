@@ -14,7 +14,7 @@ relates IntersectEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
 needs TOther obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence and keeps only elements that appear in the membership set.
 ### :typeparam T: The element type of the filtered sequence.
@@ -23,7 +23,7 @@ needs TOther obeys Iterable[T]
 entity IntersectEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Represents a lazy adapter that suppresses elements present in another iterable.
 ### The exclusion iterable is fully materialized into a set when iteration begins.
@@ -36,7 +36,7 @@ relates ExcludeEmittable[T, TSource/Iter] as Iter
 obeys Iterable[T]
 needs TSource obeys Iterable[T]
 needs TOther obeys Iterable[T]
-    pass
+    nothing
 
 ### Iterates over a source sequence and suppresses elements found in the exclusion set.
 ### :typeparam T: The element type of the filtered sequence.
@@ -45,7 +45,7 @@ needs TOther obeys Iterable[T]
 entity ExcludeEmittable[T, TSourceIter]
 obeys Emittable[T]
 needs TSourceIter obeys Emittable[T]
-    pass
+    nothing
 
 ### Materializes `other` into a set and returns an iterator that filters `source` against it.
 ### :returns: The resulting `IntersectEmittable[T, TSource/Iter]` value.

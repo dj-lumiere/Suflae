@@ -9,7 +9,7 @@ module System
 @rf("None")
 record None
 obeys Copyable
-    pass
+    nothing
 
 ### Returns the display form of `None`.
 ### :returns: The resulting `Text` value.

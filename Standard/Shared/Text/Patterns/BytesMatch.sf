@@ -8,7 +8,7 @@ module Text/Patterns
 ### the match.
 @rf("BytesMatch")
 record BytesMatch
-    pass
+    nothing
 
 ### The bytes the match took.
 ### :returns: The bytes.

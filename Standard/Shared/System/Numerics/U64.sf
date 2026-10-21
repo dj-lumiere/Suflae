@@ -8,7 +8,7 @@ module System/Numerics
 @rf("U64")
 record U64
 obeys UnsignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the sum of this value and `you`, and a flag indicating whether the result wrapped.
 ### :param you: The right operand.

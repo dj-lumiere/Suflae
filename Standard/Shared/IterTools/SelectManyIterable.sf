@@ -16,7 +16,7 @@ relates SelectManyEmittable[T, TResult, TInner, TSource/Iter] as Iter
 obeys Iterable[TResult]
 needs TSource obeys Iterable[T]
 needs TInner obeys Iterable[TResult]
-    pass
+    nothing
 
 ### Iterates over source elements, expanding each through a transform to yield a flat sequence.
 ### An internal buffer holds the current inner sequence; once drained the next outer element is fetched.
@@ -29,7 +29,7 @@ entity SelectManyEmittable[T, TResult, TInner, TSourceIter]
 obeys Emittable[TResult]
 needs TSourceIter obeys Emittable[T]
 needs TInner obeys Iterable[TResult]
-    pass
+    nothing
 
 ### Returns the stateful iterator that drives the flat-map expansion.
 ### :returns: The resulting `SelectManyEmittable[T, TResult, TInner, TSource/Iter]` value.

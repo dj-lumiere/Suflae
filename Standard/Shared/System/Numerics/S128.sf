@@ -12,7 +12,7 @@ module System/Numerics
 @rf("S128")
 record S128
 obeys SignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Returns the sum and a flag indicating whether the result overflowed.
 ### :param you: The right operand.

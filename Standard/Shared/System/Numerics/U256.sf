@@ -12,7 +12,7 @@ module System/Numerics
 @rf("U256")
 record U256
 obeys UnsignedIntegral, Comparable, Copyable
-    pass
+    nothing
 
 ### Assemble 4 U64 limbs (little-endian) into a U256.
 @rf("asm256")
