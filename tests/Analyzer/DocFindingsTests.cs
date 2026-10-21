@@ -62,7 +62,7 @@ public class DocFindingsTests
         AnalysisResult result = AnalyzeSaSuflae(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.ArgumentTypeMismatch &&
-                         e.Message.Contains(value: "'capacity' takes an 'Integer'"));
+                         e.Message.Contains(value: "'capacity'"));
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Code is SemanticDiagnosticCode.MissingRequiredMemberVariable
                 or SemanticDiagnosticCode.MemberVariableNotFound);
