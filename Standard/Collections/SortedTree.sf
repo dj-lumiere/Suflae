@@ -69,7 +69,7 @@ routine SortedTree[K, V]() -> SortedTree[K, V]
 secret routine SortedNode[K, V].lower(key: K) -> U64
     var low: U64 = 0
     var high = me.count
-    while low < high
+    until low >= high
         var middle = (low + high) // 2
         if me.keys.get_raw(index: middle) < key
             low = middle + 1
@@ -81,7 +81,7 @@ secret routine SortedNode[K, V].lower(key: K) -> U64
 secret routine SortedNode[K, V].upper(key: K) -> U64
     var low: U64 = 0
     var high = me.count
-    while low < high
+    until low >= high
         var middle = (low + high) // 2
         if key < me.keys.get_raw(index: middle)
             high = middle
@@ -148,7 +148,7 @@ secret routine SortedNode[K, V].remove_branch(at: U64)
 ### Moves the entries of `source` from entry `first` on to the end of this node.
 secret routine SortedNode[K, V].take_entries(source: SortedNode[K, V], first: U64)
     var i = first
-    while i < source.count
+    until i >= source.count
         me.keys[me.count] = source.keys[i]
         me.values[me.count] = source.values[i]
         source.keys.erase_at(position: i)
@@ -161,7 +161,7 @@ secret routine SortedNode[K, V].take_entries(source: SortedNode[K, V], first: U6
 ### Moves the branches of `source` from branch `first` on to the end of this node.
 secret routine SortedNode[K, V].take_branches(source: SortedNode[K, V], first: U64)
     var i = first
-    while i < source.fan
+    until i >= source.fan
         me.branches[me.fan] = source.branches[i]
         source.branches.erase_at(position: i)
         me.fan = me.fan + 1
@@ -173,7 +173,7 @@ secret routine SortedNode[K, V].take_branches(source: SortedNode[K, V], first: U
 secret routine SortedNode[K, V].recount()
     var total = me.count
     var i: U64 = 0
-    while i < me.fan
+    until i >= me.fan
         total = total + me.branch_size(at: i)
         i = i + 1
     me.size = total
@@ -220,7 +220,7 @@ secret routine SortedTree[K, V].rank_in(node: SortedNode[K, V], key: K, after: B
         return i
     var total = i
     var b: U64 = 0
-    while b < i
+    until b >= i
         total = total + node.branch_size(at: b)
         b = b + 1
     return total + me.rank_in(node: node.branches[i], key: key, after: after)
@@ -234,7 +234,7 @@ secret routine SortedTree[K, V].key_at_in(node: SortedNode[K, V], rank: U64) -> 
         return node.keys[rank]
     var left = rank
     var i: U64 = 0
-    while i < node.count
+    until i >= node.count
         var below = node.branch_size(at: i)
         if left < below
             return me.key_at_in(node: node.branches[i], rank: left)
@@ -254,7 +254,7 @@ secret routine SortedTree[K, V].value_at_in(node: SortedNode[K, V], rank: U64) -
         return node.values[rank]
     var left = rank
     var i: U64 = 0
-    while i < node.count
+    until i >= node.count
         var below = node.branch_size(at: i)
         if left < below
             return me.value_at_in(node: node.branches[i], rank: left)

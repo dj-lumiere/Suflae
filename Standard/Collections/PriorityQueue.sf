@@ -55,7 +55,7 @@ common routine PriorityQueue[TPriority, TElement].from_literal(pairs...: DictEnt
 needs TPriority obeys Comparable
     var result = PriorityQueue[TPriority, TElement](capacity: pairs.count().to[Integer]())
     var i: U64 = 0
-    while i < pairs.count()
+    until i >= pairs.count()
         result.add(element: pairs.get_raw(index: i).value, priority: pairs.get_raw(index: i).key)
         i = i +% 1
     return result
@@ -88,7 +88,7 @@ routine PriorityQueue[TPriority, TElement].is_empty() -> Bool
 ### Removes every entry and keeps the room.
 routine PriorityQueue[TPriority, TElement].clear()
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         me.priorities.erase_at(position: i)
         me.elements.erase_at(position: i)
         i = i + 1
@@ -174,7 +174,7 @@ failable routine PriorityQueue[TPriority, TElement].peek_entry() -> (TPriority, 
 routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], priorities: List[TPriority])
     var i = 0
     var limit = if elements.count() < priorities.count() then elements.count() else priorities.count()
-    while i < limit
+    until i >= limit
         me.add(element: elements[i], priority: priorities[i])
         i = i + 1
     return
@@ -184,7 +184,7 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
 ### :returns: The pairs, in removal order.
 routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)]
     var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
-    while me.count > 0
+    until me.count == 0
         var priority = me.priorities.at(position: 0)
         var element = me.remove()
         result.add_last(value: (priority, element))
@@ -196,7 +196,7 @@ routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)
 routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElement)]
     var copy = PriorityQueue[TPriority, TElement](capacity: me.count.to[Integer]())
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         copy.add(element: me.elements.at(position: i), priority: me.priorities.at(position: i))
         i = i + 1
     return copy.drain()
@@ -207,7 +207,7 @@ routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElemen
 routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElement)]
     var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         result.add_last(value: (me.priorities.at(position: i), me.elements.at(position: i)))
         i = i + 1
     return result
@@ -221,7 +221,7 @@ routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElem
 routine PriorityQueue[TPriority, TElement].has(element: TElement) -> Bool
 needs TElement obeys Equatable
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         if me.elements.at(position: i) == element
             return true
         i = i + 1
@@ -249,7 +249,7 @@ routine PriorityQueue[TPriority, TElement].diagnose() -> Text
 ### Moves the entry at `index` toward the root while its priority is smaller than its parent's.
 secret routine PriorityQueue[TPriority, TElement].sift_up(index: U64)
     var at = index
-    while at > 0
+    until at == 0
         var parent = (at - 1) // 2
         if me.priorities.at(position: at) >= me.priorities.at(position: parent)
             return
@@ -288,7 +288,7 @@ secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
 secret routine PriorityQueue[TPriority, TElement].entries_text() -> Text
     var result = "["
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         if i > 0
             result = f"{result}, "
         result = f"{result}{nested_repr(me.priorities.at(position: i))}: {nested_repr(me.elements.at(position: i))}"

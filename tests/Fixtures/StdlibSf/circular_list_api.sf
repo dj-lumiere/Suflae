@@ -45,7 +45,7 @@ routine start()
 
     var queue = CircularList[Integer]()
     var i = 0
-    while i < 10
+    until i >= 10
         queue.add_last(value: i)
         if i % 3 == 2
             queue.remove_first()

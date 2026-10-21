@@ -24,7 +24,7 @@ secret routine new_hash_index(capacity: U64) -> HashIndex
 ### The power of two of at least 16 slots that keeps `wanted` entries under 7/8 full.
 secret routine hash_index_slots(wanted: U64) -> U64
     var slots: U64 = 16
-    while wanted * 8 >= slots * 7
+    until wanted * 8 < slots * 7
         slots = slots * 2
     return slots
 

@@ -94,7 +94,7 @@ routine Memory[T](room: U64) -> Memory[T]
 routine Memory[T](count: Integer, fill: T) -> Memory[T]
     var result = Memory[T](capacity: count)
     var i: U64 = 0
-    while i < result.room()
+    until i >= result.room()
         danger
             place_at[T](base: result.block.data, position: i).poke(fill)
         i = i +% 1
@@ -643,14 +643,14 @@ secret failable routine places_carry[T](base: Hijacked[T], room: U64, source: U6
     if target + n > room
         throw IndexOutOfBoundsError(index: target + n, count: room)
     var i = target
-    while i < target + n
+    until i >= target + n
         if i < source or i >= source + n
             danger
                 place_at[T](base: base, position: i).peek().destruct()
         i = i +% 1
     places_move[T](base: base, target: target, source: source, count: n)
     i = source
-    while i < source + n
+    until i >= source + n
         if i < target or i >= target + n
             places_clear[T](base: base, from: i, count: 1)
         i = i +% 1
@@ -659,7 +659,7 @@ secret failable routine places_carry[T](base: Hijacked[T], room: U64, source: U6
 ### Sets every place to `value`.
 secret routine places_fill[T](base: Hijacked[T], room: U64, value: T)
     var i: U64 = 0
-    while i < room
+    until i >= room
         danger
             var slot = place_at[T](base: base, position: i)
             slot.peek().destruct()
@@ -698,7 +698,7 @@ secret routine places_reverse[T](base: Hijacked[T], room: U64)
         return
     var lo: U64 = 0
     var hi = room - 1
-    while lo < hi
+    until lo >= hi
         places_swap[T](base: base, a: lo, b: hi)
         lo = lo +% 1
         hi = hi -% 1
@@ -708,7 +708,7 @@ secret routine places_reverse[T](base: Hijacked[T], room: U64)
 secret routine places_have[T](base: Hijacked[T], room: U64, value: T) -> Bool
 needs T obeys Equatable
     var i: U64 = 0
-    while i < room
+    until i >= room
         if places_read[T](base: base, position: i) == value
             return true
         i = i +% 1
@@ -718,7 +718,7 @@ needs T obeys Equatable
 secret routine places_text[T](base: Hijacked[T], room: U64) -> Text
     var result = "["
     var i: U64 = 0
-    while i < room
+    until i >= room
         if i > 0
             result = f"{result}, "
         result = f"{result}{nested_repr(places_read[T](base: base, position: i))}"
@@ -782,7 +782,7 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
     var held = hijacked_none[T]()
     danger
         held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-    while start < n
+    until start >= n
         var end = start + BUFFER_SORT_MIN_RUN
         if end > n
             end = n
@@ -796,9 +796,9 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
     danger
         scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
-    while width < n
+    until width >= n
         var left: U64 = 0
-        while left < n
+        until left >= n
             var mid = left + width
             if mid > n
                 mid = n
@@ -825,7 +825,7 @@ secret routine MemoryBlock[T].places_insertion_sort(
 )
     var size = T.data_size()
     var i = start + 1
-    while i < end
+    until i >= end
         danger
             rf_copy_bytes_at(
                 dest: held.get_address(),
@@ -833,7 +833,7 @@ secret routine MemoryBlock[T].places_insertion_sort(
                 size: size,
             )
         var j = i
-        while j > start and me.places_go_before(base: base, held: held, position: j - 1, compare: compare)
+        until j <= start or not me.places_go_before(base: base, held: held, position: j - 1, compare: compare)
             places_move[T](base: base, target: j, source: j - 1, count: 1)
             j = j - 1
         danger
@@ -874,7 +874,7 @@ secret routine MemoryBlock[T].places_merge(
     var a = left
     var b = mid
     var out = left
-    while a < mid and b < right
+    until a >= mid or b >= right
         var take_b = false
         danger
             take_b = compare(scratch.offset(size * b).peek(), scratch.offset(size * a).peek())
@@ -917,7 +917,7 @@ needs T obeys Comparable
     var held = hijacked_none[T]()
     danger
         held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-    while start < n
+    until start >= n
         var end = start + BUFFER_SORT_MIN_RUN
         if end > n
             end = n
@@ -931,9 +931,9 @@ needs T obeys Comparable
     danger
         scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
-    while width < n
+    until width >= n
         var left: U64 = 0
-        while left < n
+        until left >= n
             var mid = left + width
             if mid > n
                 mid = n
@@ -955,7 +955,7 @@ secret routine places_insertion_sort_less[T](base: Hijacked[T], start: U64, end:
 needs T obeys Comparable
     var size = T.data_size()
     var i = start + 1
-    while i < end
+    until i >= end
         danger
             rf_copy_bytes_at(
                 dest: held.get_address(),
@@ -963,7 +963,7 @@ needs T obeys Comparable
                 size: size,
             )
         var j = i
-        while j > start and places_less_than[T](base: base, held: held, position: j - 1)
+        until j <= start or not places_less_than[T](base: base, held: held, position: j - 1)
             places_move[T](base: base, target: j, source: j - 1, count: 1)
             j = j - 1
         danger
@@ -994,7 +994,7 @@ needs T obeys Comparable
     var a = left
     var b = mid
     var out = left
-    while a < mid and b < right
+    until a >= mid or b >= right
         var take_b = false
         danger
             take_b = scratch.offset(size * b).peek() < scratch.offset(size * a).peek()
@@ -1035,7 +1035,7 @@ needs T obeys Comparable
 routine MemoryBlock[T].destruct()
     danger
         var i: U64 = 0
-        while i < me.room
+        until i >= me.room
             me.data.offset(T.data_size() * i).peek().destruct()
             i = i +% 1
         me.data.invalidate()

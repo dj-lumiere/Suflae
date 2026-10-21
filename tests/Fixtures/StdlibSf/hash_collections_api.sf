@@ -21,7 +21,7 @@ routine start()
     # Many adds and removes: the entries are packed and the table rebuilt along the way.
     var squares = Dict[Integer, Integer]()
     var i = 0
-    while i < 200
+    until i >= 200
         squares[i] = i * i
         if i % 3 == 0
             squares.remove(key: i // 2)
@@ -43,7 +43,7 @@ routine start()
     show(f"union={seen.union(other)} inter={seen.intersection(other)} diff={seen.difference(other)}")
     var many = Set[Integer]()
     i = 0
-    while i < 100
+    until i >= 100
         many.add(value: i % 37)
         i = i + 1
     show(f"distinct: {many.count()} empty set: {Set[Integer]()}")

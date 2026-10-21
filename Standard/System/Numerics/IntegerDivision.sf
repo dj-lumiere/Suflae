@@ -18,7 +18,7 @@ secret failable routine Integer.exact_decimal() -> Decimal
     var digits = me.abs()
     var ten = 10
     if not digits.is_zero()
-        while (digits % ten).is_zero()
+        until not (digits % ten).is_zero()
             digits = digits // ten
     if digits >= "10000000000000000000000000000000000".to[Integer]()
         throw NumericOverflowError(description: "the integer has more significant digits than a Decimal holds (34)")

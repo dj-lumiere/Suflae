@@ -8,7 +8,7 @@ import IterTools
 routine total(nums...: Integer) -> Integer
     var sum = 0
     var i = 0
-    while i < nums.count()
+    until i >= nums.count()
         sum = sum + nums[i]
         i = i + 1
     return sum

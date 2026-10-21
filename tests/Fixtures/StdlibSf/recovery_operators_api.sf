@@ -73,7 +73,7 @@ failable routine count_below(n: Integer) -> Integer
     if n < 0
         throw AbsentValueError()
     var i = 0
-    while i < 10 // n
+    until i >= 10 // n
         i = i + 1
     return i
 

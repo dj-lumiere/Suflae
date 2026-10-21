@@ -186,7 +186,7 @@ routine List[Agent[T]].gather_all() -> List[Check[T]]
 routine List[Agent[T]].take_finished() -> List[Agent[T]]
     var finished = List[Agent[T]]()
     var i = 0
-    while i < me.count()
+    until i >= me.count()
         if me[i].is_done()
             finished.add_last(value: me.remove_at(index: i))
         else

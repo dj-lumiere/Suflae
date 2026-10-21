@@ -76,7 +76,7 @@ routine start()
 
     var nums = Memory[Integer](capacity: 40)
     var k = 0
-    while k < 40
+    until k >= 40
         nums[k] = (k * 17) % 40
         k = k + 1
     nums.sort()

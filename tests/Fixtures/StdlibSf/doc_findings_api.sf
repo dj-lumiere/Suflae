@@ -112,7 +112,7 @@ routine start()
     var n1 = Node(value: 1, next: n2)
     var cur: Node? = n1
     var total = 0
-    while cur isnot None
+    until cur is None
         total += cur.value
         cur = cur.next
     show(total)

@@ -29,12 +29,12 @@ routine start()
 
     var nums = PriorityQueue[Integer, Integer](capacity: 2)
     var i = 0
-    while i < 30
+    until i >= 30
         nums.add(element: i, priority: (i * 7) % 30)
         i = i + 1
     var ordered = true
     var last = -1
-    while not nums.is_empty()
+    until nums.is_empty()
         var p = nums.peek_priority()
         if p < last
             ordered = false

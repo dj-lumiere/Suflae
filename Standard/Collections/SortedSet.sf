@@ -65,7 +65,7 @@ common routine SortedSet[T].from_literal(elements...: T) -> SortedSet[T]
 needs T obeys Comparable
     var result = SortedSet[T]()
     var i: U64 = 0
-    while i < elements.count()
+    until i >= elements.count()
         result.add(value: elements.get_raw(index: i))
         i = i +% 1
     return result
@@ -138,7 +138,7 @@ routine SortedSet[T].range(min_val: T, max_val: T) -> List[T]
     var result = List[T]()
     var rank = me.tree.rank(key: min_val, after: false)
     var end = me.tree.rank(key: max_val, after: true)
-    while rank < end
+    until rank >= end
         result.add_last(value: me.tree.key_at(rank: rank))
         rank = rank + 1
     return result
@@ -216,7 +216,7 @@ routine SortedSet[T].eq(you: SortedSet[T]) -> Bool
     if count != you.tree.count()
         return false
     var i: U64 = 0
-    while i < count
+    until i >= count
         if me.tree.key_at(rank: i) != you.tree.key_at(rank: i)
             return false
         i = i + 1

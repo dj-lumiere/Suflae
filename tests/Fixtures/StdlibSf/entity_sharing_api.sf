@@ -19,7 +19,7 @@ routine Account.deposit(amount: S64)
 routine sum_list(head: Node?) -> S64
     var total: S64 = 0
     var current = head
-    while current isnot None
+    until current is None
         total = total + current.value
         current = current.next
     return total

@@ -58,7 +58,7 @@ common routine Set[T].from_literal(elements...: T) -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Integer]())
     var i: U64 = 0
-    while i < elements.count()
+    until i >= elements.count()
         result.add(value: elements.get_raw(index: i))
         i = i +% 1
     return result
@@ -104,7 +104,7 @@ routine Set[T].is_empty() -> Bool
 ### Removes every value and keeps the room.
 routine Set[T].clear()
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             me.values.erase_at(position: i)
             me.live.put(position: i, value: false)
@@ -171,7 +171,7 @@ routine Set[T].iter() -> SetEmittable[T]
 ### Returns the next value.
 ### :throws: {AbsentValueError} The walk is over.
 failable routine SetEmittable[T].emit() -> T
-    while me.left > 0
+    until me.left == 0
         me.left = me.left - 1
         if me.live.emit()
             return me.values.emit()
@@ -316,7 +316,7 @@ secret routine Set[T].make_room()
         return
     var packed: U64 = 0
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             if i != packed
                 me.values.carry(source: i, target: packed, count: 1)
@@ -331,7 +331,7 @@ secret routine Set[T].make_room()
         me.live.grow_to(room: room * 2)
     me.index.reset(capacity: me.values.room())
     i = 0
-    while i < me.count
+    until i >= me.count
         me.index.place(hash: me.values.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)
         i = i + 1
     return

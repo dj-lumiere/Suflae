@@ -42,7 +42,7 @@ routine start()
 
     var racers = [slow.to[Agent](n: 1, wait: 60ms), slow.to[Agent](n: 2, wait: 5ms), slow.to[Agent](n: 3, wait: 30ms)]
     var order = List[Integer]()
-    while not racers.is_empty()
+    until racers.is_empty()
         order.add_last(value: racers.next_finished().retrieve())
     show(f"finish order: {order}")
 

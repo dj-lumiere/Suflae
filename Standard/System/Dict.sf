@@ -70,7 +70,7 @@ needs TKey obeys Hashable, Equatable
     var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
-    while i < pairs.count()
+    until i >= pairs.count()
         result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
         i = i +% 1
     return result
@@ -117,7 +117,7 @@ routine Dict[TKey, TValue].is_empty() -> Bool
 ### Removes every entry and keeps the room.
 routine Dict[TKey, TValue].clear()
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             me.keys.erase_at(position: i)
             me.vals.erase_at(position: i)
@@ -227,7 +227,7 @@ routine Dict[TKey, TValue].setitem(key: TKey, value: TValue)
 routine Dict[TKey, TValue].keys() -> List[TKey]
     var result = List[TKey](capacity: me.count.to[Integer]())
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             result.add_last(value: me.keys.at(position: i))
         i = i + 1
@@ -237,7 +237,7 @@ routine Dict[TKey, TValue].keys() -> List[TKey]
 routine Dict[TKey, TValue].values() -> List[TValue]
     var result = List[TValue](capacity: me.count.to[Integer]())
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             result.add_last(value: me.vals.at(position: i))
         i = i + 1
@@ -250,7 +250,7 @@ routine Dict[TKey, TValue].values() -> List[TValue]
 routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
     var result = List[Tuple[TKey, TValue]](capacity: me.count.to[Integer]())
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             result.add_last(value: (me.keys.at(position: i), me.vals.at(position: i)))
         i = i + 1
@@ -272,7 +272,7 @@ routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
 failable routine DictEmittable[TKey, TValue].emit() -> DictEntry[TKey, TValue]
-    while me.left > 0
+    until me.left == 0
         me.left = me.left - 1
         if me.live.emit()
             return DictEntry[TKey, TValue](key: me.keys.emit(), value: me.vals.emit())
@@ -370,7 +370,7 @@ secret routine Dict[TKey, TValue].make_room()
     # Pack the live entries to the front, oldest first.
     var packed: U64 = 0
     var i: U64 = 0
-    while i < me.used
+    until i >= me.used
         if me.live.at(position: i)
             if i != packed
                 me.keys.carry(source: i, target: packed, count: 1)
@@ -387,7 +387,7 @@ secret routine Dict[TKey, TValue].make_room()
         me.live.grow_to(room: room * 2)
     me.index.reset(capacity: me.keys.room())
     i = 0
-    while i < me.count
+    until i >= me.count
         me.index.place(hash: me.keys.at(position: i).hash(k0: me.k0, k1: me.k1), entry: i)
         i = i + 1
     return

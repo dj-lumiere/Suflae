@@ -50,7 +50,7 @@
         {
           "comment": "Control flow",
           "name": "keyword.control.sf",
-          "match": "\\b(if|elseif|else|then|each|loop|while|when|break|continue|return|throw|try|check|pierce|todo|danger|until|becomes)\\b"
+          "match": "\\b(if|elseif|else|then|each|loop|when|break|continue|return|throw|try|check|pierce|todo|danger|until|becomes)\\b"
         },
         {
           "comment": "Type and pattern operations",

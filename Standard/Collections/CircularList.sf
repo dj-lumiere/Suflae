@@ -77,7 +77,7 @@ common routine CircularList[T].from_literal(elements...: T) -> CircularList[T]
     var i: U64 = 0
     # Each element moves into the list: `add_last` makes the list's holder, and the caller releases the
     # literal's own afterwards.
-    while i < elements.count()
+    until i >= elements.count()
         result.add_last(value: elements.get_raw(index: i))
         i = i +% 1
     return result
@@ -137,7 +137,7 @@ failable routine CircularList[T].add_range(source: CircularList[T], from: Intege
         throw IndexOutOfBoundsError(index: first + n, count: source.count)
     me.make_room(extra: n)
     var i: U64 = 0
-    while i < n
+    until i >= n
         me.add_last(value: source.items.at(position: source.place(index: first + i)))
         i = i + 1
     return
@@ -337,7 +337,7 @@ needs T obeys Equatable
     if me.count != you.count
         return false
     var i: U64 = 0
-    while i < me.count
+    until i >= me.count
         if me.items.at(position: me.place(index: i)) != you.items.at(position: you.place(index: i))
             return false
         i = i + 1
@@ -449,7 +449,7 @@ secret failable routine CircularList[T].checked_position(index: Integer) -> U64
 ### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count).
 secret routine CircularList[T].cut(kept: U64)
     var i = kept
-    while i < me.count
+    until i >= me.count
         me.items.erase_at(position: me.place(index: i))
         i = i + 1
     me.forget(count: me.count - kept)
@@ -457,7 +457,7 @@ secret routine CircularList[T].cut(kept: U64)
 
 ### Tears down the oldest elements until at most `kept` remain.
 secret routine CircularList[T].drop_oldest(kept: U64)
-    while me.count > kept
+    until me.count <= kept
         me.items.erase_at(position: me.head)
         me.advance_head()
     return
@@ -471,7 +471,7 @@ secret routine CircularList[T].turn(count: U64)
         me.head = me.place(index: shift)
         return
     var i: U64 = 0
-    while i < shift
+    until i >= shift
         me.items.carry(source: me.head, target: me.place(index: me.count), count: 1)
         me.head = me.place(index: 1)
         i = i + 1

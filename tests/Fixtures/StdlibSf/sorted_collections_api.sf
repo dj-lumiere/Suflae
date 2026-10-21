@@ -13,7 +13,7 @@ entity Box
 routine start()
     var numbers = SortedList[Integer]()
     var i = 0
-    while i < 3000
+    until i >= 3000
         numbers.add(value: (i * 7919) % 1000)
         i = i + 1
     show(f"list: count={numbers.count()} min={numbers.min()} max={numbers.max()} fives={numbers.count_of(value: 5)}")
@@ -26,7 +26,7 @@ routine start()
         previous = n
     show(f"in order: {sorted}")
     i = 0
-    while i < 1000
+    until i >= 1000
         numbers.remove_all(value: i)
         if i % 2 == 0
             numbers.add(value: i)
@@ -35,12 +35,12 @@ routine start()
 
     var squares = SortedSet[Integer]()
     i = 0
-    while i < 2000
+    until i >= 2000
         squares.add(value: (i * i) % 1543)
         i = i + 1
     var size = squares.count()
     i = 0
-    while i < 1543
+    until i >= 1543
         if i % 3 != 0
             squares.remove(value: i)
         i = i + 1
@@ -55,13 +55,13 @@ routine start()
 
     var names = SortedDict[Text, Integer]()
     i = 0
-    while i < 500
+    until i >= 500
         names[f"k{i}"] = i
         i = i + 1
     names["k42"] = -42
     names["k7"] = 700
     i = 0
-    while i < 500
+    until i >= 500
         if i % 5 != 0
             names.remove(key: f"k{i}")
         i = i + 1
@@ -76,11 +76,11 @@ routine start()
     var watched = watch(target: box)
     var boxes = SortedDict[Integer, Box]()
     i = 0
-    while i < 300
+    until i >= 300
         boxes[i] = box
         i = i + 1
     i = 0
-    while i < 300
+    until i >= 300
         boxes.remove(key: i)
         i = i + 2
     boxes[1] = Box(id: 2)

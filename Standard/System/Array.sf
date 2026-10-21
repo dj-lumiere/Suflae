@@ -84,7 +84,7 @@ failable routine Array[T, COUNT].carry(source: U64, target: U64, count: U64)
     if target + n > COUNT
         throw IndexOutOfBoundsError(index: target + n, count: COUNT)
     var i = target
-    while i < target + n
+    until i >= target + n
         if i < source or i >= source + n
             danger
                 me.slot(position: i).peek().destruct()
@@ -96,7 +96,7 @@ failable routine Array[T, COUNT].carry(source: U64, target: U64, count: U64)
             size: T.data_size() * n,
         )
     i = source
-    while i < source + n
+    until i >= source + n
         if i < target or i >= target + n
             me.clear_places(from: i, count: 1)
         i = i +% 1
@@ -121,7 +121,7 @@ needs RecordType T
 failable routine Array[T, COUNT].index_of(value: T) -> Integer
 needs T obeys Equatable
     var i: U64 = 0
-    while i < COUNT
+    until i >= COUNT
         if me.get_raw(index: i) == value
             return i.to[Integer]()
         i = i +% 1

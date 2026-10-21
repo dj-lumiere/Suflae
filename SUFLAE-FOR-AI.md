@@ -73,8 +73,8 @@ through a `.rf` module the program imports (section 18).
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
     `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Atomic.fetch_*`/`swap`), which get none.
-    Other notes: `while true` / `until false` get SF-W304 with the quick fix "Write 'loop'", the body of
-    `while false` / `until true` gets SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
+    Other notes: `until false` gets SF-W304 with the quick fix "Write 'loop'", the body of `until true` gets
+    SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `suflae check --json`
     writes all diagnostics as a JSON array (`file`, `line`, `column`, `severity`, `code`, `message`, `endLine?`,
     `fix?` with 1-based edits).
@@ -424,10 +424,10 @@ each x in 1 to 5
 each (i, word) in words.enumerate()
     show(f"{i}: {word}")
 
-while n < 10
+until n >= 10             # stops when n >= 10, tested before each round
     n += 1
 
-loop
+loop                      # doesn't end by itself: break, return or throw leaves it
     n += 1
     if n >= 20
         break
@@ -437,13 +437,18 @@ loop
 `.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
-`until c` loops while `c` is false (`while not (c)`). A `while`, `until`, `each` or `loop` may end with a `then`
-block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
+Loops are `until c`, `loop` and `each`. `until c` stops when `c` becomes true, tested before each round: write the
+condition that ends the loop. `loop` doesn't end by itself: only a `break`, `return` or `throw` leaves it, so the
+lines after a `loop` without a `break` never run (SF-S786) and a routine whose last statement is such a loop needs no
+`return` after it. `while` is not a keyword: a loop written with it is SF-G224, and `migrate --step until` rewrites it
+(`while true` → `loop`, `while not c` → `until c`, an integer comparison turned around, `while i < n` →
+`until i >= n`, a float comparison and anything else → `until not (c)`, listed). An `until`, `each` or `loop` may end
+with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
 (SF-G219): the case where the loop would not run even once is an `if` before the loop.
-A loop may carry values from one round to the next: `while n > 1 with n: Integer = start, steps: Integer = 0`
-(`each x in xs with sum: Integer = 0` too). Each carried value is bound anew every round, from what the round's
+A loop may carry values from one round to the next: `until n <= 1 with n: Integer = start, steps: Integer = 0`
+(`each x in xs with sum: Integer = 0` and `loop with i: Integer = 0` too). Each carried value is bound anew every round, from what the round's
 `continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
 is stored, so `continue with x: y, y: x % y` swaps). The names are visible in the condition, the body and the
 `then` block, and nowhere after the loop. A body that carries values must not run off its end: every path ends in
@@ -452,7 +457,7 @@ in a loop without `with`. `break` takes no values.
 
 ```suflae
 routine collatz_steps(start: Integer) -> Integer
-    while n > 1 with n: Integer = start, steps: Integer = 0
+    until n <= 1 with n: Integer = start, steps: Integer = 0
         var after = if n % 2 == 0 then n // 2 else 3 * n + 1
         continue with n: after, steps: steps + 1
     then
@@ -1142,7 +1147,7 @@ routine start()
 ```suflae
 routine produce(m: Mailbox[Integer], n: Integer) -> Integer
     var i = 1
-    while i <= n
+    until i > n
         m.add_last(value: i)
         i = i + 1
     m.close()
@@ -1188,7 +1193,7 @@ routine on_stop()
 
 routine start()
     CpuEventManager.when_interrupted(on_stop)     # Ctrl+C, SIGINT
-    while stop_requests == 0
+    until stop_requests != 0
         waitfor(200ms)
     show("cleaned up")
 ```
@@ -1325,6 +1330,7 @@ number). At most 20 are shown per batch.
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
+| SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Agent]` on a non-routine, or over generic values | convert a routine, with concrete types           |
@@ -1341,8 +1347,8 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Bindings**: `var` `preset` `global` `lateinit`
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
-- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `loop` `while` `each` `with`
-  `break` `continue` `return` `throw` `pierce` `todo` `becomes` `until`
+- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `each` `with`
+  `break` `continue` `return` `throw` `pierce` `todo` `becomes`
 - **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`

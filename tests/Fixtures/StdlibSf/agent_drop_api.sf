@@ -7,7 +7,7 @@ import IO/Console
 
 routine spin(stopped: Atomic[S64]) -> Integer
     var turns = 0
-    while not cancellation_requested()
+    until cancellation_requested()
         waitfor(1ms)
         turns += 1
     stopped.fetch_add(delta: 1)

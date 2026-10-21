@@ -64,7 +64,7 @@ needs TKey obeys Comparable
     var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
-    while i < pairs.count()
+    until i >= pairs.count()
         result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
         i = i +% 1
     return result
@@ -190,7 +190,7 @@ routine SortedDict[TKey, TValue].keys() -> List[TKey]
     var count = me.tree.count()
     var result = List[TKey](capacity: count.to[Integer]())
     var i: U64 = 0
-    while i < count
+    until i >= count
         result.add_last(value: me.tree.key_at(rank: i))
         i = i + 1
     return result
@@ -200,7 +200,7 @@ routine SortedDict[TKey, TValue].values() -> List[TValue]
     var count = me.tree.count()
     var result = List[TValue](capacity: count.to[Integer]())
     var i: U64 = 0
-    while i < count
+    until i >= count
         result.add_last(value: me.tree.value_at(rank: i))
         i = i + 1
     return result
