@@ -102,7 +102,7 @@ routine Memory[T](count: Integer, fill: T) -> Memory[T]
 
 ### A block of `room` places, all zero.
 secret routine new_memory_block[T](room: U64) -> MemoryBlock[T]
-    var data = hijacked_none[T]()
+    var data = Hijacked[T].hollow()
     if room > 0
         danger
             data = hijacked_from[T](rf_allocate_dynamic(T.data_size() * room))
@@ -779,7 +779,7 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
         return
     var size = T.data_size()
     var start: U64 = 0
-    var held = hijacked_none[T]()
+    var held = Hijacked[T].hollow()
     danger
         held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
     until start >= n
@@ -792,7 +792,7 @@ secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compa
         held.invalidate()
     if n <= BUFFER_SORT_MIN_RUN
         return
-    var scratch = hijacked_none[T]()
+    var scratch = Hijacked[T].hollow()
     danger
         scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
@@ -914,7 +914,7 @@ needs T obeys Comparable
         return
     var size = T.data_size()
     var start: U64 = 0
-    var held = hijacked_none[T]()
+    var held = Hijacked[T].hollow()
     danger
         held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
     until start >= n
@@ -927,7 +927,7 @@ needs T obeys Comparable
         held.invalidate()
     if n <= BUFFER_SORT_MIN_RUN
         return
-    var scratch = hijacked_none[T]()
+    var scratch = Hijacked[T].hollow()
     danger
         scratch = hijacked_from[T](rf_allocate_dynamic_uninit(size * n))
     var width = BUFFER_SORT_MIN_RUN
