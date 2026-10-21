@@ -1,0 +1,33 @@
+module Tests/StdlibSf/CollectionLiteralExpectedApi
+
+# A collection literal takes its element types from where it goes, the way a bare number does: a protocol
+# parameter (`Iterable[S64]`), a concrete collection type, or a dict's entries. Without one it stays List[Integer].
+
+import IO/Console
+import Collections
+
+routine total(xs: Iterable[U8]) -> U8
+    var sum: U8 = 0
+    each x in xs
+        sum += x
+    return sum
+
+routine key_total(entries: Iterable[DictEntry[U16, Text]]) -> U16
+    var sum: U16 = 0
+    each entry in entries
+        sum += entry.key
+    return sum
+
+routine start()
+    var ring = CircularList[S64]()
+    ring.add_range(you: [1, 2])
+    show(ring.count())
+    var bytes = List[U8]()
+    bytes.add_range(you: [3, 4])
+    show(bytes)
+    var from_list = total(xs: [5, 6])
+    var from_set = total(xs: {7, 8})
+    var from_dict = key_total(entries: {1: "a", 2: "b"})
+    show(f"{from_list} {from_set} {from_dict}")
+    var plain = [1, 2]
+    show(plain)
