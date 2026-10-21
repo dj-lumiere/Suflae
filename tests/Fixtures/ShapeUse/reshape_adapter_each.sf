@@ -1,0 +1,18 @@
+module Tests/ShapeUse/ReshapeAdapterEach
+
+import IO/Console
+import IterTools
+# A loop over `nums.where(...)` walks `nums` itself, so a routine that adds to `nums` inside it crashes with
+# ReshapingWhileInUseError.
+
+routine grow(xs: List[Integer])
+    xs.add_last(value: 99)
+    return
+
+routine start()
+    var nums = [1, 2]
+    each x in nums.where(predicate: y => y > 0)
+        show(f"visiting {x}")
+        grow(xs: nums)
+    show("not reached")
+    return

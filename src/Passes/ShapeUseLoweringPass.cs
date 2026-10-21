@@ -60,6 +60,11 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         var rewritten = new List<Statement>(capacity: block.Statements.Count);
         foreach (Statement stmt in block.Statements)
         {
+            if (stmt is DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } declared })
+            {
+                _initializers[key: declared.Name] = init;
+            }
+
             rewritten.AddRange(collection: LowerStatement(stmt: stmt, preceding: rewritten));
         }
 
@@ -95,6 +100,11 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                         ? LowerNested(stmt: alt)
                         : null
                 };
+                if (TokenContainers(root: ifs.Condition).Count == 0)
+                {
+                    return [rebuilt with { Condition = _receiverChecks.VisitExpression(expr: ifs.Condition) }];
+                }
+
                 return BindHead(head: ifs.Condition,
                     rebuild: condition => rebuilt with { Condition = condition },
                     whole: rebuilt);
@@ -105,6 +115,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                 [
                     whenStmt with
                     {
+                        Expression = _receiverChecks.VisitExpression(expr: whenStmt.Expression),
                         Clauses = whenStmt.Clauses
                                       .Select(selector: c => c with { Body = LowerNested(stmt: c.Body) })
                                       .ToList()
@@ -126,11 +137,14 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             default:
             {
                 List<Expression> containers = TokenContainers(root: stmt);
-                List<Statement> guards = ReshapeGuards(root: stmt);
                 if (containers.Count == 0)
                 {
-                    return [.. guards, stmt];
+                    return [CheckReshapeReceivers(stmt: stmt)];
                 }
+
+                // A statement that holds an element token checks the shape before it opens that token's use: its
+                // own change of the container (`xs.add_last(value: xs[0])`) reads the element first.
+                List<Statement> guards = ReshapeGuards(root: stmt);
 
                 var result = new List<Statement>(collection: guards);
                 result.AddRange(collection: ShapeUseCalls(containers: containers, verb: RuntimeContract.ShapeUse.Begin));
@@ -154,6 +168,14 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             : loop.IterationSourcePath is { } path
                 ? LoopSourceByPath(path: path, preceding: preceding)
                 : null;
+        // A loop over an adapter (`each x in xs.where(...)`) walks the container at the head of the chain, and a
+        // loop over a global walks the global's field of the module's globals: both are found from the iterator the
+        // loop walks.
+        if (loop.AdapterSourcePath != null || source == null || !HasShapeUse(container: source))
+        {
+            source = WalkedContainer(loop: loop) ?? (loop.AdapterSourcePath == null ? source : null);
+        }
+
         if (source == null || !HasShapeUse(container: source))
         {
             return [loop with { Body = LowerNested(stmt: loop.Body) }];
@@ -171,6 +193,60 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         ];
     }
 
+    /// <summary>The initializers of the variables declared so far in the routine being lowered, by name.</summary>
+    private readonly Dictionary<string, Expression> _initializers = new(comparer: StringComparer.Ordinal);
+
+    /// <summary>
+    /// The container a lowered <c>each</c> loop walks, found from its iterator's declaration
+    /// (<c>var _lf_iter_N = source.iter()</c>): the receiver of <c>iter()</c>, followed back through a variable bound
+    /// to an adapter (<c>_lf_src_N = xs.where(...)</c>) and through the adapter chain to its head. A copy of the
+    /// head's read path, or null when the head is not a named handle.
+    /// </summary>
+    private Expression? WalkedContainer(LoopStatement loop)
+    {
+        if (loop.IteratorName is not { } iterator ||
+            !_initializers.TryGetValue(key: iterator, value: out Expression? init) ||
+            UnwrapHandleCreation(expr: init) is not CallExpression { Callee: MemberExpression { Object: var walked } })
+        {
+            return null;
+        }
+
+        // `each x in xs.where(...)` walks `_lf_src_N`, bound to the adapter chain.
+        if (loop.AdapterSourcePath != null && Unprojected(expr: walked) is IdentifierExpression adapterName &&
+            _initializers.TryGetValue(key: adapterName.Name, value: out Expression? chain) &&
+            UnwrapHandleCreation(expr: chain) is CallExpression adapterChain)
+        {
+            walked = adapterChain;
+        }
+
+        Expression current = walked;
+        while (current is CallExpression { Callee: MemberExpression step })
+        {
+            if (step.MemberName is RuntimeContract.Control or RuntimeContract.Access &&
+                step.Object.ResolvedType is { } handleType && IsRoamed(type: handleType))
+            {
+                current = step.Object;
+                break;
+            }
+
+            current = step.Object;
+        }
+
+        return IsNamedPath(expr: current) && HasShapeUse(container: current)
+            ? CopyReadPath(expr: current)
+            : null;
+    }
+
+    /// <summary>The value a new handle is made around (<c>Roamed[T](from: value)</c>, how an entity a call gives is
+    /// kept by a variable), or <paramref name="expr"/> itself.</summary>
+    private static Expression UnwrapHandleCreation(Expression expr)
+    {
+        return expr is CallExpression { Arguments: [var only], ResolvedType: { } made } && IsRoamed(type: made) &&
+               (only is NamedArgumentExpression { Name: "from", Value: var value } ? value : null) is { } inner
+            ? inner
+            : expr;
+    }
+
     /// <summary>
     /// A <c>return</c> leaves every enclosing loop that opened a shape use, so it closes those uses
     /// (innermost first) after its value is computed. A value that reaches an element token is computed
@@ -181,6 +257,13 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         List<Expression> containers = ret.Value is { } v
             ? TokenContainers(root: v)
             : [];
+        // A change of a container in the value (a lifted lambda's `return xs.add_last(value: 9)`) is checked where
+        // it is called.
+        if (containers.Count == 0 && ret.Value is { } checkedValue)
+        {
+            ret = ret with { Value = _receiverChecks.VisitExpression(expr: checkedValue) };
+        }
+
         if (containers.Count == 0 && _loopShapeUses.Count == 0)
         {
             return [ret];
@@ -397,6 +480,75 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                 }
             });
         return ShapeUseCalls(containers: handles, verb: RuntimeContract.ShapeUse.RequireFree);
+    }
+
+    /// <summary>
+    /// <paramref name="stmt"/> with the receiver of every call that can change a container's shape checked where the
+    /// call runs: <c>handle.control()</c> in front of a <c>@reshaping</c> call becomes
+    /// <c>handle.control_to_reshape()</c>, which crashes with ReshapingWhileInUseError while an <c>each</c> loop over the
+    /// entity, or a call on one of its elements, is running. Reaches every receiver: a name, an element
+    /// (<c>rows[0].add_last(...)</c>), a call result, a global's field.
+    /// </summary>
+    private Statement CheckReshapeReceivers(Statement stmt)
+    {
+        return stmt switch
+        {
+            ExpressionStatement es => es with { Expression = _receiverChecks.VisitExpression(expr: es.Expression) },
+            DropStatement ds => ds with { Expression = _receiverChecks.VisitExpression(expr: ds.Expression) },
+            AssignmentStatement a => a with
+            {
+                Target = _receiverChecks.VisitExpression(expr: a.Target),
+                Value = _receiverChecks.VisitExpression(expr: a.Value)
+            },
+            DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } v } d =>
+                d with { Declaration = v with { Initializer = _receiverChecks.VisitExpression(expr: init) } },
+            ThrowStatement t => t with { Error = _receiverChecks.VisitExpression(expr: t.Error) },
+            _ => stmt
+        };
+    }
+
+    private TypeRegistry Registry => ctx.Registry;
+
+    private ReceiverCheckRewriter? _receiverChecksStore;
+
+    private ReceiverCheckRewriter _receiverChecks => _receiverChecksStore ??= new ReceiverCheckRewriter(pass: this);
+
+    /// <summary>Puts <c>control_to_reshape()</c> in place of <c>control()</c> on the receiver of every call that can
+    /// change a container's shape (see <see cref="CheckReshapeReceivers"/>). Lambda bodies are lifted routines by
+    /// now, so every call is in a statement of some routine.</summary>
+    private sealed class ReceiverCheckRewriter(ShapeUseLoweringPass pass) : AstRewriter
+    {
+        protected override Expression VisitCall(CallExpression e)
+        {
+            Expression visited = base.VisitCall(e: e);
+            if (visited is not CallExpression
+                {
+                    ResolvedRoutine: { } callee,
+                    Callee: MemberExpression
+                    {
+                        Object: CallExpression
+                        {
+                            Callee: MemberExpression { MemberName: RuntimeContract.Control, Object: var handle } projection
+                        } projected
+                    } receiver
+                } call || !pass.ChangesShape(routine: callee) || handle.ResolvedType is not { } handleType ||
+                !IsRoamed(type: handleType) || !pass.HasShapeUse(container: handle) ||
+                (pass.Registry.LookupMemberRoutine(type: handleType,
+                     memberRoutineName: RuntimeContract.ShapeUse.ControlToReshape, isFailable: true) ??
+                 pass.Registry.LookupMemberRoutine(type: handleType,
+                     memberRoutineName: RuntimeContract.ShapeUse.ControlToReshape)) is not { } check)
+            {
+                return visited;
+            }
+
+            CallExpression checkedProjection = projected with
+            {
+                Callee = projection with { MemberName = RuntimeContract.ShapeUse.ControlToReshape },
+                ResolvedRoutine = check,
+                LoweringKind = Builder.Verification.CallClassifier.ClassifyMemberRoutineCall(memberRoutine: check)
+            };
+            return call with { Callee = receiver with { Object = checkedProjection } };
+        }
     }
 
     /// <summary>The library routines already judged by <see cref="ChangesShape"/>, by declaration site. A routine

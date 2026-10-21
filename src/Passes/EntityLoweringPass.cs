@@ -90,6 +90,9 @@ internal sealed class EntityLoweringPass
     // (scalar field) or AccessViolation (pointer field). Reset per routine.
     private bool _inCreateRoutine;
 
+    // True while lowering a routine of the standard library (see LowerDeclarationStatement).
+    private bool _inLibraryRoutine;
+
     public EntityLoweringPass(TypeRegistry registry)
     {
         _registry = registry;
@@ -193,6 +196,7 @@ internal sealed class EntityLoweringPass
 
         _roamedLocals.Clear();
         _borrowNames.Clear();
+        _inLibraryRoutine = IsStdlibPath(file: r.Location.FileName);
         _borrowNames.Add(item: "me");
         // A constructor is the `routine T(...) -> T` form (named after the type it builds). It returns
         // the bare entity by convention; the caller roams. (The routine is mangled to `T.create` at
@@ -226,6 +230,7 @@ internal sealed class EntityLoweringPass
     {
         _roamedLocals.Clear();
         _borrowNames.Clear();
+        _inLibraryRoutine = routine.Location?.FileName is { } variantFile && IsStdlibPath(file: variantFile);
         _borrowNames.Add(item: "me");
         _inCreateRoutine = false;
         _returnedCreateLocals.Clear();
@@ -356,6 +361,18 @@ internal sealed class EntityLoweringPass
             TryUnwrapRoamConstruction(expr: lowered, inner: out Expression? bare) && bare != null)
         {
             return ds with { Declaration = vd with { Initializer = bare } };
+        }
+
+        // An entity taken out of a tuple a call gave (`var (tx, rx) = make_channel[S64](capacity: 8)` reads
+        // `_ld_tmp.item1`) is moved into a handle here: the routine that made the tuple built it bare, and every
+        // slot of the program that names it (a parameter `rx: Receiver[S64]`) holds a handle.
+        // The library's own Suflae code names the RazorForge types it keeps (`RF::System.Transmitter[T]`), so it
+        // keeps them bare.
+        if (!_inLibraryRoutine &&
+            lowered is MemberExpression { Object.ResolvedType: TupleTypeSymbol, ResolvedType: EntityTypeSymbol element } &&
+            HeldThroughHandle(entity: element))
+        {
+            lowered = WrapInRoam(inner: lowered, entity: element);
         }
 
         Expression init = MaybeRoamCopy(expr: lowered);
@@ -1307,6 +1324,16 @@ internal sealed class EntityLoweringPass
         string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
         return Builder.Frontends.Languages.HasSourceExtension(fileName: declaredIn) &&
                Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge;
+    }
+
+    /// <summary>Whether a Suflae slot naming <paramref name="entity"/> holds it through a handle: an entity of Suflae's
+    /// realm, of a Suflae file, or of the standard library (a channel end). An entity of a RazorForge module the
+    /// program imports keeps its single holder.</summary>
+    private bool HeldThroughHandle(EntityTypeSymbol entity)
+    {
+        string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
+        return IsSuflaeRealmEntity(entity: entity) || !IsRazorForgeEntity(entity: entity) ||
+               declaredIn != null && IsStdlibPath(file: declaredIn);
     }
 
     // An entity of Suflae's own realm (`SF::System.List`) is always held through a handle, whichever world's value the

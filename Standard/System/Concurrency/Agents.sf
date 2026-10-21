@@ -80,7 +80,7 @@ routine Agent[T].cancel()
 ### Waits for cancelled work to stop and frees what ran it, dropping what it came to.
 secret routine Agent[T].wind_down()
     danger
-        me.work.wind_down()
+        me.work.wind_down(reports_failure: false)
     return
 
 ### Enters the work in a race.

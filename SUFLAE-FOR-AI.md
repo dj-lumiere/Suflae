@@ -1006,7 +1006,9 @@ routine start()
   element and is fine.
 - When the change is inside a called routine, the builder cannot see that `xs` and `nums` are the same
   list, so the loop marks the list as in use and the change crashes at run time with
-  `ReshapingWhileInUseError`.
+  `ReshapingWhileInUseError`. The same holds for a change made by a lambda that captured the list, for a loop
+  over a global list, for a loop over an adapter of the list (`each x in nums.where(...)` walks `nums`), and for
+  a change through an element (`rows[0].add_last(...)` while a loop walks `rows[0]`).
 - Changing the list after the loop, after `break`, or after a `return` out of the loop is fine. Changing an
   element's contents (`boxes[0].n = 5`) is not an add or remove and is always fine.
 - The check assumes a single job; two agents changing and looping over the same list concurrently are
@@ -1115,7 +1117,8 @@ routine start()
   `agents.take_finished()` takes the finished agents out of the list in place and returns them (a server
   collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
 - When the last holder of an agent lets go of it before anything retrieved it, its work is cancelled and waited
-  for (work nothing started never runs).
+  for (work nothing started never runs). A failure the work came to crashes the program there with the failure's
+  message. Call `job.cancel()` first to throw away what it comes to, a failure included.
 - `job.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
   `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
   one already started with `start_now()` is refused with `AgentStartError`.
@@ -1128,7 +1131,9 @@ routine start()
   `producer.start_now()` first, then `consumer.retrieve()`.
 - **Shared entities are safe to share between jobs.** The runtime may run jobs on several cores. An entity
   that reaches another job gets an atomic reference count and a lock taken around each access, with no
-  code from you. As with globals, one statement is atomic; a read-then-write spread over several
+  code from you. An entity reaches another job as an agent's argument, inside a value sent on a channel, as an
+  element of a list the jobs share, and when a lambda captures it (the capture alone counts, since the lambda can
+  be handed anywhere). As with globals, one statement is atomic; a read-then-write spread over several
   statements is not.
 - **Agents waiting on each other stop the program.** Two agents that use two shared entities in one statement
   each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`

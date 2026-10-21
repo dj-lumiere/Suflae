@@ -43,6 +43,27 @@ public sealed class ContainerShapeUseTests
         Assert.Contains(expectedSubstring: "Reshaping while in use error", actualString: stderr);
     }
 
+    /// <summary>
+    /// The change comes through a path the loop's own bracket used to miss: a lambda that captured the list, a global
+    /// list, an adapter over the list (<c>nums.where(...)</c>), an element list reached as <c>rows[0]</c>. Each used to
+    /// run on silently (safety matrix C45, cells sf-shape-lambda, -global, -adapter, -nested).
+    /// </summary>
+    [Theory]
+    [InlineData("reshape_lambda_capture_each.sf")]
+    [InlineData("reshape_global_each.sf")]
+    [InlineData("reshape_adapter_each.sf")]
+    [InlineData("reshape_element_list_each.sf")]
+    public void ReshapeThroughOtherPaths_CrashesWithReshapingWhileInUse(string fixture)
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: fixture);
+
+        Assert.True(condition: exit != 0,
+            userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Contains(expectedSubstring: "visiting 1", actualString: stdout);
+        Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+        Assert.Contains(expectedSubstring: "Reshaping while in use error", actualString: stderr);
+    }
+
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture)
     {
         string rfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "ShapeUse", fixture]);

@@ -1,0 +1,49 @@
+module Tests/StdlibSf/AgentsEntityPathsApi
+
+# An entity reaching several agents by a path other than an argument still takes its lock around each statement:
+# captured by a lambda the agents call, sent on a shared channel, or read as an element of a list the agents share.
+# Every update is kept.
+
+import IO/Console
+
+entity Cell
+    n: Integer
+
+routine call_times(f: Callable[(), Integer], times: S64)
+    each i in 0 til times
+        f()
+
+routine drain(rx: SharedReceiver[Cell]) -> Integer
+    var taken = 0
+    each c in rx
+        each i in 0 til 500
+            c.n = c.n + 1
+        taken = taken + 1
+    return taken
+
+routine bump_first(cs: List[Cell], times: S64)
+    each i in 0 til times
+        cs[0].n = cs[0].n + 1
+
+routine start()
+    var captured = Cell(n: 0)
+    var bump = () given (captured) => captured.n = captured.n + 1
+    var calls = [call_times.to[Agent](f: bump, times: 1000), call_times.to[Agent](f: bump, times: 1000)]
+    calls.gather()
+    show(f"lambda {captured.n}")
+
+    var sent = Cell(n: 0)
+    var (tx, rx) = make_shared_channel[Cell](capacity: 4)
+    var drains = [drain.to[Agent](rx: rx), drain.to[Agent](rx: rx)]
+    each d in drains
+        d.start_now()
+    each i in 0 til 4
+        tx.transmit(item: sent)
+    tx.close()
+    var taken = drains.gather()
+    show(f"channel {sent.n} {taken[0] + taken[1]}")
+
+    var cells = [Cell(n: 0)]
+    var bumps = [bump_first.to[Agent](cs: cells, times: 1000), bump_first.to[Agent](cs: cells, times: 1000)]
+    bumps.gather()
+    show(f"element {cells[0].n}")

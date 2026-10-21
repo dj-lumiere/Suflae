@@ -174,6 +174,17 @@ file only once its other old spellings are gone.
 - Rider plugin and VS Code extension.
 
 ### Fixed
+
+- An entity captured by a lambda that several agents call, sent on a channel, or reached as an element of a list the
+  agents share takes its lock around each statement, so no update is lost.
+- A change of a list while a loop walks it crashes with `ReshapingWhileInUseError` also when the change comes from a
+  lambda that captured the list, when the loop walks a global list or an adapter of the list (`xs.where(...)`), and
+  when it goes through an element (`rows[0].add_last(...)`).
+- `var (tx, rx) = make_channel[T](capacity: n)` gives channel ends that work when passed to a routine or an agent
+  (they crashed with a segmentation fault).
+- `cs[0].n = cs[0].n + 1` inside an agent's routine no longer stops the builder.
+- A started agent nobody retrieves crashes with its work's failure where it is dropped, instead of losing it.
+  `job.cancel()` throws the failure away.
 - Two agents adding to one `List` lost updates.
 - `total += xs[0]` crashed, and a `global` `S64` lost digits.
 - `x in dict` gave a wrong error.

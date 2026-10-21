@@ -1,0 +1,3 @@
+lambda 2000
+channel 2000 4
+element 2000
