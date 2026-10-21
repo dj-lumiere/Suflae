@@ -124,7 +124,11 @@ routine start()
 
 **Modules.** `module <Path>` is optional: without it the module path comes from the file's location
 relative to `config.toml` (each folder and the file name PascalCased, joined with `/`:
-`tools/text utils.sf` → `Tools/TextUtils`). Declare `module` only to override that.
+`tools/text utils.sf` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
+declare the same `module` are one module and build together. A file there with its own entry (`routine start()`
+or top-level statements) is another program and is not built with yours, so a draft that does not build yet can
+sit next to the program. Only files that are part of the build report their errors. A failed `build` keeps the
+last executable that built.
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
 `preset` or `global`) of module `Foo`. An import brings the module it names, never the modules under it
@@ -829,6 +833,7 @@ needs T obeys Greetable
   parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
   Write it to ask the builder for derived routines (`obeys Hashable`) or to hear about a missing routine at the
   declaration. A type that does not fit is SF-S150 where it is passed, naming the missing or mismatched routine.
+  The protocol's type arguments count too: a `List[Text]` passed where `Iterable[S64]` is taken is SF-S150.
 - Common protocols: `Equatable`, `Comparable`, `Hashable`, `Iterable[T]`, `Copyable`.
 - Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
 

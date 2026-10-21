@@ -1,0 +1,19 @@
+module Tests/StdlibSf/ListAddRangeApi
+
+# add_range adds every element of an iterable at the back: a list literal, another list, and a circular list
+# taking a list.
+
+import IO/Console
+import Collections
+
+routine start()
+    var xs = [0]
+    xs.add_range(you: [1, 2])
+    show(xs)
+    var ys = [7, 8]
+    xs.add_range(you: ys)
+    show(xs)
+    show(ys)
+    var ring = CircularList[Integer]()
+    ring.add_range(you: xs)
+    show(ring.count())
