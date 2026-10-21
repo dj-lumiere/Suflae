@@ -1,0 +1,27 @@
+module Tests/StdlibSf/RandomEntropyHandleApi
+
+# A Random from `Random.from_entropy()` is held like any other: passed to a routine, kept in a variable, and kept in an
+# entity's member variable that a routine uses inside an `each` loop over another member.
+
+import Random
+
+entity Board
+    rng: Random
+    cells: List[Integer]
+
+routine Board.cell_sum() -> Integer
+    var total = 0
+    each c in me.cells
+        total += c + me.rng.range(low: 0, high: 1).to[Integer]()
+    return total
+
+routine draw(rng: Random) -> Integer
+    return rng.range(low: 0, high: 10).to[Integer]()
+
+routine start()
+    show(draw(rng: Random.from_entropy()) < 10)
+    var fresh = Random.from_entropy()
+    show(draw(rng: fresh) < 10)
+    show(fresh.range(low: 5, high: 6))
+    var board = Board(rng: Random.from_entropy(), cells: [1, 2, 3])
+    show(board.cell_sum())

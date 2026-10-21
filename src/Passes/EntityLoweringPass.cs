@@ -902,10 +902,13 @@ internal sealed class EntityLoweringPass
     {
         // The routine the call is bound to says what comes back: a concrete routine that returns no entity hands
         // back no entity to wrap, whatever type a by-name lookup left on the call.
+        // A shared routine Suflae shows (`Random.from_entropy()`) is declared to give the handle and gives the
+        // entity itself, so a handle return type counts as an entity here.
         bool returnsNoEntity = call.ResolvedRoutine is { IsCreator: false, ReturnType: { } returned } &&
-                               returned is not (EntityTypeSymbol or GenericParameterTypeSymbol);
+                               returned is not (EntityTypeSymbol or GenericParameterTypeSymbol) &&
+                               RoamedInnerEntity(t: returned) == null;
         if (call.ResolvedType is EntityTypeSymbol callEntity && !returnsNoEntity &&
-            (IsSuflaeRealmEntity(entity: callEntity) || !IsRfRealmRef(callee: call.Callee)) &&
+            (IsSuflaeRealmEntity(entity: callEntity) || !IsRfRealmRef(callee: call.Callee, routine: call.ResolvedRoutine)) &&
             !IsRazorForgeEntity(entity: callEntity))
         {
             return WrapInRoam(inner: lowered, entity: callEntity);
@@ -1323,12 +1326,22 @@ internal sealed class EntityLoweringPass
             (t.Name == bareName || t.Name.EndsWith(value: "." + bareName, comparisonType: StringComparison.Ordinal)));
     }
 
-    private static bool IsRfRealmRef(Expression callee)
+    private static bool IsRfRealmRef(Expression callee, RoutineInfo? routine = null)
     {
         return callee is IdentifierExpression { Realm: TypeModel.Realms.Shared } ||
+               // A common routine called on a type written `RF::Name` hands back that world's value. Called on the
+               // type as Suflae names it (`Random.from_entropy()`), it hands back a value Suflae holds by handle.
+               callee is MemberExpression
+               {
+                   Object: IdentifierExpression { Realm: TypeModel.Realms.Shared } or
+                   TypeExpression { Realm: TypeModel.Realms.Shared }
+               } ||
                // A routine called on a RazorForge entity held as such (`RF::System.List`) hands back that
                // world's value too.
-               callee is MemberExpression { Object.ResolvedType: EntityTypeSymbol { Realm: TypeModel.Realms.Shared } };
+               routine is not { Kind: RoutineKind.CommonRoutine } && callee is MemberExpression
+               {
+                   Object.ResolvedType: EntityTypeSymbol { Realm: TypeModel.Realms.Shared }
+               };
     }
 
     // Recognizes the `Roamed(from: X)` wrapper construction that <see cref="WrapInRoam"/> builds and
