@@ -8,6 +8,7 @@ using Suflae.Lexer;
 using Suflae.Passes;
 using SyntaxTree;
 using TypeModel.Enums;
+using TypeModel.Symbols;
 
 namespace Suflae;
 
@@ -174,6 +175,11 @@ public sealed class SuflaeRules : LanguageRules
     public override RoutineDeclaration LowerEntitiesInRoutine(RoutineDeclaration routine, TypeRegistry registry)
     {
         return new EntityLoweringPass(registry: registry).LowerRoutine(r: routine);
+    }
+
+    public override Statement LowerEntitiesInVariantBody(Statement body, RoutineInfo routine, TypeRegistry registry)
+    {
+        return new EntityLoweringPass(registry: registry).LowerVariantBody(body: body, routine: routine);
     }
 
     public override void LowerFirst(PostprocessingContext ctx, Program program)

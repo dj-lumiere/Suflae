@@ -217,6 +217,26 @@ internal sealed class EntityLoweringPass
             : r with { Body = newBody };
     }
 
+    /// <summary>
+    /// Lowers the body of a recovery variant of a routine written in Suflae: the builder copied it from the base
+    /// routine before the base was lowered, so a construction in it still builds a bare entity. A variant is never
+    /// a creator, and its parameters that are handles are borrowed as the base's are.
+    /// </summary>
+    internal Statement LowerVariantBody(Statement body, RoutineInfo routine)
+    {
+        _roamedLocals.Clear();
+        _borrowNames.Clear();
+        _borrowNames.Add(item: "me");
+        _inCreateRoutine = false;
+        _returnedCreateLocals.Clear();
+        foreach (ParamInfo p in routine.Parameters.Where(predicate: p => IsRoamedType(t: p.Type)))
+        {
+            _borrowNames.Add(item: p.Name);
+        }
+
+        return LowerStatement(stmt: body);
+    }
+
     // ---- Statements -----------------------------------------------------------------------------
 
     private Statement LowerStatement(Statement stmt)
@@ -230,6 +250,7 @@ internal sealed class EntityLoweringPass
             } ds => LowerDeclarationStatement(stmt: stmt, ds: ds, vd: vd),
             AssignmentStatement assign => LowerAssignmentStatement(stmt: stmt, assign: assign),
             ReturnStatement { Value: not null } ret => LowerReturnStatement(stmt: stmt, ret: ret),
+            VariantReturnStatement { Value: not null } vr => LowerVariantReturnStatement(stmt: stmt, vr: vr),
             ExpressionStatement
             {
                 Expression: BinaryExpression { Operator: BinaryOperator.Assign } bin
@@ -434,6 +455,17 @@ internal sealed class EntityLoweringPass
 
         return changed
             ? whenStmt with { Expression = subj, Clauses = clauses }
+            : stmt;
+    }
+
+    /// <summary>A recovery variant's return of its value (or of the error it fails with) hands the value over as
+    /// a plain return does.</summary>
+    private Statement LowerVariantReturnStatement(Statement stmt, VariantReturnStatement vr)
+    {
+        var asReturn = new ReturnStatement(Value: vr.Value, Location: vr.Location);
+        return LowerReturnStatement(stmt: asReturn, ret: asReturn) is ReturnStatement { Value: { } lowered } &&
+               !ReferenceEquals(objA: lowered, objB: vr.Value)
+            ? vr with { Value = lowered }
             : stmt;
     }
 

@@ -17,7 +17,7 @@ module System/Text
 @rf("Bytes")
 record Bytes
 relates BytesEmittable as Iter
-obeys Copyable, Iterable[Byte], Comparable, Hashable
+obeys Copyable, Addable, Iterable[Byte], Comparable, Hashable
     pass
 
 ### Represents the iterator used to traverse a `Bytes` value.
