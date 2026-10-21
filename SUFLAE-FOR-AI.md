@@ -1332,6 +1332,15 @@ mode = "debug"              # debug | debug-jit | release | release-time | relea
 ```
 
 - A single script needs no manifest: `suflae run script.sf`. Without a manifest the build mode is `debug`.
+- **Moving 0.1 code:** `suflae migrate <folder>` first indents a file written in steps of 2 spaces in steps of 4
+  (`migrate --step indent` does only that, text literals keep their lines), renames the 0.1 manifest file to
+  `config.toml` (the old file alone is a build error that names `config.toml`), and then rewrites the old
+  spellings: `try_f(x)` → `try f(x)`, `check_f(x)` / `lookup_f(x)` → `check f(x)`, `routine T.create(...)` →
+  `routine T(...)` (a member routine `create` that gives back its own type is SF-W104), `-x ** n` → `(-x) ** n`
+  (the old meaning), and `C64` / `C128` → `C128` / `C256` in a project with a manifest. It lists what it cannot
+  decide (a range whose start is not a literal may have counted down). Run the named steps after it and
+  `--step suffix` last. A build error on an old name (`Result`, `Indexable`, `try_f`, `gather`, `IO/FileSystem`,
+  `Moment.now`, ...) names what is written now.
 
 ## 21. Reading build errors
 

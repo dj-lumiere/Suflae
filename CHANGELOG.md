@@ -14,16 +14,20 @@ files whose `config.toml` already says `suflae-version = "0.5.0"`, and marks the
 named steps (`suflae migrate --step <name> <folder>`) run one rewrite on any source. Where no step exists, the
 build error says what to write instead.
 
-`migrate` reads sources as 0.5 code, so indent 0.1 sources in steps of 4 spaces before you run it
-(see the first item below).
+`migrate` first indents a 0.1 file in steps of 4 spaces and renames the 0.1 manifest file to `config.toml`, then
+rewrites it. Run the named steps after it and `--step suffix` last: the suffix step needs analysis, which reads a
+file only once its other old spellings are gone.
 
 ### Breaking changes
 
 **Source layout and tools**
-- Indentation is a multiple of 4 spaces. Any other indent is SF-G053. 0.1 sources used 2 spaces: double the
-  leading spaces of each line before running `migrate`.
-- The project manifest is `config.toml`. Rename the 0.1 manifest file to it. Settings that were environment
-  variables are `[target]` and `[debug]` keys in it.
+- Indentation is a multiple of 4 spaces. Any other indent is SF-G053. 0.1 sources used 2 spaces: default `migrate`
+  doubles the leading spaces of each line of such a file first (`migrate --step indent` does only that, and leaves
+  the lines inside a text literal as they are).
+- The project manifest is `config.toml`. The 0.1 manifest file with no `config.toml` next to it is a build error
+  that names `config.toml`, and default `migrate` renames it. Settings that were environment variables are
+  `[target]` and `[debug]` keys in it: when the old deadlock variable is still set, every command prints a warning
+  that names `deadlock-check` under `[debug]`.
 - The commands are `check`, `build`, `run`, `test`, `fmt`, `lint`, `lsp`, `new`, `migrate` and `docs`. A bare file
   name is not a command: the error shows `suflae run <file>`.
 - Every runtime crash exits with code 82.
@@ -32,9 +36,10 @@ build error says what to write instead.
 - A routine that can fail says so on its declaration: `failable routine parse(...)`. `routine parse!(...)` is
   SF-G222 (`migrate --step failable`). A call never writes `!` (SF-G211).
 - Recovery is a keyword at the call: `try f(x)` gives a `Maybe[T]`, `check f(x)` gives a `Check[T]`. The
-  `try_f` / `check_f` / `lookup_f` routines are gone. Write `try f(x)` for `try_f(x)` and `check f(x)` for
-  `check_f(x)` and `lookup_f(x)`.
-- `Result[T]` is `Check[T]`. `Lookup[T]` is gone.
+  `try_f` / `check_f` / `lookup_f` routines are gone. Default `migrate` writes `try f(x)` for `try_f(x)` (and
+  `try r.f(x)` for `r.try_f(x)`) and `check f(x)` for `check_f(x)` and `lookup_f(x)`, and the build error on an old
+  name names the keyword.
+- `Result[T]` is `Check[T]`. `Lookup[T]` is gone. The build errors say so.
 - `absent` is gone: a routine with nothing to give throws, `throw AbsentValueError()` (default `migrate`).
 - The `Crashable` protocol is the `Crashables` record. Every crashable writes its own `crash_message()` (SF-S704).
   A crashable larger than 64 bytes is a build error.
@@ -50,7 +55,8 @@ build error says what to write instead.
 - Fixed-width numbers are visible without an import. Default `migrate` removes `import Numerics`.
 - Binary floats are `B16`, `B32`, `B64`, `B128` (the build error names the `B` type for an `F` name). Complex types
   are named by their total bits: 0.1's `C64` is `C128` and 0.1's `C128` is `C256`, and `C64` is now two `B32`
-  parts. Change these by hand: the old names still build.
+  parts. Default `migrate` renames them in a project it moves (a file with no `config.toml` above it gets them
+  listed instead, because the old names still build).
 - `S64 / S64` is SF-S065. Write `a // b`, or `a.to[Decimal]() / b.to[Decimal]()`.
 - Containment is a call on the collection: `xs.has(x)`, `xs.lacks(x)`, `d.has_key(k)`, `d.lacks_key(k)`. The
   `have` / `lack` operators are gone (`migrate --step have`), `contains` is `has` (default `migrate`), `x in xs` as
@@ -61,11 +67,14 @@ build error says what to write instead.
 - `Character` is `Char` and `Routine[...]` is `Callable[...]` (default `migrate`).
 - Operator levels: `and` and `or` share one level, and so do the bitwise operators, so mixing them needs
   parentheses (SF-G216). A range binds looser than arithmetic and tighter than comparisons. `**` binds tighter than
-  a leading `-`: `-2 ** 2` is `-4`. Check every `-x ** n` by hand.
+  a leading `-`: `-2 ** 2` is `-4`. Default `migrate` writes `(-x) ** n` for each `-x ** n`, which keeps what the
+  line computed in 0.1, and lists each one.
 - A range counts down only with a negative step: `10 to 1` is empty, write `10 to 1 by -1`. Default `migrate` adds
-  the step where both ends are literals. Check the other ranges by hand.
+  the step where both ends are literals and lists the ranges whose start is not a literal.
 - A chained comparison goes one way. There is no `<<<`.
 - A constructor is `routine T(...)`. `routine T.create(...)` declares an ordinary member routine named `create`.
+  Default `migrate` rewrites it to `routine T(...)` (and a call `T.create(...)` to `T(...)`), and a member routine
+  `create` that gives back its own type is warning SF-W104.
 - A `var` that hides a parameter or an outer local is SF-S008. An unknown annotation is SF-G221.
 - The right side of a compound assignment is checked like a binary expression (`Integer += S64` is SF-S502).
 - `===` and `!==` take entities only.
@@ -95,8 +104,10 @@ build error says what to write instead.
   `CircularList`'s (default `migrate` lists them).
 - `Signals` is `CpuEventManager` in `System/Cpu`, with one handler slot per event kind (`migrate --step
   cpu-events`).
-- The time is read with `Clock.now()`, `Clock.monotonic()` and `CpuClock.now()`.
-- `FileManager` does every file system task, and `IO/FileSystem` is gone. Reading or writing a missing file fails,
+- The time is read with `Clock.now()`, `Clock.monotonic()` and `CpuClock.now()` (the build error on `Moment.now`
+  says so). A `Moment` is written with two digits for each part after the year: `2026-01-15 12:30:00` (0.1 wrote
+  `2026-1-15 12:30:0`).
+- `FileManager` does every file system task, and `IO/FileSystem` is gone (the import error names `FileManager`). Reading or writing a missing file fails,
   `make_file` fails on an existing file unless you pass `replacing: true`, and there is no `touch`. The
   directories and the environment variables are `Environment`'s, random bytes are `Entropy`'s.
 - `ask_line` and `ask_word` fail with `EndOfInputError` at the end of input.
@@ -104,7 +115,8 @@ build error says what to write instead.
   `d.add(key:, value:)` is rewritten to it.
 - `PriorityQueue` holds `(priority, element)` tuples and has `unordered`, `ordered` and `drain`.
 - `Duration` `//` and `%` follow the integer rules, and overflow or division by zero crashes.
-- `Indexable` is `ViewingIndexable` and `MutableIndexable` is `ModifyingIndexable`.
+- `Indexable` is `ViewingIndexable` and `MutableIndexable` is `ModifyingIndexable` (the build error names the new
+  name, and so does the one on `PQEntry`, `gather` and `race`).
 - Concurrency: `suspended` is gone. Any routine runs concurrently through `f.to[Agent](args)` (default `migrate`
   adds `.to[Agent]` to the calls). Start an agent with `start_now()`, `start_here()` or `start_apart()`.
   `execute()` is gone (default `migrate` writes `start_now()`). `gather()` and `race()` are routines on the agent
@@ -156,6 +168,8 @@ build error says what to write instead.
 - A resident build daemon and a JIT mode for the edit loop: `[target] mode = "debug-jit"`, `use-daemon` and
   `incremental`.
 - `new`, `migrate`, `docs`, `fmt`, `lint`, `test`, `lsp` and `check --json`.
+- `migrate --step indent` (indent in steps of 4 spaces). Default `migrate` and the `have` and `until` steps read a
+  file whose numbers still have type suffixes, and leave the suffixes for `--step suffix`.
 - The language server: diagnostics, formatting, hover, go to definition, rename and quick fixes.
 - Rider plugin and VS Code extension.
 
