@@ -63,15 +63,18 @@ routine Decimal.compare(you: Decimal) -> ComparisonSign
 @rf("Decimal.eq")
 routine Decimal.eq(you: Decimal) -> Bool
 
-### Returns `me * you`.
+### Returns `me * you`, exactly.
+### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.
 @rf("Decimal.mul")
 failable routine Decimal.mul(you: Decimal) -> Decimal
 
-### Returns `me + you`.
+### Returns `me + you`, exactly.
+### :throws: {NumericOverflowError} when the exact sum needs more than 34 significant digits.
 @rf("Decimal.add")
 failable routine Decimal.add(you: Decimal) -> Decimal
 
-### Returns `me - you`.
+### Returns `me - you`, exactly.
+### :throws: {NumericOverflowError} when the exact difference needs more than 34 significant digits.
 @rf("Decimal.sub")
 failable routine Decimal.sub(you: Decimal) -> Decimal
 
@@ -104,7 +107,8 @@ routine Decimal.clamp(min_val: Decimal, max_val: Decimal) -> Decimal
 @rf("Decimal.recip")
 routine Decimal.recip() -> Decimal
 
-### Returns `(me + you) / 2`. A non-finite intermediate crashes, as for all `Decimal` arithmetic.
+### Returns `(me + you) / 2`, rounded to the nearest 34-digit value like any quotient. A non-finite intermediate
+### crashes, as for all `Decimal` arithmetic.
 ### :param you: The other value.
 ### :returns: The arithmetic midpoint of `me` and `you`.
 @rf("Decimal.midpoint")

@@ -7,21 +7,21 @@ module System/Numerics
 ### `me + you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The sum.
-### :throws: {NumericOverflowError} when `me` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Integer.add(you: Decimal) -> Decimal
     return me.exact_decimal().add(you: you)
 
 ### `me - you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The difference.
-### :throws: {NumericOverflowError} when `me` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Integer.sub(you: Decimal) -> Decimal
     return me.exact_decimal().sub(you: you)
 
 ### `me * you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The product.
-### :throws: {NumericOverflowError} when `me` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `me` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Integer.mul(you: Decimal) -> Decimal
     return me.exact_decimal().mul(you: you)
 
@@ -47,21 +47,21 @@ failable routine Integer.compare(you: Decimal) -> ComparisonSign
 ### `me + you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The sum.
-### :throws: {NumericOverflowError} when `you` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Decimal.add(you: Integer) -> Decimal
     return me.add(you: you.exact_decimal())
 
 ### `me - you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The difference.
-### :throws: {NumericOverflowError} when `you` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Decimal.sub(you: Integer) -> Decimal
     return me.sub(you: you.exact_decimal())
 
 ### `me * you` as a `Decimal`.
 ### :param you: The other side.
 ### :returns: The product.
-### :throws: {NumericOverflowError} when `you` has more significant digits than a `Decimal` holds.
+### :throws: {NumericOverflowError} when `you` or the exact result has more significant digits than a `Decimal` holds.
 failable routine Decimal.mul(you: Integer) -> Decimal
     return me.mul(you: you.exact_decimal())
 

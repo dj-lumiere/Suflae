@@ -185,8 +185,9 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes
   (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Integer`.
 - **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
-  safe) with 34 significant digits; a result needing more digits (`1 / 3`) is rounded to 34, and a result
-  beyond about `1e6144` crashes. It displays canonically: `2.50` shows as `2.5`.
+  safe) with 34 significant digits. `+ - *` are exact: a result that needs more than 34 digits crashes with
+  `NumericOverflowError` (`try` recovers it) instead of rounding. `/`, `sqrt`, the transcendentals and `**` give the
+  nearest 34-digit value (`1 / 3`), and a result beyond about `1e6144` crashes. It displays canonically: `2.50` shows as `2.5`.
 - Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
 - A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
   the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`

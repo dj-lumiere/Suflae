@@ -1,0 +1,21 @@
+module Tests/StdlibSf/DecimalExactApi
+
+# `+ - *` on Decimal are exact: a result that needs more than 34 significant digits stops instead of rounding, and
+# `try` recovers it. Division rounds to the nearest 34-digit value.
+
+import IO/Console
+
+routine start()
+    var big: Decimal = 9999999999999999999999999999999999
+    var half: Decimal = 0.5
+    var x: Decimal = 1.234567890123456789
+    show(try (big + half))
+    show(try (big - half))
+    show(try (x * x))
+    show(big + 1)
+    show(big * 10)
+    show(0.1 + 0.2)
+    show(1 / 3)
+    when check (big + half)
+        is NumericOverflowError as e => show(e.crash_message())
+        else => show("fits")
