@@ -9,22 +9,22 @@ import IO/Errors
 ### :param at: The directory.
 ### :returns: The entry names.
 ### :throws: {IOError} when the directory cannot be listed.
-failable common routine OsFileManager.list(at: Directory) -> List[Text]
-    return OsFileManager.list(at: at).to[List[Text]]()
+failable common routine FileManager.list(at: Directory) -> List[Text]
+    return FileManager.list(at: at).to[List[Text]]()
 
 ### Returns the directory's entries.
 ### :param at: The directory.
 ### :returns: The entries.
 ### :throws: {IOError} when the directory cannot be listed.
-failable common routine OsFileManager.entries(at: Directory) -> List[DirEntry]
-    return OsFileManager.entries(at: at).to[List[DirEntry]]()
+failable common routine FileManager.entries(at: Directory) -> List[DirEntry]
+    return FileManager.entries(at: at).to[List[DirEntry]]()
 
 ### Returns the paths of everything under the directory, at any depth. Symbolic links are not followed.
 ### :param at: The directory.
 ### :returns: The full paths.
 ### :throws: {IOError} when any directory in the tree cannot be listed.
-failable common routine OsFileManager.walk(at: Directory) -> List[Text]
-    return OsFileManager.walk(at: at).to[List[Text]]()
+failable common routine FileManager.walk(at: Directory) -> List[Text]
+    return FileManager.walk(at: at).to[List[Text]]()
 
 ### The storage devices the operating system reports, none where it reports none.
 ### :returns: The devices.

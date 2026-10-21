@@ -36,7 +36,7 @@ routine splitmix64_next(x: U64) -> U64
 @rf("make_random")
 routine make_random(seed: U64) -> Random
 
-### Creates a generator seeded with 256 random bits from the operating system's random source ({OsEntropy}), so every
+### Creates a generator seeded with 256 random bits from the operating system's random source ({Entropy}), so every
 ### run gets a stream of its own.
 ### :returns: A fresh `Random` generator.
 @rf("Random.from_entropy")

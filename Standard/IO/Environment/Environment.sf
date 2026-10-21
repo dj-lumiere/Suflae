@@ -5,13 +5,13 @@ module IO/Environment
 
 ### The arguments the program was started with, its own name left out.
 ### :returns: The arguments, in order.
-common routine OsEnvironment.arguments() -> List[Text]
-    return OsEnvironment.arguments().to[List[Text]]()
+common routine Environment.arguments() -> List[Text]
+    return Environment.arguments().to[List[Text]]()
 
 ### Every environment variable with its value, as the operating system has them now: a copy, which changes nothing
 ### when it changes.
 ### :returns: The variables by name.
-common routine OsEnvironment.to[Dict[Text, Text]]() -> Dict[Text, Text]
+common routine Environment.to[Dict[Text, Text]]() -> Dict[Text, Text]
     var parts = environment_parts().to[List[Text]]()
     var result = Dict[Text, Text]()
     var i = 0

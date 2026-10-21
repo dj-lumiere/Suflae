@@ -4,11 +4,11 @@ module IO/File
 # checks that the two still match.
 
 ### A `File` names persistent byte content in the filesystem — the data-at-rest itself, NOT an open
-### handle. It is a cheap value (just the path), constructing one opens nothing. {OsFileManager} opens one of
+### handle. It is a cheap value (just the path), constructing one opens nothing. {FileManager} opens one of
 ### three sessions over its content:
-###   * `OsFileManager.open_storage[T](at:)` — a random-access {FileStorage} of fixed-size cells, no cursor,
-###   * `OsFileManager.open_read(at:)` — a sequential {Source} (consume forward with `load`),
-###   * `OsFileManager.open_write(at:)` / `open_append(at:)` — a sequential {Sink} (emit forward with `store`).
+###   * `FileManager.open_storage[T](at:)` — a random-access {FileStorage} of fixed-size cells, no cursor,
+###   * `FileManager.open_read(at:)` — a sequential {Source} (consume forward with `load`),
+###   * `FileManager.open_write(at:)` / `open_append(at:)` — a sequential {Sink} (emit forward with `store`).
 ### The content outlives every session (closing a session leaves the file intact — criterion: a file
 ### persists beyond the program). Things that are NOT files — a socket, pipe, or console — have no such
 ### content layer: they are born as {Source}/{Sink} with nothing addressable underneath, so they can
@@ -26,7 +26,7 @@ record File
 ###
 ### A cell is read with `storage[i]` and written with `storage[i] = value`. A storage is opened for writing when the file can be written, otherwise for
 ### reading only, and writing a cell of one opened for reading only fails with {NotEnoughPermissionError}. A
-### storage cannot grow its file: size the file first with `OsFileManager.set_size`. Writes land in the file,
+### storage cannot grow its file: size the file first with `FileManager.set_size`. Writes land in the file,
 ### flushed lazily by the OS, on `flush()`, and when the storage ends.
 @rf("FileStorage")
 entity FileStorage[T]
@@ -53,7 +53,7 @@ obeys Sink, Enterable
 ### A `Directory` names a directory in the filesystem — a container of entries, NOT byte content (that
 ### is what {File} is). Like `File` it is a cheap value (just the path), constructing one creates
 ### nothing. It builds the paths of the things inside it (`file(name:)` → a {File}, `go_to(name:)` → a
-### nested `Directory`). {OsFileManager} makes, lists and removes it.
+### nested `Directory`). {FileManager} makes, lists and removes it.
 @rf("Directory")
 record Directory
     ### The path naming this directory.
@@ -76,7 +76,7 @@ record FileMetadata
     readonly: Bool  # Whether the path is marked readonly
 
 ### One storage device (a disk, an SD card), as the operating system reports it: its blocks and its partition table.
-### With an OS the OS manages it, and this is what the program can ask about it.
+### The OS manages it, and this is what the program can ask about it.
 @rf("StorageManager")
 record StorageManager
     ### The OS's name for the device (`/dev/sda`, `\\.\PhysicalDrive0`).
@@ -85,7 +85,7 @@ record StorageManager
     size: U64
 
 ### One partition, a slice of a storage device, as the operating system reports it. A partition with a file system
-### has exactly one file manager: with an OS that is the OS's, reached through {OsFileManager}.
+### has exactly one file manager, the OS's, reached through {FileManager}.
 @rf("PartitionManager")
 record PartitionManager
     ### The OS's name for the partition (`/dev/sda1`, `C:\`).
@@ -99,42 +99,12 @@ record PartitionManager
     ### Its size in bytes, 0 when the OS doesn't say.
     size: U64
 
-### The role of a file manager: the file system on one partition, keeping its file table, giving files space, and
-### doing every read and write. A partition has exactly one, and making a second one over a partition that has one
-### fails. {OsFileManager} is the operating system's, the one a program calls with an OS.
-@rf("FileManager")
-protocol FileManager
-    ### Reads a whole file.
-    ### :param at: The file.
-    ### :returns: Its contents.
-    failable common routine Me.read_bytes(at: File) -> Bytes
-
-    ### Writes `content` to an existing file, replacing what it held.
-    ### :param at: The file.
-    ### :param content: The bytes to write.
-    failable common routine Me.write_bytes(at: File, content: Bytes)
-
-    ### The direct entries of a directory.
-    ### :param at: The directory.
-    ### :returns: The entries.
-    failable common routine Me.entries(at: Directory) -> List[DirEntry]
-
-    ### Removes a file.
-    ### :param at: The file.
-    failable common routine Me.delete(at: File)
-
-    ### The partition a directory is on.
-    ### :param at: The directory.
-    ### :returns: The partition.
-    failable common routine Me.partition(at: Directory) -> PartitionManager
-
-### The operating system's file manager: the one place a program with an OS does file system work. Its routines are
-### called on the type (`OsFileManager.read_text(at:)`), and every one that touches the disk is here. The OS keeps
-### one file manager per mounted partition, and `OsFileManager` reaches all of them: `partition(at:)` tells which
+### The operating system's file manager: the one place a program does file system work. Its routines are
+### called on the type (`FileManager.read_text(at:)`), and every one that touches the disk is here. The OS keeps
+### one file manager per mounted partition, and `FileManager` reaches all of them: `partition(at:)` tells which
 ### partition a path is on.
-@rf("OsFileManager")
-record OsFileManager
-obeys FileManager
+@rf("FileManager")
+record FileManager
     pass
 
 ### This file's extension, without the leading dot (empty when absent).
@@ -211,124 +181,124 @@ common routine PartitionManager.all() -> List[PartitionManager]
 ### :param at: The directory.
 ### :returns: The partition.
 ### :throws: {NotFoundError} when nothing is at the path, {IOError} when the OS can't tell.
-@rf("OsFileManager.partition")
-failable common routine OsFileManager.partition(at: Directory) -> PartitionManager
+@rf("FileManager.partition")
+failable common routine FileManager.partition(at: Directory) -> PartitionManager
 
 ### The partition the file is on: its file manager is the OS's file manager for that partition.
 ### :param at: The file.
 ### :returns: The partition.
 ### :throws: {NotFoundError} when nothing is at the path, {IOError} when the OS can't tell.
-@rf("OsFileManager.partition")
-failable common routine OsFileManager.partition(at: File) -> PartitionManager
+@rf("FileManager.partition")
+failable common routine FileManager.partition(at: File) -> PartitionManager
 
 ### Whether something exists at this file's path.
 ### :param at: The file.
 ### :returns: `true` when the path exists.
-@rf("OsFileManager.exists")
-common routine OsFileManager.exists(at: File) -> Bool
+@rf("FileManager.exists")
+common routine FileManager.exists(at: File) -> Bool
 
 ### Whether something exists at this directory's path.
 ### :param at: The directory.
 ### :returns: `true` when the path exists.
-@rf("OsFileManager.exists")
-common routine OsFileManager.exists(at: Directory) -> Bool
+@rf("FileManager.exists")
+common routine FileManager.exists(at: Directory) -> Bool
 
 ### Whether the path names a regular file. A missing path gives `false`.
 ### :param at: The file.
 ### :returns: `true` when the path is a regular file.
-@rf("OsFileManager.is_file")
-common routine OsFileManager.is_file(at: File) -> Bool
+@rf("FileManager.is_file")
+common routine FileManager.is_file(at: File) -> Bool
 
 ### Whether the path names a directory. A missing path gives `false`.
 ### :param at: The directory.
 ### :returns: `true` when the path is a directory.
-@rf("OsFileManager.is_directory")
-common routine OsFileManager.is_directory(at: Directory) -> Bool
+@rf("FileManager.is_directory")
+common routine FileManager.is_directory(at: Directory) -> Bool
 
 ### The size of a file in bytes.
 ### :param at: The file.
 ### :returns: The size in bytes.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the file cannot be inspected.
-@rf("OsFileManager.size")
-failable common routine OsFileManager.size(at: File) -> S64
+@rf("FileManager.size")
+failable common routine FileManager.size(at: File) -> S64
 
 ### A file's metadata, captured in a single stat.
 ### :param at: The file.
 ### :returns: The resulting {FileMetadata}.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the file cannot be inspected.
-@rf("OsFileManager.metadata")
-failable common routine OsFileManager.metadata(at: File) -> FileMetadata
+@rf("FileManager.metadata")
+failable common routine FileManager.metadata(at: File) -> FileMetadata
 
 ### A directory's metadata, captured in a single stat.
 ### :param at: The directory.
 ### :returns: The resulting {FileMetadata}.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the directory cannot be inspected.
-@rf("OsFileManager.metadata")
-failable common routine OsFileManager.metadata(at: Directory) -> FileMetadata
+@rf("FileManager.metadata")
+failable common routine FileManager.metadata(at: Directory) -> FileMetadata
 
 ### Whether this process can read the path.
 ### :param at: The file.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_read")
-common routine OsFileManager.can_read(at: File) -> Bool
+@rf("FileManager.can_read")
+common routine FileManager.can_read(at: File) -> Bool
 
 ### Whether this process can read the directory.
 ### :param at: The directory.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_read")
-common routine OsFileManager.can_read(at: Directory) -> Bool
+@rf("FileManager.can_read")
+common routine FileManager.can_read(at: Directory) -> Bool
 
 ### Whether this process can write to the path.
 ### :param at: The file.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_write")
-common routine OsFileManager.can_write(at: File) -> Bool
+@rf("FileManager.can_write")
+common routine FileManager.can_write(at: File) -> Bool
 
 ### Whether this process can write to the directory.
 ### :param at: The directory.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_write")
-common routine OsFileManager.can_write(at: Directory) -> Bool
+@rf("FileManager.can_write")
+common routine FileManager.can_write(at: Directory) -> Bool
 
 ### Whether this process can execute the file.
 ### :param at: The file.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_execute")
-common routine OsFileManager.can_execute(at: File) -> Bool
+@rf("FileManager.can_execute")
+common routine FileManager.can_execute(at: File) -> Bool
 
 ### Whether this process can enter the directory.
 ### :param at: The directory.
 ### :returns: The resulting `Bool` value.
-@rf("OsFileManager.can_execute")
-common routine OsFileManager.can_execute(at: Directory) -> Bool
+@rf("FileManager.can_execute")
+common routine FileManager.can_execute(at: Directory) -> Bool
 
 ### The file at its absolute path (symlinks and other non-canonical components kept).
 ### :param at: The file.
 ### :returns: A new `File` naming the absolute path.
 ### :throws: {IOError} when the path cannot be resolved.
-@rf("OsFileManager.absolute")
-failable common routine OsFileManager.absolute(at: File) -> File
+@rf("FileManager.absolute")
+failable common routine FileManager.absolute(at: File) -> File
 
 ### The directory at its absolute path (symlinks and other non-canonical components kept).
 ### :param at: The directory.
 ### :returns: A new `Directory` naming the absolute path.
 ### :throws: {IOError} when the path cannot be resolved.
-@rf("OsFileManager.absolute")
-failable common routine OsFileManager.absolute(at: Directory) -> Directory
+@rf("FileManager.absolute")
+failable common routine FileManager.absolute(at: Directory) -> Directory
 
 ### The file at its canonical location (casing normalized, links and relative segments resolved).
 ### :param at: The file.
 ### :returns: A new `File` naming the canonical path.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the path cannot be resolved.
-@rf("OsFileManager.canonical")
-failable common routine OsFileManager.canonical(at: File) -> File
+@rf("FileManager.canonical")
+failable common routine FileManager.canonical(at: File) -> File
 
 ### The directory at its canonical location (casing normalized, links and relative segments resolved).
 ### :param at: The directory.
 ### :returns: A new `Directory` naming the canonical path.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the path cannot be resolved.
-@rf("OsFileManager.canonical")
-failable common routine OsFileManager.canonical(at: Directory) -> Directory
+@rf("FileManager.canonical")
+failable common routine FileManager.canonical(at: Directory) -> Directory
 
 ### Makes the file. Its directory must exist. An existing file is an error, unless `replacing` is true: then it
 ### is emptied.
@@ -337,8 +307,8 @@ failable common routine OsFileManager.canonical(at: Directory) -> Directory
 ### :returns: The file, made.
 ### :throws: {IOError} when it already exists (and `replacing` is false), {NotFoundError} when its directory is
 ###     missing, {NotEnoughPermissionError}, {NotEnoughSpaceError} or {StorageFaultError} for those reasons.
-@rf("OsFileManager.make_file")
-failable common routine OsFileManager.make_file(at: File, replacing: Bool = false) -> File
+@rf("FileManager.make_file")
+failable common routine FileManager.make_file(at: File, replacing: Bool = false) -> File
 
 ### Makes the directory. An existing directory is an error. With `parents`, missing directories above it are made
 ### too, and one that already exists is kept.
@@ -346,26 +316,26 @@ failable common routine OsFileManager.make_file(at: File, replacing: Bool = fals
 ### :param parents: Whether missing directories above it are made too.
 ### :returns: The directory, made.
 ### :throws: {IOError} when the directory cannot be made, or the crashable for the reason.
-@rf("OsFileManager.make_directory")
-failable common routine OsFileManager.make_directory(at: Directory, parents: Bool = false) -> Directory
+@rf("FileManager.make_directory")
+failable common routine FileManager.make_directory(at: Directory, parents: Bool = false) -> Directory
 
 ### Removes the file.
 ### :param at: The file.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the file cannot be removed.
-@rf("OsFileManager.delete")
-failable common routine OsFileManager.delete(at: File)
+@rf("FileManager.delete")
+failable common routine FileManager.delete(at: File)
 
 ### Removes the directory, which must be empty. `delete_all` removes one with contents.
 ### :param at: The directory.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the directory cannot be removed.
-@rf("OsFileManager.delete")
-failable common routine OsFileManager.delete(at: Directory)
+@rf("FileManager.delete")
+failable common routine FileManager.delete(at: Directory)
 
 ### Removes the directory and everything in it.
 ### :param at: The directory.
 ### :throws: {NotFoundError} when nothing is there, {IOError} when the tree cannot be removed.
-@rf("OsFileManager.delete_all")
-failable common routine OsFileManager.delete_all(at: Directory)
+@rf("FileManager.delete_all")
+failable common routine FileManager.delete_all(at: Directory)
 
 ### Changes the file's name, in the directory it is in. Only the name changes: `to` is a name, not a path, and one
 ### with a separator in it fails (put the file in another directory with `move`).
@@ -376,8 +346,8 @@ failable common routine OsFileManager.delete_all(at: Directory)
 ### :throws: {IOError} when the name holds a separator or is taken (and `replacing` is false), {NotFoundError} when
 ###     nothing is at `at`, or the crashable for another reason.
 @discardable
-@rf("OsFileManager.rename")
-failable common routine OsFileManager.rename(at: File, to: Text, replacing: Bool = false) -> File
+@rf("FileManager.rename")
+failable common routine FileManager.rename(at: File, to: Text, replacing: Bool = false) -> File
 
 ### Changes the directory's name, in the directory it is in. Only the name changes: `to` is a name, not a path, and
 ### one with a separator in it fails (put the directory in another one with `move`).
@@ -388,8 +358,8 @@ failable common routine OsFileManager.rename(at: File, to: Text, replacing: Bool
 ### :throws: {IOError} when the name holds a separator or is taken (and `replacing` is false), {NotFoundError} when
 ###     nothing is at `at`, or the crashable for another reason.
 @discardable
-@rf("OsFileManager.rename")
-failable common routine OsFileManager.rename(at: Directory, to: Text, replacing: Bool = false) -> Directory
+@rf("FileManager.rename")
+failable common routine FileManager.rename(at: Directory, to: Text, replacing: Bool = false) -> Directory
 
 ### Puts the file into the directory `into`, keeping its name. A move is a copy into `into` and then a delete of the
 ### original, and it is not atomic: if the copy fails nothing is deleted, and if the delete fails both are there and
@@ -402,8 +372,8 @@ failable common routine OsFileManager.rename(at: Directory, to: Text, replacing:
 ###     deleted after the copy, {NotFoundError} when nothing is at `at` or `into` is missing, or the crashable for
 ###     another reason.
 @discardable
-@rf("OsFileManager.move")
-failable common routine OsFileManager.move(at: File, into: Directory, replacing: Bool = false) -> File
+@rf("FileManager.move")
+failable common routine FileManager.move(at: File, into: Directory, replacing: Bool = false) -> File
 
 ### Puts the directory, with everything in it, into the directory `into`, keeping its name. A move is a copy into
 ### `into` and then a delete of the original, and it is not atomic: if the copy fails nothing is deleted, and if the
@@ -417,8 +387,8 @@ failable common routine OsFileManager.move(at: File, into: Directory, replacing:
 ###     couldn't be deleted after the copy, {NotFoundError} when nothing is at `at` or `into` is missing, or the
 ###     crashable for another reason.
 @discardable
-@rf("OsFileManager.move")
-failable common routine OsFileManager.move(at: Directory, into: Directory, replacing: Bool = false) -> Directory
+@rf("FileManager.move")
+failable common routine FileManager.move(at: Directory, into: Directory, replacing: Bool = false) -> Directory
 
 ### Copies the file. An existing destination is an error unless `replacing` is true.
 ### :param from: The file to copy.
@@ -426,8 +396,8 @@ failable common routine OsFileManager.move(at: Directory, into: Directory, repla
 ### :param replacing: Whether an existing destination is replaced.
 ### :throws: {IOError} when the destination exists (and `replacing` is false), or the crashable for why the copy
 ###     failed.
-@rf("OsFileManager.copy")
-failable common routine OsFileManager.copy(from: File, to: File, replacing: Bool = false)
+@rf("FileManager.copy")
+failable common routine FileManager.copy(from: File, to: File, replacing: Bool = false)
 
 ### Copies the directory and everything in it. Symbolic links are not followed. An existing destination is an
 ### error unless `replacing` is true: then the tree is copied into it, replacing files of the same names.
@@ -436,30 +406,30 @@ failable common routine OsFileManager.copy(from: File, to: File, replacing: Bool
 ### :param replacing: Whether an existing destination is copied into.
 ### :throws: {IOError} when the destination exists (and `replacing` is false), or the crashable for why an entry
 ###     could not be copied.
-@rf("OsFileManager.copy")
-failable common routine OsFileManager.copy(from: Directory, to: Directory, replacing: Bool = false)
+@rf("FileManager.copy")
+failable common routine FileManager.copy(from: Directory, to: Directory, replacing: Bool = false)
 
 ### Sets the readonly attribute of the file (file system metadata).
 ### :param at: The file.
 ### :param readonly: `true` to make it readonly, `false` to clear it.
 ### :throws: {NotFoundError} when nothing is there, or the crashable for why the attribute cannot be set.
-@rf("OsFileManager.set_readonly")
-failable common routine OsFileManager.set_readonly(at: File, readonly: Bool = true)
+@rf("FileManager.set_readonly")
+failable common routine FileManager.set_readonly(at: File, readonly: Bool = true)
 
 ### Sets the readonly attribute of the directory (file system metadata).
 ### :param at: The directory.
 ### :param readonly: `true` to make it readonly, `false` to clear it.
 ### :throws: {NotFoundError} when nothing is there, or the crashable for why the attribute cannot be set.
-@rf("OsFileManager.set_readonly")
-failable common routine OsFileManager.set_readonly(at: Directory, readonly: Bool = true)
+@rf("FileManager.set_readonly")
+failable common routine FileManager.set_readonly(at: Directory, readonly: Bool = true)
 
 ### Sets an existing file's size to exactly `bytes` (extending with zero bytes or truncating). Size a file before
 ### opening it as storage to produce output through it.
 ### :param at: The file.
 ### :param bytes: The exact size in bytes.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why its size cannot be set.
-@rf("OsFileManager.set_size")
-failable common routine OsFileManager.set_size(at: File, bytes: U64)
+@rf("FileManager.set_size")
+failable common routine FileManager.set_size(at: File, bytes: U64)
 
 ### Reads a whole file as text (UTF-8, lossy). UNCOLORED, like `waitfor`: inside work an Agent runs as a fiber
 ### (`start_now()`/`start_here()`) the fiber PARKS while a worker thread does the blocking read (its siblings keep
@@ -467,58 +437,58 @@ failable common routine OsFileManager.set_size(at: File, bytes: U64)
 ### :param at: The file.
 ### :returns: Its contents as `Text`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be read.
-@rf("OsFileManager.read_text")
-failable common routine OsFileManager.read_text(at: File) -> Text
+@rf("FileManager.read_text")
+failable common routine FileManager.read_text(at: File) -> Text
 
 ### Reads a whole file. UNCOLORED, like `read_text`.
 ### :param at: The file.
 ### :returns: Its contents.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be read.
-@rf("OsFileManager.read_bytes")
-failable common routine OsFileManager.read_bytes(at: File) -> Bytes
+@rf("FileManager.read_bytes")
+failable common routine FileManager.read_bytes(at: File) -> Bytes
 
 ### Writes `content` to an existing file, replacing what it held. UNCOLORED, like `read_text`. The text is encoded as
 ### UTF-8.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :param content: The text to write.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be written.
-@rf("OsFileManager.write_text")
-failable common routine OsFileManager.write_text(at: File, content: Text)
+@rf("FileManager.write_text")
+failable common routine FileManager.write_text(at: File, content: Text)
 
 ### Writes `content` to an existing file, replacing what it held. UNCOLORED, like `read_text`.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :param content: The bytes to write.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be written.
-@rf("OsFileManager.write_bytes")
-failable common routine OsFileManager.write_bytes(at: File, content: Bytes)
+@rf("FileManager.write_bytes")
+failable common routine FileManager.write_bytes(at: File, content: Bytes)
 
 ### Adds `content` at the end of an existing file. The text is encoded as UTF-8.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :param content: The text to add.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be written.
-@rf("OsFileManager.append_text")
-failable common routine OsFileManager.append_text(at: File, content: Text)
+@rf("FileManager.append_text")
+failable common routine FileManager.append_text(at: File, content: Text)
 
 ### Opens the file for sequential reading, giving a {Source} consumed forward with `load`.
 ### :param at: The file.
 ### :returns: A {FileSource} over the file's content, to be bound by `using`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened for reading.
-@rf("OsFileManager.open_read")
-failable common routine OsFileManager.open_read(at: File) -> FileSource
+@rf("FileManager.open_read")
+failable common routine FileManager.open_read(at: File) -> FileSource
 
 ### Opens an existing file for sequential writing, EMPTYING it first, giving a {Sink} filled with `store`.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :returns: A {FileSink} over the file's content, to be bound by `using`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened for writing.
-@rf("OsFileManager.open_write")
-failable common routine OsFileManager.open_write(at: File) -> FileSink
+@rf("FileManager.open_write")
+failable common routine FileManager.open_write(at: File) -> FileSink
 
 ### Opens an existing file for sequential appending (writes land after its contents), giving a {Sink}.
 ### :param at: The file, which must exist (make it with `make_file`).
 ### :returns: A {FileSink} over the file's content, to be bound by `using`.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened for appending.
-@rf("OsFileManager.open_append")
-failable common routine OsFileManager.open_append(at: File) -> FileSink
+@rf("FileManager.open_append")
+failable common routine FileManager.open_append(at: File) -> FileSink
 
 ### Opens the whole file as a {FileStorage} of `T` cells (`Byte` or `Char`): for reading and writing when the file
 ### can be written, for reading only otherwise. An empty file gives a storage of no cells. Bytes past the last whole
@@ -526,8 +496,8 @@ failable common routine OsFileManager.open_append(at: File) -> FileSink
 ### :param at: The file.
 ### :returns: The storage.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened.
-@rf("OsFileManager.open_storage")
-failable common routine OsFileManager.open_storage[T](at: File) -> FileStorage[T]
+@rf("FileManager.open_storage")
+failable common routine FileManager.open_storage[T](at: File) -> FileStorage[T]
 needs T obeys StorageCell
 
 ### Opens a WINDOW of the file as a {FileStorage} of `T` cells: `count` cells starting at cell `start`, clamped to
@@ -539,8 +509,8 @@ needs T obeys StorageCell
 ### :param count: The number of cells (clamped to the file's end).
 ### :returns: The storage.
 ### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened.
-@rf("OsFileManager.open_storage_range")
-failable common routine OsFileManager.open_storage_range[T](at: File, start: U64, count: U64) -> FileStorage[T]
+@rf("FileManager.open_storage_range")
+failable common routine FileManager.open_storage_range[T](at: File, start: U64, count: U64) -> FileStorage[T]
 needs T obeys StorageCell
 
 ### The direct entries of the directory as bare names (`.` and `..` left out), in the platform's order. Use
@@ -548,8 +518,8 @@ needs T obeys StorageCell
 ### :param at: The directory.
 ### :returns: The entry names.
 ### :throws: {NotFoundError} when the directory doesn't exist, or the crashable for why it cannot be listed.
-@rf("OsFileManager.list")
-failable common routine OsFileManager.list(at: Directory) -> List[Text]
+@rf("FileManager.list")
+failable common routine FileManager.list(at: Directory) -> List[Text]
 
 ### The direct entries of the directory WITH their kind and modification time, in one directory read.
 ### Prefer this over `list` + `is_directory` + `metadata` when walking a tree: on Windows the kind and
@@ -558,8 +528,8 @@ failable common routine OsFileManager.list(at: Directory) -> List[Text]
 ### :param at: The directory.
 ### :returns: The entries.
 ### :throws: {NotFoundError} when the directory doesn't exist, or the crashable for why it cannot be listed.
-@rf("OsFileManager.entries")
-failable common routine OsFileManager.entries(at: Directory) -> List[DirEntry]
+@rf("FileManager.entries")
+failable common routine FileManager.entries(at: Directory) -> List[DirEntry]
 
 ### Every path under the directory, at any depth, a directory before its contents. Symbolic links are not
 ### followed.
@@ -567,8 +537,8 @@ failable common routine OsFileManager.entries(at: Directory) -> List[DirEntry]
 ### :returns: The full paths.
 ### :throws: {NotFoundError} when the directory doesn't exist, or the crashable for why a directory in the tree
 ###     cannot be listed.
-@rf("OsFileManager.walk")
-failable common routine OsFileManager.walk(at: Directory) -> List[Text]
+@rf("FileManager.walk")
+failable common routine FileManager.walk(at: Directory) -> List[Text]
 
 ### The number of `T` cells in the storage.
 ### :returns: The resulting `U64` value.
@@ -622,7 +592,7 @@ routine FileSource.load(max: U64) -> Bytes
 @rf("FileSource.close")
 routine FileSource.close()
 
-### Pass-through entry: the descriptor was already acquired by `OsFileManager.open_read`.
+### Pass-through entry: the descriptor was already acquired by `FileManager.open_read`.
 ### :returns: This `FileSource`.
 @rf("FileSource.enter")
 failable routine FileSource.enter() -> FileSource
@@ -651,7 +621,7 @@ routine FileSink.flush()
 @rf("FileSink.close")
 routine FileSink.close()
 
-### Pass-through entry: the descriptor was already acquired by `OsFileManager.open_write`/`open_append`.
+### Pass-through entry: the descriptor was already acquired by `FileManager.open_write`/`open_append`.
 ### :returns: This `FileSink`.
 @rf("FileSink.enter")
 failable routine FileSink.enter() -> FileSink
