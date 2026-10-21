@@ -1,0 +1,21 @@
+module Tests/StdlibSf/FloatTextEdgesApi
+
+import IO/Console
+# The text of the binary floats and decimals at their edges: halfway cases of fixed and significant-digit
+# rounding, specials, the smallest subnormals, texts read back at the ends of the ranges, and Decimal scale.
+routine start()
+    var a: B64 = 2.675
+    var b: B64 = 0.125
+    var tiny: B64 = -0.001
+    var top: B64 = inf
+    show(f"fixed: {a.fixed(places: 2)} {b.fixed(places: 2)} {tiny.fixed(places: 2)} {top.fixed(places: 1)}")
+    var c: B64 = 0.0995
+    var d: B64 = 123456.0
+    show(f"sig: {c.to_text(sig_digits: 2)} {d.to_text(sig_digits: 3)}")
+    show(f"subnormal: {B16.from_bits(bits: 1)} {B32.from_bits(bits: 1)} {B64.from_bits(bits: 1)} {B128.from_bits(bits: 1)}")
+    show(f"read: {"2.4703282292062328e-324".to[B64]().to_bits()} {"65520".to[B16]()} {"-INFINITY".to[B32]()} {"0.1".to[B128]()}")
+    var e: Decimal = 2.50
+    var f: Decimal = 1.230
+    show(f"decimal: {e} {f} {e.diagnose()} {f.fixed(places: 1)} {"2.25".to[Decimal]().fixed(places: 1)}")
+    var g: D64 = 1.230
+    show(f"ieee decimal: {g} {g.diagnose()} {g.fixed(places: 5)}")

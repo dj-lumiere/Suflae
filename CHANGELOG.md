@@ -192,6 +192,9 @@ file only once its other old spellings are gone.
 - A `Random` from `Random.from_entropy()` crashed when passed to a routine, and gave a false
   `ReshapingWhileInUseError` as an entity's member variable.
 - A syntax error inside a value `when` no longer reports the rest of the routine as top-level statements.
+- Converting the smallest `S128` or `S256` to `B128` crashed. `B128.rem` crashed on operands near the top of the
+  range.
+- `try` / `check` around `text.to[B16]()` or `text.to[B32]()` failed to build.
 
 ### Removed
 - `Result[T]`, `Lookup[T]`, `Crashable`, `absent`, `discard`, and the `try_` / `check_` / `lookup_` routines.

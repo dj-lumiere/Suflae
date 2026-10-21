@@ -252,13 +252,6 @@ routine B128.round() -> B128
 @rf("B128.rint")
 routine B128.rint() -> B128
 
-### Guarded round-to-integer core for round/rint over packed (finite) bits.
-### :param bits: The raw encoding (assumed finite).
-### :param half_even: Break ties to even when `true`, else away from zero.
-### :returns: The rounded encoding.
-@rf("b128_round_to_int")
-routine b128_round_to_int(bits: U128, half_even: Bool) -> U128
-
 ### The smaller of `me` and `you`. If one operand is NaN, the other one. -0 counts below +0.
 ### :param you: The value to compare against.
 ### :returns: The minimum.
@@ -316,96 +309,12 @@ common routine B128.signaling_nan() -> B128
 @rf("b128_order_key")
 routine b128_order_key(bits: U128) -> U128
 
-### Widens a `U128` into a `U256`.
-@rf("b128_u256")
-routine b128_u256(x: U128) -> U256
-
-### Narrows a `U256` to its low 128 bits.
-@rf("b128_u256_to128")
-routine b128_u256_to128(x: U256) -> U128
-
-### Logical left shift of a `U256` by a `U128` amount.
-@rf("b128_u256_shl")
-routine b128_u256_shl(v: U256, n: U128) -> U256
-
-### Logical right shift of a `U256` by a `U128` amount.
-@rf("b128_u256_shr")
-routine b128_u256_shr(v: U256, n: U128) -> U256
-
-### The wide bit mask `1 << n` as a `U256`.
-@rf("b128_u256_bit")
-routine b128_u256_bit(n: U128) -> U256
-
-### The wide low mask `(1 << n) - 1` as a `U256`.
-@rf("b128_u256_lowmask")
-routine b128_u256_lowmask(n: U128) -> U256
-
-### Shifts a 128-bit significand right by `amount`, folding all bits shifted out
-### into a sticky bit (bit 0). Used for exponent alignment and rounding.
-### :param value: The significand to shift.
-### :param amount: The right-shift distance.
-### :returns: The shifted significand with sticky bit folded in.
-@rf("b128_shr_sticky")
-routine b128_shr_sticky(value: U128, amount: U128) -> U128
-
-### Packs a sign / 113-bit significand (implicit at bit 112) / biased exponent into
-### a final binary128 encoding, applying overflow and the normal vs. subnormal rule.
-### :param sign: The sign bit (0 or 1).
-### :param biased: The biased exponent.
-### :param sig: The 113-bit significand (no guard bits).
-### :returns: The packed encoding.
-@rf("b128_pack")
-routine b128_pack(sign: U64, biased: U64, sig: U128) -> U128
-
-### Software binary128 addition over raw encodings.
-@rf("b128_add_bits")
-routine b128_add_bits(a: U128, b: U128) -> U128
-
-### Software binary128 multiplication over raw encodings (U256 product).
-@rf("b128_mul_bits")
-routine b128_mul_bits(a: U128, b: U128) -> U128
-
-### Software binary128 division over raw encodings (U256 numerator).
-@rf("b128_div_bits")
-routine b128_div_bits(a: U128, b: U128) -> U128
-
-### A subnormal (or zero, or the smallest normal) result v 2^-sh of the minimum exponent's unit, rounded once to
-### nearest even: `sticky` says the true value lies above v by less than one of v's units.
-@rf("b128_round_subnormal")
-routine b128_round_subnormal(sign: U64, v: U256, sh: S64, sticky: Bool) -> U128
-
-### Denormalizes a normalized significand into the subnormal range by shifting right
-### `under` places with round-to-nearest-even, then packs the result.
-### :param sign: The sign bit.
-### :param sig: The 113-bit significand to denormalize.
-### :param under: The number of right shifts needed (>= 1).
-### :returns: The packed subnormal (or zero) encoding.
-@rf("b128_finish_subnormal")
-routine b128_finish_subnormal(sign: U64, sig: U128, under: S64) -> U128
-
 ### Returns the square root. Checked: crashes (domain error) if `me` is negative (`sqrt(<0)` ->
 ### NaN).
 ### Use `sqrt_unchecked` for raw IEEE 754 propagation.
 ### :returns: The quadruple-precision square root (always finite for finite non-negative input).
 @rf("B128.sqrt")
 failable routine B128.sqrt() -> B128
-
-### Normalizes a positive integer significand `sig * 2^exp_lsb` into packed bits.
-### Exact: assumes the value is representable (true for fmod/remainder results).
-### :param sign: The sign bit (0 or 1).
-### :param sig: The nonzero integer significand (<= 127 bits).
-### :param exp_lsb: The binary exponent of `sig`'s least-significant bit.
-### :returns: The packed `B128` encoding.
-@rf("b128_norm_pack")
-routine b128_norm_pack(sign: U64, sig: U128, exp_lsb: S64) -> U128
-
-### Long-division core: for nonzero finite magnitudes, returns the truncated
-### remainder `|a| mod |b|` (as packed bits) and the parity of `floor(|a|/|b|)`.
-### :param abits: Magnitude bits of the dividend.
-### :param bbits: Magnitude bits of the divisor.
-### :returns: A pair `(remainder-bits, quotient-is-odd)`.
-@rf("b128_fmod_core")
-routine b128_fmod_core(abits: U128, bbits: U128) -> (U128, Bool)
 
 ### Returns `me mod you` truncated toward zero (C `mod_trunc`): result has the sign of
 ### `me` and magnitude strictly less than `|you|`.
@@ -534,14 +443,6 @@ routine B128.low_bits() -> U64
 ### :returns: The most-significant half of the bit pattern.
 @rf("B128.high_bits")
 routine B128.high_bits() -> U64
-
-### Shifts `sig` right by `amount` bits, rounding to nearest with ties to even.
-### Used by the `B128 -> B64` narrowing to discard the low significand bits.
-### :param sig: The significand to round (up to 113 significant bits).
-### :param amount: The count of low bits to discard.
-### :returns: The rounded, right-shifted magnitude.
-@rf("b128_rshift_rne")
-routine b128_rshift_rne(sig: U128, amount: U64) -> U64
 
 ### Returns a stable hash derived from the raw floating-point encoding.
 ### NaN payloads and negative zero are normalized so equal numeric values hash
@@ -703,7 +604,7 @@ routine B128.to_unchecked[B64]() -> B64
 ### Parses decimal text into the correctly-rounded `B128` (round-to-nearest-even). Accepts standard
 ### decimal notation and the special values `nan`, `inf`, and `infinity` (case-insensitive, with
 ### optional leading sign). The value is built as an exact rational and rounded once, straight to
-### binary128 (`b128_from_ratio`, the same path B16/B32/B64 use).
+### binary128 (the same reader B16/B32/B64 use).
 ### :returns: The correctly-rounded `B128` value.
 ### :throws: {InvalidValueError} on malformed input.
 @rf("Text.to")

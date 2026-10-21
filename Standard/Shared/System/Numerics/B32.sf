@@ -358,12 +358,7 @@ failable routine B32.mul_add(b: B32, c: B32) -> B32
 @rf("B32.mul_add_unchecked")
 routine B32.mul_add_unchecked(b: B32, c: B32) -> B32
 
-### Floating-point remainder of me/you (C fmod), exact. Taken in B64 without a division instruction's remainder:
-### |me| is reduced by |you| 2^k (k keeping the quotient below 2^29) with q = trunc(|me| / (|you| 2^k)), whose
-### product with the divisor has at most 53 bits and so is exact, as is the difference (a multiple of the
-### divisor's B32 grid below twice it); q off by one from the division's rounding is corrected, and each round
-### takes up to 28 bits of exponent difference. (LLVM narrows a widened frem back to the C runtime's fmodf,
-### several times slower than this.) Special cases take the frem.
+### Floating-point remainder of me/you (C fmod), exact.
 @rf("B32.mod_trunc")
 routine B32.mod_trunc(you: B32) -> B32
 
