@@ -4,39 +4,22 @@ module IO/File
 # checks that the two still match.
 
 ### A `File` names persistent byte content in the filesystem — the data-at-rest itself, NOT an open
-### handle. It is a cheap value (just the path), constructing one opens nothing. {FileManager} opens one of
-### three sessions over its content:
-###   * `FileManager.open_storage[T](at:)` — a random-access {FileStorage} of fixed-size cells, no cursor,
+### handle. It is a cheap value (just the path), constructing one opens nothing. {FileManager} reads or writes
+### its content whole, or opens one of two sessions over it:
 ###   * `FileManager.open_read(at:)` — a sequential {Source} (consume forward with `pull`),
 ###   * `FileManager.open_write(at:)` / `open_append(at:)` — a sequential {Sink} (emit forward with `push`).
 ### The content outlives every session (closing a session leaves the file intact — criterion: a file
 ### persists beyond the program). Things that are NOT files — a socket, pipe, or console — have no such
 ### content layer: they are born as {Source}/{Sink} with nothing addressable underneath, so they can
-### never be opened as storage.
+### never be opened as one.
 @rf("File")
 record File
     ### The path naming this file's content.
     at: Text
 
-### A file seen as fixed-size cells of `T`, read and written in place by index, with no cursor: what the OS's file
-### mapping gives (CreateFileMapping / MapViewOfFile, mmap). `FileStorage[Byte]` is one byte per cell.
-### `FileStorage[Char]` is one Unicode scalar per cell, four bytes each, UTF-32LE on disk (a UTF-8 text file is not
-### one: read it as `Text`, or as `FileStorage[Byte]`). Zero-copy: the cells are not read into memory up front but
-### brought in on access.
-###
-### A cell is read with `storage[i]` and written with `storage[i] = value`. A storage is opened for writing when the file can be written, otherwise for
-### reading only, and writing a cell of one opened for reading only fails with {NotEnoughPermissionError}. A
-### storage cannot grow its file: size the file first with `FileManager.set_size`. Writes land in the file,
-### flushed lazily by the OS, on `flush()`, and when the storage ends.
-@rf("FileStorage")
-entity FileStorage[T]
-needs T obeys StorageCell
-    nothing
-
 ### A sequential read session over a {File}'s content. It holds one OS descriptor with a `close`
 ### teardown, so it is an `entity` (never copied, so the descriptor is never closed twice). Consume
-### it forward with `pull`, there is no length, index, or seek — the file's spatial extent lives on
-### {FileStorage}, not here.
+### it forward with `pull`, there is no length, index, or seek.
 @rf("FileSource")
 entity FileSource
 obeys Source, Enterable
@@ -490,29 +473,6 @@ failable common routine FileManager.open_write(at: File) -> FileSink
 @rf("FileManager.open_append")
 failable common routine FileManager.open_append(at: File) -> FileSink
 
-### Opens the whole file as a {FileStorage} of `T` cells (`Byte` or `Char`): for reading and writing when the file
-### can be written, for reading only otherwise. An empty file gives a storage of no cells. Bytes past the last whole
-### cell are not part of it.
-### :param at: The file.
-### :returns: The storage.
-### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened.
-@rf("FileManager.open_storage")
-failable common routine FileManager.open_storage[T](at: File) -> FileStorage[T]
-needs T obeys StorageCell
-
-### Opens a WINDOW of the file as a {FileStorage} of `T` cells: `count` cells starting at cell `start`, clamped to
-### the file's end, for reading and writing when the file can be written. This is the way through a file larger
-### than the address space. The window's own `count()` may be smaller than `count` when it reaches the end, and a
-### `start` at or past the end gives a storage of no cells.
-### :param at: The file.
-### :param start: The first cell.
-### :param count: The number of cells (clamped to the file's end).
-### :returns: The storage.
-### :throws: {NotFoundError} when the file doesn't exist, or the crashable for why it can't be opened.
-@rf("FileManager.open_storage_range")
-failable common routine FileManager.open_storage_range[T](at: File, start: U64, count: U64) -> FileStorage[T]
-needs T obeys StorageCell
-
 ### The direct entries of the directory as bare names (`.` and `..` left out), in the platform's order. Use
 ### `Directory.file(name:)` / `go_to(name:)` to turn one into a path.
 ### :param at: The directory.
@@ -539,46 +499,6 @@ failable common routine FileManager.entries(at: Directory) -> List[DirEntry]
 ###     cannot be listed.
 @rf("FileManager.walk")
 failable common routine FileManager.walk(at: Directory) -> List[Text]
-
-### The number of `T` cells in the storage.
-### :returns: The resulting `U64` value.
-@rf("FileStorage.count")
-routine FileStorage[T].count() -> U64
-
-### Whether the storage was opened for writing (the file could be written).
-### :returns: The resulting `Bool` value.
-@rf("FileStorage.is_writable")
-routine FileStorage[T].is_writable() -> Bool
-
-### The `T` in cell `index`.
-### :param index: The zero-based cell.
-### :returns: The value in that cell.
-### :throws: {IndexOutOfBoundsError} if `index >= count()`, {InvalidValueError} when the cell doesn't hold a valid
-###     `T` (a `Char` cell that isn't a Unicode scalar).
-@rf("FileStorage.getitem")
-failable routine FileStorage[T].getitem(index: U64) -> T
-
-### Writes `value` into cell `index`. The write lands in the file (flushed lazily, on `flush()`, or when the storage
-### ends). A storage cannot grow its file: writing past the end is an error.
-### :param index: The zero-based cell.
-### :param value: The value to store there.
-### :throws: {IndexOutOfBoundsError} if `index >= count()`, {NotEnoughPermissionError} when the storage was opened
-###     for reading only, {InvalidValueError} when `value` isn't a valid `T` for a cell.
-@rf("FileStorage.setitem")
-failable routine FileStorage[T].setitem(index: U64, value: T)
-
-### Forces pending writes back to the file now (a durability checkpoint). Writes are otherwise flushed lazily by
-### the OS, and always when the storage ends.
-@rf("FileStorage.flush")
-routine FileStorage[T].flush()
-
-### Flushes pending writes and lets the file go. Runs once: the storage's end calls it, and later calls do nothing.
-@rf("FileStorage.close")
-routine FileStorage[T].close()
-
-### Lets the file go when the storage ends.
-@rf("FileStorage.destruct")
-routine FileStorage[T].destruct()
 
 ### Pulls up to `max` bytes from the current position. Returns fewer when end-of-file is reached first,
 ### an empty `Bytes` signals EOF.

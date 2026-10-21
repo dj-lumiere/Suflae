@@ -6,8 +6,7 @@ already exists
 not found
 renamed.txt
 inner true false
-5
-Hello
+hello
 PATH set: true
 PATH in the snapshot: true
 0

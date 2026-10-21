@@ -758,7 +758,7 @@ internal sealed class EntityLoweringPass
     }
 
     // `x is None` / `x isnot None` on a nullable entity reference (`E?` = Roamed[E]): rewrite to
-    // `x.is_none()` (negated -> `not x.is_none()`). Done before reachability so the Roamed[E].is_none()
+    // `x.is_hollow()` (negated -> `not x.is_hollow()`). Done before reachability so the Roamed[E].is_hollow()
     // instance gets seeded/instantiated for the concrete entity; codegen has no direct IsPattern
     // lowering for a Roamed handle. The frontend already narrowed the flow.
     private Expression LowerNoneIsPattern(IsPatternExpression ipe)
@@ -775,7 +775,7 @@ internal sealed class EntityLoweringPass
         TypeSymbol? boolType = _registry.LookupType(name: "Bool");
         var isNoneCall = new CallExpression(
             Callee: new MemberExpression(Object: inner,
-                MemberName: "is_none",
+                MemberName: RuntimeContract.RoamedMemberRoutine.IsHollow,
                 Location: ipe.Location) { ResolvedType = boolType },
             Arguments: new List<Expression>(),
             Location: ipe.Location) { ResolvedType = boolType };

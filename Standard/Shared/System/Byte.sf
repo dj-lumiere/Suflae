@@ -8,13 +8,49 @@ module System
 ### always uses an escaped hexadecimal representation.
 @rf("Byte")
 record Byte
-obeys Copyable
+obeys Copyable, Bitwiseable, Invertible
     nothing
 
-### Reads an unsigned 8-bit integer as a `Byte` with the same bits: `0x41u8.to[Byte]()`.
+### Makes the byte whose value is `from`: `Byte(0x41)`. Every `U8` is a byte, so this never fails.
+### :param from: The value.
 ### :returns: The byte.
-@rf("U8.to")
-routine U8.to[Byte]() -> Byte
+@rf("Byte")
+routine Byte(from: U8) -> Byte
+
+### Returns the bitwise AND of this byte and `you`.
+### :param you: The other byte.
+### :returns: `me & you`.
+@rf("Byte.bitand")
+routine Byte.bitand(you: Byte) -> Byte
+
+### Returns the bitwise OR of this byte and `you`.
+### :param you: The other byte.
+### :returns: `me | you`.
+@rf("Byte.bitor")
+routine Byte.bitor(you: Byte) -> Byte
+
+### Returns the bitwise XOR of this byte and `you`.
+### :param you: The other byte.
+### :returns: `me ^ you`.
+@rf("Byte.bitxor")
+routine Byte.bitxor(you: Byte) -> Byte
+
+### Returns this byte with every bit flipped.
+### :returns: `~me`.
+@rf("Byte.bitnot")
+routine Byte.bitnot() -> Byte
+
+### Left-shifts this byte by `bits` positions, filling vacated bits with zero. Shifting by 8 or more gives 0.
+### :param bits: The number of bit positions to shift left.
+### :returns: `me << bits`.
+@rf("Byte.shift_left")
+routine Byte.shift_left(bits: U32) -> Byte
+
+### Right-shifts this byte by `bits` positions, filling vacated bits with zero. Shifting by 8 or more gives 0.
+### :param bits: The number of bit positions to shift right.
+### :returns: `me >>> bits`.
+@rf("Byte.logical_shift_right")
+routine Byte.logical_shift_right(bits: U32) -> Byte
 
 ### Returns whether both values are equal.
 ### :param you: The other value to compare against.
@@ -72,23 +108,3 @@ routine Byte.diagnose() -> Text
 ### :returns: The resulting `U64` value.
 @rf("Byte.hash")
 routine Byte.hash(k0: U64, k1: U64) -> U64
-
-### Reads this byte's bits as a `U8`: `b.to[U8]()`.
-### :returns: The same bits as a `U8`.
-@rf("Byte.to")
-routine Byte.to[U8]() -> U8
-
-### Widens this byte to a `U32`: `b.to[U32]()`.
-### :returns: The byte's value as a `U32`.
-@rf("Byte.to")
-routine Byte.to[U32]() -> U32
-
-### Widens this byte to a `U16`: `b.to[U16]()`.
-### :returns: The byte's value as a `U16`.
-@rf("Byte.to")
-routine Byte.to[U16]() -> U16
-
-### Widens this byte to a `U64`: `b.to[U64]()`.
-### :returns: The byte's value as a `U64`.
-@rf("Byte.to")
-routine Byte.to[U64]() -> U64

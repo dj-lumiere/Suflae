@@ -11,16 +11,6 @@ record Char
 obeys Comparable, Copyable
     nothing
 
-### Reads a byte value (0 to 255) as the character with that codepoint: `65u8.to[Char]()` is `'A'`.
-### :returns: The character.
-@rf("U8.to")
-routine U8.to[Char]() -> Char
-
-### Reads a Unicode code point as the character with that codepoint: `0x41u32.to[Char]()` is `'A'`.
-### :returns: The character.
-@rf("U32.to")
-routine U32.to[Char]() -> Char
-
 ### Makes one-character text: `'x'.to[Text]()`.
 ### :returns: The resulting `Text` value.
 @rf("Char.to")
@@ -98,12 +88,11 @@ routine Char.eq(you: Char) -> Bool
 @rf("Char.compare")
 routine Char.compare(you: Char) -> ComparisonSign
 
-### Converts this value to byte.
-### This is only meaningful for characters in the ASCII range and currently
-### truncates to the low 7 bits.
-### :returns: The resulting `Byte` value.
+### The byte an ASCII character is in UTF-8: `'A'.to_byte()` is `b'A'`.
+### :returns: The byte.
+### :throws: Throws {InvalidValueError} when this character is not ASCII: its UTF-8 form is more than one byte.
 @rf("Char.to_byte")
-routine Char.to_byte() -> Byte
+failable routine Char.to_byte() -> Byte
 
 ### Returns the display form of this character.
 ### The display form emits the character itself rather than its numeric code.
@@ -155,13 +144,3 @@ routine Char.is_latin() -> Bool
 ### :returns: The resulting `Bool` value.
 @rf("Char.is_emoji")
 routine Char.is_emoji() -> Bool
-
-### Reads this character's codepoint as a `U32`: `c.to[U32]()`.
-### :returns: The codepoint.
-@rf("Char.to")
-routine Char.to[U32]() -> U32
-
-### Widens this character's codepoint to a `U64`: `c.to[U64]()`.
-### :returns: The codepoint as a `U64`.
-@rf("Char.to")
-routine Char.to[U64]() -> U64

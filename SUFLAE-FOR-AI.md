@@ -247,9 +247,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 ```suflae
 var small = count.to[U8]()        # Integer to U8 (a bare literal is an Integer: 200.to[U8]())
 var n = "42".to[S64]()             # text parsing (also Integer, Decimal, B64, ...)
-var code = 'A'.to[U32]()           # a Char's codepoint (b.to[U8]() for a Byte)
-var letter = code.to[Char]()       # 'A' when code is a U32 of 65, and 'x'.to[Text]() makes one-character text
-var byte = bits.to[Byte]()         # the same bits as a Byte, from a U8
+var one = 'x'.to[Text]()           # one-character text
 var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
 var wide: U64 = count.to()         # T left out: the declared type gives it
 var fits: U8? = try count.to()     # none when it does not fit
@@ -257,6 +255,15 @@ var low = count.to_wrap[U8]()      # the low 8 bits (300 -> 44), never fails
 var near = count.to_clamp[U8]()    # the nearest U8 (300 -> 255), never fails
 var why: Check[S64] = check line.to()
 ```
+
+**A byte's and a character's numbers are named routines, not conversions.** `b.value()` is a `Byte`'s value and
+`c.codepoint()` a `Char`'s code point, both `Integer`. `Byte(v)` makes a byte from a `U8` (`Byte(65)`, `Byte(n.to[U8]())`),
+`Char.from_codepoint(n:)` a character (failable: a surrogate 0xD800..0xDFFF, below 0 or above 0x10FFFF fails).
+`c.to_byte()` is an ASCII character's byte (failable). `c.digit_value()` (`base: 10` default, `base: 16` also takes
+`a-f`/`A-F`) is failable, ASCII only. `b.to[U8]()`, `c.to[U32]()`, `v.to[Byte]()`, `n.to[Char]()` are build errors
+(SF-S646) naming these. A `Byte` is eight bits with no arithmetic: `&`, `|`, `^`, `~` (result `Byte`), `<<` and `>>>`.
+`>>` on a `Byte` is a build error pointing to `>>>`. A bare number where a `Byte` goes is a `Byte` (`b & 0x7F`),
+outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to `Byte(v)` and lists `n.to[Char]()`.
 
 - `Integer` converts to every fixed-width integer (`S8..S256`, `U8..U256`), to `Decimal`, and to
   `B32`/`B64` (the nearest value, as does `Decimal`). Widening
@@ -1028,9 +1035,8 @@ routine start()
   `IO/FileSystem`. Failures are recovered with `try`/`check`: `NotFoundError`, `NotEnoughPermissionError`,
   `NotEnoughSpaceError`, `StorageFaultError` (the device failed to read or write), and `IOError` for the rest, each
   its own error (`is IOError` doesn't take the other four, `is Crashables` takes all).
-- A file as cells: `var s = FileManager.open_storage[Byte](at: f)` (or `[Char]`, one Unicode scalar per 4-byte
-  cell, UTF-32LE, a UTF-8 file is not one) gives a `FileStorage[T]`: `s[i]`, `s[i] = v`, `s.count()`, `s.flush()`,
-  `s.close()`, `open_storage_range[T](at:, start:, count:)` for a window. It can't grow the file (`set_size` first).
+- Files are read and written whole or through sessions. There is no mapped storage in Suflae
+  (`FileManager.open_storage` is gone): read the bytes with `read_bytes`, or a session in chunks.
 - The environment (`Environment`, always available): `arguments()` (a list, the program's own name left out),
   `variable(name:)` (`try` gives a `Maybe`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
   `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a

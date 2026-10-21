@@ -28,10 +28,6 @@ routine start()
     var inner = FileManager.make_directory(at: root.go_to(name: "inner"))
     var moved = FileManager.move(at: renamed, into: inner)
     show(f"{moved.parent().name()} {FileManager.exists(at: moved)} {FileManager.exists(at: renamed)}")
-    var storage = FileManager.open_storage[Byte](at: moved)
-    storage[0] = b'H'
-    show(storage.count())
-    storage.close()
     show(FileManager.read_text(at: moved))
     show(f"PATH set: {(try Environment.variable(name: "PATH")).is_present()}")
     # The snapshot keeps each name as the system spells it, and Windows spells this one Path.

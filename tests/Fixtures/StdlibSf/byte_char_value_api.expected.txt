@@ -1,0 +1,19 @@
+value: 195
+wide: 1195
+and: 3
+or: 207
+xor: 60
+not: 60
+shl: 134
+shr: 12
+top bit: true
+codepoint: 65
+from_codepoint: 한
+surrogate: none
+negative: none
+digit: 7
+hex: 15 11
+not a digit: none
+to_byte: 65
+non-ascii to_byte: none
+DONE
