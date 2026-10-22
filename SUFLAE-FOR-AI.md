@@ -129,9 +129,10 @@ routine start()
 **Modules.** `module <Path>` is optional: without it the module path comes from the file's location
 relative to `config.toml` (each folder and the file name PascalCased, joined with `/`:
 `tools/text utils.sf` → `Tools/TextUtils`). Declare `module` only to override that. Files in one folder that
-declare the same `module` are one module and build together. A file there with its own entry (`routine start()`
-or top-level statements) is another program and is not built with yours, so a draft that does not build yet can
-sit next to the program. Only files that are part of the build report their errors. A failed `build` keeps the
+declare the same `module` are one module and build together. A file there with its own `routine start()` is another
+program and is not built with yours, so a draft that does not build yet can sit next to the program. A file there
+with top-level statements and no `routine start()` is built and is SF-S443, since only the entry file may be a
+script. Only files that are part of the build report their errors. A failed `build` keeps the
 last executable that built.
 
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,

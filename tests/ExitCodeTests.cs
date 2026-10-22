@@ -88,6 +88,21 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "Range step zero error", actualString: stdout + stderr);
     }
 
+    /// <summary>Calls deeper than the memory for them holds crash with the out of memory report and status 82, never
+    /// a segmentation fault.</summary>
+    [Fact]
+    public void DeepCalls_CrashLoudly()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "deep_calls.sf");
+
+        Assert.True(condition: exit == 82,
+            userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Contains(expectedSubstring: "shallow 100", actualString: stdout);
+        Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+        Assert.Contains(expectedSubstring: "Out of memory error", actualString: stdout + stderr);
+        Assert.DoesNotContain(expectedSubstring: "SegmentationFault", actualString: stdout + stderr);
+    }
+
     /// <summary>Two jobs that use two shared entities in opposite orders wait on each other: a debug build's
     /// deadlock check stops the program with status 82 and says which job waits for which, instead of hanging. The
     /// report speaks of jobs and entities, never of the runtime's access manager.</summary>

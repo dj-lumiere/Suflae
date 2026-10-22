@@ -1,0 +1,14 @@
+module Tests/ExitCode/DeepCalls
+
+# Calls that go deeper than the memory for them holds crash with an out of memory report (status 82), never a
+# segmentation fault.
+
+routine depth(n: Integer) -> Integer
+    if n == 0
+        return 0
+    return depth(n: n - 1) + 1
+
+routine start()
+    show(f"shallow {depth(n: 100)}")
+    show(f"{depth(n: 100000000)}")
+    show("not reached")

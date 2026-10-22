@@ -1,0 +1,36 @@
+module Tests/StdlibSf/IsnotAndLoopEndApi
+
+# `x isnot None and c` reads as `(x isnot None) and c`, and a routine that returns nothing may end in a `loop`
+# whose only way out is `return`.
+
+entity Reader
+    position: Integer
+
+failable routine Reader.reference() -> Integer
+    if me.position < 0
+        throw AbsentValueError()
+    return me.position
+
+routine Reader.range_follows(c: Char) -> Bool
+    var first = try me.reference()
+    if first isnot None and c == ':'
+        return true
+    if first is None or c == '!'
+        return false
+    return false
+
+routine Reader.skip(text: Text)
+    loop
+        if me.position >= text.count()
+            return
+        me.position += 1
+
+routine start()
+    var reader = Reader(position: 0)
+    reader.skip(text: "abc")
+    show(reader.position)
+    show(reader.range_follows(c: ':'))
+    show(reader.range_follows(c: ';'))
+    reader.position = -1
+    show(reader.range_follows(c: ':'))
+    show("DONE")
