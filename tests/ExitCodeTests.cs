@@ -100,7 +100,7 @@ public sealed class ExitCodeTests
             userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
         Assert.Contains(expectedSubstring: "starting", actualString: stdout);
         Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
-        Assert.Contains(expectedSubstring: "These agents wait on each other for the entities they share",
+        Assert.Contains(expectedSubstring: "These pieces of work wait on each other for the entities they share",
             actualString: stdout + stderr);
         Assert.DoesNotContain(expectedSubstring: "AccessManager", actualString: stdout + stderr);
     }
