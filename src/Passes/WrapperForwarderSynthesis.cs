@@ -40,7 +40,7 @@ internal static class WrapperForwarderSynthesis
     /// <summary>
     /// Whether <paramref name="receiver"/> is the PLAIN generic form <c>X[T, ..]</c> whose type-args are
     /// exactly the owner's bare generic parameters — i.e. the receiver the wrapper's <c>inner</c> field
-    /// matches. A specialized receiver (<c>List[Agent[V]]</c>, <c>List[U16]</c>) or a bare (non-generic)
+    /// matches. A specialized receiver (<c>List[Work[V]]</c>, <c>List[U16]</c>) or a bare (non-generic)
     /// receiver on a generic owner returns false, so its method is not blindly forwarded.
     /// </summary>
     private static bool IsPlainGenericReceiver(TypeExpression? receiver, List<string> ownerParams)
@@ -332,7 +332,7 @@ internal static class WrapperForwarderSynthesis
         }
 
         // Only the PLAIN generic form `X[T,..].m` forwards cleanly (me.inner is `RF::System.Y[T,..]`).
-        // A SPECIALIZED-receiver method (`List[Agent[V]].gather`, `List[U16]…`) targets a different
+        // A SPECIALIZED-receiver method (`List[Work[V]].gather`, `List[U16]…`) targets a different
         // instantiation than the wrapper's inner field — skip (its `me.inner` would mistype).
         if (!IsPlainGenericReceiver(receiver: inner.ReceiverType, ownerParams: ownerParams))
         {

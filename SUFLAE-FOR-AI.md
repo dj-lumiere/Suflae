@@ -30,7 +30,7 @@ object: it has identity, compared with `===`.
 
 The second axis is **machine visibility**. Suflae hides the machine. Numbers are `Integer`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
-memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Agent](args)`
+memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Work](args)`
 whose work the runtime schedules, and shared entities are locked for you. A Suflae program has no
 machine-level code at all: no `danger` blocks, no `dangerous` routines, no foreign `C::` routines. C is reached
 through a `.rf` module the program imports (section 18).
@@ -92,7 +92,7 @@ through a `.rf` module the program imports (section 18).
     `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** A line with no work is `nothing`. The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `to[Agent]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
+    `preset`, `each`, `when`, `to[Work]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -139,7 +139,7 @@ last executable that built.
 (`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
-`System/Concurrency`: `Agent`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
+`System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
 `PriorityQueue`, …), `IterTools` (iterator adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
 (`x.type_name()`), `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
@@ -163,13 +163,13 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   `flags` cases and `preset` constants `SCREAMING_SNAKE_CASE`.
 - No kind or scope prefixes on names (`m_pos`, `_count`, `p_node`, `bDone`, `IComparable`): `lint` hints them.
 - Generic parameters: a type parameter is `T` alone only when it is the only one and its role is obvious
-  (`List[T]`, `Set[T]`, `Agent[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
+  (`List[T]`, `Set[T]`, `Work[T]`). Otherwise every type parameter is `T` + a PascalCase role (`Dict[TKey, TValue]`,
   `select[TResult]`, `zip[TFirst, TSecond, ...]`), never another single letter (`K`, `V`, `U`, ...). A const generic
   is `SCREAMING_SNAKE_CASE` with a meaning (`needs U64 CAPACITY`, `COUNT`, `BITS`), never `N`. The `T` prefix shows
   at a use site (`var k: TKey`, a hover `get(key: TKey) -> TValue?`) that a name is a type parameter and not a real
   type, and SCREAMING marks a buildtime constant like a `preset`, so case alone tells type, type parameter, buildtime
   constant and runtime value apart. A receiver pattern's own parameter shadows the owner's parameter of the same name
-  (`routine List[Agent[T]].gather() -> List[T]`: that `T` is the pattern's).
+  (`routine List[Work[T]].gather() -> List[T]`: that `T` is the pattern's).
 - Builder-written per-type routines (the constructor, `represent`, `diagnose`, `eq`, `compare`, `hash`, …) are
   **wired routines**. They carry no sigil; you may write your own to replace one.
 - Say "build error" and "builder", not "compile error" and "compiler".
@@ -229,10 +229,10 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   `CpuEventManager.when_interrupted` works.
 - A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
-  `enter`/`exit` on that entity. Agents giving no value can be gathered.
+  `enter`/`exit` on that entity. Works giving no value can be gathered.
 - `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or SF-S202 (a `return`
   path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
-  one-item tuple as `(1,)`. `try sv.to[List[Integer]]()` recovers a bad element too. A cancelled agent nothing
+  one-item tuple as `(1,)`. `try sv.to[List[Integer]]()` recovers a bad element too. A cancelled job nothing
   started is done (`is_done()` is true).
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
@@ -354,7 +354,7 @@ routine start()
   initializer reads another global must be a number, `Text` or `Bool` (SF-S437). A read hidden behind a
   member-routine call (`global a: Integer = x.foo()`) is not followed by this ordering.
 - A program with globals needs an entry point (an explicit `start()` or a script) (SF-S438).
-- **Every global is safe to use from concurrent agents.** A single-statement read-modify-write
+- **Every global is safe to use from concurrent jobs.** A single-statement read-modify-write
   (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
   overflow** instead of crashing. Every other type (`Integer`, `Decimal`, `Text`, records, wider numbers)
@@ -569,7 +569,7 @@ routine Account.deposit(amount: Integer)                       # member routine,
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
   always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
   `nums.select(transform: double)`.
-- Any routine can run concurrently: `f.to[Agent](...)` defers a call into an `Agent[T]` (§16).
+- Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
   `@test`/`@case`/`@skip`/`@time_limit`, …). Any other name is SF-G221, and a misspelling names the close one. There
   is no `@deprecated`, no `@initonly` and no `@bench` yet.
@@ -789,7 +789,7 @@ category: only a crashable can be thrown.
 - Standard errors include `AbsentValueError`, `DivisionByZeroError`, `IndexOutOfBoundsError`,
   `KeyNotFoundError`, `EmptyCollectionError`, `IntegerOverflowError`, `NumericOverflowError`,
   `NumericDomainError`, `InvalidValueError`, `IOError`, `NotFoundError`, `NotEnoughPermissionError`,
-  `NotEnoughSpaceError`, `StorageFaultError`, `TaskTimeoutError`, `AgentStartError`,
+  `NotEnoughSpaceError`, `StorageFaultError`, `TaskTimeoutError`, `WorkStartError`,
   `CancelRequested`, `ChannelClosedError`, `ReshapingWhileInUseError`. `stop()` and `breach()` crash on purpose (`UserTerminationError`,
   `LogicBreachedError`).
 
@@ -1011,7 +1011,7 @@ routine start()
   a change through an element (`rows[0].add_last(...)` while a loop walks `rows[0]`).
 - Changing the list after the loop, after `break`, or after a `return` out of the loop is fine. Changing an
   element's contents (`boxes[0].n = 5`) is not an add or remove and is always fine.
-- The check assumes a single job; two agents changing and looping over the same list concurrently are
+- The check assumes a single job; two jobs changing and looping over the same list concurrently are
   not protected.
 
 ## 15. Console, files and resources
@@ -1048,7 +1048,7 @@ routine start()
   `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
   `Directory` and build paths from it. `Entropy.next_u64()` gives random bits from the operating system,
   `Random.from_entropy()` a generator seeded with them.
-- `FileManager.read_text` / `write_text` are safe inside an agent's work: it waits while other jobs run.
+- `FileManager.read_text` / `write_text` are safe inside a job's work: it waits while other jobs run.
 - `migrate --step files` rewrites `OsFileManager` / `OsEnvironment` / `OsEntropy` → `FileManager` /
   `Environment` / `Entropy`, the directory routines → `Environment`,
   `subdir` → `go_to`, `move(from:, to:)` → `rename` or `move(at:, into:)` when the paths show which, and lists the
@@ -1069,8 +1069,8 @@ using FileManager.open_write(at: out) as sink
 
 ## 16. Concurrency
 
-Any routine can run concurrently. **`f.to[Agent](args)`** computes the arguments now (and a receiver that is a
-value, as in `p.total.to[Agent]()`), defers the call into an `Agent[T]`, and starts
+Any routine can run concurrently. **`f.to[Work](args)`** computes the arguments now (and a receiver that is a
+value, as in `p.total.to[Work]()`), defers the call into a `Work[T]`, and starts
 nothing. **Nothing runs until a verb starts it.** Where the work runs is the runtime's business.
 
 ```suflae
@@ -1079,67 +1079,70 @@ routine fetch(id: Integer) -> Integer
     return id * 10
 
 routine start()
-    var a = fetch.to[Agent](id: 1)           # Agent[Integer], not started
+    var a = fetch.to[Work](id: 1)           # Work[Integer], not started
     a.start_now()                        # starts it now
     show(f"one => {a.retrieve()}")       # wait for the value
 
-    var jobs = [fetch.to[Agent](id: 2), fetch.to[Agent](id: 3)]
+    var jobs = [fetch.to[Work](id: 2), fetch.to[Work](id: 3)]
     var results = jobs.gather()          # start both, wait for all
     show(f"{results[0]} {results[1]}")
     return
 ```
 
 - The routine is named, not called, and the conversion takes the routine's own arguments. Only that routine is the
-  work: `f.to[Agent](x).retrieve()` makes the Agent and collects it at once. `agent` is an ordinary name.
-- A failure is recovered where the Agent is collected: `try job.retrieve()`, `check job.retrieve()`.
-- An agent of a routine that returns nothing is `Agent[None]`, and the type can be inferred:
-  `var jobs = [work.to[Agent](), work.to[Agent]()]` then `jobs.gather()`.
+  work: `f.to[Work](x).retrieve()` makes the Work and collects it at once.
+- A failure is recovered where the Work is collected: `try job.retrieve()`, `check job.retrieve()`.
+- A Work of a routine that returns nothing is `Work[None]`, and the type can be inferred:
+  `var jobs = [work.to[Work](), work.to[Work]()]` then `jobs.gather()`.
 - `job.start_now()` starts the work now. Collect it later with `retrieve()` or `gather()`.
+- `start_now()` is the only start verb: `start_here()` and `start_apart()` are build errors that point to it.
+  `migrate --step work` rewrites them to `start_now()`, and an older `Agent` / `to[Agent]` to `Work` / `to[Work]`
+  (a remaining `Agent` is a build error naming `Work`).
 - `job.retrieve()` waits for its value, starting it first if nothing has. Inside a job it parks (other
   jobs keep running).
-- A failure stays in its agent. A failure inside the work does not end the program where the work runs,
-  and the other agents keep running. It surfaces where the agent is retrieved: `a.retrieve()` rethrows it
+- A failure stays in its Work. A failure inside the work does not end the program where the work runs,
+  and the other jobs keep running. It surfaces where the Work is retrieved: `a.retrieve()` rethrows it
   (bare, it crashes loudly there like any failure), `check a.retrieve()` / `try a.retrieve()` recover it
-  The crash report's trace ends with `agent in start()` (the line that made the
-  Agent) and `Thrown again at` names the `retrieve()` line.
+  The crash report's trace ends with `work in start()` (the line that made the
+  Work) and `Thrown again at` names the `retrieve()` line.
 - `job.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
   at its next wait (`waitfor`, `retrieve`, a channel) or through `cancellation_requested()`, and stops
-  there. Retrieving a cancelled agent waits for it to stop, then crashes with `CancelRequested` (the name
+  there. Retrieving a cancelled Work waits for it to stop, then crashes with `CancelRequested` (the name
   carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
-- Starting an agent twice, or retrieving it twice, crashes with `AgentStartError`.
-- `agents.gather()` runs a `List[Agent[T]]` concurrently and returns every result in input order, and
-  throws the first failure it meets (in list order). `agents.race()` returns the first finisher's value,
-  and throws the winner's failure. `agents.cancel_all()` returns nothing: it cancels every agent and
+- Starting a Work twice, or retrieving it twice, crashes with `WorkStartError`.
+- `jobs.gather()` runs a `List[Work[T]]` concurrently and returns every result in input order, and
+  throws the first failure it meets (in list order). `jobs.race()` returns the first finisher's value,
+  and throws the winner's failure. `jobs.cancel_all()` returns nothing: it cancels every job and
   waits until each has stopped, dropping what each came to. Work nothing started yet never runs.
-  `agents.next_finished()` waits for the first agent to finish, takes it out of the list and returns it (call it
-  in a loop to handle results in finishing order). `agents.gather_all()` waits for all and returns a
-  `List[Check[T]]`: each agent's value or failure, so one failure does not hide the others' results.
-  `agents.take_finished()` takes the finished agents out of the list in place and returns them (a server
+  `jobs.next_finished()` waits for the first job to finish, takes it out of the list and returns it (call it
+  in a loop to handle results in finishing order). `jobs.gather_all()` waits for all and returns a
+  `List[Check[T]]`: each job's value or failure, so one failure does not hide the others' results.
+  `jobs.take_finished()` takes the finished jobs out of the list in place and returns them (a server
   collecting its departed clients' work: rebuilding the list with `where` would drop the work still running).
-- When the last holder of an agent lets go of it before anything retrieved it, its work is cancelled and waited
+- When the last holder of a Work lets go of it before anything retrieved it, its work is cancelled and waited
   for (work nothing started never runs). A failure the work came to crashes the program there with the failure's
   message. Call `job.cancel()` first to throw away what it comes to, a failure included.
 - `job.waitfor(5s).retrieve()` waits at most 5 seconds and crashes with `TaskTimeoutError` past it;
-  `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the agent:
-  one already started with `start_now()` is refused with `AgentStartError`.
+  `try job.waitfor(5s).retrieve()` gives `None` instead. Give the deadline before starting the Work:
+  one already started with `start_now()` is refused with `WorkStartError`.
 - `job.is_done()` and `job.is_running()` are snapshots for polling.
 - Free routines: `waitfor(duration)` pauses (parks a job), `yield_now()` lets other jobs run,
   `cancellation_requested()` tells a long loop to stop early. Cancellation is cooperative.
-- An agent that nothing starts never runs. `f.to[Agent]()` as a statement is warning
+- A Work that nothing starts never runs. `f.to[Work]()` as a statement is warning
   SF-W008. There is no fire-and-forget: start it with `start_now()` and collect it later.
 - Jobs that talk to each other (over a channel) must all be started before you wait on one:
   `producer.start_now()` first, then `consumer.retrieve()`.
 - **Shared entities are safe to share between jobs.** The runtime may run jobs on several cores. An entity
   that reaches another job gets an atomic reference count and a lock taken around each access, with no
-  code from you. An entity reaches another job as an agent's argument, inside a value sent on a channel, as an
+  code from you. An entity reaches another job as a Work's argument, inside a value sent on a channel, as an
   element of a list the jobs share, and when a lambda captures it (the capture alone counts, since the lambda can
   be handed anywhere). As with globals, one statement is atomic; a read-then-write spread over several
   statements is not.
-- **Agents waiting on each other stop the program.** Two agents that use two shared entities in one statement
+- **Jobs waiting on each other stop the program.** Two jobs that use two shared entities in one statement
   each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`
   build, off in the release modes, `= false` / `= true` in config.toml overrides) then stops the program with a
-  `Deadlock error` that says which agent waits for an entity which other agent is using, instead of hanging. The
-  message names agents and entities only.
+  `Deadlock error` that says which job waits for an entity which other job is using, instead of hanging. The
+  message names jobs and entities only.
 - There is no thread type in Suflae.
 
 ```suflae
@@ -1156,15 +1159,15 @@ routine slow(n: Integer) -> Integer
     return n
 
 routine start()
-    var bad = checked.to[Agent](n: -1)
-    var good = checked.to[Agent](n: 3)
+    var bad = checked.to[Work](n: -1)
+    var good = checked.to[Work](n: 3)
     bad.start_now()
     good.start_now()
     show(f"good: {good.retrieve()}")     # 3
     when check bad.retrieve()
         is Integer as v => show(f"bad: {v}")
         is Crashables as e => show(f"bad failed: {e.crash_message()}")
-    var running = slow.to[Agent](n: 1)
+    var running = slow.to[Work](n: 1)
     running.start_now()
     running.cancel()
     when check running.retrieve()
@@ -1173,7 +1176,7 @@ routine start()
     return
 ```
 
-**Mailboxes** (always available): one `Mailbox[T]` that every agent that adds or takes holds.
+**Mailboxes** (always available): one `Mailbox[T]` that every job that adds or takes holds.
 
 ```suflae
 routine produce(m: Mailbox[Integer], n: Integer) -> Integer
@@ -1186,7 +1189,7 @@ routine produce(m: Mailbox[Integer], n: Integer) -> Integer
 
 routine start()
     var m = Mailbox[Integer](capacity: 2)
-    var job = produce.to[Agent](m: m, n: 5)
+    var job = produce.to[Work](m: m, n: 5)
     job.start_now()
     var first = m.remove_first()
     var total = first
@@ -1199,16 +1202,16 @@ routine start()
 `add_last` waits while the mailbox is full (`capacity: 0`: each `add_last` waits for a taker) and crashes with
 `ChannelClosedError` once the mailbox is closed. `remove_first()` takes one value, waiting while it is empty, and
 crashes once it is closed and empty. `each x in m` waits while it is empty and ends when it is closed and empty.
-Nothing closes a mailbox by itself: the side that is done calls `close()`. Several agents taking from one mailbox
-each get different values. `m.count()` and `m.is_closed()` are snapshots another agent can change at once.
+Nothing closes a mailbox by itself: the side that is done calls `close()`. Several jobs taking from one mailbox
+each get different values. `m.count()` and `m.is_closed()` are snapshots another job can change at once.
 `m.add_last_if_room(value: x)` never waits: it adds and returns `true` when there is room, returns `false` when the
 mailbox is full, and crashes with `ChannelClosedError` once it is closed (a broadcast over subscribers' mailboxes uses
 it, so one full subscriber does not hold up the rest).
 
-A statement is one step for the agents that share an entity, so two statements can be split by another agent. A
+A statement is one step for the jobs that share an entity, so two statements can be split by another job. A
 shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
-and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two agents both add), and `d.items()` returns a copy
-of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another agent adds or removes an entry during the walk).
+and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two jobs both add), and `d.items()` returns a copy
+of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another job adds or removes an entry during the walk).
 
 ## 17. Process events
 
@@ -1272,7 +1275,7 @@ routine start()
 
 The `.rf` module is checked by RazorForge's rules (section 23), and inside it `danger`, `dangerous` and `C::`
 are available. Mark a foreign routine that may block for long (a read from a pipe, a sleep, a network wait)
-`@blocking` there: called from an agent's work it runs on one of the runtime's I/O threads while the job parks.
+`@blocking` there: called from a job's work it runs on one of the runtime's I/O threads while the job parks.
 
 The standard library uses `danger` internally; that is never visible to a program.
 
@@ -1373,8 +1376,8 @@ number). At most 20 are shown per batch.
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
-| SF-W008       | an agent that nothing starts                        | `.start_now()` or `.retrieve()` it                |
-| SF-S642       | `to[Agent]` on a non-routine, or over generic values | convert a routine, with concrete types           |
+| SF-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
+| SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
 ## 22. Keywords
 
@@ -1397,7 +1400,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
   does nothing)
 - **Logic**: `and` `or` `not`
 - **Literals**: `true` `false` `None` `none`
-- **Concurrency**: `f.to[Agent](args)`
+- **Concurrency**: `f.to[Work](args)`
 - **Reserved, not usable in a program**: `danger` `dangerous`
 
 `!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
@@ -1438,7 +1441,7 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 ## 24. Status (do not generate as if shipped)
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
-nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Agent
+nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and the basic `ObjectHacker`
 surface. The `StdlibSf` fixtures run in CI with their expected output.
 

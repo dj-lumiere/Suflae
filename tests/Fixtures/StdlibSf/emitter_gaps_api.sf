@@ -49,8 +49,8 @@ routine start()
         show(t.open)
     show(s.open)
 
-    # Agents that give no value can be gathered.
-    var jobs = [ping.to[Agent](), ping.to[Agent]()]
+    # jobs that give no value can be gathered.
+    var jobs = [ping.to[Work](), ping.to[Work]()]
     jobs.gather()
     show("gathered")
 

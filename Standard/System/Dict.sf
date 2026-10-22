@@ -151,7 +151,7 @@ secret routine Dict[TKey, TValue].put(key: TKey, value: TValue) -> Bool
     return true
 
 ### Adds `key` with `value` only when `key` has no entry, in one step: `d[k] = v` replaces a value that is there,
-### this keeps it. Another agent sharing the dict cannot slip an entry in between the check and the adding, as it
+### this keeps it. Another job sharing the dict cannot slip an entry in between the check and the adding, as it
 ### could between `if d lack k` and `d[k] = v`.
 ### :param key: The key.
 ### :param value: The value for a new key.
@@ -244,8 +244,8 @@ routine Dict[TKey, TValue].values() -> List[TValue]
     return result
 
 ### Returns a copy of the keys and values as they are now, in insertion order, as pairs:
-### `each (k, v) in d.items()`. `each e in d` walks the dict itself and is faster, but crashes when another agent
-### adds or removes an entry during the walk. Walk `items()` instead over a dict other agents may change: the copy
+### `each (k, v) in d.items()`. `each e in d` walks the dict itself and is faster, but crashes when another job
+### adds or removes an entry during the walk. Walk `items()` instead over a dict other jobs may change: the copy
 ### does not change under the loop.
 routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
     var result = List[Tuple[TKey, TValue]](capacity: me.count.to[Integer]())

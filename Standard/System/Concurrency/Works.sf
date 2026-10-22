@@ -1,0 +1,203 @@
+module System/Concurrency
+
+# Suflae's own Work: work a `to[Work]` conversion has bound to its arguments, shared like any Suflae entity. It drives the
+# work held inside, so every holder of the Work sees the same work: run once, consumed once. When the last holder lets
+# go of a Work whose value nobody took, its work is cancelled and waited for. Structured concurrency over Suflae's own list of jobs (`race`, `gather`,
+# `cancel_all`) works on that list directly.
+
+### Work a `to[Work]` conversion has bound to its arguments. Nothing runs until a verb runs it: `start_now` starts it in
+### the background, `retrieve` waits for its value (starting it first if nothing has).
+### :typeparam T: The value the routine returns.
+entity Work[T]
+    ### The work: where it runs, its fiber or thread, and its result.
+    secret state: RF::System.WorkState[T]
+    ### The wait deadline of the next `retrieve`; only meaningful when `has_deadline` is true.
+    secret deadline: Duration
+    ### Whether `waitfor` gave the next `retrieve` a deadline.
+    secret has_deadline: Bool
+
+# ============================================================================
+# Builder plumbing
+# ============================================================================
+
+### Builds the Work of a `to[Work]` conversion: the work that will run `entry(recipe)`, not started.
+routine work_recipe[T](entry: Addr, recipe: Addr) -> Work[T]
+    danger
+        return Work[T](state: work_state[T](entry: entry, recipe: recipe),
+            deadline: Duration(seconds: 0, nanoseconds: 0), has_deadline: false)
+
+# ============================================================================
+# Running one Work
+# ============================================================================
+
+### Waits for the work's value, starting it first if nothing has. Inside another job it parks, so other jobs
+### keep running.
+### :throws: {TaskSpawnError} if the work could not be started.
+### :throws: {TaskTimeoutError} if a deadline was set with `waitfor` and passed first.
+### :returns: The value the routine returned.
+failable routine Work[T].retrieve() -> T
+    # A deadline from `waitfor` is for this one retrieve.
+    var has_deadline = me.has_deadline
+    me.has_deadline = false
+    return me.state.retrieve(deadline: me.deadline, has_deadline: has_deadline)
+
+### Starts the work now and returns at once. Collect its value later with `retrieve` or `gather`.
+### :throws: {WorkStartError} if the work was started already.
+### :throws: {TaskSpawnError} if the work could not be started.
+failable routine Work[T].start_now()
+    me.state.start_now()
+    return
+
+### The same work with a deadline: its `retrieve` waits at most `deadline` and crashes with {TaskTimeoutError} past
+### it (`job.waitfor(5s).retrieve()`).
+### :param deadline: The longest `retrieve` waits.
+### :returns: A Work over the same work, carrying the deadline.
+routine Work[T].waitfor(deadline: Duration) -> Work[T]
+    danger
+        return Work[T](state: me.state.add_holder(), deadline: deadline, has_deadline: true)
+
+### Whether the work has finished, or was never started and cannot start.
+routine Work[T].is_done() -> Bool
+    return me.state.is_done()
+
+### Whether the work was started and has not finished yet.
+routine Work[T].is_running() -> Bool
+    return me.state.is_running()
+
+### Starts the work if it has not started yet.
+### :returns: `false` if it could not start.
+secret routine Work[T].launch() -> Bool
+    danger
+        return me.state.launch()
+
+### Asks the work to stop. Work nothing started yet never runs. Running work sees the request at its next wait
+### (`waitfor`, `retrieve`) or through `cancellation_requested()`, and stops there. Retrieving a cancelled Work waits
+### for it to stop, then throws {CancelRequested}.
+routine Work[T].cancel()
+    me.state.cancel()
+    return
+
+### Waits for cancelled work to stop and frees what ran it, dropping what it came to.
+secret routine Work[T].wind_down()
+    danger
+        me.state.wind_down(reports_failure: false)
+    return
+
+### Enters the work in a race.
+secret routine Work[T].join_race(race: Addr)
+    danger
+        if me.state.is_coro()
+            C::rf_race_add_coro(race: race, coro: me.state.coro_handle())
+        else
+            C::rf_race_add_task(race: race, task: me.state.task_handle())
+    return
+
+### The value the finished work produced, or its failure thrown here. A cancelled Work throws
+### {CancelRequested}.
+secret failable routine Work[T].result() -> T
+    return me.state.settle()
+
+### Frees the work once nothing will read it again.
+secret routine Work[T].reap()
+    danger
+        me.state.reap()
+    return
+
+### Ends a Work the last holder lets go of: work that still runs is cancelled and waited for, work nothing
+### started never runs.
+@override
+routine Work[T].destruct()
+    danger
+        me.state.dispose()
+        return
+
+# ============================================================================
+# Running a list of jobs
+# ============================================================================
+
+### Races the jobs, driving them concurrently until the first one finishes, and returns that winner's
+### value, or throws its failure. Every Work of the list is freed afterwards, the losers too.
+### :throws: {TaskSpawnError} if the list is empty (there is nothing to race) or a Work cannot be started.
+### :returns: The value produced by the first Work to finish.
+failable routine List[Work[T]].race() -> T
+    if me.is_empty()
+        throw TaskSpawnError()
+    danger
+        var race = C::rf_race_begin()
+        each job in me
+            if not job.launch()
+                throw TaskSpawnError()
+            job.join_race(race: race)
+        var winner = (C::rf_race_wait(race: race)).to[Integer]()
+        C::rf_race_end(race: race)
+        var value = me[winner].result()
+        each job in me
+            job.reap()
+        return value
+
+### Drives the jobs concurrently and waits for all of them, returning their results in the list's order.
+### The total wait is the slowest Work, not the sum. If a Work throws, the throw comes out here.
+### :throws: {TaskSpawnError} if a Work cannot be started.
+### :returns: The values produced by every Work, in the order they appear in the list.
+failable routine List[Work[T]].gather() -> List[T]
+    # Start every Work first so they run together, then collect each.
+    each job in me
+        if not job.launch()
+            throw TaskSpawnError()
+    var results = List[T]()
+    each job in me
+        results.add_last(value: job.retrieve())
+    return results
+
+### Waits until one of the jobs finishes, takes it out of the list and returns it, starting the ones nothing
+### started. Called again and again it hands the jobs over in the order they finish, so each result is handled as
+### soon as it is there. `retrieve` the returned Work for its value or its failure.
+### :throws: {TaskSpawnError} if the list is empty or a Work cannot be started.
+### :returns: The first Work of the list to finish.
+failable routine List[Work[T]].next_finished() -> Work[T]
+    if me.is_empty()
+        throw TaskSpawnError()
+    danger
+        var race = C::rf_race_begin()
+        each job in me
+            if not job.launch()
+                throw TaskSpawnError()
+            job.join_race(race: race)
+        var winner = (C::rf_race_wait(race: race)).to[Integer]()
+        C::rf_race_end(race: race)
+        return me.remove_at(index: winner)
+
+### Drives the jobs concurrently and waits for all of them, returning each one's result or failure in the list's
+### order: a Work that fails does not stop the others or hide their results (`gather` throws the first failure).
+### :returns: Each Work's value or failure, in the order they appear in the list.
+routine List[Work[T]].gather_all() -> List[Check[T]]
+    each job in me
+        job.launch()
+    var results = List[Check[T]]()
+    each job in me
+        results.add_last(value: check job.retrieve())
+    return results
+
+### Takes the finished jobs out of the list and returns them, in order, leaving the ones still waiting or
+### running in place. A long-running server collects the work of its departed clients this way: rebuilding the list
+### with `where` would drop the old list, and with it the work that still runs. `retrieve` what a taken Work came
+### to, or `cancel` it.
+### :returns: The finished Works.
+routine List[Work[T]].take_finished() -> List[Work[T]]
+    var finished = List[Work[T]]()
+    var i = 0
+    until i >= me.count()
+        if me[i].is_done()
+            finished.add_last(value: me.remove_at(index: i))
+        else
+            i = i + 1
+    return finished
+
+### Cancels every Work and waits for each to stop, dropping what it came to. Work nothing started yet never
+### runs. Running work sees the request at its next wait or through `cancellation_requested()`.
+routine List[Work[T]].cancel_all()
+    each job in me
+        job.cancel()
+    each job in me
+        job.wind_down()
+    return

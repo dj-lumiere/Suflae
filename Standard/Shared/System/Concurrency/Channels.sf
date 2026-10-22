@@ -73,7 +73,7 @@ secret routine Transmitter[T].duplicate() -> Transmitter[T]
 @rf("Transmitter.close")
 secret routine Transmitter[T].close()
 
-### Whether the channel has been closed (a subsequent `transmit` would throw). Racy: another agent could
+### Whether the channel has been closed (a subsequent `transmit` would throw). Racy: another job could
 ### close it the instant after you check, so prefer handling `transmit`'s failure to gating on this.
 ### :returns: `true` if the channel is closed.
 @rf("Transmitter.is_closed")

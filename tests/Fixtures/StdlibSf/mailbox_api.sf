@@ -2,7 +2,7 @@ module Tests/StdlibSf/MailboxApi
 
 import IO/Console
 
-# A mailbox carries values from one agent to another in order: `add_last` waits while it is full, `each` and
+# A mailbox carries values from one job to another in order: `add_last` waits while it is full, `each` and
 # `remove_first` wait while it is empty, and `each` ends once it is closed and empty.
 routine produce(q: Mailbox[Integer], n: Integer) -> Integer
     var i = 1
@@ -14,7 +14,7 @@ routine produce(q: Mailbox[Integer], n: Integer) -> Integer
 
 routine start()
     var q = Mailbox[Integer](capacity: 2)
-    var job = produce.to[Agent](q: q, n: 5)
+    var job = produce.to[Work](q: q, n: 5)
     job.start_now()
     var first = q.remove_first()
     var total = first

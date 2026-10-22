@@ -1,7 +1,7 @@
 module System/Concurrency
 
-### A mailbox that agents pass values through, in order: `Mailbox[T](capacity: 8)`, then `m.add_last(value: x)` on
-### one side and `each x in m` (or `m.remove_first()`) on the other. Hand the same mailbox to every agent that adds or
+### A mailbox that jobs pass values through, in order: `Mailbox[T](capacity: 8)`, then `m.add_last(value: x)` on
+### one side and `each x in m` (or `m.remove_first()`) on the other. Hand the same mailbox to every job that adds or
 ### takes.
 ###
 ### `add_last` waits while the mailbox is full, `each` and `remove_first` wait while it is empty. `close()` ends it,
@@ -9,7 +9,7 @@ module System/Concurrency
 ### ends. Nothing closes a mailbox by itself, so the side that is done calls `close()`. A mailbox nobody closes leaves
 ### its readers waiting, which the runtime reports as a deadlock instead of hanging quietly.
 ###
-### Several agents can take from one mailbox: each value goes to one of them.
+### Several jobs can take from one mailbox: each value goes to one of them.
 ### :typeparam T: The values the mailbox carries.
 @self_locking
 entity Mailbox[T]
@@ -61,7 +61,7 @@ routine Mailbox[T].close()
 routine Mailbox[T].is_closed() -> Bool
     return me.transmitter.is_closed()
 
-### How many values wait in the mailbox right now. Another agent can change it at once, so it is for showing, not
+### How many values wait in the mailbox right now. Another job can change it at once, so it is for showing, not
 ### for deciding.
 ### :returns: The number of values waiting.
 routine Mailbox[T].count() -> Integer

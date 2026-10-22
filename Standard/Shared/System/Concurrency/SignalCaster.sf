@@ -36,15 +36,15 @@ routine SignalCaster.wait()
 @rf("SignalCaster.wait_within")
 routine SignalCaster.wait_within(deadline: Duration) -> Bool
 
-### Wakes one waiting agent. Call after making the condition true and releasing the lock.
+### Wakes one waiting job. Call after making the condition true and releasing the lock.
 @rf("SignalCaster.cast_one")
 routine SignalCaster.cast_one()
 
-### Wakes every waiting agent. Call after making the condition true and releasing the lock.
+### Wakes every waiting job. Call after making the condition true and releasing the lock.
 @rf("SignalCaster.cast_all")
 routine SignalCaster.cast_all()
 
-### Produces another handle on the same monitor, so another agent can synchronize through it.
+### Produces another handle on the same monitor, so another job can synchronize through it.
 ### :returns: A new `SignalCaster` sharing this monitor.
 @rf("SignalCaster.duplicate")
 routine SignalCaster.duplicate() -> SignalCaster

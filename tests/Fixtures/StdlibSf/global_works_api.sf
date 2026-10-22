@@ -1,6 +1,6 @@
-module Tests/StdlibSf/GlobalAgentsApi
+module Tests/StdlibSf/GlobalWorksApi
 
-# Four agents change the same globals at once. An S64 global and an Integer global both keep every update: the read
+# Four jobs change the same globals at once. An S64 global and an Integer global both keep every update: the read
 # and the write of `visits = visits + 1` stay under one lock even where the update can fail.
 global visits: S64 = 0
 global big: Integer = 0
@@ -13,7 +13,7 @@ routine visit(name: Text) -> Text
     return name
 
 routine start()
-    var jobs = [visit.to[Agent](name: "a"), visit.to[Agent](name: "b"), visit.to[Agent](name: "c"), visit.to[Agent](name: "d")]
+    var jobs = [visit.to[Work](name: "a"), visit.to[Work](name: "b"), visit.to[Work](name: "c"), visit.to[Work](name: "d")]
     var done = jobs.gather()
     show(visits)
     show(big)

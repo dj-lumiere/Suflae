@@ -1,9 +1,9 @@
-module Tests/StdlibSf/OwnChoiceAgentsApi
+module Tests/StdlibSf/OwnChoiceWorksApi
 
 import IO/Console
 
 # A Suflae choice or flags hands its cases back in Suflae's own list, counted with Integer, and a Suflae
-# list of Agents runs them together.
+# list of jobs runs them together.
 choice Color
     RED
     GREEN
@@ -33,11 +33,11 @@ routine names(colors: List[Color]) -> Text
 routine start()
     show(f"colors={names(colors: Color.all_cases())}count={Color.count() * 10}")
     show(f"perms={Perm.all_cases().count()} count={Perm.count()}")
-    var jobs = [fetch.to[Agent](id: 1), fetch.to[Agent](id: 2), fetch.to[Agent](id: 3)]
+    var jobs = [fetch.to[Work](id: 1), fetch.to[Work](id: 2), fetch.to[Work](id: 3)]
     show(f"gather={jobs.gather()}")
-    var racers = [fetch.to[Agent](id: 4), fetch.to[Agent](id: 5)]
+    var racers = [fetch.to[Work](id: 4), fetch.to[Work](id: 5)]
     show(f"race={racers.race() > 0}")
-    var stoppers = [slow.to[Agent](id: 6), slow.to[Agent](id: 7)]
+    var stoppers = [slow.to[Work](id: 6), slow.to[Work](id: 7)]
     stoppers.cancel_all()
     show(f"cancel={stoppers[0].is_done()} {stoppers[1].is_done()}")
     show("DONE")

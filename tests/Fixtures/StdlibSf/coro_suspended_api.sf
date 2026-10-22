@@ -1,7 +1,7 @@
 module Tests/StdlibSf/CoroSuspendedApi
 
 import IO/Console
-# SF twin of Stdlib/coro_suspended_api.rf. `agent f(...)` over a plain routine yields an Agent[T]
+# SF twin of Stdlib/coro_suspended_api.rf. `f.to[Work](...)` over a plain routine yields a Work[T]
 # handle, and `retrieve()` starts it, drives it to completion (through every yield) and returns its
 # value. SF spells the yield through the `yield_now()` surface (RF's fixture uses the raw
 # `C::rf_coro_yield()`, which SF hides); the driven result is identical, so the expected output matches.
@@ -18,9 +18,9 @@ routine counter() -> S64
     return n
 
 routine start()
-    var c = compute.to[Agent](x: 21)
+    var c = compute.to[Work](x: 21)
     show(f"compute => {c.retrieve()}")
 
-    var k = counter.to[Agent]()
+    var k = counter.to[Work]()
     show(f"counter => {k.retrieve()}")
     return

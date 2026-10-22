@@ -117,10 +117,13 @@ file only once its other old spellings are gone.
 - `Duration` `//` and `%` follow the integer rules, and overflow or division by zero crashes.
 - `Indexable` is `ViewingIndexable` and `MutableIndexable` is `ModifyingIndexable` (the build error names the new
   name, and so does the one on `PQEntry`, `gather` and `race`).
-- Concurrency: `suspended` is gone. Any routine runs concurrently through `f.to[Agent](args)` (default `migrate`
-  adds `.to[Agent]` to the calls). Start an agent with `start_now()`, `start_here()` or `start_apart()`.
-  `execute()` is gone (default `migrate` writes `start_now()`). `gather()` and `race()` are routines on the agent
-  list: `agents.gather()`. When the last name that refers to an agent goes away, the work is cancelled and waited
+- Concurrency: `suspended` is gone. Any routine runs concurrently through `f.to[Work](args)` (default `migrate`
+  adds `.to[Work]` to the calls). A piece of handed-off work is a `Work[T]`, made with
+  `f.to[Work](args)` and started with `start_now()`, the one start verb. `start_here()` and `start_apart()` are
+  build errors that point to `start_now()`. `migrate --step work` rewrites `Agent` to `Work` and the other start
+  verbs to `start_now()`, and a remaining `Agent` is a build error that names `Work`.
+  `execute()` is gone (default `migrate` writes `start_now()`). `gather()` and `race()` are routines on the Work
+  list: `jobs.gather()`. When the last name that refers to a Work goes away, the work is cancelled and waited
   for.
 - Byte flows (`FileSource`, `FileSink`, `stdin()`, `stdout()`) read with `pull(max:)` and write with `push(data:)`
   (`migrate --step verbs`).
@@ -133,7 +136,7 @@ file only once its other old spellings are gone.
 - A routine that returns nothing ends without `return`.
 - `Integer / Integer` is a `Decimal` (`7 / 2` is `3.5`). An `Integer` and a `Decimal` mix in arithmetic and give a
   `Decimal`.
-- `global name: Type = init`: module-level state. Changes to a global from several agents are serialized.
+- `global name: Type = init`: module-level state. Changes to a global from several jobs are serialized.
 - Loops carry values: `until c with total = 0`, `continue with total: v`, and `then` sees them.
 - A `when` that gives a value ends a block arm with `becomes value`. One arm can match several values
   (`== 4, 6, 9, 11 =>`). An arm can be `throw ...` in a `failable` routine (SF-S750 elsewhere, with a quick fix that
@@ -158,7 +161,7 @@ file only once its other old spellings are gone.
 - `Environment`, `Entropy`, `Clock`, `CpuClock`, `CpuEventManager`.
 - `ask[T]()`, `set_exit_code`, `to_wrap[T]()`, `to_clamp[T]()`, `to_text(radix:)`, `hex()`, `bin()`, `oct()`,
   `fixed(places)`.
-- Agents: `cancel()`, `next_finished`, `gather_all`, `take_finished`, `cancel_all`.
+- Work lists: `cancel()`, `next_finished`, `gather_all`, `take_finished`, `cancel_all`.
 - `Dict.set_if_absent`, `List.swap`, `first_true` / `count_trues` / `is_any_true` on bit collections.
 - Float math routines are correctly rounded on every platform, and printed floats are the shortest decimal that
   reads back to the same bits. `BF16` does arithmetic.
@@ -175,17 +178,17 @@ file only once its other old spellings are gone.
 
 ### Fixed
 
-- An entity captured by a lambda that several agents call, sent on a channel, or reached as an element of a list the
-  agents share takes its lock around each statement, so no update is lost.
+- An entity captured by a lambda that several jobs call, sent on a channel, or reached as an element of a list the
+  jobs share takes its lock around each statement, so no update is lost.
 - A change of a list while a loop walks it crashes with `ReshapingWhileInUseError` also when the change comes from a
   lambda that captured the list, when the loop walks a global list or an adapter of the list (`xs.where(...)`), and
   when it goes through an element (`rows[0].add_last(...)`).
-- `var (tx, rx) = make_channel[T](capacity: n)` gives channel ends that work when passed to a routine or an agent
+- `var (tx, rx) = make_channel[T](capacity: n)` gives channel ends that work when passed to a routine or a Work
   (they crashed with a segmentation fault).
-- `cs[0].n = cs[0].n + 1` inside an agent's routine no longer stops the builder.
-- A started agent nobody retrieves crashes with its work's failure where it is dropped, instead of losing it.
+- `cs[0].n = cs[0].n + 1` inside a Work's routine no longer stops the builder.
+- A started Work nobody retrieves crashes with its work's failure where it is dropped, instead of losing it.
   `job.cancel()` throws the failure away.
-- Two agents adding to one `List` lost updates.
+- Two jobs adding to one `List` lost updates.
 - `total += xs[0]` crashed, and a `global` `S64` lost digits.
 - `x in dict` gave a wrong error.
 - A `when` with no subject, a typed `E?` local, member defaults, destructuring arms and `??` were rejected or built

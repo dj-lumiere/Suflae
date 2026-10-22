@@ -88,9 +88,9 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "Range step zero error", actualString: stdout + stderr);
     }
 
-    /// <summary>Two agents that use two shared entities in opposite orders wait on each other: a debug build's
-    /// deadlock check stops the program with status 82 and says which agent waits for which, instead of hanging. The
-    /// report speaks of agents and entities, never of the runtime's access manager.</summary>
+    /// <summary>Two jobs that use two shared entities in opposite orders wait on each other: a debug build's
+    /// deadlock check stops the program with status 82 and says which job waits for which, instead of hanging. The
+    /// report speaks of jobs and entities, never of the runtime's access manager.</summary>
     [Fact]
     public void SharedEntityDeadlock_CrashesLoudly()
     {

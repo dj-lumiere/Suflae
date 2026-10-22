@@ -34,23 +34,23 @@ crashable KeyNotFoundError
     ### Stores the key that could not be resolved.
     key: Text
 
-### Raised when an Agent's work could not be started (thread or allocation failure).
+### Raised when a Work could not be started (thread or allocation failure).
 @rf("TaskSpawnError")
 crashable TaskSpawnError
     nothing
 
-### Raised when an Agent is started a second time.
-@rf("AgentStartError")
-crashable AgentStartError
+### Raised when a Work is started a second time.
+@rf("WorkStartError")
+crashable WorkStartError
     ### What went wrong.
     reason: Text
 
-### Raised when an agent that was cancelled is retrieved: its work stopped, or never ran, so it has no value.
+### Raised when a Work that was cancelled is retrieved: its work stopped, or never ran, so it has no value.
 @rf("CancelRequested")
 crashable CancelRequested
     nothing
 
-### Raised when an Agent's work did not finish before its `waitfor` deadline.
+### Raised when a Work did not finish before its `waitfor` deadline.
 @rf("TaskTimeoutError")
 crashable TaskTimeoutError
     nothing
@@ -92,15 +92,15 @@ routine KeyNotFoundError.crash_message() -> Text
 @rf("TaskSpawnError.crash_message")
 routine TaskSpawnError.crash_message() -> Text
 
-### Returns the default message for a cancelled agent.
+### Returns the default message for a cancelled Work.
 ### :returns: The resulting `Text` value.
 @rf("CancelRequested.crash_message")
 routine CancelRequested.crash_message() -> Text
 
-### Returns the reason the Agent could not start.
+### Returns the reason the Work could not start.
 ### :returns: The resulting `Text` value.
-@rf("AgentStartError.crash_message")
-routine AgentStartError.crash_message() -> Text
+@rf("WorkStartError.crash_message")
+routine WorkStartError.crash_message() -> Text
 
 ### Returns the default message for task-timeout failures.
 ### :returns: The resulting `Text` value.

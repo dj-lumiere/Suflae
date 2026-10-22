@@ -2,9 +2,9 @@ module Tests/StdlibSf/SharedStepsApi
 
 import IO/Console
 
-# One-statement steps for state that several agents share: `set_if_absent` adds a key only when it is missing,
+# One-statement steps for state that several jobs share: `set_if_absent` adds a key only when it is missing,
 # `items()` walks a copy, `add_last_if_room` never waits on a full mailbox, and `take_finished` collects finished work in
-# place, `next_finished` hands Agents over as they finish, and `gather_all` keeps every result and failure.
+# place, `next_finished` hands jobs over as they finish, and `gather_all` keeps every result and failure.
 routine double(n: Integer) -> Integer
     return n * 2
 
@@ -31,22 +31,22 @@ routine start()
     var closed = try q.add_last_if_room(value: 4)
     show(f"after close: {closed is None}")
 
-    var jobs = List[Agent[Integer]]()
-    jobs.add_last(value: double.to[Agent](n: 1))
-    jobs.add_last(value: double.to[Agent](n: 2))
-    jobs.add_last(value: double.to[Agent](n: 3))
+    var jobs = List[Work[Integer]]()
+    jobs.add_last(value: double.to[Work](n: 1))
+    jobs.add_last(value: double.to[Work](n: 2))
+    jobs.add_last(value: double.to[Work](n: 3))
     var two = jobs[1].retrieve()
     var done = jobs.take_finished()
     show(f"taken: {done.count()} left: {jobs.count()} value: {two}")
     show(f"rest: {jobs.gather()}")
 
-    var racers = [slow.to[Agent](n: 1, wait: 60ms), slow.to[Agent](n: 2, wait: 5ms), slow.to[Agent](n: 3, wait: 30ms)]
+    var racers = [slow.to[Work](n: 1, wait: 60ms), slow.to[Work](n: 2, wait: 5ms), slow.to[Work](n: 3, wait: 30ms)]
     var order = List[Integer]()
     until racers.is_empty()
         order.add_last(value: racers.next_finished().retrieve())
     show(f"finish order: {order}")
 
-    var tries = [risky.to[Agent](n: 1), risky.to[Agent](n: 2), risky.to[Agent](n: 3)]
+    var tries = [risky.to[Work](n: 1), risky.to[Work](n: 2), risky.to[Work](n: 3)]
     var outcomes = tries.gather_all()
     show(f"all: {outcomes.count()} first: {outcomes[0]} third: {outcomes[2]}")
     show("DONE")
