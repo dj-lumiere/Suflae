@@ -212,7 +212,7 @@ routine SortedList[T].to[List[T]]() -> List[T]
 
 @override
 routine SortedList[T].represent() -> Text
-    return f"{me.type_name()}([{me.items_text()}])"
+    return f"[{me.items_text()}]"
 
 @override
 routine SortedList[T].diagnose() -> Text

@@ -202,7 +202,7 @@ routine SortedSet[T].to[List[T]]() -> List[T]
 
 @override
 routine SortedSet[T].represent() -> Text
-    return f"{me.type_name()}({{{me.items_text()}}})"
+    return f"{{{me.items_text()}}}"
 
 ### Returns a diagnostic form that includes the runtime type name and element count.
 @override

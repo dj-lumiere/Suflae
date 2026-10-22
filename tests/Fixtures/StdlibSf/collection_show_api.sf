@@ -1,0 +1,66 @@
+module Tests/StdlibSf/CollectionShowApi
+
+import IO/Console
+import Collections
+
+# Every collection shows itself with `show(x)` and `f"{x:?}"`: sequences as [a, b], sets as {a, b}, dictionaries as
+# {key: value}, the empty set as {} and the empty dictionary as {:}. Text inside a collection is quoted. Sorted
+# collections show in order, a PriorityQueue its `priority: element` pairs in the order they come out, and a range
+# as it is written. The diagnose form puts the qualified type and the count around the same text.
+
+routine start()
+    var numbers = [1, 2, 3]
+    show(numbers)
+    show(f"{numbers:?}")
+    var words = ["a", "b"]
+    show(f"{words} {words:?}")
+    var ages = {"ann": 31, "bob": 27}
+    show(f"{ages} {ages:?}")
+    var no_ages = Dict[Text, Integer]()
+    show(f"{no_ages} {no_ages:?}")
+    var sets = [{1: 10, 2: 5}, Dict[Integer, Integer]()]
+    show(sets)
+    var seen = {2, 1}
+    show(f"{seen} {seen:?}")
+    var none_seen = Set[Integer]()
+    show(f"{none_seen} {none_seen:?}")
+
+    show(f"{0 to 10} {0 til 10 by 2} {10 to 0 by -2}")
+    var r = 0 til 10 by 2
+    show(f"{r:?}")
+
+    var queue = PriorityQueue[Integer, Text]()
+    queue.add(element: "d", priority: 4)
+    queue.add(element: "a", priority: 1)
+    queue.add(element: "c", priority: 3)
+    queue.add(element: "b", priority: 2)
+    show(f"{queue} {queue:?}")
+    show(f"{queue.peek()} {queue.count()}")
+    var no_queue = PriorityQueue[Integer, Text]()
+    show(no_queue)
+
+    var index = SortedDict[Integer, Text]()
+    index[3] = "c"
+    index[1] = "a"
+    show(f"{index} {index:?}")
+    var no_index = SortedDict[Integer, Text]()
+    show(f"{no_index} {no_index:?}")
+    var tree = SortedSet[Integer]()
+    tree.add(3)
+    tree.add(1)
+    show(f"{tree} {tree:?}")
+    var ranked = SortedList[Integer]()
+    ranked.add(3)
+    ranked.add(1)
+    ranked.add(3)
+    show(f"{ranked} {ranked:?}")
+    var ring = RotatableList[Text]()
+    ring.add_last("b")
+    ring.add_first("a")
+    show(f"{ring} {ring:?}")
+    var bits = BitList()
+    bits.add_last(true)
+    bits.add_last(false)
+    show(f"{bits} {bits:?}")
+    var marks = BitArray[3]()
+    show(f"{marks} {marks:?}")

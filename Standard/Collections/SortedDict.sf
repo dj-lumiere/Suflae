@@ -236,10 +236,14 @@ routine SortedDict[TKey, TValue].to[List[DictEntry[TKey, TValue]]]() -> List[Dic
 
 @override
 routine SortedDict[TKey, TValue].represent() -> Text
-    return f"{me.type_name()}({{{me.entries_text()}}})"
+    if me.is_empty()
+        return "{:}"
+    return f"{{{me.entries_text()}}}"
 
 @override
 routine SortedDict[TKey, TValue].diagnose() -> Text
+    if me.is_empty()
+        return me.full_type_name() + "(count: 0, {:})"
     return f"{me.full_type_name()}(count: {me.count()}, {{{me.entries_text()}}})"
 
 ### Serializes this dictionary to a `SerialValue.Dict`; keys render via `represent`, values serialize.

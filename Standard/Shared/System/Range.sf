@@ -102,6 +102,17 @@ needs T obeys FloorDivisible
 @rf("Range.require_nonzero_step")
 failable routine Range[T].require_nonzero_step()
 
+### Returns the range as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`. A step of 1 is left out, and a
+### range that counts down shows its step with a minus sign.
+### :returns: The resulting `Text` value.
+@rf("Range.represent")
+routine Range[T].represent() -> Text
+
+### Returns the range's diagnostic text: its type around the written form, as `Range[Integer](0 til 10 by 2)`.
+### :returns: The resulting `Text` value.
+@rf("Range.diagnose")
+routine Range[T].diagnose() -> Text
+
 ### Creates an iterator for this value.
 ### The emitter starts at `me.start` and moves by the step's magnitude in the step's direction. A step of zero
 ### crashes here.

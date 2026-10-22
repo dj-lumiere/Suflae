@@ -234,10 +234,13 @@ routine PriorityQueue[TPriority, TElement].lacks(element: TElement) -> Bool
 needs TElement obeys Equatable
     return not me.has(element)
 
+### Returns the queue as text: its `priority: element` pairs in square brackets, in the order they come out, the
+### next one first, as `[1: "a", 2: "b", 4: "d"]`. The queue does not change. An empty queue shows `[]`.
 @override
 routine PriorityQueue[TPriority, TElement].represent() -> Text
-    return f"{me.type_name()}({me.entries_text()})"
+    return me.entries_text()
 
+### Returns the queue's diagnostic text: its type, count and pairs.
 @override
 routine PriorityQueue[TPriority, TElement].diagnose() -> Text
     return f"{me.full_type_name()}(count: {me.count}, {me.entries_text()})"
@@ -284,13 +287,33 @@ secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
     me.elements.grow_to(room: room)
     return
 
-### The entries as text, in heap order: `[1: "a", 3: "b"]`.
+### The entries as text in the order `shown_order` gives: `[1: "a", 3: "b"]`.
 secret routine PriorityQueue[TPriority, TElement].entries_text() -> Text
     var result = "["
-    var i: U64 = 0
-    until i >= me.count
-        if i > 0
+    var first = true
+    each i in me.shown_order()
+        if not first
             result = f"{result}, "
         result = f"{result}{nested_repr(me.priorities.at(position: i))}: {nested_repr(me.elements.at(position: i))}"
-        i = i + 1
+        first = false
     return f"{result}]"
+
+### The storage positions in the order `represent` and `diagnose` show them, the order the entries come out:
+### smallest priority first, equal priorities in storage order. It sorts a copy of the positions, so the heap does
+### not change. This routine alone decides that order.
+secret routine PriorityQueue[TPriority, TElement].shown_order() -> List[U64]
+    var order = List[U64]()
+    var i: U64 = 0
+    until i >= me.count
+        # The first shown position whose priority is greater than this one's, found by halving.
+        var low = 0
+        var high = order.count()
+        until low >= high
+            var mid = low + (high - low) // 2
+            if me.priorities.at(position: order[mid]) > me.priorities.at(position: i)
+                high = mid
+            else
+                low = mid + 1
+        order.add_at(index: low, value: i)
+        i = i + 1
+    return order

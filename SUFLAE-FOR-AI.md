@@ -952,6 +952,14 @@ each entry in ages
 - Inside a protocol-constrained routine, the routines of a protocol the constraint's protocol obeys can be called
   (`animal.name()` with `protocol Animal obeys Named`), and an associated type (`T/Item`) stands for the obeying
   type's own (`relates Text as Item`).
+- **Showing a collection.** `show(xs)` and `f"{xs}"` write the elements, each in the form it has inside a
+  collection (`Text` quoted `"a"`, `Char` as `'a'`, everything else its `represent`): `List`, `Array` and the
+  other sequences `[1, 2, 3]`, sets `{1, 2}`, dictionaries `{1: 10, 2: 20}`, the empty set `{}` and the empty
+  dictionary `{:}`. `Dict` and `Set` show in insertion order, the sorted collections in order. A `PriorityQueue`
+  shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
+  and the queue does not change. A range shows as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`.
+  `f"{xs:?}"` (diagnose) puts the qualified type and the count around the same text:
+  `System.List[System.Integer](count: 3, [1, 2, 3])`, `System.Dict[System.Integer, System.Integer](count: 0, {:})`.
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,

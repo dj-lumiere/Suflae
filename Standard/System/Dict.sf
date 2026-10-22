@@ -304,6 +304,8 @@ routine Dict[TKey, TValue].represent() -> Text
 
 @override
 routine Dict[TKey, TValue].diagnose() -> Text
+    if me.is_empty()
+        return me.full_type_name() + "(count: 0, {:})"
     return f"{me.full_type_name()}(count: {me.count}, {{{me.entries_text()}}})"
 
 # ============================================================================
