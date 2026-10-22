@@ -76,7 +76,7 @@ through a `.rf` module the program imports (section 18).
 10. **A result you do not need takes no marker** (`drop` and `discard` are SF-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
-    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Atomic.fetch_*`/`swap`), which get none.
+    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Unbroken.fetch_*`/`swap`), which get none.
     Other notes: `until false` gets SF-W304 with the quick fix "Write 'loop'", the body of `until true` gets
     SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `suflae check --json`
@@ -936,7 +936,7 @@ each entry in ages
   `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Integer]]()`). A type rebuilds itself in
   `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
   builder's own: a program that writes or calls `from_serial` gets SF-S809 and uses `sv.to[T]()` instead. Every
-  collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `CircularList`), a dictionary's keys
+  collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `RotatableList`), a dictionary's keys
   from their text (`sv.to[Dict[Integer, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
   read back: naming it in `sv.to[T]()` is SF-S813.
 - A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is SF-G250, which names that spelling.
@@ -957,9 +957,9 @@ each entry in ages
   `xs.enumerate()` (pairs `(Integer, T)`). A negative index crashes with `NegativeIndexError`; count from the
   end with `^` (`xs[^1]`).
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
-  `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`, `CircularList`. A `List` keeps its elements from the first
+  `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`, `RotatableList`. A `List` keeps its elements from the first
   place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
-  `CircularList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
+  `RotatableList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
   and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Array[T, COUNT]` is RazorForge's
   fixed-size record, counted and indexed with `Integer` too. RazorForge's `SplitList` / `SplitArray`
   (structure-of-arrays layouts) are not available in Suflae.
@@ -1064,7 +1064,7 @@ using FileManager.open_write(at: out) as sink
   A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
   There is no `defer`.
 - A byte flow (`FileSource`, `FileSink`, `stdin()`, `stdout()`) is read with `pull(max:)` and written with
-  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places such as `Atomic`, where
+  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places such as `Unbroken`, where
   reading again gives the same value. `migrate --step verbs` rewrites the old `load` / `store` on a flow.
 
 ## 16. Concurrency

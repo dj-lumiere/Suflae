@@ -101,7 +101,7 @@ file only once its other old spellings are gone.
 - Channels are `Mailbox[T]` (`add_last`, `add_last_if_room`, `remove_first`, `close`, `each x in m`). Default
   `migrate` lists each `make_channel` for a rewrite by hand.
 - `List` keeps its elements from the first place on. The ring operations (`rotate_left`, `keep_last`, ...) are
-  `CircularList`'s (default `migrate` lists them).
+  `RotatableList`'s (default `migrate` lists them).
 - `Signals` is `CpuEventManager` in `System/Cpu`, with one handler slot per event kind (`migrate --step
   cpu-events`).
 - The time is read with `Clock.now()`, `Clock.monotonic()` and `CpuClock.now()` (the build error on `Moment.now`
@@ -127,6 +127,9 @@ file only once its other old spellings are gone.
   for.
 - Byte flows (`FileSource`, `FileSink`, `stdin()`, `stdout()`) read with `pull(max:)` and write with `push(data:)`
   (`migrate --step verbs`).
+- `Atomic[T]` is `Unbroken[T]` (a value whose one change is never broken partway), and `CircularList[T]` is
+  `RotatableList[T]`. The routines keep their names. Default `migrate` and `migrate --step type-names` rewrite the
+  old names, and a remaining old name is a build error that names the new one.
 - The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
   `all_off()` is gone, and its build error names `none`.
 

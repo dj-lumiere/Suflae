@@ -43,4 +43,30 @@ public class ReleaseHintTests
                                        """);
         Assert.Contains(expectedSubstring: "write 'try halve(...)'", actualString: errors);
     }
+
+    [Theory]
+    [InlineData("Atomic[S64]", "It is called 'Unbroken' now (migrate --step type-names rewrites it).")]
+    [InlineData("CircularList[S64]", "It is called 'RotatableList' now (migrate --step type-names rewrites it).")]
+    public void RenamedType_NamesTheNewName(string type, string hint)
+    {
+        string errors = Errors(source: $"""
+                                        routine take(x: {type}) -> S64
+                                            return 0
+
+                                        routine start()
+                                            return
+                                        """);
+        Assert.Contains(expectedSubstring: hint, actualString: errors);
+    }
+
+    [Fact]
+    public void RenamedTypeCreated_NamesTheNewName()
+    {
+        string errors = Errors(source: """
+                                       routine start()
+                                           var hits = Atomic[S64](initial: 0)
+                                       """);
+        Assert.Contains(expectedSubstring: "It is called 'Unbroken' now (migrate --step type-names rewrites it).",
+            actualString: errors);
+    }
 }

@@ -3,7 +3,7 @@ module System
 # Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
 # checks that the two still match.
 
-### Integer-indexed read access for ordered sequences (List, CircularList, Array, BitArray, BitList).
+### Integer-indexed read access for ordered sequences (List, RotatableList, Array, BitArray, BitList).
 ### Provides the `[]` subscript operator with U64 integer keys.
 ### Back-index (`^n`) is handled as a separate overload by each conforming type.
 ### Bounds violations throw at runtime.

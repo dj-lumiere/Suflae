@@ -107,7 +107,7 @@ internal static class WrapperForwarderSynthesis
         // ALL scanned stdlib programs — eager `module System` AND the on-demand modules (e.g. `module
         // Collections`), both fully parsed by the scan before this runs. Forwarders appended to an on-demand
         // program register when that module later loads. Without this, `Collections`-module wrappers
-        // (CircularList/SortedList/…) got NO forwarders (over-prune at codegen) while `System`-module ones
+        // (RotatableList/SortedList/…) got NO forwarders (over-prune at codegen) while `System`-module ones
         // (List/Dict/Set) worked.
         List<(Program Program, string FilePath, string Module)> allProgs = programs.ToList();
 
@@ -237,7 +237,7 @@ internal static class WrapperForwarderSynthesis
             return;
         }
 
-        // `inner.Type.Name` is the module-qualified owner ("System.List", "Collections.CircularList") — a
+        // `inner.Type.Name` is the module-qualified owner ("System.List", "Collections.RotatableList") — a
         // TypeExpression keeps its args in GenericArguments, so Name has no `[..]` to strip. This is
         // the exact key of the member index, so only that module's own members are forwarded.
         string innerModuleOwner = innerType.Name;

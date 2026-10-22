@@ -7,7 +7,7 @@ module System/Numerics
 ###
 ### `S256` is the widest fixed-width signed integer, for wide intermediate results, cryptographic
 ### computations, and values that can't fit in `S128`. Note that `S256` does not
-### implement `AtomicType` because hardware atomic operations on 256-bit values
+### implement `UnbrokenType` because hardware atomic operations on 256-bit values
 ### are not available.
 @rf("S256")
 record S256

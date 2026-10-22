@@ -8,7 +8,7 @@ import BuilderQuery
 ### position is O(1). Adding or removing at the back is O(1) amortized: the list moves into a memory twice the size
 ### when it runs out of room. Adding or removing anywhere else is O(n), since the elements after it move. One list
 ### is a stack (`add_last` / `remove_last`). For a queue, a deque, rotation or a latest-N history, use
-### `CircularList[T]`, which is O(1) at both ends.
+### `RotatableList[T]`, which is O(1) at both ends.
 ###
 ### Positions count from 0. A negative position crashes with `NegativeIndexError`, one at or past the end
 ### with `IndexOutOfBoundsError`.

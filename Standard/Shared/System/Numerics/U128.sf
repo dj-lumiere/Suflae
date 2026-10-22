@@ -8,7 +8,7 @@ module System/Numerics
 ###
 ### `U128` is used for cryptographic keys, UUIDs, very large counters, and
 ### other data that requires more than 64 bits. Note that `U128` does not
-### implement `AtomicType` because hardware atomic operations on 128-bit
+### implement `UnbrokenType` because hardware atomic operations on 128-bit
 ### values are not universally available.
 @rf("U128")
 record U128

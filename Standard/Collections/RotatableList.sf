@@ -4,12 +4,12 @@ import BuilderQuery
 
 ### A growable ring of elements, counted and indexed with `Integer`, with O(1) adding and removing at both ends.
 ###
-### `CircularList[T]` keeps its elements in a `Memory[T]` used as a ring: the elements sit one after another from a
+### `RotatableList[T]` keeps its elements in a `Memory[T]` used as a ring: the elements sit one after another from a
 ### first place, wrapping past the end of the memory to its start. Reading or writing by position is O(1). Adding or
 ### removing at the front or the back is O(1) amortized: the ring moves into a memory twice the size when it runs out
 ### of room. Inserting or removing in the middle is O(n), since the elements after it move.
 ###
-### A circular list is a queue (`add_last` / `remove_first`) and a deque. It also rotates (`rotate_left`,
+### A rotatable list is a queue (`add_last` / `remove_first`) and a deque. It also rotates (`rotate_left`,
 ### `rotate_right`) and keeps a fixed-size latest-N history (`add_last_keeping`, `keep_last`) without moving into a
 ### new memory. A `List[T]` keeps its elements from the first place on instead, so adding at its front moves them all.
 ###
@@ -28,8 +28,8 @@ import BuilderQuery
 ### | `sort` | O(n log n) |
 ### | Iteration | O(n) |
 ###
-### :typeparam T: The element type stored in the circular list.
-entity CircularList[T]
+### :typeparam T: The element type stored in the rotatable list.
+entity RotatableList[T]
 relates MemoryEmittable[T] as Iter
 obeys Iterable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
@@ -44,24 +44,24 @@ obeys Iterable[T], Container, Equatable, Copyable, ListLiteral[T]
 # ============================================================================
 
 ### Creates an empty list.
-routine CircularList[T]() -> CircularList[T]
-    return CircularList[T](items: Memory[T](capacity: 0), head: 0, count: 0)
+routine RotatableList[T]() -> RotatableList[T]
+    return RotatableList[T](items: Memory[T](capacity: 0), head: 0, count: 0)
 
 ### Creates an empty list with room for at least `capacity` elements.
 ### :param capacity: The number of elements to make room for.
-routine CircularList[T](capacity: Integer) -> CircularList[T]
-    return CircularList[T](items: Memory[T](capacity: capacity), head: 0, count: 0)
+routine RotatableList[T](capacity: Integer) -> RotatableList[T]
+    return RotatableList[T](items: Memory[T](capacity: capacity), head: 0, count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
 ### :param count: The number of elements.
 ### :param fill_value: The value every element starts as.
-routine CircularList[T](count: Integer, fill_value: T) -> CircularList[T]
-    return CircularList[T](items: Memory[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
+routine RotatableList[T](count: Integer, fill_value: T) -> RotatableList[T]
+    return RotatableList[T](items: Memory[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
 
 ### Builds a list from its serialized element list.
 ### :throws: {SerialShapeError} when the value is not a list or an element does not fit `T`.
-failable common routine CircularList[T].from_serial(value: SerialValue) -> CircularList[T]
-    var result = CircularList[T]()
+failable common routine RotatableList[T].from_serial(value: SerialValue) -> RotatableList[T]
+    var result = RotatableList[T]()
     when value
         is RF::System.List[SerialValue] as items =>
             each item in items
@@ -72,8 +72,8 @@ failable common routine CircularList[T].from_serial(value: SerialValue) -> Circu
 
 ### Builds the list a `[a, b, c]` literal writes.
 ### :param elements: The elements, in order.
-common routine CircularList[T].from_literal(elements...: T) -> CircularList[T]
-    var result = CircularList[T](capacity: elements.count().to[Integer]())
+common routine RotatableList[T].from_literal(elements...: T) -> RotatableList[T]
+    var result = RotatableList[T](capacity: elements.count().to[Integer]())
     var i: U64 = 0
     # Each element moves into the list: `add_last` makes the list's holder, and the caller releases the
     # literal's own afterwards.
@@ -87,15 +87,15 @@ common routine CircularList[T].from_literal(elements...: T) -> CircularList[T]
 # ============================================================================
 
 ### Returns the number of elements.
-routine CircularList[T].count() -> Integer
+routine RotatableList[T].count() -> Integer
     return me.count.to[Integer]()
 
 ### Returns the number of elements the list holds without growing.
-routine CircularList[T].capacity() -> Integer
+routine RotatableList[T].capacity() -> Integer
     return me.items.room().to[Integer]()
 
 ### Returns whether the list has no elements.
-routine CircularList[T].is_empty() -> Bool
+routine RotatableList[T].is_empty() -> Bool
     return me.count == 0
 
 # ============================================================================
@@ -104,7 +104,7 @@ routine CircularList[T].is_empty() -> Bool
 
 ### Adds `value` at the back. The list moves into a bigger memory when it is full.
 ### :param value: The value to add.
-routine CircularList[T].add_last(value: T)
+routine RotatableList[T].add_last(value: T)
     me.make_room(extra: 1)
     me.items.put(position: me.place(index: me.count), value: value)
     me.count = me.count + 1
@@ -112,7 +112,7 @@ routine CircularList[T].add_last(value: T)
 
 ### Adds `value` at the front. The list moves into a bigger memory when it is full.
 ### :param value: The value to add.
-routine CircularList[T].add_first(value: T)
+routine RotatableList[T].add_first(value: T)
     me.make_room(extra: 1)
     me.head = if me.head == 0 then me.items.room() - 1 else me.head - 1
     me.items.put(position: me.head, value: value)
@@ -121,7 +121,7 @@ routine CircularList[T].add_first(value: T)
 
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
-routine CircularList[T].add_range(you: Iterable[T])
+routine RotatableList[T].add_range(you: Iterable[T])
     each value in you
         me.add_last(value: value)
     return
@@ -130,7 +130,7 @@ routine CircularList[T].add_range(you: Iterable[T])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-failable routine CircularList[T].add_range(source: CircularList[T], from: Integer, count: Integer)
+failable routine RotatableList[T].add_range(source: RotatableList[T], from: Integer, count: Integer)
     var first = position_of(value: from)
     var n = position_of(value: count)
     if first + n > source.count
@@ -145,7 +145,7 @@ failable routine CircularList[T].add_range(source: CircularList[T], from: Intege
 ### Inserts `value` at `index`, moving the elements from there one place back.
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
-failable routine CircularList[T].add_at(index: Integer, value: T)
+failable routine RotatableList[T].add_at(index: Integer, value: T)
     var at = position_of(value: index)
     if at > me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)
@@ -158,7 +158,7 @@ failable routine CircularList[T].add_at(index: Integer, value: T)
 
 ### Removes and returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
-failable routine CircularList[T].remove_last() -> T
+failable routine RotatableList[T].remove_last() -> T
     if me.count == 0
         throw AbsentValueError()
     var value = me.items.take_at(position: me.place(index: me.count - 1))
@@ -167,7 +167,7 @@ failable routine CircularList[T].remove_last() -> T
 
 ### Removes and returns the first element.
 ### :throws: {AbsentValueError} The list is empty.
-failable routine CircularList[T].remove_first() -> T
+failable routine RotatableList[T].remove_first() -> T
     if me.count == 0
         throw AbsentValueError()
     var value = me.items.take_at(position: me.head)
@@ -176,7 +176,7 @@ failable routine CircularList[T].remove_first() -> T
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
-failable routine CircularList[T].remove_at(index: Integer) -> T
+failable routine RotatableList[T].remove_at(index: Integer) -> T
     var at = me.checked_position(index: index)
     me.straighten()
     var value = me.items.take_at(position: at)
@@ -186,7 +186,7 @@ failable routine CircularList[T].remove_at(index: Integer) -> T
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
-failable routine CircularList[T].truncate(new_count: Integer)
+failable routine RotatableList[T].truncate(new_count: Integer)
     var kept = position_of(value: new_count)
     if kept > me.count
         throw IndexOutOfBoundsError(index: kept, count: me.count)
@@ -194,21 +194,21 @@ failable routine CircularList[T].truncate(new_count: Integer)
     return
 
 ### Removes every element and keeps the memory.
-routine CircularList[T].clear()
+routine RotatableList[T].clear()
     me.cut(kept: 0)
     return
 
 ### Discards the oldest elements so at most the latest `n` remain, keeping the memory: the fixed-space step of a
 ### rolling "keep the latest N" history. When `n` is at least the count, nothing changes.
 ### :param n: The maximum number of most-recent elements to keep.
-failable routine CircularList[T].keep_last(n: Integer)
+failable routine RotatableList[T].keep_last(n: Integer)
     me.drop_oldest(kept: position_of(value: n))
     return
 
 ### Discards the newest elements so at most the first `n` remain, keeping the memory. When `n` is at least the
 ### count, nothing changes.
 ### :param n: The maximum number of oldest elements to keep.
-routine CircularList[T].keep_first(n: Integer)
+routine RotatableList[T].keep_first(n: Integer)
     if n < me.count.to[Integer]()
         me.truncate(new_count: n)
     return
@@ -217,7 +217,7 @@ routine CircularList[T].keep_first(n: Integer)
 ### fixed-size latest-N history, which never needs more room than `keeping`. With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of most-recent elements to keep afterward.
-failable routine CircularList[T].add_last_keeping(value: T, keeping: Integer)
+failable routine RotatableList[T].add_last_keeping(value: T, keeping: Integer)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -230,7 +230,7 @@ failable routine CircularList[T].add_last_keeping(value: T, keeping: Integer)
 ### With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of elements to keep afterward.
-failable routine CircularList[T].add_first_keeping(value: T, keeping: Integer)
+failable routine RotatableList[T].add_first_keeping(value: T, keeping: Integer)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -242,7 +242,7 @@ failable routine CircularList[T].add_first_keeping(value: T, keeping: Integer)
 
 ### Makes room for at least `new_capacity` elements without growing again.
 ### :param new_capacity: The number of elements to make room for.
-routine CircularList[T].reserve(new_capacity: Integer)
+routine RotatableList[T].reserve(new_capacity: Integer)
     if new_capacity > me.items.room().to[Integer]()
         me.straighten()
         me.items.grow_to(room: new_capacity.to[U64]())
@@ -254,49 +254,49 @@ routine CircularList[T].reserve(new_capacity: Integer)
 
 ### Returns the first element.
 ### :throws: {AbsentValueError} The list is empty.
-failable routine CircularList[T].first() -> T
+failable routine RotatableList[T].first() -> T
     if me.count == 0
         throw AbsentValueError()
     return me.items.at(position: me.head)
 
 ### Returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
-failable routine CircularList[T].last() -> T
+failable routine RotatableList[T].last() -> T
     if me.count == 0
         throw AbsentValueError()
     return me.items.at(position: me.place(index: me.count - 1))
 
 ### Returns the first element, or `default_value` if the list is empty.
 ### :param default_value: The value to return when there is no element.
-routine CircularList[T].first_or_default(default_value: T) -> T
+routine RotatableList[T].first_or_default(default_value: T) -> T
     if me.count == 0
         return default_value
     return me.first()
 
 ### Returns the last element, or `default_value` if the list is empty.
 ### :param default_value: The value to return when there is no element.
-routine CircularList[T].last_or_default(default_value: T) -> T
+routine RotatableList[T].last_or_default(default_value: T) -> T
     if me.count == 0
         return default_value
     return me.last()
 
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
-failable routine CircularList[T].getitem(index: Integer) -> T
+failable routine RotatableList[T].getitem(index: Integer) -> T
     return me.items.at(position: me.place(index: me.checked_position(index: index)))
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
-failable routine CircularList[T].setitem(index: Integer, value: T)
+failable routine RotatableList[T].setitem(index: Integer, value: T)
     me.items.put(position: me.place(index: me.checked_position(index: index)), value: value)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
 ### list are skipped, and a range that counts down (`by -1`) gives the elements in reverse.
 ### :param range: The positions to copy.
-routine CircularList[T].getitem(range: Range[Integer]) -> CircularList[T]
-    var result = CircularList[T]()
+routine RotatableList[T].getitem(range: Range[Integer]) -> RotatableList[T]
+    var result = RotatableList[T]()
     var count = me.count.to[Integer]()
     each i in range
         if not i.is_negative() and i < count
@@ -309,13 +309,13 @@ routine CircularList[T].getitem(range: Range[Integer]) -> CircularList[T]
 
 ### Moves the first `n` elements to the back, keeping their order.
 ### :param n: How many positions to rotate by.
-failable routine CircularList[T].rotate_left(n: Integer)
+failable routine RotatableList[T].rotate_left(n: Integer)
     me.turn(count: position_of(value: n))
     return
 
 ### Moves the last `n` elements to the front, keeping their order.
 ### :param n: How many positions to rotate by.
-failable routine CircularList[T].rotate_right(n: Integer)
+failable routine RotatableList[T].rotate_right(n: Integer)
     var shift = position_of(value: n)
     if me.count == 0
         return
@@ -327,12 +327,12 @@ failable routine CircularList[T].rotate_right(n: Integer)
 # ============================================================================
 
 ### Returns a walk over the elements, front to back.
-routine CircularList[T].iter() -> MemoryEmittable[T]
+routine RotatableList[T].iter() -> MemoryEmittable[T]
     return me.items.walk_at(first: me.head, count: me.count)
 
 ### Returns whether both lists hold equal elements in the same order.
 ### :param you: The other list.
-routine CircularList[T].eq(you: CircularList[T]) -> Bool
+routine RotatableList[T].eq(you: RotatableList[T]) -> Bool
 needs T obeys Equatable
     if me.count != you.count
         return false
@@ -345,7 +345,7 @@ needs T obeys Equatable
 
 ### Returns whether some element equals `value` (`xs have v`).
 ### :param value: The value to look for.
-routine CircularList[T].has(value: T) -> Bool
+routine RotatableList[T].has(value: T) -> Bool
 needs T obeys Equatable
     each element in me
         if element == value
@@ -355,30 +355,30 @@ needs T obeys Equatable
 ### Returns whether `value` is not in this value: the opposite of `has`.
 ### :param value: The value to look for.
 ### :returns: `true` when `value` is absent.
-routine CircularList[T].lacks(value: T) -> Bool
+routine RotatableList[T].lacks(value: T) -> Bool
 needs T obeys Equatable
     return not me.has(value)
 
 ### Returns the list as text: `[1, 2, 3]`.
 @override
-routine CircularList[T].represent() -> Text
+routine RotatableList[T].represent() -> Text
     return me.elements_text()
 
 ### Returns the list's diagnostic text: its type, count and elements.
 @override
-routine CircularList[T].diagnose() -> Text
+routine RotatableList[T].diagnose() -> Text
     return f"{me.full_type_name()}(count: {me.count}, {me.elements_text()})"
 
 ### Returns a new list holding copies of the elements.
-routine CircularList[T].duplicate() -> CircularList[T]
-    var result = CircularList[T](capacity: me.count.to[Integer]())
+routine RotatableList[T].duplicate() -> RotatableList[T]
+    var result = RotatableList[T](capacity: me.count.to[Integer]())
     each element in me
         result.add_last(value: element)
     return result
 
 ### Returns the list as a `SerialValue.List` of its serialized elements.
 @override
-routine CircularList[T].serialize() -> SerialValue
+routine RotatableList[T].serialize() -> SerialValue
     var result = RF::System.List[SerialValue]()
     each element in me
         result.add_last(value: element.serialize())
@@ -389,7 +389,7 @@ routine CircularList[T].serialize() -> SerialValue
 # ============================================================================
 
 ### Sorts the elements in ascending order. The sort is stable: equal elements keep their order.
-routine CircularList[T].sort()
+routine RotatableList[T].sort()
 needs T obeys Comparable
     me.straighten()
     me.items.view(first: 0, room: me.count).sort()
@@ -397,13 +397,13 @@ needs T obeys Comparable
 
 ### Sorts the elements so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
-routine CircularList[T].sort_by(compare: Callable[(T, T), Bool])
+routine RotatableList[T].sort_by(compare: Callable[(T, T), Bool])
     me.straighten()
     me.items.view(first: 0, room: me.count).sort_by(compare: compare)
     return
 
 ### Returns a new list of the elements in ascending order.
-routine CircularList[T].sorted() -> CircularList[T]
+routine RotatableList[T].sorted() -> RotatableList[T]
 needs T obeys Comparable
     var result = me.duplicate()
     result.sort()
@@ -411,7 +411,7 @@ needs T obeys Comparable
 
 ### Returns a new list of the elements, ordered by `compare`.
 ### :param compare: Returns whether its first argument goes before its second.
-routine CircularList[T].sorted_by(compare: Callable[(T, T), Bool]) -> CircularList[T]
+routine RotatableList[T].sorted_by(compare: Callable[(T, T), Bool]) -> RotatableList[T]
     var result = me.duplicate()
     result.sort_by(compare: compare)
     return result
@@ -419,12 +419,12 @@ routine CircularList[T].sorted_by(compare: Callable[(T, T), Bool]) -> CircularLi
 ### Swaps the elements at `first` and `second` in place.
 ### :param first: One position.
 ### :param second: The other position.
-failable routine CircularList[T].swap(first: Integer, second: Integer)
+failable routine RotatableList[T].swap(first: Integer, second: Integer)
     me.items.swap_at(first: me.place(index: me.checked_position(index: first)), second: me.place(index: me.checked_position(index: second)))
     return
 
 ### Reverses the order of the elements.
-routine CircularList[T].reverse_in_place()
+routine RotatableList[T].reverse_in_place()
     me.straighten()
     me.items.view(first: 0, room: me.count).reverse()
     return
@@ -435,19 +435,19 @@ routine CircularList[T].reverse_in_place()
 
 ### The memory place of the element at `index`, counted from the first one.
 @inline
-secret routine CircularList[T].place(index: U64) -> U64
+secret routine RotatableList[T].place(index: U64) -> U64
     var place = me.head + index
     var room = me.items.room()
     return if place >= room then place - room else place
 ### The position `index` names, crashing unless it is the position of an element.
-secret failable routine CircularList[T].checked_position(index: Integer) -> U64
+secret failable routine RotatableList[T].checked_position(index: Integer) -> U64
     var at = position_of(value: index)
     if at >= me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)
     return at
 
 ### Tears down the elements from position `kept` on, keeping the first `kept` (at most the count).
-secret routine CircularList[T].cut(kept: U64)
+secret routine RotatableList[T].cut(kept: U64)
     var i = kept
     until i >= me.count
         me.items.erase_at(position: me.place(index: i))
@@ -456,14 +456,14 @@ secret routine CircularList[T].cut(kept: U64)
     return
 
 ### Tears down the oldest elements until at most `kept` remain.
-secret routine CircularList[T].drop_oldest(kept: U64)
+secret routine RotatableList[T].drop_oldest(kept: U64)
     until me.count <= kept
         me.items.erase_at(position: me.head)
         me.advance_head()
     return
 
 ### Moves the first `count` elements to the back, keeping their order.
-secret routine CircularList[T].turn(count: U64)
+secret routine RotatableList[T].turn(count: U64)
     if me.count == 0
         return
     var shift = count % me.count
@@ -478,20 +478,20 @@ secret routine CircularList[T].turn(count: U64)
     return
 
 ### Forgets the last `count` elements (already handed out or torn down).
-secret routine CircularList[T].forget(count: U64)
+secret routine RotatableList[T].forget(count: U64)
     me.count = me.count - count
     if me.count == 0
         me.head = 0
     return
 
 ### Moves the front past the first element (already handed out or torn down).
-secret routine CircularList[T].advance_head()
+secret routine RotatableList[T].advance_head()
     me.head = me.place(index: 1)
     me.forget(count: 1)
     return
 
 ### Lays the elements out from the memory's first place, so positions are places. The order does not change.
-secret routine CircularList[T].straighten()
+secret routine RotatableList[T].straighten()
     if me.head == 0
         return
     me.items.turn(count: me.head)
@@ -500,7 +500,7 @@ secret routine CircularList[T].straighten()
 
 ### Moves into a bigger memory when fewer than `extra` places are free: twice the room, at least four, or as much
 ### as needed.
-secret routine CircularList[T].make_room(extra: U64)
+secret routine RotatableList[T].make_room(extra: U64)
     var needed = me.count + extra
     var room = me.items.room()
     if needed <= room
@@ -513,7 +513,7 @@ secret routine CircularList[T].make_room(extra: U64)
     return
 
 ### The elements as text: `[1, 2, 3]`.
-secret routine CircularList[T].elements_text() -> Text
+secret routine RotatableList[T].elements_text() -> Text
     var result = "["
     var first = true
     each element in me

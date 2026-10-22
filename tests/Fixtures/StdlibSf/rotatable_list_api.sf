@@ -1,17 +1,17 @@
-module Tests/StdlibSf/CircularListApi
+module Tests/StdlibSf/RotatableListApi
 
 import IO/Console
 import Collections
 import ObjectHacker
 
-# A CircularList keeps its elements in a ring: it is a queue and a deque, rotates, and keeps a fixed-size latest-N
+# A RotatableList keeps its elements in a ring: it is a queue and a deque, rotates, and keeps a fixed-size latest-N
 # history. A List keeps them from the first place on, so it adds and removes at its front by moving the rest.
 
 entity Box
     id: Integer
 
 routine start()
-    var xs = CircularList[Integer](capacity: 4)
+    var xs = RotatableList[Integer](capacity: 4)
     xs.add_last(value: 2)
     xs.add_last(value: 3)
     xs.add_first(value: 1)
@@ -34,7 +34,7 @@ routine start()
     xs.reverse_in_place()
     show(f"reversed: {xs}")
 
-    var history = CircularList[Text](capacity: 3)
+    var history = RotatableList[Text](capacity: 3)
     each word in ["a", "b", "c", "d", "e"]
         history.add_last_keeping(value: word, keeping: 3)
     show(f"history: {history} capacity={history.capacity()}")
@@ -43,7 +43,7 @@ routine start()
     history.clear()
     show(f"cleared: {history} empty={history.is_empty()}")
 
-    var queue = CircularList[Integer]()
+    var queue = RotatableList[Integer]()
     var i = 0
     until i >= 10
         queue.add_last(value: i)
@@ -58,7 +58,7 @@ routine start()
 
     var box = Box(id: 1)
     var seen = watch(target: box)
-    var boxes = CircularList[Box]()
+    var boxes = RotatableList[Box]()
     boxes.add_last(value: box)
     boxes.add_first(value: box)
     boxes.add_at(index: 1, value: box)
@@ -66,14 +66,14 @@ routine start()
     boxes.remove_first()
     boxes.truncate(new_count: 1)
     box = Box(id: 0)
-    boxes = CircularList[Box]()
+    boxes = RotatableList[Box]()
     show(f"released: {not seen.is_alive()}")
 
-    var empty = CircularList[Integer]()
+    var empty = RotatableList[Integer]()
     var removed = try empty.remove_first()
     show(f"empty remove: {removed is None}")
 
-    var words: CircularList[Text] = ["alpha", "beta", "gamma"]
+    var words: RotatableList[Text] = ["alpha", "beta", "gamma"]
     words.rotate_left(n: 1)
     words.swap(first: 0, second: 2)
     show(f"swap: {words}")
