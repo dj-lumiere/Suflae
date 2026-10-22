@@ -932,7 +932,8 @@ each entry in ages
 - A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
   on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Iterable[S64]` builds a `List[S64]`, and
   `{1: "a"}` given to an `Iterable[DictEntry[U16, Text]]` builds a `Dict[U16, Text]`. With nothing to go by,
-  `[1, 2]` is a `List[Integer]`.
+  `[1, 2]` is a `List[Integer]`. The empty set literal is `{}` and the empty dict literal `{:}`
+  (`s[b] = {:}` on a `List[Dict[Integer, Integer]]`). A `{}` where a dict is expected is SF-S558.
 - `sv.to[List[Integer]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
   `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Integer]]()`). A type rebuilds itself in
   `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
