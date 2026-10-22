@@ -135,15 +135,17 @@ routine ByteSize.eq(you: ByteSize) -> Bool
 @rf("ByteSize.compare")
 routine ByteSize.compare(you: ByteSize) -> ComparisonSign
 
-### Returns the display form of this byte size.
-### Breaks the raw byte count into binary unit components (PiB, TiB, GiB, MiB,
-### KiB, B) and concatenates the non-zero parts, matching the component-wise
-### style of `Duration.represent`.
+### Returns the display form of this byte size: the byte count with its digits
+### grouped in threes by `_` and a `B` after it, `1_500_000_000B`, `4_096B`,
+### `999B`, `0B`. The count is never split into units, so the text is always
+### exact. To show it in a unit, pick one with `kb_size()`, `mib_size()` and the
+### other conversion routines.
 ### :returns: The resulting `Text` value.
 @rf("ByteSize.represent")
 routine ByteSize.represent() -> Text
 
-### Returns the diagnostic form of this byte size.
+### Returns the diagnostic form of this byte size, the call that makes it:
+### `ByteSize(bytes: 1500000000)`.
 ### :returns: The resulting `Text` value.
 @rf("ByteSize.diagnose")
 routine ByteSize.diagnose() -> Text

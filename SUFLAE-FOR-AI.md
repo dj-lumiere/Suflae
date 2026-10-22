@@ -213,7 +213,8 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 - A literal out of range for its type is a build error (SF-S010): `-1` never fits an unsigned type; write
   `U8_MAX`, `U64_MAX`.
 - Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
-  `1gb`, `1gib`.
+  `1gb`, `1gib`. A size displays as its byte count grouped in threes by `_`: `{4kib}` is `4_096B`, never split
+  into units (`kb_size()`, `mib_size()`, ... convert to a unit).
 - Duration `//` and `%` leave a remainder that is never negative (`-10s // 3s` is `-4`), and overflow or `// 0s`
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). The time is read from `Clock`, called on the type: `Clock.now()` (a `Moment`), `Clock.monotonic()` (a
