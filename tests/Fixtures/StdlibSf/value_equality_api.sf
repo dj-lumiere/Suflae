@@ -1,0 +1,71 @@
+module Tests/StdlibSf/ValueEqualityApi
+
+# `==` compares values and `===` asks for the same entity. A record and an entity get `==` without
+# `obeys Equatable` when every member variable has one, a record gets a hash the same way, and an
+# entity hashes only when it declares `obeys Hashable`.
+entity Player
+    name: Text
+
+entity Badge
+obeys Hashable
+    code: Text
+
+record Team
+    lead: Player
+    size: Integer
+
+record Point
+    x: Integer
+    y: Integer
+
+record Named
+    name: Text
+    size: Integer
+
+routine same[T](a: T, b: T) -> Bool
+needs T obeys Equatable
+    return a == b
+
+routine start()
+    var a = Player("Ada")
+    var b = Player("Ada")
+    show(f"a == b: {a == b}")
+    show(f"a === b: {a === b}")
+    var c = a
+    show(f"a === c: {a === c}")
+    b.name = "Bo"
+    show(f"after rename: {a == b}")
+
+    show(f"teams equal: {Team(a, 3) == Team(Player("Ada"), 3)}")
+    show(f"teams differ: {Team(a, 3) != Team(b, 3)}")
+    show(f"generic same: {same(Point(1, 2), Point(1, 2))}")
+    show(f"generic entity: {same(a, Player("Ada"))}")
+
+    var points = Set[Point]()
+    points.add(Point(1, 2))
+    points.add(Point(1, 2))
+    points.add(Point(3, 2))
+    show(f"points in set: {points.count()}")
+
+    var built = "Ad" + "a"
+    show(f"text hash: {"Ada".hash(k0: 3, k1: 5) == built.hash(k0: 3, k1: 5)}")
+    var texts = Set[Text]()
+    texts.add("Ada")
+    show(f"text found: {texts.has(built)}")
+
+    var big: Integer = 18446744073709551616
+    var two: Integer = 2
+    var made = two ** 64
+    show(f"integer hash: {big.hash(k0: 3, k1: 5) == made.hash(k0: 3, k1: 5)}")
+    var numbers = Set[Integer]()
+    numbers.add(big)
+    show(f"integer found: {numbers.has(made)}")
+
+    var sizes = Dict[Named, Integer]()
+    sizes[Named("Ada", big)] = 7
+    show(f"record key: {sizes[Named(built, made)]}")
+
+    var badges = Set[Badge]()
+    badges.add(Badge("A1"))
+    badges.add(Badge("A1"))
+    show(f"badges in set: {badges.count()}")

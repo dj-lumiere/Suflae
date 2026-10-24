@@ -1,18 +1,16 @@
 module Tests/StdlibSf/EntityEqualityApi
 
-# `==` on an entity the program writes, and on a record holding one, when the entity declares `obeys Equatable`,
-# and a record holding a `Hashable` entity as a `Set` element.
+# `==` on an entity the program writes and on a record holding one, with no `obeys Equatable`, and a record
+# holding an entity that declares `obeys Hashable` as a `Set` element.
 entity Player
-obeys Equatable, Hashable
+obeys Hashable
     name: Text
 
 record Team
-obeys Equatable
     lead: Player
     size: Integer
 
 record Seat
-obeys Equatable, Hashable
     holder: Player
     row: Integer
 

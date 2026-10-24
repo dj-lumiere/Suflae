@@ -197,7 +197,7 @@ public class DocFindingsTests
                             name: Text
 
                         record Team
-                        obeys Equatable
+                        obeys Comparable
                             lead: Player
                             size: Integer
 
@@ -209,7 +209,7 @@ public class DocFindingsTests
         AnalysisResult result = AnalyzeSaSuflae(source: source);
         Assert.Contains(collection: result.Errors,
             filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
-                         e.Message.Contains(value: "`routine Team.eq(you: Team) -> Bool`"));
+                         e.Message.Contains(value: "`routine Team.compare(you: Team) -> ComparisonSign`"));
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Message.Contains(value: "Viewing") || e.Message.Contains(value: "Roamed"));
     }
@@ -247,23 +247,6 @@ public class DocFindingsTests
                          e.Message.Contains(value: "`routine Keyed.hash(k0: U64, k1: U64) -> U64`"));
         Assert.DoesNotContain(collection: result.Errors,
             filter: e => e.Message.Contains(value: "Keyed.eq"));
-    }
-
-    /// <summary>`==` on an entity is there only when the entity declares `obeys Equatable`.</summary>
-    [Fact]
-    public void Analyze_EntityWithoutEquatable_HasNoEquality()
-    {
-        string source = """
-                        entity Player
-                            name: Text
-
-                        routine start()
-                            var ada = Player(name: "Ada")
-                            show(ada == ada)
-                        """;
-
-        AnalysisResult result = AnalyzeSaSuflae(source: source);
-        Assert.Contains(collection: result.Errors, filter: e => e.Message.Contains(value: "'=='"));
     }
 
     /// <summary>Adding to the list an `each` loop goes through, written in the loop's body, doesn't build.</summary>
