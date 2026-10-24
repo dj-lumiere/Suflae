@@ -214,6 +214,58 @@ public class DocFindingsTests
             filter: e => e.Message.Contains(value: "Viewing") || e.Message.Contains(value: "Roamed"));
     }
 
+    /// <summary>The builder writes a record's `compare` and `hash` only when every member variable has them: an entity
+    /// whose declaration doesn't ask for `Comparable` or `Hashable` has neither, so the record's `obeys` line is
+    /// SF-S702 for each.</summary>
+    [Fact]
+    public void Analyze_RecordHoldingEntity_ComparableAndHashableNeedTheEntitysOwn()
+    {
+        string source = """
+                        entity Player
+                        obeys Equatable
+                            name: Text
+
+                        record Ranked
+                        obeys Comparable
+                            lead: Player
+
+                        record Keyed
+                        obeys Equatable, Hashable
+                            lead: Player
+
+                        routine start()
+                            show(Ranked(lead: Player(name: "Ada")).lead.name)
+                            show(Keyed(lead: Player(name: "Ada")).lead.name)
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
+                         e.Message.Contains(value: "`routine Ranked.compare(you: Ranked) -> ComparisonSign`"));
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
+                         e.Message.Contains(value: "`routine Keyed.hash(k0: U64, k1: U64) -> U64`"));
+        Assert.DoesNotContain(collection: result.Errors,
+            filter: e => e.Message.Contains(value: "Keyed.eq"));
+    }
+
+    /// <summary>`==` on an entity is there only when the entity declares `obeys Equatable`.</summary>
+    [Fact]
+    public void Analyze_EntityWithoutEquatable_HasNoEquality()
+    {
+        string source = """
+                        entity Player
+                            name: Text
+
+                        routine start()
+                            var ada = Player(name: "Ada")
+                            show(ada == ada)
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors, filter: e => e.Message.Contains(value: "'=='"));
+    }
+
     /// <summary>Adding to the list an `each` loop goes through, written in the loop's body, doesn't build.</summary>
     [Fact]
     public void Analyze_ListChangedInItsOwnLoop_ReportsError()

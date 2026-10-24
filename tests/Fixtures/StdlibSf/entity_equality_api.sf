@@ -1,0 +1,31 @@
+module Tests/StdlibSf/EntityEqualityApi
+
+# `==` on an entity the program writes, and on a record holding one, when the entity declares `obeys Equatable`,
+# and a record holding a `Hashable` entity as a `Set` element.
+entity Player
+obeys Equatable, Hashable
+    name: Text
+
+record Team
+obeys Equatable
+    lead: Player
+    size: Integer
+
+record Seat
+obeys Equatable, Hashable
+    holder: Player
+    row: Integer
+
+routine start()
+    var ada = Player(name: "Ada")
+    show(f"same entity: {ada == ada}")
+    show(f"same contents: {ada == Player(name: "Ada")}")
+    show(f"other contents: {ada == Player(name: "Bo")}")
+    show(f"same team: {Team(lead: ada, size: 3) == Team(lead: ada, size: 3)}")
+    show(f"other lead: {Team(lead: ada, size: 3) == Team(lead: Player(name: "Bo"), size: 3)}")
+    show(f"other size: {Team(lead: ada, size: 3) != Team(lead: ada, size: 4)}")
+    var seats = Set[Seat]()
+    seats.add(Seat(holder: ada, row: 1))
+    seats.add(Seat(holder: ada, row: 1))
+    seats.add(Seat(holder: Player(name: "Bo"), row: 1))
+    show(f"seats: {seats.count()}")

@@ -1,0 +1,7 @@
+same entity: true
+same contents: true
+other contents: false
+same team: true
+other lead: false
+other size: true
+seats: 2
