@@ -1,0 +1,34 @@
+module Tests/StdlibSf/OptionalValuesApi
+
+# An entity's E? member variable shows as none when it holds nothing, a record built with positional values wraps a
+# value for a T? member variable, and a failable routine's bare result keeps its declared type under try.
+
+import IO/Console
+
+entity Node
+    value: S64
+    next: Node?
+
+record Slot
+    item: Integer?
+
+failable routine pick(n: S64) -> S64
+    if n < 0
+        throw ElementNotFoundError()
+    return 0
+
+routine start()
+    var tail = Node(value: 2, next: none)
+    var head = Node(value: 1, next: tail)
+    show(tail)
+    show(head)
+    show(f"tail.next: {tail.next}")
+    var slot = Slot(1)
+    show(slot.item)
+    when try pick(n: 3)
+        is None => show("none")
+        else as v => show(f"pick: {v}")
+    when try pick(n: -1)
+        is None => show("pick: none")
+        else as v => show(f"pick: {v}")
+    show("DONE")

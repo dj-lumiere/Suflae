@@ -30,4 +30,6 @@ routine start()
     show(f"removed again: {remove_implant(target: ada, replacing: Hero.attack)}")
     show(f"ada: {ada.attack(power: three)}")
     ada.shout()
+    # The last implant goes too, so the objects of the programs after this one have none.
+    remove_implant(target: ada, replacing: Hero.shout)
     show("DONE")

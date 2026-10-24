@@ -1,0 +1,7 @@
+Node(value: 2, next: none)
+Node(value: 1, next: Node(value: 2, next: none))
+tail.next: none
+1
+pick: 0
+pick: none
+DONE
