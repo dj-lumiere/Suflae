@@ -43,21 +43,23 @@ internal static class ImplantPass
             return true;
         }
 
-        var entities = new HashSet<string>(collection: files.SelectMany(selector: f =>
-            f.Program.Declarations.OfType<EntityDeclaration>().Select(selector: e => e.Name)), comparer: StringComparer.Ordinal);
-        var routines = new Dictionary<(string Owner, string Name), List<RoutineDeclaration>>();
-        foreach ((Program program, _) in files)
+        // An entity is known by its module and name: two modules of one build may each have a type of the same name.
+        var entities = new HashSet<(string Module, string Name)>(collection: files.SelectMany(selector: f =>
+            f.Program.Declarations.OfType<EntityDeclaration>()
+             .Select(selector: e => (ModuleOf(program: f.Program, filePath: f.FilePath), e.Name))));
+        var routines = new Dictionary<(string Owner, string Name), List<(RoutineDeclaration Routine, string FilePath)>>();
+        foreach ((Program program, string declaringFile) in files)
         foreach (RoutineDeclaration routine in program.Declarations.OfType<RoutineDeclaration>())
         {
-            if (Replaceable(routine: routine, entities: entities))
+            if (Replaceable(routine: routine, module: ModuleOf(program: program, filePath: declaringFile), entities: entities))
             {
                 (string, string) key = (routine.OwnerName!, routine.MemberRoutineName!);
-                if (!routines.TryGetValue(key: key, value: out List<RoutineDeclaration>? list))
+                if (!routines.TryGetValue(key: key, value: out List<(RoutineDeclaration, string)>? list))
                 {
                     routines[key: key] = list = [];
                 }
 
-                list.Add(item: routine);
+                list.Add(item: (routine, declaringFile));
             }
         }
 
@@ -73,7 +75,7 @@ internal static class ImplantPass
                 }
 
                 Statement rewritten = calls.VisitStatement(stmt: body);
-                if (Replaceable(routine: routine, entities: entities) &&
+                if (Replaceable(routine: routine, module: ModuleOf(program: program, filePath: filePath), entities: entities) &&
                     Prologue(routine: routine, filePath: filePath) is { } prologue)
                 {
                     var statements = new List<Statement> { prologue };
@@ -95,12 +97,20 @@ internal static class ImplantPass
 
     /// <summary>Whether a routine is a member routine of an entity of the program that an object can have replaced:
     /// not common, without type parameters, every parameter typed, and not one the builder wrote.</summary>
-    private static bool Replaceable(RoutineDeclaration routine, HashSet<string> entities)
+    private static bool Replaceable(RoutineDeclaration routine, string module, HashSet<(string Module, string Name)> entities)
     {
         return routine is { OwnerName: { } owner, MemberRoutineName: { } name, IsCommon: false, HasReceiverTypeArgs: false } &&
-               entities.Contains(item: owner) && routine.GenericParameters is not { Count: > 0 } &&
+               entities.Contains(item: (module, owner)) && routine.GenericParameters is not { Count: > 0 } &&
                routine.Parameters.All(predicate: p => p.Type != null) &&
                !RuntimeContract.ProgramAnnotation.IsWritten(name: name);
+    }
+
+    /// <summary>The module a file belongs to: its <c>module</c> line, or its folder when it has none (a file without
+    /// the line takes its module from where it is).</summary>
+    private static string ModuleOf(Program program, string filePath)
+    {
+        return program.Declarations.OfType<ModuleDeclaration>().FirstOrDefault()?.Path ??
+               Path.GetDirectoryName(path: filePath) ?? filePath;
     }
 
     /// <summary>The name a routine's replacement is kept under: its type, its name and its parameters' names.</summary>
@@ -213,7 +223,7 @@ internal static class ImplantPass
 
     /// <summary>Rewrites <c>implant(...)</c> and <c>remove_implant(...)</c>.</summary>
     private sealed class CallRewriter(
-        Dictionary<(string Owner, string Name), List<RoutineDeclaration>> routines,
+        Dictionary<(string Owner, string Name), List<(RoutineDeclaration Routine, string FilePath)>> routines,
         string filePath,
         Action<SemanticDiagnosticCode, string, SourceLocation> report) : AstRewriter
     {
@@ -302,12 +312,21 @@ internal static class ImplantPass
                 return null;
             }
 
-            if (!routines.TryGetValue(key: (owner, name), value: out List<RoutineDeclaration>? found))
+            if (!routines.TryGetValue(key: (owner, name), value: out List<(RoutineDeclaration Routine, string FilePath)>? declared))
             {
                 Fail(message: $"'{owner}.{name}' is not a member routine of an entity of the program that an object can " +
                               "have replaced (a common routine, a routine with type parameters or one with a parameter " +
                               "without a type cannot).", at: at);
                 return null;
+            }
+
+            // A type of the call's own file is the one its name means there. Another file's type of the same name
+            // (another module) is used only when the file declares none.
+            List<RoutineDeclaration> found = declared.Where(predicate: d => d.FilePath == filePath)
+                                                     .Select(selector: d => d.Routine).ToList();
+            if (found.Count == 0)
+            {
+                found = declared.Select(selector: d => d.Routine).ToList();
             }
 
             if (found.Count > 1)

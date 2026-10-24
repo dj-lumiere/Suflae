@@ -30,7 +30,7 @@ routine Table.apply(to: TypeInfo)
 global memo: Dict[Unknown, Unknown] = Dict[Unknown, Unknown]()
 global routes: List[Text] = List[Text]()
 global trace: List[Text] = List[Text]()
-global calls: Integer = 0
+global fib_runs: Integer = 0
 
 routine Memoize.around(call: Invocation) -> Unknown
     var key = call.args[0]
@@ -49,7 +49,7 @@ routine Traced.around(call: Invocation) -> Unknown
 
 @Memoize(limit: 100)
 routine fib(n: Integer) -> Integer
-    calls = calls + 1
+    fib_runs = fib_runs + 1
     if n < 2
         return n
     return fib(n: n - 1) + fib(n: n - 2)
@@ -80,8 +80,8 @@ entity Hero
     name: Text
 
 routine start()
-    show(f"fib(30) = {fib(n: 30)}, body ran {calls} times")
-    show(f"fib(31) = {fib(n: 31)}, body ran {calls} times")
+    show(f"fib(30) = {fib(n: 30)}, body ran {fib_runs} times")
+    show(f"fib(31) = {fib(n: 31)}, body ran {fib_runs} times")
     var c = Counter(total: 0)
     var five: S64 = 5
     var two: S64 = 2
