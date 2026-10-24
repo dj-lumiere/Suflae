@@ -623,6 +623,7 @@ routine start()
     var c = Account(owner: "Ada", balance: 150)
     show(a === b)            # true: same object
     show(a === c)            # false: another object with the same contents
+    show(a == c)             # true: `==` compares the contents
     return
 ```
 
@@ -635,11 +636,19 @@ routine start()
   resource that must be released at a known point (a file), use `using` (§15).
 - **Identity**: `===` / `!==` compare whether two entity names refer to the same object. On a record or a
   number they are a build error (SF-S440): values have no identity, use `==`.
-- **Equality and order are opt-in.** `obeys Equatable` gives `==`/`!=` (the builder compares member by
-  member unless you write `routine T.eq(you: T) -> Bool`); `obeys Hashable` lets the type be a `Dict` key
-  or `Set` element; `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
-  `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`. Text and numbers already have all
-  of these.
+- **Equality and hashing are automatic, order is opt-in.** `==` / `!=` compare values: every record and every
+  entity has them, with no `obeys` line, when each of its member variables has `==` (the builder compares
+  member by member, a `routine T.eq(you: T) -> Bool` you write takes its place). Two different entities with
+  equal contents are `==` and not `===` (`Player("Ada") == Player("Ada")` is true). A member variable without
+  `==` (a routine value such as `Callable[(), None]`, an optional `T?`) means the type has none: `==` on it, or
+  passing it where `needs T obeys Equatable` is asked, is a build error naming that member variable
+  (SF-S065 / SF-S150). A record also hashes automatically (a `Dict` key or `Set` element, no `obeys`) when every
+  member variable hashes. An entity hashes only when it declares `obeys Hashable`, since its member variables
+  can change while a `Set` or `Dict` holds it: `Set[Player]` without it is SF-S150, and so is a record holding
+  such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
+  `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
+  in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Integer` and
+  `Decimal` hash their value (two equal ones hash the same however they were built).
 - Every type gets `represent()` (what `show` and `f"{x}"` print, e.g. `Point(x: 3, y: 4)`) and
   `diagnose()` (the debug form, `f"{x:?}"`). Write your own to change them.
 
@@ -864,7 +873,7 @@ needs T obeys Greetable
 - `obeys` lines sit under the type's header. A protocol lists the routines a conforming type must have,
   with `Me` for the conforming type. Writing `obeys` is optional: a type that has the routines (same names,
   parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
-  Write it to ask the builder for derived routines (`obeys Hashable`) or to hear about a missing routine at the
+  Write it to ask the builder for derived routines (`obeys Comparable`, an entity's `obeys Hashable`) or to hear about a missing routine at the
   declaration. A type that does not fit is SF-S150 where it is passed, naming the missing or mismatched routine.
   The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is SF-S150.
 - Common protocols: `Equatable`, `Comparable`, `Hashable`, `Emittable[T]`, `Copyable`.
