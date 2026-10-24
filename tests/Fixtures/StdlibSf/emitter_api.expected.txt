@@ -5,6 +5,8 @@ rest: 1
 after the end: none
 big: 4
 big: 3
+zip: 1 one
+zip: 2 two
 dict: 2 c
 sorted list: [1, 1, 3, 4]
 sorted set: {1, 3, 4}

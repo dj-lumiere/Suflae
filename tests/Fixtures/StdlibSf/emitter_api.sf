@@ -29,6 +29,12 @@ routine start()
     each b in big
         show(f"big: {b}")
 
+    # Two sources walked side by side, stopping at the shorter one.
+    var numbers = [1, 2, 3]
+    var words = ["one", "two"]
+    each (n, w) in zip(a: numbers, b: words)
+        show(f"zip: {n} {w}")
+
     # Collecting.
     var pairs = [(2, "b"), (1, "a"), (2, "c")]
     var d = pairs.to[Dict]()

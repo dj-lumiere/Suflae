@@ -187,6 +187,33 @@ public class DocFindingsTests
                          e.Message.Contains(value: "creator"));
     }
 
+    /// <summary>A missing protocol routine is named in the types a Suflae program writes: the record itself, no token
+    /// and no module.</summary>
+    [Fact]
+    public void Analyze_MissingProtocolRoutine_NamesTheWrittenType()
+    {
+        string source = """
+                        entity Player
+                            name: Text
+
+                        record Team
+                        obeys Equatable
+                            lead: Player
+                            size: Integer
+
+                        routine start()
+                            show(Team(lead: Player(name: "Ada"), size: 3).size)
+                            return
+                        """;
+
+        AnalysisResult result = AnalyzeSaSuflae(source: source);
+        Assert.Contains(collection: result.Errors,
+            filter: e => e.Code == SemanticDiagnosticCode.MissingProtocolMemberRoutine &&
+                         e.Message.Contains(value: "`routine Team.eq(you: Team) -> Bool`"));
+        Assert.DoesNotContain(collection: result.Errors,
+            filter: e => e.Message.Contains(value: "Viewing") || e.Message.Contains(value: "Roamed"));
+    }
+
     /// <summary>Adding to the list an `each` loop goes through, written in the loop's body, doesn't build.</summary>
     [Fact]
     public void Analyze_ListChangedInItsOwnLoop_ReportsError()

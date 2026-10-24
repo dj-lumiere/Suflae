@@ -134,3 +134,48 @@ routine Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSou
 ### :returns: The resulting `Tuple[TFirst, TSecond, TThird, TFourth]` value.
 @rf("Zip4Emitter.emit")
 failable routine Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstEmitter, TSecondEmitter, TThirdEmitter, TFourthEmitter].emit() -> Tuple[TFirst, TSecond, TThird, TFourth]
+
+### Returns a lazy adapter that pairs each value of `a` with a value of `b`: `each (name, age) in zip(a: names, b: ages)`.
+### Stops when either source runs out.
+### :param a: The first source.
+### :param b: The second source.
+### :returns: The pairs, as a `ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource]`.
+@rf("zip")
+routine zip[TFirst, TSecond, TFirstSource, TSecondSource](a: TFirstSource, b: TSecondSource) -> ZipEmittable[TFirst, TSecond, TFirstSource, TSecondSource]
+needs TFirstSource obeys Emittable[TFirst]
+needs TSecondSource obeys Emittable[TSecond]
+
+### Returns a lazy adapter that puts the values of `a`, `b` and `c` together in threes.
+### Stops when the shortest of the three sources runs out.
+### :param a: The first source.
+### :param b: The second source.
+### :param c: The third source.
+### :returns: The triples, as a `Zip3Emittable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource]`.
+@rf("zip")
+routine zip[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource](
+    a: TFirstSource,
+    b: TSecondSource,
+    c: TThirdSource,
+) -> Zip3Emittable[TFirst, TSecond, TThird, TFirstSource, TSecondSource, TThirdSource]
+needs TFirstSource obeys Emittable[TFirst]
+needs TSecondSource obeys Emittable[TSecond]
+needs TThirdSource obeys Emittable[TThird]
+
+### Returns a lazy adapter that puts the values of `a`, `b`, `c` and `d` together in fours.
+### Stops when the shortest of the four sources runs out.
+### :param a: The first source.
+### :param b: The second source.
+### :param c: The third source.
+### :param d: The fourth source.
+### :returns: The quadruples, as a `Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource]`.
+@rf("zip")
+routine zip[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource](
+    a: TFirstSource,
+    b: TSecondSource,
+    c: TThirdSource,
+    d: TFourthSource,
+) -> Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSource, TThirdSource, TFourthSource]
+needs TFirstSource obeys Emittable[TFirst]
+needs TSecondSource obeys Emittable[TSecond]
+needs TThirdSource obeys Emittable[TThird]
+needs TFourthSource obeys Emittable[TFourth]
