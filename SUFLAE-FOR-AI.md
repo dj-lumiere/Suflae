@@ -208,6 +208,11 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   no `-0` (`(-0.5).fixed(0)` is `0`, `"-0"` reads as `0`) and no trailing zeros, so `1.0` and `1.00` are the same and
   hash the same (a `Decimal` can be a `Set` or `Dict` key). `2.50` shows as `2.5`, `100` and `1e2` both as `100` (an
   integer of up to 34 digits is written in full), `1e40` as `1E+40`.
+  `a.rem(you: b)` on `Decimal` is the remainder of the floored division, `a - b * floor(a / b)`, computed exactly,
+  with the sign of `b` (`-7` by `2` is `1`, `7` by `-2` is `-1`, `5.5` by `2` is `1.5`, `1E+30` by `7` is `1`). A zero
+  `b` crashes with `DivisionByZeroError` and a remainder that needs more than 34 digits (`-1e-40` by `7`) with
+  `NumericOverflowError` (`try` / `check` recover both). Integer `%` is Euclidean (never negative, `7 % -2` is `1`), so
+  the two agree for a positive divisor only. `Decimal` has no `%` or `//`, and `D32`/`D64`/`D128` keep the IEEE `rem`.
 - Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
 - A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
   the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`
@@ -396,7 +401,7 @@ routine start()
   (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
   `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
   The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `recip_sqrt`, `sin_cos`, `gamma`,
-  `ln_gamma`, `mul_add`, `mod_trunc` (truncated remainder), `rem` (IEEE remainder), `fract`, `is_sign_negative`,
+  `ln_gamma`, `mul_add`, `mod_trunc` (truncated remainder), `rem` (IEEE remainder, on `Decimal` the floored remainder), `fract`, `is_sign_negative`,
   `total_compare`, and so on. Float/decimal `max`/`min` return the other operand when one is NaN (`migrate --step
   names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands
