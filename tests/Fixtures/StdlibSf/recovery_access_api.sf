@@ -39,8 +39,8 @@ failable routine parsed(t: Text) -> Integer
         throw AbsentValueError()
     return t.to[Integer]()
 
-# a routine that is not failable, with a subscript, called bare by a failable one
-routine last_of(items: List[Integer]) -> Integer
+# a failable routine with a subscript, called bare by another failable one
+failable routine last_of(items: List[Integer]) -> Integer
     return items[items.count() - 1]
 
 failable routine last_plus_one(items: List[Integer]) -> Integer
