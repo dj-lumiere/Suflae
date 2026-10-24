@@ -1,0 +1,33 @@
+module Tests/StdlibSf/ObjectHackerImplantApi
+
+import IO/Console
+import ObjectHacker
+# implant replaces a member routine for one object: the routine is named by its type and name (Hero.attack), and the
+# replacement takes the object first, then the routine's arguments. Other objects keep the routine. remove_implant
+# gives the object its routine back. A replacement of another signature is a build error.
+entity Hero
+    name: Text
+    hp: S64
+
+routine Hero.attack(power: S64) -> S64
+    me.hp = me.hp - power
+    return me.hp
+
+routine Hero.shout()
+    show(f"{me.name}: hey")
+
+routine start()
+    var ada = Hero(name: "Ada", hp: 10)
+    var bea = Hero(name: "Bea", hp: 10)
+    implant(target: ada, replacing: Hero.attack, with: (hero: Hero, power: S64) => hero.hp * 100 + power)
+    implant(target: ada, replacing: Hero.shout, with: (hero: Hero) => show(f"{hero.name}: implanted"))
+    var three: S64 = 3
+    show(f"ada: {ada.attack(power: three)}")
+    show(f"bea: {bea.attack(power: three)}")
+    ada.shout()
+    bea.shout()
+    show(f"removed: {remove_implant(target: ada, replacing: Hero.attack)}")
+    show(f"removed again: {remove_implant(target: ada, replacing: Hero.attack)}")
+    show(f"ada: {ada.attack(power: three)}")
+    ada.shout()
+    show("DONE")

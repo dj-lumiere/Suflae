@@ -190,7 +190,8 @@ public sealed class SuflaeRules : LanguageRules
         bool annotated = AnnotationSynthesisPass.Run(files: files, report: report);
         // Before the globals: their setup in start() changes the globals' holder, which no hook can reach.
         ChangeHookBarrierPass.Run(files: files);
-        return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report) && annotated;
+        bool implanted = ImplantPass.Run(files: files, report: report);
+        return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report) && annotated && implanted;
     }
 
     public override void SynthesizeStandardLibrary(

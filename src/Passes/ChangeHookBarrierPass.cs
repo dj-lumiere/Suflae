@@ -98,7 +98,7 @@ internal static class ChangeHookBarrierPass
                 $"    {StorePlaceholder} = 0\n" +
                 "    if hooks_on()\n" +
                 $"        {TargetPlaceholder}.changed_member(memvar: \"{memvar}\")\n";
-            string text = new string(c: '\n', count: Math.Max(val1: 0, val2: s.Location.Line - 1)) + source;
+            string text = new string(c: '\n', count: Math.Max(val1: 0, val2: s.Location.Line - 2)) + source;
             List<Builder.Tokenizer.Token> tokens =
                 Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Suflae);
             var parser = new Builder.Parser.Parser(tokens: tokens, language: Language.Suflae, fileName: filePath)

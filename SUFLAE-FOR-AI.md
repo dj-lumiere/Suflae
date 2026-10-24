@@ -1435,6 +1435,13 @@ routine start()
   until it is removed. A build that imports `ObjectHacker` tests for hooks at every member variable change (about
   0.3 ns per change while no object has hooks), a build that does not pays nothing. Annotate the lambda's
   parameters (SF-S638 otherwise).
+- `implant(target: ada, replacing: Hero.attack, with: (hero: Hero, power: S64) => ...)` replaces a member routine for
+  that one object: its calls run the replacement, given the object first and then the arguments. The member routine
+  is named by its type and name (`Hero.attack`, an entity's routine that is not common, has no type parameters and
+  types every parameter, and is not overloaded by name), and a replacement of another signature is a build error
+  where `implant` is written. Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
+  gives it back (`false` when there was none). An implant keeps its object alive until it is removed. In a build
+  that imports `ObjectHacker` every member routine of an entity starts with the test for a replacement.
 - **The program's own annotations.** A record that obeys `Annotation` is an annotation of that name, written on a
   routine, a record or an entity with named build-time constant arguments: `@Memoize(limit: 100)`. Its
   `routine Memoize.apply(to: RoutineInfo)` (`to: TypeInfo` on a type) runs once per declaration it is on when the
@@ -1610,12 +1617,12 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and `ObjectHacker`'s
-`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations, `when_changed` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
+`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations, `when_changed`, `implant` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:
 
 - a REPL and hot reload;
-- `ObjectHacker`'s `implant` and `when_destroyed`; annotations on parameters and member variables;
+- `ObjectHacker`'s `when_destroyed`; annotations on parameters and member variables;
   hot reload and `morph` come after 0.5.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every

@@ -1,7 +1,9 @@
 module ObjectHacker
 
-# The change hooks of objects: `when_changed` and `remove_hook` (Hooks.rf) add and remove them, and the routines the
-# builder writes around every change of a member variable run them.
+# The change hooks and implants of objects: `when_changed` and `remove_hook` (Hooks.rf) add and remove hooks, and the
+# routines the builder writes around every change of a member variable run them. `implant` and `remove_implant`
+# (written by the builder from `implant(target: hero, replacing: Hero.attack, with: f)`) replace a member routine for one
+# object, and the builder writes a test for a replacement at the top of every member routine of an entity.
 
 secret record ChangeHook
     secret id: U64
@@ -12,6 +14,7 @@ secret entity HookTable
     secret target: Unknown
     secret hooks: List[ChangeHook]
     secret pending: List[Unknown]
+    secret implants: Dict[Text, Unknown]
 
 # Every object's hooks, by the object's key.
 secret entity HookRegistry
@@ -35,11 +38,18 @@ secret routine add_change_hook(key: U64, target: Unknown, handler: failable Call
         is None =>
             var hooks = List[ChangeHook]()
             hooks.add_last(value: ChangeHook(id: id, handler: handler))
-            registry.tables[key] = HookTable(target: target, hooks: hooks, pending: List[Unknown]())
+            registry.tables[key] = HookTable(target: target, hooks: hooks, pending: List[Unknown](), implants: Dict[Text, Unknown]())
             registry.hooked = registry.hooked + 1
             set_hooked_count(count: registry.hooked)
         else as table => table.hooks.add_last(value: ChangeHook(id: id, handler: handler))
     return id
+
+# Takes an object's table out of the registry once it has neither hooks nor implants.
+secret routine forget_if_empty(registry: HookRegistry, key: U64, table: HookTable)
+    if table.hooks.count() == 0 and table.implants.count() == 0
+        registry.tables.remove(key: key)
+        registry.hooked = registry.hooked - 1
+        set_hooked_count(count: registry.hooked)
 
 secret routine drop_change_hook(key: U64, hook: U64) -> Bool
     when stored_registry()
@@ -57,11 +67,48 @@ secret routine drop_change_hook(key: U64, hook: U64) -> Bool
                         else
                             left.add_last(value: listed)
                     table.hooks = left
-                    if left.count() == 0
-                        registry.tables.remove(key: key)
-                        registry.hooked = registry.hooked - 1
-                        set_hooked_count(count: registry.hooked)
+                    forget_if_empty(registry: registry, key: key, table: table)
                     return found
+
+# What the builder writes for `implant(target: hero, replacing: Hero.attack, with: f)`: from now on a call of that member
+# routine on the object runs the replacement instead (an `Unknown` keeping the routine value, whose signature the
+# builder checks where `implant` is written). An implant keeps its object alive until it is removed.
+secret routine add_implant(key: U64, target: Unknown, routine_key: Text, replacement: Unknown)
+    var registry = hook_registry()
+    when try registry.tables[key]
+        is None =>
+            var implants = Dict[Text, Unknown]()
+            implants[routine_key] = replacement
+            registry.tables[key] = HookTable(target: target, hooks: List[ChangeHook](), pending: List[Unknown](), implants: implants)
+            registry.hooked = registry.hooked + 1
+            set_hooked_count(count: registry.hooked)
+        else as table => table.implants[routine_key] = replacement
+
+secret routine drop_implant(key: U64, routine_key: Text) -> Bool
+    when stored_registry()
+        is None => return false
+        else as kept =>
+            var registry = kept.to[HookRegistry]()
+            when try registry.tables[key]
+                is None => return false
+                else as table =>
+                    var found = table.implants.remove(key: routine_key)
+                    forget_if_empty(registry: registry, key: key, table: table)
+                    return found
+
+# Whether the object has a replacement for a member routine: the builder's test at the top of every member routine of
+# an entity.
+secret routine has_implant(key: U64, routine_key: Text) -> Bool
+    when stored_registry()
+        is None => return false
+        else as kept =>
+            when try kept.to[HookRegistry]().tables[key]
+                is None => return false
+                else as table => return table.implants.has_key(key: routine_key)
+
+# The object's replacement for a member routine, found by `has_implant`.
+secret routine implant_of(key: U64, routine_key: Text) -> Unknown
+    return hook_registry().tables[key].implants[routine_key]
 
 secret routine hooks_before(key: U64, memvar: Text)
     when stored_registry()

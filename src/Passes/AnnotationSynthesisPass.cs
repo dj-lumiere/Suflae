@@ -385,12 +385,12 @@ internal static class AnnotationSynthesisPass
 
     /// <summary>Parses a body the pass writes, and marks each call in it as the builder's (it may reach
     /// ObjectHacker's own helpers).</summary>
-    /// <summary>Parses a body the pass writes as if it stood right under line <paramref name="line"/> of the file,
+    /// <summary>Parses a body the pass writes as if it started at line <paramref name="line"/> of the file,
     /// the line of the declaration it is written for: an error in it points there, and a lambda in it, named by
     /// where it stands, is told apart from the lambda written for another declaration.</summary>
     private static Statement ParseBody(string source, string filePath, int line)
     {
-        string text = new string(c: '\n', count: Math.Max(val1: 0, val2: line - 1)) +
+        string text = new string(c: '\n', count: Math.Max(val1: 0, val2: line - 2)) +
                       $"routine reflected_written()\n{source}";
         List<Builder.Tokenizer.Token> tokens =
             Builder.Tokenizer.Lexers.Tokenize(source: text, fileName: filePath, language: Language.Suflae);
