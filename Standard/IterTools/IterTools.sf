@@ -50,7 +50,7 @@ routine Emittable[T].get_count() -> Integer
 
 ### Returns how many values satisfy `predicate`.
 ### :param predicate: The test applied to each value.
-routine Emittable[T].get_count(predicate: Callable[(T,), Bool]) -> Integer
+routine Emittable[T].get_count(predicate: failable Callable[(T,), Bool]) -> Integer
     return me.get_count(predicate: predicate).to[Integer]()
 
 ### Returns the values after the first `count`.

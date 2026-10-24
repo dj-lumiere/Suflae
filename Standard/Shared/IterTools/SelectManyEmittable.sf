@@ -49,5 +49,5 @@ failable routine SelectManyEmitter[T, TResult, TInner, TSourceEmitter].emit() ->
 ### :param transform: The routine that maps each source element to an inner emittable.
 ### :returns: The resulting `SelectManyEmittable[T, TResult, TInner, Me]` value.
 @rf("Emittable.select_many")
-routine Emittable[T].select_many[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectManyEmittable[T, TResult, TInner, Me]
+routine Emittable[T].select_many[TResult, TInner](transform: failable Callable[(T,), TInner]) -> SelectManyEmittable[T, TResult, TInner, Me]
 needs TInner obeys Emittable[TResult]

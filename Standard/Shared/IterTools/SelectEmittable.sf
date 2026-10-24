@@ -44,4 +44,4 @@ failable routine SelectEmitter[T, TResult, TSourceEmitter].emit() -> TResult
 ### :param transform: The routine used to map each source value to a result value.
 ### :returns: The resulting `SelectEmittable[T, TResult, Me]` value.
 @rf("Emittable.select")
-routine Emittable[T].select[TResult](transform: Callable[(T,), TResult]) -> SelectEmittable[T, TResult, Me]
+routine Emittable[T].select[TResult](transform: failable Callable[(T,), TResult]) -> SelectEmittable[T, TResult, Me]

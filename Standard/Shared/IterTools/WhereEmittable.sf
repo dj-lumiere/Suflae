@@ -40,11 +40,11 @@ failable routine WhereEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
 ### :param predicate: The filter predicate.
 ### :returns: The resulting `WhereEmittable[T, Me]` value.
 @rf("Emittable.where")
-routine Emittable[T].where(predicate: Callable[(T,), Bool]) -> WhereEmittable[T, Me]
+routine Emittable[T].where(predicate: failable Callable[(T,), Bool]) -> WhereEmittable[T, Me]
 
 ### Returns a lazy adapter that keeps only values for which `predicate` returns
 ### `false`.
 ### :param predicate: The filter predicate.
 ### :returns: The resulting `WhereEmittable[T, Me]` value.
 @rf("Emittable.where_not")
-routine Emittable[T].where_not(predicate: Callable[(T,), Bool]) -> WhereEmittable[T, Me]
+routine Emittable[T].where_not(predicate: failable Callable[(T,), Bool]) -> WhereEmittable[T, Me]

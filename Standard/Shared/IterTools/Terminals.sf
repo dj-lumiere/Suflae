@@ -20,14 +20,14 @@ failable routine Emittable[T].last() -> T
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Emittable.any")
-routine Emittable[T].any(predicate: Callable[(T,), Bool]) -> Bool
+routine Emittable[T].any(predicate: failable Callable[(T,), Bool]) -> Bool
 
 ### Returns `true` when every produced value satisfies `predicate`.
 ### Iteration stops as soon as a failing value is found.
 ### :param predicate: The predicate to test against each item.
 ### :returns: The resulting `Bool` value.
 @rf("Emittable.all")
-routine Emittable[T].all(predicate: Callable[(T,), Bool]) -> Bool
+routine Emittable[T].all(predicate: failable Callable[(T,), Bool]) -> Bool
 
 ### Folds this emittable into a single result value.
 ### The combiner receives the current accumulator and the next item in iteration
@@ -38,7 +38,7 @@ routine Emittable[T].all(predicate: Callable[(T,), Bool]) -> Bool
 @rf("Emittable.accumulate")
 routine Emittable[T].accumulate[TState](
     start: TState,
-    combiner: Callable[(TState, T), TState],
+    combiner: failable Callable[(TState, T), TState],
 ) -> TState
 
 ### Returns the sum of all values in this emittable.
@@ -64,14 +64,14 @@ needs T obeys Comparable
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.min_by")
-failable routine Emittable[T].min_by[TKey](selector: Callable[(T,), TKey]) -> T
+failable routine Emittable[T].min_by[TKey](selector: failable Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the element for which `selector` returns the largest key.
 ### :param selector: The routine that extracts a comparable key from each element.
 ### :returns: The resulting `T` value.
 @rf("Emittable.max_by")
-failable routine Emittable[T].max_by[TKey](selector: Callable[(T,), TKey]) -> T
+failable routine Emittable[T].max_by[TKey](selector: failable Callable[(T,), TKey]) -> T
 needs TKey obeys Comparable
 
 ### Returns the first value produced by this emittable, or `default` when the emittable is empty.

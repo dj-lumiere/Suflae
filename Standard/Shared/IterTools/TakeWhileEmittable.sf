@@ -43,4 +43,4 @@ failable routine TakeWhileEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/It
 ### :param predicate: The predicate that controls when iteration stops.
 ### :returns: The resulting `TakeWhileEmittable[T, Me]` value.
 @rf("Emittable.take_while")
-routine Emittable[T].take_while(predicate: Callable[(T,), Bool]) -> TakeWhileEmittable[T, Me]
+routine Emittable[T].take_while(predicate: failable Callable[(T,), Bool]) -> TakeWhileEmittable[T, Me]

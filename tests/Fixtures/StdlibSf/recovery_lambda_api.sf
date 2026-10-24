@@ -2,28 +2,28 @@ module Tests/StdlibSf/RecoveryLambdaApi
 
 import IO/Console
 import IterTools
-# With `try`, `grab` or `lookup` in front, a failure inside a lambda or routine value is recovered too, wherever
-# the value is called beneath the keyword: through the emitter adapters (`select`, `where`) and the terminals
-# that drive them, through `any`/`all`/`sort_by`, through a routine that calls the value it was handed, a value
-# passed down two levels, a value kept in a record, and an `each` loop over an adapter.
+# A lambda that can fail, handed to a `failable Callable`, passes its failure up through the routine it was handed
+# to, so `try` and `check` receive it: through the emitter adapters (`select`, `where`) and the terminals that drive
+# them, through `any`/`all`/`sort_by`, through a routine that calls the value it was handed, a value passed down two
+# levels, a value kept in a member variable, and an `each` loop over an adapter in a failable routine.
 
-routine apply(f: Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
     return f(x)
 
-routine apply_twice(f: Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply_twice(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
     return apply(f: f, x: apply(f: f, x: x))
 
-routine sum_inverse(xs: List[Integer]) -> Integer
+failable routine sum_inverse(xs: List[Integer]) -> Integer
     var total = 0
     each y in xs.select(transform: x => 100 // x)
         total += y
     return total
 
-routine hundred_over(x: Integer) -> Integer
+failable routine hundred_over(x: Integer) -> Integer
     return 100 // x
 
 record Holder
-    f: Callable[(Integer,), Integer]
+    f: failable Callable[(Integer,), Integer]
 
 routine run(holder: Holder, x: Integer) -> Integer
     return holder.f(x)
@@ -81,7 +81,7 @@ routine start()
     show(f"stored try: {try run(holder: holder, x: 0)}")
 
     # a local routine value called directly beneath the keyword
-    var g: Callable[(Integer,), Integer] = x => 10 // x
+    var g: failable Callable[(Integer,), Integer] = x => 10 // x
     show(f"local try: {try g(0)}")
     show(f"local ok: {try g(5)}")
     show("DONE")

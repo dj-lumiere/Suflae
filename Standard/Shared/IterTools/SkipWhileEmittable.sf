@@ -39,4 +39,4 @@ failable routine SkipWhileEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/It
 ### :param predicate: The predicate that controls the initial skipping phase.
 ### :returns: The resulting `SkipWhileEmittable[T, Me]` value.
 @rf("Emittable.skip_while")
-routine Emittable[T].skip_while(predicate: Callable[(T,), Bool]) -> SkipWhileEmittable[T, Me]
+routine Emittable[T].skip_while(predicate: failable Callable[(T,), Bool]) -> SkipWhileEmittable[T, Me]

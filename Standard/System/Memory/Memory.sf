@@ -436,13 +436,13 @@ routine Span[T].reverse()
 
 ### Sorts what the places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
-routine Memory[T].sort_by(compare: Callable[(T, T), Bool])
+routine Memory[T].sort_by(compare: failable Callable[(T, T), Bool])
     me.block.places_sort_by(base: me.block.data, room: me.block.room, compare: compare)
     return
 
 ### Sorts what the span's places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
-routine Span[T].sort_by(compare: Callable[(T, T), Bool])
+routine Span[T].sort_by(compare: failable Callable[(T, T), Bool])
     me.block.places_sort_by(base: me.base(), room: me.room, compare: compare)
     return
 
@@ -773,7 +773,7 @@ secret routine places_swap[T](base: Hijacked[T], a: U64, b: U64)
 secret preset BUFFER_SORT_MIN_RUN: U64 = 32
 
 ### Sorts what `room` places hold so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
-secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compare: Callable[(T, T), Bool])
+secret routine MemoryBlock[T].places_sort_by(base: Hijacked[T], room: U64, compare: failable Callable[(T, T), Bool])
     var n = room
     if n <= 1
         return
@@ -821,7 +821,7 @@ secret routine MemoryBlock[T].places_insertion_sort(
     start: U64,
     end: U64,
     held: Hijacked[T],
-    compare: Callable[(T, T), Bool],
+    compare: failable Callable[(T, T), Bool],
 )
     var size = T.data_size()
     var i = start + 1
@@ -850,7 +850,7 @@ secret routine MemoryBlock[T].places_go_before(
     base: Hijacked[T],
     held: Hijacked[T],
     position: U64,
-    compare: Callable[(T, T), Bool],
+    compare: failable Callable[(T, T), Bool],
 ) -> Bool
     danger
         return compare(held.peek(), place_at[T](base: base, position: position).peek())
@@ -862,7 +862,7 @@ secret routine MemoryBlock[T].places_merge(
     mid: U64,
     right: U64,
     scratch: Hijacked[T],
-    compare: Callable[(T, T), Bool],
+    compare: failable Callable[(T, T), Bool],
 )
     var size = T.data_size()
     danger

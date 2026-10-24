@@ -538,8 +538,8 @@ var label = when
 - In a `when` statement an arm may be a block: break the line after `=>` and indent the statements one level,
   as in an `if` body. Keep a one-statement arm on one line. In a `when` that gives a value, a block arm ends with
   `becomes value`, the arm's value (without it, SF-S307). An arm may also be `throw ...` (`else => throw
-  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type, and it is allowed only
-  in a `failable` routine (otherwise SF-S750, whose quick fix writes `failable` on the declaration).
+  InvalidValueError(message: word)`): it gives no value, so the other arms decide the type. In a `failable`
+  routine the failure goes to the caller, and in a routine that is not failable it crashes on the spot.
 
 ```suflae
 when terrain
@@ -585,7 +585,8 @@ routine Account.deposit(amount: Integer)                       # member routine,
   a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
   variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
-  always a tuple: `()`, `(T,)`, `(A, B)`). A free routine's bare name is a value:
+  always a tuple: `()`, `(T,)`, `(A, B)`), and `failable Callable[(Integer,), Integer]` for one that may fail
+  (§11). A free routine's bare name is a value:
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
@@ -719,7 +720,9 @@ failable routine find(items: List[Text], name: Text) -> Integer
     throw AbsentValueError()
 ```
 
-- `throw` in a routine not declared `failable` is SF-S750. A `failable` routine that never throws is an error too.
+- `throw` in a routine not declared `failable` crashes on the spot with the error's message (status 82): use it for
+  a broken invariant (state the program can no longer trust), never for a condition a caller could handle. A
+  `failable` routine that never throws is an error.
 - Call sites never write `!` (`parse!(n: 1)` is SF-G211), and a declaration never does (`routine parse!(...)` is
   SF-G222). **A bare call crashes loudly on failure**: the
   error's title and message, where it was thrown, and a stack trace go to stderr.
@@ -753,28 +756,29 @@ routine start()
     return
 ```
 
-- **With a keyword in front, every failure beneath it is recovered, at any depth; only `pierce` still
-  crashes.** That covers a `throw` in the called routine and in every routine it calls, bare calls
-  included (failable or not: `try f()` also recovers a division by zero inside a plain helper `f` calls), a
-  checked operation (`try a + b` recovers a fixed-width overflow, `check a // b` a division by zero,
-  `x += d`), an index out of range or a missing key (`try items[9]`), and a failing conversion
-  (`300.to[S8]()`, `"x".to[Integer]()`). Each becomes the result's failure (`try`: `None`, `check`: the
-  error), and evaluation stops at the first one. A bare call still crashes loudly. Lambdas and routine values are covered the same way: a failure
-  inside a lambda handed to another routine (`try items.select(transform: x => 10 // x).to[List]()`,
-  `check items.sort_by(compare: f)`, a routine that calls the value it was given, a routine value passed down
-  several levels or kept in a record) is recovered by the keyword above the call that reaches it, at any
-  depth. A routine value called with no keyword above that call still crashes on failure. An `each` loop over
-  an adapter holding a lambda ends only when its source ends: a failure inside the lambda is the loop's
-  failure, recovered by a keyword above the loop or crashing without one. Not covered: a crash inside a
-  library routine not declared `failable` (other than in a routine value you handed it) stays a crash, and the
-  fatal walls below stay fatal.
+- **Failures rise only through failable routines.** A `throw` in a `failable` routine goes to the caller, where
+  `try`/`check` receive it (a bare call inside another failable routine passes it on). A routine that is not
+  failable is a wall: a failure inside it (its own `throw`, a checked operation, a bare call of a failable routine)
+  crashes there, even under `try`/`check` above its caller. Checked operations, indexing and conversions are failable
+  routines, so `try a + b` (a fixed-width overflow), `check a // b` (a division by zero), `try items[9]` (an index
+  out of range, a missing key), `300.to[S8]()` and `"x".to[Integer]()` are received. Each becomes the result's
+  failure (`try`: `None`, `check`: the error), and evaluation stops at the first one. `try`/`check` in front of an
+  expression that reaches no failable call is SF-S760 (remove the keyword, or declare the routine `failable`).
+- **Routine values.** A lambda whose body can fail (a checked operation, indexing, a call of a failable routine)
+  and a failable routine named as a value may fail, and their type is written `failable Callable[(T,), U]`. They
+  go only to a parameter of such a type: handing one to a plain `Callable[...]` is SF-S761 (mark the parameter
+  `failable`, or hand it a value that cannot fail). A call that hands one to a `failable Callable` parameter can
+  fail through it: `try apply(f: x => 10 // x, x: 0)` gives `None`, a bare one crashes loudly. The library's
+  routines that take a routine value take it as `failable Callable[...]` (`select`, `where`, `take_while`,
+  `skip_while`, `distinct_by`, `select_many`, `any`, `all`, `accumulate`, `get_count`, `min_by`, `max_by`,
+  `sort_by`, `sorted_by`). An adapter (`select`, `where`, ...) keeps the lambda and calls it later, so a call that
+  works on the adapter (`s.to[List]()`) or an `each` loop over it can fail through it:
+  `try items.select(transform: x => 10 // x).to[List]()` is received, and an `each` loop over such an adapter passes
+  the lambda's failure on in a failable routine and crashes anywhere else. A handler given to `CpuEventManager`
+  that fails crashes the program.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
-- **`pierce`** is the failure that must not be recovered: `pierce NopeError()` crashes like an unrecovered
-  `throw` (status 82), and it crashes the same way under `try`/`check` at any depth. Use it for a
-  broken invariant (state the program can no longer trust), never for a condition a caller could handle. It
-  does not make a routine failable (no `failable` needed for it).
 - **`todo`** is a statement for code not written yet (`routine parse(text: Text) -> Header` with the body `todo`):
-  running it crashes with `NotImplementedError` naming the routine, like `pierce`. It does not make the routine
+  running it crashes with `NotImplementedError` naming the routine, even under `try`/`check`. It does not make the routine
   failable and ends its path, so a body that is only `todo` needs no `return`. The build warns once per routine
   that still has one (SF-W303). `nothing` is an empty body on purpose, a different thing.
 - Typical use: `try` when only success matters, `check` when the kind of failure matters. "Not found" is
@@ -1470,12 +1474,14 @@ number). At most 20 are shown per batch.
 | SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | SF-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
-| SF-S750       | `throw` in a routine not declared `failable`        | declare it `failable routine name(...)`           |
+| SF-S760       | `try`/`check` over nothing that can fail            | remove the keyword, or declare the routine `failable` |
+| SF-S761       | a lambda that can fail given to a plain `Callable`  | write the parameter `failable Callable[...]`      |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
 | SF-G212       | `x in coll` as a test                               | `coll.has(x)`                                     |
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
+| SF-G227       | a line written `pierce X`                           | `throw X` in a routine that is not failable (`migrate --step pierce`) |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
@@ -1493,7 +1499,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `each` `with`
-  `break` `continue` `return` `throw` `pierce` `todo` `becomes`
+  `break` `continue` `return` `throw` `todo` `becomes`
 - **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`

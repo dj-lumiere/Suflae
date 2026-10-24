@@ -82,5 +82,5 @@ needs TKey obeys Hashable, Comparable
 ### :param key: The routine that extracts the comparison key from each element.
 ### :returns: The resulting `DistinctByEmittable[T, TKey, Me]` value.
 @rf("Emittable.distinct_by")
-routine Emittable[T].distinct_by[TKey](key: Callable[(T,), TKey]) -> DistinctByEmittable[T, TKey, Me]
+routine Emittable[T].distinct_by[TKey](key: failable Callable[(T,), TKey]) -> DistinctByEmittable[T, TKey, Me]
 needs TKey obeys Hashable, Comparable

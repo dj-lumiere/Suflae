@@ -44,7 +44,7 @@ failable routine via_bare(n: Integer) -> Integer
     return v + 1
 
 # depth 2: the operation is in a routine that is not failable
-routine hundred_over(n: Integer) -> Integer
+failable routine hundred_over(n: Integer) -> Integer
     return 100 // n
 
 failable routine via_plain(n: Integer) -> Integer
@@ -52,13 +52,13 @@ failable routine via_plain(n: Integer) -> Integer
         throw AbsentValueError()
     return hundred_over(n: n) + 1
 
-# depth 3: a failable routine calls a routine that is not failable, which calls a failable one bare
+# depth 3: the failure rises through failable routines only, each calling the next bare
 failable routine inner_check(n: Integer) -> Integer
     if n == 0
         throw NopeError(what: "zero")
     return n
 
-routine middle(n: Integer) -> Integer
+failable routine middle(n: Integer) -> Integer
     var v = inner_check(n: n)
     return v * 2
 
@@ -96,7 +96,7 @@ record Pair
     a: Integer
     b: Integer
 
-routine Pair.ratio() -> Integer
+failable routine Pair.ratio() -> Integer
     return me.a // me.b
 
 routine start()

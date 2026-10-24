@@ -24,7 +24,7 @@ routine stop_at_three(limit: Integer) -> Text
         show(f"left at {n}")
     return f"stopped at {n}"
 
-routine ratio_steps(numerator: Integer, divisor: Integer) -> Integer
+failable routine ratio_steps(numerator: Integer, divisor: Integer) -> Integer
     var n = 0
     until n >= numerator // divisor
         n += 1

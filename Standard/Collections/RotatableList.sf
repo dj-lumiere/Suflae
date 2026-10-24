@@ -397,7 +397,7 @@ needs T obeys Comparable
 
 ### Sorts the elements so that `compare(a, b)` holds for every `a` before `b` it decides. Stable.
 ### :param compare: Returns whether its first argument goes before its second.
-routine RotatableList[T].sort_by(compare: Callable[(T, T), Bool])
+routine RotatableList[T].sort_by(compare: failable Callable[(T, T), Bool])
     me.straighten()
     me.items.view(first: 0, room: me.count).sort_by(compare: compare)
     return
@@ -411,7 +411,7 @@ needs T obeys Comparable
 
 ### Returns a new list of the elements, ordered by `compare`.
 ### :param compare: Returns whether its first argument goes before its second.
-routine RotatableList[T].sorted_by(compare: Callable[(T, T), Bool]) -> RotatableList[T]
+routine RotatableList[T].sorted_by(compare: failable Callable[(T, T), Bool]) -> RotatableList[T]
     var result = me.duplicate()
     result.sort_by(compare: compare)
     return result
