@@ -995,15 +995,21 @@ each entry in ages
 - **Emitters.** What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
   with `emitter()`. `each` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
   for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `each x in it`,
-  which goes on from where `it` is. An emitter or adapter kept in a variable keeps the collection it walks alive
-  (one more reference to it), even when the variable that named the collection gets another value. Changing the
-  collection's shape while an `each` walks it crashes, as below.
+  which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
+  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An entity a program writes that obeys `Emitter[T]` (it has a
+  failable `emit()`) is walked as it is: `each n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
+  An emitter or adapter kept in a variable keeps the collection it walks alive (one more reference to it), even when
+  the variable that named the collection gets another value. Giving the variable another adapter later
+  (`kept = make().where(...)`) keeps the new collection alive the same way. Changing the collection's shape while an
+  `each` walks it crashes, as below.
 - Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
   `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `each` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
   (pairs), `to[RotatableList]()`, `to[BitList]()` (Bools), `to[PriorityQueue]()` (`(priority, element)` pairs).
+  `to[Array[T, N]]()` names the size (`xs.to[Array[Integer, 3]]()`) and is failable: fewer or more than `N` values
+  throw `ElementCountMismatchError`.
 
 **Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that
 its next element is really the next one, so it is not allowed:
