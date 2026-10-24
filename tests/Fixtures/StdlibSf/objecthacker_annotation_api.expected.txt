@@ -1,0 +1,21 @@
+fib(30) = 832040, body ran 31 times
+fib(31) = 1346269, body ran 32 times
+add: 5
+add: 7
+log: hi
+ok
+add enter add [5]
+add leave 5
+add enter add [2]
+add leave 7
+log enter log_line [hi]
+log leave none
+health enter health []
+health leave ok
+/users -> list_users
+/health -> health
+table heroes for Hero
+health annotation: Route(path: /health)
+health annotation: Traced(label: health)
+hero annotation: Table(name: heroes)
+DONE

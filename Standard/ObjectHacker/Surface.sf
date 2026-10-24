@@ -53,6 +53,9 @@ entity TypeInfo
     routines: List[RoutineInfo]
     ### The creators of the type that the build reached: first the one taking one argument per member variable.
     creators: List[RoutineInfo]
+    ### The values of the program's own annotations on the type (`@Tagged(name: "x")`), in the order they are
+    ### written. Read one with `a.is[Tagged]()` and `try a.to[Tagged]()`.
+    annotations: List[Unknown]
     secret handle: TypeHandle
 
 ### Whether the type obeys a protocol.
@@ -113,6 +116,7 @@ secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
         arms: List[TypeInfo](),
         routines: List[RoutineInfo](),
         creators: List[RoutineInfo](),
+        annotations: fact.handle.make_annotations(),
         handle: fact.handle,
     )
     seen[fact.type_id] = info
@@ -179,6 +183,9 @@ entity RoutineInfo
     is_failable: Bool
     ### Whether it has type parameters of its own (a running program cannot call one).
     is_generic: Bool
+    ### The values of the program's own annotations on it (`@Route(path: "/users")`), in the order they are
+    ### written. Read one with `a.is[Route]()` and `try a.to[Route]()`.
+    annotations: List[Unknown]
     secret index: U64
     secret owner: TypeHandle
 
@@ -206,6 +213,9 @@ secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dic
             has_default: parameter.has_default,
             default: parameter.default,
         ))
+    var annotations = List[Unknown]()
+    each value in fact.annotations
+        annotations.add_last(value: value)
     return RoutineInfo(
         name: fact.name,
         full_name: fact.full_name,
@@ -215,6 +225,7 @@ secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dic
         returns: returns_from(fact: fact, seen: seen),
         is_failable: fact.is_failable,
         is_generic: fact.is_generic,
+        annotations: annotations,
         index: fact.index,
         owner: owner,
     )
@@ -308,3 +319,55 @@ routine routines(in: Text) -> List[RoutineInfo]
         if fact.module_name == in and fact.is_built
             found.add_last(value: routine_info_from(fact: fact, owner: module_handle(), seen: seen))
     return found
+
+# ============================================================================
+# Annotations
+# ============================================================================
+
+### What a program's own annotation obeys. An annotation is a record that obeys `Annotation`, and its name is the
+### annotation's name: `record Memoize` with `obeys Annotation` is written `@Memoize(limit: 100)` on a routine, a
+### record or an entity. The record's member variables take build-time constants (text, numbers, `Bool`).
+### Two routines of the record give it an effect, and both may be left out:
+### `routine Memoize.apply(to: RoutineInfo)` (or `to: TypeInfo` on a type) runs once for each routine or type it
+### is on, when the program starts, after the globals are set and before the body of `start()`.
+### `routine Memoize.around(call: Invocation) -> Unknown` runs instead of every call of the routine it is on, and
+### `call.proceed()` runs the routine itself. A routine takes at most one annotation with an `around`.
+protocol Annotation
+
+### One call of a routine, as an annotation's `around` sees it.
+entity Invocation
+    ### The routine being called.
+    routine_info: RoutineInfo
+    ### The arguments of the call, in parameter order.
+    args: List[Unknown]
+    secret run: failable Callable[(), Unknown]
+
+### Runs the routine with the call's arguments and gives back what it returns (an `Unknown` keeping `none` when it
+### returns nothing). It can run any number of times. A failure of the routine passes on through a failable
+### `around` and crashes in one that is not failable.
+### :returns: What the routine returns, kept in an `Unknown`.
+failable routine Invocation.proceed() -> Unknown
+    return me.run()
+
+secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], run: failable Callable[(), Unknown]) -> Invocation
+    return Invocation(routine_info: routine_info, args: args, run: run)
+
+# The description of a routine of the program's modules that carries an annotation. An empty module name matches
+# any module.
+secret failable routine annotated_routine(module_name: Text, name: Text, count: Integer) -> RoutineInfo
+    each fact in reached_routines()
+        if fact.name == name and fact.parameters.count() == count and (module_name == "" or fact.module_name == module_name)
+            return routine_info_from(fact: fact, owner: module_handle(), seen: Dict[U64, TypeInfo]())
+    throw NoSuchRoutineError(owner: module_name, routine_name: name)
+
+# The description of a member routine or a common routine that carries an annotation.
+secret failable routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Integer) -> RoutineInfo
+    var fact = maker()
+    each listed in fact.handle.make_routines()
+        if listed.name == name and listed.parameters.count() == count
+            return routine_info_from(fact: listed, owner: fact.handle, seen: Dict[U64, TypeInfo]())
+    throw NoSuchRoutineError(owner: fact.name, routine_name: name)
+
+# The description of a type that carries an annotation.
+secret routine annotated_type(maker: Callable[(), TypeFact]) -> TypeInfo
+    return info_from(fact: maker(), seen: Dict[U64, TypeInfo]())

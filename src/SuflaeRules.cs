@@ -186,7 +186,9 @@ public sealed class SuflaeRules : LanguageRules
         Action<SemanticDiagnosticCode, string, SourceLocation> report)
     {
         EmitterSelfSynthesisPass.Run(files: files);
-        return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report);
+        // Annotations first: the globals' setup goes in front of the annotations' apply calls in start().
+        bool annotated = AnnotationSynthesisPass.Run(files: files, report: report);
+        return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report) && annotated;
     }
 
     public override void SynthesizeStandardLibrary(

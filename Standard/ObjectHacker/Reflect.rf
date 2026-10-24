@@ -77,6 +77,8 @@ secret record TypeHandle
     secret make_creators: Callable[(), SF::System.List[RoutineFact]]
     ### Calls the creator at an index of `make_creators()`.
     secret do_create: Callable[(U64, Roamed[SF::System.Dict[Text, Unknown]]), Unknown]
+    ### The values of the program's own annotations on the type, in the order they are written.
+    secret make_annotations: Callable[(), SF::System.List[Unknown]]
 
 ### The tables of the program's modules' own routines.
 secret routine module_handle() -> TypeHandle
@@ -85,6 +87,7 @@ secret routine module_handle() -> TypeHandle
         do_invoke: (target: Unknown, index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reached_invoke(index: index, args: args),
         make_creators: () => new_routine_facts(),
         do_create: (index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => unknown_nothing(),
+        make_annotations: () => new_unknown_list(),
     )
 
 ### What the builder knows of one parameter of a reached routine.
@@ -126,6 +129,8 @@ secret record RoutineFact
     secret has_returns: Bool
     ### The description of what it returns (of `Bool` when it returns nothing).
     secret make_returns: Callable[(), TypeFact]
+    ### The values of the program's own annotations on it, in the order they are written.
+    secret annotations: SF::System.List[Unknown]
 
 ### One parameter, for the builder's tables.
 secret routine parameter_fact[P](name: Text, order: U64, has_default: Bool, default: Unknown?) -> ParameterFact
@@ -150,6 +155,7 @@ secret routine routine_fact[R](
     is_generic: Bool,
     has_returns: Bool,
     parameters: SF::System.List[ParameterFact],
+    annotations: SF::System.List[Unknown],
 ) -> RoutineFact
     return RoutineFact(
         name: name,
@@ -163,6 +169,7 @@ secret routine routine_fact[R](
         parameters: steal parameters,
         has_returns: has_returns,
         make_returns: R.type_fact_maker(),
+        annotations: steal annotations,
     )
 
 ### An empty list of routine facts, for the builder's tables.
@@ -172,6 +179,10 @@ secret routine new_routine_facts() -> SF::System.List[RoutineFact]
 ### An empty list of parameter facts, for the builder's tables.
 secret routine new_parameter_facts() -> SF::System.List[ParameterFact]
     return SF::System.List[ParameterFact]()
+
+### An empty list of `Unknown`s, for the builder's tables.
+secret routine new_unknown_list() -> SF::System.List[Unknown]
+    return SF::System.List[Unknown]()
 
 ### An empty list of type facts, for the builder's tables.
 secret routine new_type_facts() -> SF::System.List[TypeFact]
@@ -192,6 +203,10 @@ secret routine reflected_creators[T]() -> SF::System.List[RoutineFact]
 ### Calls the creator of `T` at `index` of `reflected_creators[T]()`. The builder writes this body.
 secret routine reflected_create[T](index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Unknown
     return unknown_nothing()
+
+### The values of the program's own annotations on `T`, in the order they are written. The builder writes this body.
+secret routine reflected_annotations[T]() -> SF::System.List[Unknown]
+    return SF::System.List[Unknown]()
 
 ### The types of the program's own modules that the build reached. The builder writes this body.
 secret routine reached_types() -> SF::System.List[TypeFact]

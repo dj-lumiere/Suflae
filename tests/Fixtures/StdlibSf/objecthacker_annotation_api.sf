@@ -1,0 +1,102 @@
+module Tests/StdlibSf/ObjectHackerAnnotationApi
+
+import IO/Console
+import ObjectHacker
+# A program's own annotation is a record that obeys Annotation. Its apply runs once per declaration it is on when the
+# program starts, and its around runs instead of every call of the routine it is on (call.proceed() runs the
+# routine). RoutineInfo.annotations and TypeInfo.annotations give the annotation values back.
+record Route
+obeys Annotation
+    path: Text
+
+routine Route.apply(to: RoutineInfo)
+    routes.add_last(value: f"{me.path} -> {to.name}")
+
+record Memoize
+obeys Annotation
+    limit: S64
+
+record Traced
+obeys Annotation
+    label: Text
+
+record Table
+obeys Annotation
+    name: Text
+
+routine Table.apply(to: TypeInfo)
+    routes.add_last(value: f"table {me.name} for {to.name}")
+
+global memo: Dict[Unknown, Unknown] = Dict[Unknown, Unknown]()
+global routes: List[Text] = List[Text]()
+global trace: List[Text] = List[Text]()
+global calls: Integer = 0
+
+routine Memoize.around(call: Invocation) -> Unknown
+    var key = call.args[0]
+    when try memo[key]
+        is None =>
+            var result = call.proceed()
+            memo[key] = result
+            return result
+        else as hit => return hit
+
+routine Traced.around(call: Invocation) -> Unknown
+    trace.add_last(value: f"{me.label} enter {call.routine_info.name} {call.args}")
+    var result = call.proceed()
+    trace.add_last(value: f"{me.label} leave {result}")
+    return result
+
+@Memoize(limit: 100)
+routine fib(n: Integer) -> Integer
+    calls = calls + 1
+    if n < 2
+        return n
+    return fib(n: n - 1) + fib(n: n - 2)
+
+entity Counter
+    total: S64
+
+@Traced(label: "add")
+routine Counter.add(amount: S64) -> S64
+    me.total = me.total + amount
+    return me.total
+
+@Traced(label: "log")
+routine log_line(text: Text)
+    show(f"log: {text}")
+
+@Route(path: "/users")
+routine list_users() -> Text
+    return "users"
+
+@Route(path: "/health")
+@Traced(label: "health")
+routine health() -> Text
+    return "ok"
+
+@Table(name: "heroes")
+entity Hero
+    name: Text
+
+routine start()
+    show(f"fib(30) = {fib(n: 30)}, body ran {calls} times")
+    show(f"fib(31) = {fib(n: 31)}, body ran {calls} times")
+    var c = Counter(total: 0)
+    var five: S64 = 5
+    var two: S64 = 2
+    show(f"add: {c.add(amount: five)}")
+    show(f"add: {c.add(amount: two)}")
+    log_line(text: "hi")
+    show(health())
+    each line in trace
+        show(line)
+    each line in routes
+        show(line)
+    each r in routines(in: "Tests/StdlibSf/ObjectHackerAnnotationApi")
+        if r.name == "health"
+            each a in r.annotations
+                show(f"health annotation: {a}")
+    each a in type_info(of: Hero(name: "x")).annotations
+        show(f"hero annotation: {a}")
+    show("DONE")

@@ -590,8 +590,10 @@ routine Account.deposit(amount: Integer)                       # member routine,
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
 - **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
-  `@test`/`@case`/`@skip`/`@time_limit`, …). Any other name is SF-G221, and a misspelling names the close one. There
-  is no `@deprecated`, no `@initonly` and no `@bench` yet.
+  `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is SF-G221, and a
+  misspelling names the close one. A name that starts with a capital is the program's own annotation (§19): a record
+  that obeys `Annotation`, and SF-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
+  yet.
 - **Routine tests.** `suflae test` builds a file once per `@test` routine, calling it in place of the program's own
   statements: once per `@case(input: (a, b), output: r)` (arguments in parameter order, the result compared with
   `==`), or once with no arguments when there is no case. `@skip("reason")` reports it skipped, `@time_limit(1s)`
@@ -1425,6 +1427,42 @@ routine start()
   with `name`, `order`, `type`, `has_default`, `default`, `returns: TypeInfo?`, `is_failable`, `is_generic`).
   `types(in: "Game")` and `routines(in: "Game")` list a module's types and free routines. `call(info:, args:)`
   calls a free routine, a common routine or a creator from its `RoutineInfo`.
+- **The program's own annotations.** A record that obeys `Annotation` is an annotation of that name, written on a
+  routine, a record or an entity with named build-time constant arguments: `@Memoize(limit: 100)`. Its
+  `routine Memoize.apply(to: RoutineInfo)` (`to: TypeInfo` on a type) runs once per declaration it is on when the
+  program starts, after the globals are set and before the body of `start()`, in module order (a module after the
+  ones it imports) and source order. Its `routine Memoize.around(call: Invocation) -> Unknown` runs instead of every
+  call of the routine, recursive calls too: `call.routine_info`, `call.args` (`List[Unknown]`, parameter order) and
+  `call.proceed()` (runs the routine, any number of times, and gives its result as an `Unknown`, one keeping `none`
+  for a routine that returns nothing). What `around` returns must be of the routine's return type (else a loud
+  failure). A routine takes at most one annotation with an `around` (SF-S706), and neither goes on a routine or type
+  with type parameters. A failure of the routine passes on through a `failable` `around` and crashes in one that is
+  not. `RoutineInfo.annotations` and `TypeInfo.annotations` give the values back (`List[Unknown]`: `a.is[Route]()`,
+  `try a.to[Route]()`). An annotated routine stays in the build even when nothing calls it.
+
+```suflae
+record Memoize
+obeys Annotation
+    limit: S64
+
+global memo: Dict[Unknown, Unknown] = Dict[Unknown, Unknown]()
+
+routine Memoize.around(call: Invocation) -> Unknown
+    var key = call.args[0]
+    when try memo[key]
+        is None =>
+            var result = call.proceed()
+            memo[key] = result
+            return result
+        else as hit => return hit
+
+@Memoize(limit: 100)
+routine fib(n: Integer) -> Integer
+    if n < 2
+        return n
+    return fib(n: n - 1) + fib(n: n - 2)
+```
+
 - Only what the build reached is listed and callable: a routine nothing in the program calls is left out of
   the program, and naming it fails with `RoutineNotBuiltError`. Mark a type `@reflectable` to keep every routine
   it has. Other errors: `NoSuchRoutineError`, `ArgumentError` (missing, unknown or wrongly typed argument),
@@ -1564,12 +1602,12 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and `ObjectHacker`'s
-`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
+`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:
 
 - a REPL and hot reload;
-- `ObjectHacker`'s annotations with `apply`/`around`, `when_*` hooks and `implant`;
+- `ObjectHacker`'s `when_*` hooks and `implant`; annotations on parameters and member variables;
   hot reload and `morph` come after 0.5.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every

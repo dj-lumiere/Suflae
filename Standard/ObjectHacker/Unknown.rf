@@ -258,6 +258,7 @@ secret routine type_fact_of[T]() -> TypeFact
             do_invoke: (target: Unknown, index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reflected_invoke[T](target: target, index: index, args: args),
             make_creators: () => reflected_creators[T](),
             do_create: (index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reflected_create[T](index: index, args: args),
+            make_annotations: () => reflected_annotations[T](),
         ),
     )
 
