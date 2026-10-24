@@ -682,7 +682,9 @@ variant Number
 ```
 
 - **choice**: one of a fixed set, compared with `==` (`c == Color.RED`, `when c` with `== Color.RED =>`
-  arms). Cases may carry values (`OK: 200`). Equality, order and hashing come with every choice.
+  arms). Cases may carry values (`OK: 200`): every case or none (then 0, 1, 2, ... in order), some with and some
+  without is SF-S417. A flags member may say its bit the same way (`MINE: 0`, 0 to 63, every member or none).
+  Equality, order and hashing come with every choice.
   `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
   `Integer`); flags have the same two for their members.
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
