@@ -67,6 +67,10 @@ secret record UnknownKind
     secret do_poked: Callable[(Addr, Text, Unknown), Unknown?]
     ### Lets go of the kept value and frees its cell.
     secret do_release: Callable[(Addr,), None]
+    ### Whether the values kept at two addresses (both of this type) are equal, by the type's own `==`.
+    secret do_equal: Callable[(Addr, Addr), Bool]
+    ### The kept value's `hash()`.
+    secret do_hash: Callable[(Addr,), U64]
 
 ### The cell an `Unknown` points at: the kept value and the routines for its type. It never changes after it is
 ### made, so every copy of an `Unknown` can point at the same cell.
@@ -87,6 +91,7 @@ routine UnknownCell.destruct()
 ### out. An entity is kept as one more name for it, so a change through the `Unknown` reaches every name. A
 ### record is kept as a copy.
 record Unknown
+obeys Equatable, Hashable
     ### The cell holding the value.
     secret cell: Roamed[UnknownCell]
 
@@ -159,6 +164,40 @@ needs RecordType T
                         changed.$nameof(m) = new_value
                         return Unknown(from: changed)
     return none
+
+secret routine unknown_equal[T](data: Addr, other: Addr) -> Bool
+needs RecordType T
+    danger
+        return Hijacked[T](data).peek().kept_equal(you: Hijacked[T](other).peek())
+
+secret routine unknown_hash[T](data: Addr) -> U64
+needs RecordType T
+    danger
+        return Hijacked[T](data).peek().kept_hash()
+
+### `==` on two values an `Unknown` keeps, for a type that has none: a loud failure naming the type.
+@overridable
+secret routine T.kept_equal(you: T) -> Bool
+needs AnyType T
+    throw UnknownOperationError(type_name: me.type_name(), operation: "==")
+
+### `==` on two values an `Unknown` keeps: the type's own.
+@override
+secret routine T.kept_equal(you: T) -> Bool
+needs T obeys Equatable
+    return me == you
+
+### `hash()` on a value an `Unknown` keeps, for a type that has none: a loud failure naming the type.
+@overridable
+secret routine T.kept_hash() -> U64
+needs AnyType T
+    throw UnknownOperationError(type_name: me.type_name(), operation: "hash()")
+
+### `hash()` on a value an `Unknown` keeps: the type's own keyed hash with both keys zero.
+@override
+secret routine T.kept_hash() -> U64
+needs T obeys Hashable
+    return me.hash(k0: 0, k1: 0)
 
 secret routine unknown_release[T](data: Addr)
 needs RecordType T
@@ -239,8 +278,81 @@ needs RecordType T
             do_poke: do_poke,
             do_poked: (data: Addr, memvar: Text, value: Unknown) => unknown_poked[T](data: data, memvar: memvar, value: value),
             do_release: (data: Addr) => unknown_release[T](data: data),
+            do_equal: (data: Addr, other: Addr) => unknown_equal[T](data: data, other: other),
+            do_hash: (data: Addr) => unknown_hash[T](data: data),
         )
         return Unknown(cell: Roamed[UnknownCell](from: UnknownCell(data: cell.get_address(), kind: kind)))
+
+# A routine value has no member variables, no `==` and no hash, and its bound payload needs no teardown: its table
+# says so. It is kept like a record otherwise.
+secret routine unknown_show_routine[T](data: Addr) -> Text
+needs RoutineType T
+    danger
+        return Hijacked[T](data).peek().represent()
+
+secret routine unknown_serialize_routine[T](data: Addr) -> SerialValue
+needs RoutineType T
+    danger
+        return Hijacked[T](data).peek().serialize()
+
+secret routine unknown_no_memvar(data: Addr, memvar: Text) -> Unknown?
+    return none
+
+secret routine unknown_no_poked(data: Addr, memvar: Text, value: Unknown) -> Unknown?
+    return none
+
+secret routine unknown_release_routine(data: Addr)
+    danger
+        Hijacked[Addr](data).invalidate()
+    return
+
+secret routine unknown_wrap_record(value: T) -> Unknown
+needs RecordType T
+    return unknown_wrap[T](
+        value: value,
+        type_id: T.type_id(),
+        is_entity: false,
+        do_peek: (data: Addr, memvar: Text) => unknown_peek[T](data: data, memvar: memvar),
+        do_poke: unknown_poke_record,
+    )
+
+secret routine unknown_wrap_routine(value: T) -> Unknown
+needs RoutineType T
+    danger
+        var cell = Hijacked[T](rf_allocate_dynamic(size: T.data_size()))
+        cell.poke(value)
+        var kind = UnknownKind(
+            type_id: T.type_id(),
+            is_entity: false,
+            make_fact: T.type_fact_maker(),
+            do_show: (data: Addr) => unknown_show_routine[T](data: data),
+            do_serialize: (data: Addr) => unknown_serialize_routine[T](data: data),
+            do_peek: unknown_no_memvar,
+            do_poke: unknown_poke_record,
+            do_poked: unknown_no_poked,
+            do_release: unknown_release_routine,
+            do_equal: (data: Addr, other: Addr) => unknown_cannot_compare(type_name: T.type_name()),
+            do_hash: (data: Addr) => unknown_cannot_hash(type_name: T.type_name()),
+        )
+        return Unknown(cell: Roamed[UnknownCell](from: UnknownCell(data: cell.get_address(), kind: kind)))
+
+### A value kept in an `Unknown`, by its kind: a record (any value that is not an entity) as a copy.
+@overridable
+secret common routine T.kept_unknown(value: T) -> Unknown
+needs RecordType T
+    return unknown_wrap_record(value: value)
+
+### A routine value kept in an `Unknown`: it has no member variables, no `==` and no hash.
+@override
+secret common routine T.kept_unknown(value: T) -> Unknown
+needs RoutineType T
+    return unknown_wrap_routine(value: value)
+
+secret routine unknown_cannot_compare(type_name: Text) -> Bool
+    throw UnknownOperationError(type_name: type_name, operation: "==")
+
+secret routine unknown_cannot_hash(type_name: Text) -> U64
+    throw UnknownOperationError(type_name: type_name, operation: "hash()")
 
 ### Keeps an entity: the `Unknown` is one more name for it.
 ### :param from: The entity.
@@ -261,18 +373,12 @@ needs EntityType T
 routine Unknown(from: Unknown) -> Unknown
     return Unknown(cell: from.cell)
 
-### Keeps a copy of a value of any type that is not an entity.
+### Keeps a copy of a value of any type that is not an entity (a record, a choice, a routine value, ...).
 ### :param from: The value.
 ### :returns: The `Unknown` keeping it.
 routine Unknown(from: T) -> Unknown
-needs RecordType T
-    return unknown_wrap[T](
-        value: from,
-        type_id: T.type_id(),
-        is_entity: false,
-        do_peek: (data: Addr, memvar: Text) => unknown_peek[T](data: data, memvar: memvar),
-        do_poke: unknown_poke_record,
-    )
+needs AnyType T
+    return T.kept_unknown(value: from)
 
 # ============================================================================
 # Reading an Unknown
@@ -289,6 +395,31 @@ secret routine Unknown.kind() -> UnknownKind
 secret routine Unknown.data() -> Addr
     danger
         return me.cell.view().data
+
+### Whether two `Unknown`s keep equal values: values of one type, equal by that type's own `==`. Values of two
+### types are never equal. A type with no `==` fails loudly here.
+### :param you: The other `Unknown`.
+### :returns: Whether the kept values are equal.
+@readonly
+@override
+routine Unknown.eq(you: Viewing[Unknown]) -> Bool
+    if me.kind().type_id != you.kind().type_id
+        return false
+    return me.kind().do_equal(me.data(), you.data())
+
+### The kept value's `hash()`. A type with no hash fails loudly here.
+### :returns: The hash.
+@readonly
+@override
+routine Unknown.hash() -> U64
+    return me.kind().do_hash(me.data())
+
+### The kept value's hash, keyed: its hash mixed with the two keys.
+### :returns: The hash.
+@readonly
+@override
+routine Unknown.hash(k0: U64, k1: U64) -> U64
+    return me.kind().do_hash(me.data()).bitxor(you: k0).rotate_left(bits: 17).bitxor(you: k1)
 
 ### Whether the kept value is a `T`.
 ### :returns: `true` when the kept value's type is `T`.

@@ -25,6 +25,19 @@ crashable NoSuchMemberVariableError
 routine NoSuchMemberVariableError.crash_message() -> Text
     return f"'{me.type_name}' has no member variable '{me.memvar}'"
 
+### Raised when two `Unknown`s are compared, or one is hashed, and the kept value's type has no `==` or no hash.
+crashable UnknownOperationError
+    ### The kept value's type.
+    type_name: Text
+    ### The operation the type does not have (`==` or `hash()`).
+    operation: Text
+
+### Returns the message for an operation the kept value's type does not have.
+### :returns: The message.
+@readonly
+routine UnknownOperationError.crash_message() -> Text
+    return f"'{me.type_name}' has no {me.operation}, so the values an Unknown keeps of it cannot be compared or hashed. Give '{me.type_name}' one with 'obeys Equatable' or 'obeys Hashable', or compare them another way."
+
 ### Raised when `poke` or `poked` is given a value of another type than the member variable holds.
 crashable MemberVariableTypeError
     ### The target's type.

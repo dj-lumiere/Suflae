@@ -54,4 +54,16 @@ routine start()
         i = i + 1
     show(f"copies: {copies.count()} last: {copies[99]}")
 
+    show(f"5 == 5: {Unknown(from: 5) == Unknown(from: 5)}, 5 == 6: {Unknown(from: 5) == Unknown(from: 6)}")
+    show(f"5 == \"5\": {Unknown(from: 5) == Unknown(from: "5")}")
+    show(f"points: {Unknown(from: Point(x: 1, y: 2)) == Unknown(from: Point(x: 1, y: 2))}")
+    var seen = Set[Unknown]()
+    seen.add(Unknown(from: "a"))
+    seen.add(Unknown(from: "a"))
+    seen.add(Unknown(from: 1))
+    show(f"distinct: {seen.count()}")
+    var names = Dict[Unknown, Text]()
+    names[Unknown(from: Point(x: 0, y: 0))] = "origin"
+    show(f"by key: {names[Unknown(from: Point(x: 0, y: 0))]}")
+
     show("DONE")

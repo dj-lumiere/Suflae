@@ -1,0 +1,14 @@
+module Tests/ExitCode/UnknownNoEquality
+
+import ObjectHacker
+# Two Unknowns keeping a type that has no == (a record holding a routine value) cannot be compared: the comparison
+# fails loudly with a message naming the type.
+record Action
+    run: Callable[(), Integer]
+
+routine start()
+    var a = Unknown(from: Action(run: () => 1))
+    var b = Unknown(from: Action(run: () => 2))
+    show("comparing")
+    show(a == b)
+    show("not reached")

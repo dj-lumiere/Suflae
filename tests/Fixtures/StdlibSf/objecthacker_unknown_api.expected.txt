@@ -11,4 +11,9 @@ hero.hp after poke through Unknown: 40
 to Hero: same entity=true
 type_info: Hero ENTITY
 copies: 100 last: item 99
+5 == 5: true, 5 == 6: false
+5 == "5": false
+points: true
+distinct: 2
+by key: origin
 DONE

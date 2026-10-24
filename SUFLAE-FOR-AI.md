@@ -1396,7 +1396,10 @@ routine start()
 - `Unknown(from: value)` keeps a copy of a record (any non-entity value) or one more name for an entity
   (`Unknown(from: an_unknown)` is that same `Unknown`). `u.is[T]()`, `try u.to[T]()` (absent when the kept
   value is not a `T`), `u.represent()` (`f"{u}"` shows the kept value), `u.serialize()`, `u.type_info()`.
-  Every verb below also takes an `Unknown` target and works on what it keeps.
+  Every verb below also takes an `Unknown` target and works on what it keeps. `u == v` is true when both keep
+  values of one type that are equal by that type's own `==` (values of two types are never equal), and `u.hash()`
+  is the kept value's hash, so `Unknown` works as a `Set`/`Dict` key. A kept type with no `==` or no hash fails
+  loudly when compared or hashed (`UnknownOperationError`, naming the type).
 - `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program does not import
   `BuilderQuery`). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
   (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
@@ -1546,8 +1549,8 @@ concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, an
 Not built yet:
 
 - a REPL and hot reload;
-- `ObjectHacker`'s `call`/`create` by name, annotations with `apply`/`around`, `when_*` hooks, `implant`
-  and `morph`.
+- `ObjectHacker`'s `call`/`create` by name, annotations with `apply`/`around`, `when_*` hooks and `implant`;
+  hot reload and `morph` come after 0.5.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every
 argument, return a value on every path of a routine that has one, use bare `Integer`/`Decimal` numbers, and
