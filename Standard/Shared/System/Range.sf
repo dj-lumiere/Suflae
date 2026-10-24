@@ -29,6 +29,7 @@ needs T obeys Comparable, Addable, Subtractable
 ### :typeparam T: The type argument bound to `T`.
 @rf("RangeEmitter")
 entity RangeEmitter[T]
+obeys Emitter[T]
 needs RecordType T
 needs T obeys Comparable, Addable, Subtractable
     ### Stores the next value to yield.

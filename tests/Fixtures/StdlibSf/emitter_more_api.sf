@@ -1,0 +1,29 @@
+module Tests/StdlibSf/EmitterMoreApi
+
+# Collecting into a fixed-size Array, and terminals and adapters straight on an emitter.
+import IterTools
+
+routine start()
+    var xs = [4, 1, 3]
+
+    # to[Array[T, N]]: the bracket names the size, a different count fails.
+    show(f"array: {xs.to[Array[Integer, 3]]()}")
+    show(f"array from where: {xs.where(predicate: v => v > 1).to[Array[Integer, 2]]()}")
+    when try xs.to[Array[Integer, 2]]()
+        is None => show("array of 2: none")
+        else => show("array of 2: some")
+    var short = check xs.to[Array[Integer, 5]]()
+    when short
+        is ElementCountMismatchError as e => show(e.crash_message())
+        else => show("array of 5: some")
+
+    # Terminals and adapters on an emitter go on from where it is.
+    var it = xs.emitter()
+    show(f"first: {it.emit()}")
+    show(f"rest: {it.to[List]()}")
+    var counting = (1 to 5).emitter()
+    show(f"skipped: {counting.emit()}")
+    show(f"sum of the rest: {counting.sum()}")
+    var walk = xs.emitter()
+    show(f"skipped: {walk.emit()}")
+    show(f"where on the rest: {walk.where(predicate: v => v > 1).to[List]()}")

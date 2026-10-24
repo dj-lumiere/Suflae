@@ -28,6 +28,22 @@ needs TKey obeys Hashable, Equatable
         result[pair.item0] = pair.item1
     return result
 
+### Collects the values into an `Array[T, N]`, in order. The bracket names the size: `xs.to[Array[Integer, 3]]()`.
+### :throws: {ElementCountMismatchError} There are fewer or more than `N` values.
+failable routine Emittable[T].to[Array[T, N]]() -> Array[T, N]
+needs U64 N
+needs RecordType T
+    var result = Array[T, N]()
+    var filled: U64 = 0
+    each item in me
+        if filled >= N
+            throw ElementCountMismatchError(expected: N, found: N + 1)
+        result.put(position: filled, value: item)
+        filled = filled + 1
+    if filled < N
+        throw ElementCountMismatchError(expected: N, found: filled)
+    return result
+
 ### Returns how many values there are.
 routine Emittable[T].get_count() -> Integer
     return me.get_count().to[Integer]()

@@ -25,6 +25,20 @@ crashable EmptyCollectionError
 crashable ElementNotFoundError
     nothing
 
+### Represents the crashable raised when values are collected into a collection of a fixed size (an `Array[T, N]`)
+### and there are fewer or more of them than it holds.
+@rf("ElementCountMismatchError")
+crashable ElementCountMismatchError
+    ### Stores how many elements the collection holds.
+    expected: U64
+    ### Stores how many values there were, or `expected` + 1 when there were more than `expected` (the rest is not read).
+    found: U64
+
+### Returns the default message for a fixed-size collection filled with the wrong number of values.
+### :returns: The resulting `Text` value.
+@rf("ElementCountMismatchError.crash_message")
+routine ElementCountMismatchError.crash_message() -> Text
+
 ### Returns the default message for failed indexed access.
 ### :returns: The resulting `Text` value.
 @rf("IndexOutOfBoundsError.crash_message")

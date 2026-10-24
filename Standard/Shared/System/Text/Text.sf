@@ -25,6 +25,7 @@ obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Emittable[Char], 
 ### last.
 @rf("TextEmitter")
 entity TextEmitter
+obeys Emitter[Char]
     ### Stores the source text.
     text: Text
     ### Stores the current character index.

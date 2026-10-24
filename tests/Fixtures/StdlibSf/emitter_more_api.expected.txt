@@ -1,0 +1,10 @@
+array: [4, 1, 3]
+array from where: [4, 3]
+array of 2: none
+Cannot collect 3 values into a collection that holds exactly 5
+first: 4
+rest: [1, 3]
+skipped: 1
+sum of the rest: 14
+skipped: 4
+where on the rest: [3]
