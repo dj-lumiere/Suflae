@@ -1443,7 +1443,7 @@ routine start()
   that one object: its calls run the replacement, given the object first and then the arguments. The member routine
   is named by its type and name (`Hero.attack`, an entity's routine that is not common, has no type parameters and
   types every parameter, and is not overloaded by name), and a replacement of another signature is a build error
-  where `implant` is written. Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
+  where `implant` is written (SF-S201, naming `implant`, the routine and both signatures). Other objects keep the routine. `remove_implant(target: ada, replacing: Hero.attack)`
   gives it back (`false` when there was none). An implant keeps its object alive until it is removed. In a build
   that imports `ObjectHacker` every member routine of an entity starts with the test for a replacement.
 - **The program's own annotations.** A record that obeys `Annotation` is an annotation of that name, written on a

@@ -251,8 +251,24 @@ internal static class ImplantPass
 
                 var fill = new Placeholders(target: target, value: with,
                     types: new Dictionary<string, TypeExpression> { [key: TypePlaceholder] = CallableOf(routine: found, filePath: filePath) });
-                return new BlockStatement(Statements: block.Statements.Select(selector: fill.VisitStatement).ToList(),
-                    Location: s.Location);
+                // The local that takes the replacement says which routine it replaces, so a replacement of another
+                // signature is reported as one, naming the routine.
+                List<Statement> statements = block.Statements.Select(selector: fill.VisitStatement)
+                                                  .Select(selector: statement => statement is DeclarationStatement
+                                                       {
+                                                           Declaration: VariableDeclaration variable
+                                                       } declaration
+                                                       ? declaration with
+                                                       {
+                                                           Declaration = variable with
+                                                           {
+                                                               ReplacementOf = $"{found.OwnerName}.{found.MemberRoutineName}",
+                                                               ReplacedRoutineAt = found.Location
+                                                           }
+                                                       }
+                                                       : statement)
+                                                  .ToList();
+                return new BlockStatement(Statements: statements, Location: s.Location);
             }
 
             return base.VisitExpressionStatement(s: s);
