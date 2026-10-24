@@ -39,7 +39,7 @@ internal static class ModuleGlobalsSynthesisPass
         Action<SemanticDiagnosticCode, string, SourceLocation> report)
     {
         if (!ModuleGlobalOrder.TryOrder(orderedFiles: orderedFiles, report: report,
-                out List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals,
+                out List<ModuleGlobal> globals,
                 out List<HashSet<int>> deps, out List<int> order))
         {
             return false;
@@ -83,7 +83,7 @@ internal static class ModuleGlobalsSynthesisPass
     /// list that gets prepended to <c>start()</c>. Returns false (after reporting RF-S437) if a dependent
     /// field has a type with no synthesizable default.</summary>
     private static bool TryBuildModuleGlobalsSynthesis(
-        List<(string Name, TypeExpression Type, Expression Init, SourceLocation Loc)> globals,
+        List<ModuleGlobal> globals,
         List<HashSet<int>> deps, List<int> order, SourceLocation anchor,
         Action<SemanticDiagnosticCode, string, SourceLocation> report, out EntityDeclaration entityDecl,
         out VariableDeclaration singletonDecl, out List<Statement> initStmts)
@@ -91,11 +91,12 @@ internal static class ModuleGlobalsSynthesisPass
         int n = globals.Count;
         SourceLocation loc0 = anchor;
 
-        // 3) Build the __ModuleGlobals entity — one field per global (`name: Type`, no initializer).
+        // 3) Build the __ModuleGlobals entity, one field per global (`name: Type`, no initializer). Two modules'
+        //    globals of one name get a field each, named with their module.
         var fieldDecls = new List<SyntaxTree.Declaration>(capacity: n);
         for (int i = 0; i < n; i++)
         {
-            fieldDecls.Add(item: new VariableDeclaration(Name: globals[index: i].Name,
+            fieldDecls.Add(item: new VariableDeclaration(Name: globals[index: i].StorageName,
                 Type: globals[index: i].Type,
                 Initializer: null,
                 Visibility: VisibilityModifier.Open,
@@ -138,7 +139,7 @@ internal static class ModuleGlobalsSynthesisPass
                 value = def;
             }
 
-            ctorArgs.Add(item: (globals[index: i].Name, value));
+            ctorArgs.Add(item: (globals[index: i].StorageName, value));
         }
 
         var construct = new CreatorExpression(TypeName: ModuleGlobalsEntityName,
@@ -162,11 +163,13 @@ internal static class ModuleGlobalsSynthesisPass
                 continue; // independent — already set by the constructor
             }
 
+            // Marked as a global's initialization so analysis reads both sides in the global's own file and module:
+            // the name assigned to is that module's global even when another module has one of the same name.
             initStmts.Add(item: new AssignmentStatement(
                 Target: new IdentifierExpression(Name: globals[index: i].Name,
                     Location: globals[index: i].Loc),
                 Value: globals[index: i].Init,
-                Location: globals[index: i].Loc));
+                Location: globals[index: i].Loc) { IsGlobalInit = true });
         }
 
         // 6) The singleton declaration — an entity `global` stored behind a promoted Roamed[E] handle.

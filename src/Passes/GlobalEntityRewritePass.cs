@@ -234,10 +234,31 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
         var receiver = new IdentifierExpression(
             Name: RuntimeContract.ModuleGlobals.SingletonName,
             Location: id.Location) { ResolvedType = SingletonType };
-        return new MemberExpression(Object: receiver, MemberName: id.Name, Location: id.Location)
+        return new MemberExpression(Object: receiver, MemberName: FieldNameOf(id: id), Location: id.Location)
         {
             ResolvedType = id.ResolvedType
         };
+    }
+
+    // The member variables of the one holder of every global, read once.
+    private HashSet<string>? _fieldNames;
+
+    /// <summary>
+    /// The holder's member variable for the global <paramref name="id"/> resolved to: when two modules have a global
+    /// of the same name, each has its own member variable named with its module (see
+    /// <see cref="Builder.Desugaring.ModuleGlobalOrder.StorageName"/>), otherwise it is the global's own name.
+    /// </summary>
+    private string FieldNameOf(IdentifierExpression id)
+    {
+        // The singleton's type is the holder itself or the handle around it.
+        EntityTypeSymbol? holder = SingletonType as EntityTypeSymbol ??
+                                   SingletonType?.TypeArguments?.OfType<EntityTypeSymbol>()
+                                                .FirstOrDefault();
+        _fieldNames ??= holder?.MemberVariables.Select(selector: m => m.Name)
+                               .ToHashSet(comparer: StringComparer.Ordinal) ?? [];
+        string own = Builder.Desugaring.ModuleGlobalOrder.StorageName(module: id.ResolvedVariable?.Module,
+            name: id.Name, nameIsShared: true);
+        return _fieldNames.Contains(item: own) ? own : id.Name;
     }
 
     /// <summary>
