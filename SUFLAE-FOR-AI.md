@@ -84,7 +84,7 @@ through a `.rf` module the program imports (section 18).
 10. **A result you do not need takes no marker** (`drop` and `discard` are SF-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
     A call made for its result and left unused (`name.trim()` on its own line) builds and gets a NOTE, `note[SF-W007]`,
     from `check`, `lint` and the language server (never from a build). The stdlib marks by-product results
-    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`, `Unbroken.fetch_*`/`swap`), which get none.
+    `@discardable` (`Set.add`/`remove`, `Dict.remove`, `Sorted*`), which get none.
     Other notes: `until false` gets SF-W304 with the quick fix "Write 'loop'", the body of `until true` gets
     SF-W057 and is shown faded (as is code after an unconditional `return`, SF-S786,
     an error). Diagnostics may carry a fix the language server offers as a quick fix, and `suflae check --json`
@@ -377,7 +377,8 @@ routine start()
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
   overflow** instead of crashing. Every other type (`Integer`, `Decimal`, `Text`, records, wider numbers)
   is serialized through a lock. A logical update spread over several statements
-  (`var t = g` … `g = t + 1`) is not atomic; serialize it yourself.
+  (`var t = g` … `g = t + 1`) is not atomic; serialize it yourself. A global and an entity's member variable are
+  the one way to change a shared value: there is no `Unbroken` (SF-S447 names this way).
 - Use a global for state the whole process has one of (a log, configuration, a registry); pass per-task
   context as parameters.
 
@@ -1141,7 +1142,7 @@ using FileManager.open_write(at: out) as sink
   A type works with `using` when it has `enter` (its result is bound by `as`) and `exit` member routines.
   There is no `defer`.
 - A byte flow (`FileSource`, `FileSink`, `stdin()`, `stdout()`) is read with `pull(max:)` and written with
-  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places such as `Unbroken`, where
+  `push(data:)`: bytes come out in the order they went in. `load` / `store` belong to places (a memory cell), where
   reading again gives the same value. `migrate --step verbs` rewrites the old `load` / `store` on a flow.
 
 ## 16. Concurrency

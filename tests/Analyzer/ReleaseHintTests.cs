@@ -45,7 +45,7 @@ public class ReleaseHintTests
     }
 
     [Theory]
-    [InlineData("Atomic[S64]", "It is called 'Unbroken' now (migrate --step type-names rewrites it).")]
+    [InlineData("Atomic[S64]", "A number every job changes is a 'global' or a member variable of an entity")]
     [InlineData("CircularList[S64]", "It is called 'RotatableList' now (migrate --step type-names rewrites it).")]
     public void RenamedType_NamesTheNewName(string type, string hint)
     {
@@ -66,7 +66,7 @@ public class ReleaseHintTests
                                        routine start()
                                            var hits = Atomic[S64](initial: 0)
                                        """);
-        Assert.Contains(expectedSubstring: "It is called 'Unbroken' now (migrate --step type-names rewrites it).",
+        Assert.Contains(expectedSubstring: "A number every job changes is a 'global' or a member variable of an entity",
             actualString: errors);
     }
 }

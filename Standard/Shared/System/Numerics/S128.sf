@@ -7,8 +7,7 @@ module System/Numerics
 ### to 170,141,183,460,469,231,731,687,303,715,884,105,727.
 ###
 ### `S128` holds values that can't fit in `S64`: wide intermediate results, cryptographic computations,
-### and large counters. `S256` goes wider still. Note that `S128` does not implement `UnbrokenType`
-### because hardware atomic operations on 128-bit values are not universally available.
+### and large counters. `S256` goes wider still.
 @rf("S128")
 record S128
 obeys SignedIntegral, Comparable, Copyable

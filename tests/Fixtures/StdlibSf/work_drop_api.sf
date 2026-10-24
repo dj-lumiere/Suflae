@@ -5,26 +5,27 @@ module Tests/StdlibSf/WorkDropApi
 
 import IO/Console
 
-routine spin(stopped: Unbroken[S64]) -> Integer
+global stopped: S64 = 0
+
+routine spin() -> Integer
     var turns = 0
     until cancellation_requested()
         waitfor(1ms)
         turns += 1
-    stopped.fetch_add(delta: 1)
+    stopped += 1
     return turns
 
-routine leave_running(stopped: Unbroken[S64])
-    var job = spin.to[Work](stopped: stopped)
+routine leave_running()
+    var job = spin.to[Work]()
     job.start_now()
     waitfor(5ms)
 
 routine start()
-    var stopped = Unbroken[S64](initial: 0)
-    leave_running(stopped: stopped)
-    show(f"after scope: {stopped.load()}")
-    var jobs = [spin.to[Work](stopped: stopped), spin.to[Work](stopped: stopped)]
+    leave_running()
+    show(f"after scope: {stopped}")
+    var jobs = [spin.to[Work](), spin.to[Work]()]
     jobs[0].start_now()
     waitfor(5ms)
     jobs = []
-    show(f"after list: {stopped.load()}")
+    show(f"after list: {stopped}")
     show("DONE")
