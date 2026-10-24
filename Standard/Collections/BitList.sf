@@ -724,3 +724,10 @@ routine BitList.destruct()
 dangerous routine BitList.roam_free()
     me.data.invalidate()
     return
+
+### Collects the values into a bit list, in order.
+routine Emittable[Bool].to[BitList]() -> BitList
+    var result = BitList()
+    each item in me
+        result.add_last(value: item)
+    return result

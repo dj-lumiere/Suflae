@@ -19,6 +19,15 @@ needs T obeys Hashable, Equatable
         result.add(value: item)
     return result
 
+### Collects `(key, value)` pairs into a dict, in order: a later pair whose key is there already replaces its value.
+routine Emittable[Tuple[TKey, TValue]].to[Dict[TKey, TValue]]() -> Dict[TKey, TValue]
+needs TKey obeys Hashable, Equatable
+    var result = Dict[TKey, TValue]()
+    each item in me
+        var pair: Tuple[TKey, TValue] = item
+        result[pair.item0] = pair.item1
+    return result
+
 ### Returns how many values there are.
 routine Emittable[T].get_count() -> Integer
     return me.get_count().to[Integer]()

@@ -317,3 +317,12 @@ secret routine PriorityQueue[TPriority, TElement].shown_order() -> List[U64]
         order.add_at(index: low, value: i)
         i = i + 1
     return order
+
+### Collects `(priority, element)` pairs into a priority queue.
+routine Emittable[Tuple[TPriority, TElement]].to[PriorityQueue[TPriority, TElement]]() -> PriorityQueue[TPriority, TElement]
+needs TPriority obeys Comparable
+    var result = PriorityQueue[TPriority, TElement]()
+    each item in me
+        var pair: Tuple[TPriority, TElement] = item
+        result.add(element: pair.item1, priority: pair.item0)
+    return result

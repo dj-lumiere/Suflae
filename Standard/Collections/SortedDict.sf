@@ -286,3 +286,12 @@ secret routine SortedDict[TKey, TValue].entries_text() -> Text
         result = f"{result}{nested_repr(entry.key)}: {nested_repr(entry.value)}"
         first = false
     return result
+
+### Collects `(key, value)` pairs into a sorted dict: a later pair whose key is there already replaces its value.
+routine Emittable[Tuple[TKey, TValue]].to[SortedDict[TKey, TValue]]() -> SortedDict[TKey, TValue]
+needs TKey obeys Comparable
+    var result = SortedDict[TKey, TValue]()
+    each item in me
+        var pair: Tuple[TKey, TValue] = item
+        result[pair.item0] = pair.item1
+    return result

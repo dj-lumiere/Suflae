@@ -522,3 +522,10 @@ secret routine RotatableList[T].elements_text() -> Text
         result = f"{result}{nested_repr(element)}"
         first = false
     return f"{result}]"
+
+### Collects the values into a rotatable list, in order.
+routine Emittable[T].to[RotatableList[T]]() -> RotatableList[T]
+    var result = RotatableList[T]()
+    each item in me
+        result.add_last(value: item)
+    return result

@@ -262,3 +262,11 @@ secret routine SortedList[T].items_text() -> Text
         result = f"{result}{nested_repr(value)}"
         first = false
     return result
+
+### Collects the values into a sorted list, smallest first.
+routine Emittable[T].to[SortedList[T]]() -> SortedList[T]
+needs T obeys Comparable
+    var result = SortedList[T]()
+    each item in me
+        result.add(value: item)
+    return result
