@@ -420,7 +420,8 @@ failable routine Integer.to[B32]() -> B32
 @rf("Integer.to")
 failable routine Integer.to[B64]() -> B64
 
-### Converts an arbitrary-precision integer to `Decimal`, rounding half-even to its 34 significant digits.
+### Converts an arbitrary-precision integer to `Decimal`, rounding to its 34 significant digits, a value exactly halfway
+### away from zero.
 ### :returns: The resulting `Decimal` value.
 ### :throws: {NumericOverflowError} if this value is beyond the range of `Decimal` (about `1e6144`).
 @rf("Integer.to")

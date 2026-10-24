@@ -61,7 +61,9 @@ through a `.rf` module the program imports (section 18).
 5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
    significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Integer` values turns each into a `Decimal`
    first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
-   `1.0 / 3` is `0.333…` too (§4).
+   `1.0 / 3` is `0.333…` too (§4). Every rounding a `Decimal` does (`/`, text read in, `round()`, `fixed(places:)`)
+   takes a value exactly halfway away from zero: `2.5` to `3`, `-2.5` to `-3` (`D32`, `D64`, `D128` keep IEEE 754's
+   ties to even).
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before

@@ -2,5 +2,5 @@ fixed: 2.67 0.12 -0.00 inf
 sig: 0.1 1.23e+05
 subnormal: 6e-08 1e-45 5e-324 6e-4966
 read: 1 inf -inf 0.1
-decimal: 2.5 1.23 Decimal(2.5) 1.2 2.2
+decimal: 2.5 1.23 Decimal(2.5) 1.2 2.3
 ieee decimal: 1.230 D64(1.230) 1.23000

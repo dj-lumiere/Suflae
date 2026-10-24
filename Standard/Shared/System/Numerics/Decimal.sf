@@ -150,7 +150,7 @@ routine S64.to[Decimal]() -> Decimal
 @rf("S128.to")
 routine S128.to[Decimal]() -> Decimal
 
-### S256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+### S256 -> Decimal (rounds half away from zero when the magnitude exceeds 34 digits).
 @rf("S256.to")
 routine S256.to[Decimal]() -> Decimal
 
@@ -174,19 +174,19 @@ routine U64.to[Decimal]() -> Decimal
 @rf("U128.to")
 routine U128.to[Decimal]() -> Decimal
 
-### U256 -> Decimal (rounds half-even when the magnitude exceeds 34 digits).
+### U256 -> Decimal (rounds half away from zero when the magnitude exceeds 34 digits).
 @rf("U256.to")
 routine U256.to[Decimal]() -> Decimal
 
-### B16 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+### B16 -> Decimal (correctly rounded, a tie away from zero; crashes if the value is non-finite).
 @rf("B16.to")
 routine B16.to[Decimal]() -> Decimal
 
-### B32 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+### B32 -> Decimal (correctly rounded, a tie away from zero; crashes if the value is non-finite).
 @rf("B32.to")
 routine B32.to[Decimal]() -> Decimal
 
-### B64 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+### B64 -> Decimal (correctly rounded, a tie away from zero; crashes if the value is non-finite).
 @rf("B64.to")
 routine B64.to[Decimal]() -> Decimal
 
@@ -202,7 +202,7 @@ failable routine Decimal.to[B32]() -> B32
 @rf("Decimal.to")
 failable routine Decimal.to[B64]() -> B64
 
-### B128 -> Decimal (correctly rounded via D128; crashes if the value is non-finite).
+### B128 -> Decimal (correctly rounded, a tie away from zero; crashes if the value is non-finite).
 @rf("B128.to")
 routine B128.to[Decimal]() -> Decimal
 
