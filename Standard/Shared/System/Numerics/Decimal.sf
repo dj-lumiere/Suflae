@@ -6,14 +6,15 @@ module System/Numerics
 ### A finite-only canonical software decimal128 value (shares D128's i128 BID storage).
 @rf("Decimal")
 record Decimal
-obeys Numeric, Comparable, Copyable
+obeys Numeric, Comparable, Copyable, Hashable
     nothing
 
 ### Views this Decimal as its underlying `D128` (bit-for-bit; a Decimal is always finite).
 @rf("dec_to_d128")
 routine dec_to_d128(x: Decimal) -> D128
 
-### Wraps a `D128` bit pattern as a Decimal (bit-for-bit; the caller guarantees finiteness).
+### Wraps a finite `D128` as a Decimal in its one form: trailing zeros of the coefficient stripped, a zero +0 (the
+### caller guarantees finiteness).
 @rf("dec_of_d128")
 routine dec_of_d128(x: D128) -> Decimal
 
@@ -27,7 +28,7 @@ failable routine dec_of_d128_finite(d: D128) -> Decimal
 @rf("Decimal.to_bits")
 routine Decimal.to_bits() -> U128
 
-### Reinterprets a raw U128 as a Decimal (bit-for-bit; assumes a valid finite BID encoding).
+### Reads a raw U128 as a Decimal in its one form (assumes a valid finite BID encoding).
 @rf("Decimal.from_bits")
 common routine Decimal.from_bits(bits: U128) -> Decimal
 
@@ -59,9 +60,16 @@ routine Decimal.is_nan() -> Bool
 @rf("Decimal.compare")
 routine Decimal.compare(you: Decimal) -> ComparisonSign
 
-### Value equality (delegated to D128): 1.0 and 1.00 are equal; +0 and -0 are equal.
+### Value equality (delegated to D128): `1.0` and `1.00` are equal (and are the same bits).
 @rf("Decimal.eq")
 routine Decimal.eq(you: Decimal) -> Bool
+
+### Returns a SipHash-2-4 keyed hash of the bits. A Decimal has one form, so equal values hash equal.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("Decimal.hash")
+routine Decimal.hash(k0: U64, k1: U64) -> U64
 
 ### Returns `me * you`, exactly.
 ### :throws: {NumericOverflowError} when the exact product needs more than 34 significant digits.

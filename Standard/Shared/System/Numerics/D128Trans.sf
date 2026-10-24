@@ -382,10 +382,6 @@ routine D128.floor() -> D128
 @rf("D128.ceil")
 routine D128.ceil() -> D128
 
-### Rounds to the nearest integral value, ties away from zero. Specials pass through. Never crashes.
-@rf("D128.round")
-routine D128.round() -> D128
-
 ### Rounds to the nearest integral value, ties to even (IEEE roundTiesToEven). Never crashes.
 @rf("D128.rint")
 routine D128.rint() -> D128

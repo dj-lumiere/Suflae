@@ -931,9 +931,18 @@ failable routine B128.scaleb(n: Integer) -> B128
 ### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
+### :param rule: How the digits past them go (a tie to the even one when left out).
 ### :returns: The rendered `Text`.
-routine D32.fixed(places: Integer) -> Text
-    return me.fixed(places: places.to[U64]())
+routine D32.fixed(places: Integer, rule: RoundingRule = RoundingRule.HALF_EVEN) -> Text
+    return me.fixed(places: places.to[U64](), rule: rule)
+
+### Rounds to `places` digits after the point by `rule`, a tie to the even one when left out (D32's rule, as its
+### operators round): `x.round()` is the nearest integral value, `2.5` -> `2`. Specials pass through.
+### :param places: The digits after the point kept (0 for an integral value).
+### :param rule: How the digits past them go.
+### :returns: The rounded value.
+routine D32.round(places: Integer = 0, rule: RoundingRule = RoundingRule.HALF_EVEN) -> D32
+    return me.round(places: places.to[U64](), rule: rule)
 
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.
@@ -945,9 +954,18 @@ failable routine D32.scaleb(n: Integer) -> D32
 ### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
+### :param rule: How the digits past them go (a tie to the even one when left out).
 ### :returns: The rendered `Text`.
-routine D64.fixed(places: Integer) -> Text
-    return me.fixed(places: places.to[U64]())
+routine D64.fixed(places: Integer, rule: RoundingRule = RoundingRule.HALF_EVEN) -> Text
+    return me.fixed(places: places.to[U64](), rule: rule)
+
+### Rounds to `places` digits after the point by `rule`, a tie to the even one when left out (D64's rule, as its
+### operators round): `x.round()` is the nearest integral value, `2.5` -> `2`. Specials pass through.
+### :param places: The digits after the point kept (0 for an integral value).
+### :param rule: How the digits past them go.
+### :returns: The rounded value.
+routine D64.round(places: Integer = 0, rule: RoundingRule = RoundingRule.HALF_EVEN) -> D64
+    return me.round(places: places.to[U64](), rule: rule)
 
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.
@@ -959,9 +977,18 @@ failable routine D64.scaleb(n: Integer) -> D64
 ### exact value (`2.675.fixed(2)` is `2.67`, since the stored double is just below 2.675). The integer
 ### part is always written out in full, never in exponent form.
 ### :param places: The number of digits after the point (0 for none).
+### :param rule: How the digits past them go (a tie to the even one when left out).
 ### :returns: The rendered `Text`.
-routine D128.fixed(places: Integer) -> Text
-    return me.fixed(places: places.to[U64]())
+routine D128.fixed(places: Integer, rule: RoundingRule = RoundingRule.HALF_EVEN) -> Text
+    return me.fixed(places: places.to[U64](), rule: rule)
+
+### Rounds to `places` digits after the point by `rule`, a tie to the even one when left out (D128's rule, as its
+### operators round): `x.round()` is the nearest integral value, `2.5` -> `2`. Specials pass through.
+### :param places: The digits after the point kept (0 for an integral value).
+### :param rule: How the digits past them go.
+### :returns: The rounded value.
+routine D128.round(places: Integer = 0, rule: RoundingRule = RoundingRule.HALF_EVEN) -> D128
+    return me.round(places: places.to[U64](), rule: rule)
 
 ### IEEE 754 scaleB: `me * 10^n`. Checked: crashes if a finite `me` overflows to ±infinity.
 ### :param n: The power-of-ten exponent to apply.

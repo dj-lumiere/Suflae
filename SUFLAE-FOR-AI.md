@@ -63,8 +63,13 @@ through a `.rf` module the program imports (section 18).
    first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
    `1.0 / 3` is `0.333…` too (§4). Every rounding a `Decimal` does (`/`, text read in, `round()`, `fixed(places:)`)
    is half up: x goes to the n (at the digit kept) with `n - 0.5 <= x < n + 0.5`, that is `floor(x + 0.5)`. `2.5` goes
-   to `3`, `-2.5` to `-2`, `-7.125` to 2 places to `-7.12`, and `round()` of `-0.5` is `0` (`D32`, `D64`, `D128` keep
-   IEEE 754's ties to even).
+   to `3`, `-2.5` to `-2`, `-7.125` to 2 places to `-7.12`, and `round()` of `-0.5` is `0`, `**`, `sqrt` and the
+   transcendentals included (`D32`, `D64`, `D128` keep IEEE 754's ties to even, cohorts and `-0`). A routine that rounds
+   on purpose takes a `RoundingRule` (`HALF_UP`, `HALF_EVEN`, `HALF_AWAY`, `FLOOR`, `CEIL`, `TRUNC`; left out, the
+   type's own rule: `HALF_UP` for `Decimal`, `HALF_EVEN` for the D types): `x.round(places: 2, rule: RoundingRule.FLOOR)`,
+   `x.fixed(places: 2, rule: ...)`, `a.divide(by: b, places: 2)`, `a.add(you: b, places: 2)`, `a.subtract(you: b,
+   places: 2)`, `a.multiply(by: b, places: 10)` (exact, then rounded once: they round where `+ - *` crash). The
+   operators never take a rule, and there is no global rounding state.
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before
@@ -199,7 +204,10 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 - **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
   safe) with 34 significant digits. `+ - *` are exact: a result that needs more than 34 digits crashes with
   `NumericOverflowError` (`try` recovers it) instead of rounding. `/`, `sqrt`, the transcendentals and `**` give the
-  nearest 34-digit value (`1 / 3`), and a result beyond about `1e6144` crashes. It displays canonically: `2.50` shows as `2.5`.
+  nearest 34-digit value (`1 / 3`), and a result beyond about `1e6144` crashes. A `Decimal` has one form per value:
+  no `-0` (`(-0.5).fixed(0)` is `0`, `"-0"` reads as `0`) and no trailing zeros, so `1.0` and `1.00` are the same and
+  hash the same (a `Decimal` can be a `Set` or `Dict` key). `2.50` shows as `2.5`, `100` and `1e2` both as `100` (an
+  integer of up to 34 digits is written in full), `1e40` as `1E+40`.
 - Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
 - A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
   the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`

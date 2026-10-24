@@ -376,10 +376,6 @@ routine D64.floor() -> D64
 @rf("D64.ceil")
 routine D64.ceil() -> D64
 
-### Rounds to the nearest integral value, ties away from zero. Specials pass through. Never crashes.
-@rf("D64.round")
-routine D64.round() -> D64
-
 ### Rounds to the nearest integral value, ties to even (IEEE roundTiesToEven). Never crashes.
 @rf("D64.rint")
 routine D64.rint() -> D64

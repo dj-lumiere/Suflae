@@ -1,0 +1,22 @@
+module System/Numerics
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### How a routine that rounds on purpose (`round`, `fixed`, `Decimal.divide`) treats the digits it drops. The
+### operators take no rule: D32, D64, and D128 round a tie to the even one, as IEEE 754 does, and Decimal rounds half
+### up. Leaving `rule` out gives the type's own rule.
+@rf("RoundingRule")
+choice RoundingRule
+    ### To the n with n - 0.5 <= x < n + 0.5: 2.5 to 3, -2.5 to -2.
+    HALF_UP
+    ### To the nearest, a tie to the even one: 2.5 to 2, -2.5 to -2.
+    HALF_EVEN
+    ### To the nearest, a tie away from zero: 2.5 to 3, -2.5 to -3.
+    HALF_AWAY
+    ### Down, toward -infinity: 2.4 to 2, -2.6 to -3.
+    FLOOR
+    ### Up, toward +infinity: 2.4 to 3, -2.6 to -2.
+    CEIL
+    ### Toward zero: 2.6 to 2, -2.6 to -2.
+    TRUNC

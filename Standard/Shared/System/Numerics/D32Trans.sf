@@ -376,10 +376,6 @@ routine D32.floor() -> D32
 @rf("D32.ceil")
 routine D32.ceil() -> D32
 
-### Rounds to the nearest integral value, ties away from zero. Specials pass through. Never crashes.
-@rf("D32.round")
-routine D32.round() -> D32
-
 ### Rounds to the nearest integral value, ties to even (IEEE roundTiesToEven). Never crashes.
 @rf("D32.rint")
 routine D32.rint() -> D32

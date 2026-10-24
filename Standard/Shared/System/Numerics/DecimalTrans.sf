@@ -127,7 +127,7 @@ failable routine Decimal.gamma() -> Decimal
 @rf("Decimal.ln_gamma")
 routine Decimal.ln_gamma() -> Decimal
 
-### True if me has its sign bit set (negative, including -0).
+### True if me has its sign bit set (a Decimal below zero: there is no -0).
 @rf("Decimal.is_sign_negative")
 routine Decimal.is_sign_negative() -> Bool
 
@@ -139,7 +139,7 @@ routine Decimal.is_normal() -> Bool
 @rf("Decimal.is_zero")
 routine Decimal.is_zero() -> Bool
 
-### True if me is negative (-0 is negative).
+### True if me is below zero (a Decimal zero is always +0).
 @rf("Decimal.is_negative")
 routine Decimal.is_negative() -> Bool
 
@@ -151,7 +151,7 @@ routine Decimal.is_positive() -> Bool
 @rf("Decimal.is_subnormal")
 routine Decimal.is_subnormal() -> Bool
 
-### -1, 0, or +1 matching the sign of me (+-0 -> +0).
+### -1, 0, or +1 matching the sign of me.
 @rf("Decimal.signum")
 routine Decimal.signum() -> Decimal
 
@@ -163,7 +163,7 @@ routine Decimal.fpclassify() -> FpClass
 @rf("Decimal.abs")
 routine Decimal.abs() -> Decimal
 
-### Negation of me (flips the sign).
+### Negation of me (flips the sign: zero stays +0).
 @rf("Decimal.neg")
 routine Decimal.neg() -> Decimal
 
@@ -214,11 +214,6 @@ routine Decimal.floor() -> Decimal
 ### Rounds toward positive infinity (ceil).
 @rf("Decimal.ceil")
 routine Decimal.ceil() -> Decimal
-
-### Rounds half up (Decimal's rounding): the integral value n with n - 0.5 <= me < n + 0.5, that is floor(me + 0.5)
-### (2.5 -> 3, -2.5 -> -2, -0.5 -> 0).
-@rf("Decimal.round")
-routine Decimal.round() -> Decimal
 
 ### Rounds the way Decimal rounds, half up: the same as `round()`.
 @rf("Decimal.rint")
