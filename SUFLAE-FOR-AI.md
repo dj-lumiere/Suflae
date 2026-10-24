@@ -150,8 +150,8 @@ it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Num
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
-(`x.type_name()`), `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
+`PriorityQueue`, …), `IterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `ObjectHacker`
+(`type_name(of: x)`, reflection, section 19). Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
 `module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
 `Numerics` and rewrites `Core.X` to `System.X`.
@@ -1354,7 +1354,9 @@ The standard library uses `danger` internally; that is never visible to a progra
 
 ## 19. ObjectHacker (runtime reflection)
 
-`import ObjectHacker` works on live objects from the outside. Values travel as `SerialValue`.
+`import ObjectHacker` works on live objects from the outside. Every verb takes the object as an argument
+(`peek(target: hero, ...)`), never as a receiver. A value whose type is known only while the program runs is an
+`Unknown`; `SerialValue` is only for serialization.
 
 ```suflae
 import ObjectHacker
@@ -1364,25 +1366,49 @@ entity Hero
     hp: S64
     secret seed: S64
 
+record Point
+    x: S64
+    y: S64
+
 routine start()
     var hero = Hero(name: "Ada", hp: 10, seed: 7)
     var alias = hero
     show(type_name(of: hero))                          # Hero
     each info in memvars(of: hero)
-        show(f"{info.order}: {info.name}: {info.type_name}, secret: {info.is_secret}")
-    show(peek(target: hero, memvar: "hp"))             # SerialValue(10)
+        show(f"{info.order}: {info.name}: {info.type.name}, secret: {info.is_secret}")
+    show(peek(target: hero, memvar: "hp"))             # 10 (an Unknown)
     var hp: S64 = 25
-    poke(target: hero, memvar: "hp", value: SerialValue(from: hp))
+    poke(target: hero, memvar: "hp", value: hp)
     show(alias.hp)                                     # 25: every name sees the change
+    var p = Point(x: 1, y: 2)
+    var y: S64 = 9
+    p = poked(target: p, memvar: "y", value: y)        # a record changes only as a copy
+    var u = Unknown(from: p)
+    show(u.is[Point]())                                # true
+    when try u.to[Point]()
+        is None => show("not a Point")
+        else as q => show(q.y)                         # 9
+    show(type_info(of: hero).kind)                     # ENTITY
     var seen = watch(target: hero)
     show(seen.is_alive())                              # true
-    return
 ```
 
-- `type_name(of:)`, `memvars(of:)` (every member variable, `secret` ones included, in declaration order),
-  `peek(target:)` (the whole object serialized), `peek(target:, memvar:)` (failable: throws `AbsentValueError`
-  for an unknown name), `poke(target:, memvar:, value:)` (entities only; throws `NoSuchMemberVariableError`),
-  `watch(target:)` (an observation that does not keep the entity alive; `is_alive()`).
+- `Unknown(from: value)` keeps a copy of a record (any non-entity value) or one more name for an entity
+  (`Unknown(from: an_unknown)` is that same `Unknown`). `u.is[T]()`, `try u.to[T]()` (absent when the kept
+  value is not a `T`), `u.represent()` (`f"{u}"` shows the kept value), `u.serialize()`, `u.type_info()`.
+  Every verb below also takes an `Unknown` target and works on what it keeps.
+- `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program does not import
+  `BuilderQuery`). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
+  (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
+  (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
+  ones included), `protocols` (names), `obeys_protocol(name:)`, `cases` (a choice's or flags' case names) and
+  `arms` (a variant's arm types). `memvars(of: x)` is `type_info(of: x).memvars`.
+- `peek(target:, memvar:) -> Unknown` is failable: `NoSuchMemberVariableError` for a name the type does not have.
+- `poke(target:, memvar:, value:)` changes an entity in place, under its lock; the value must be of the member
+  variable's exact type (`MemberVariableTypeError` names both types: a bare `5` is an `Integer`, so give an
+  `S64` slot a typed variable). Given a record it throws `PokeKindError`: take the changed copy with
+  `p = poked(target: p, memvar:, value:)` instead (`poked` given an entity throws `PokeKindError` too).
+- `watch(target:)`: an observation that does not keep the entity alive; `is_alive()`.
 
 ## 20. CLI and `config.toml`
 
@@ -1514,13 +1540,14 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
-concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and the basic `ObjectHacker`
-surface. The `StdlibSf` fixtures run in CI with their expected output.
+concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and `ObjectHacker`'s
+`Unknown`, `type_info`, `peek`/`poke`/`poked` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:
 
 - a REPL and hot reload;
-- stronger runtime reflection in `ObjectHacker` beyond reading, writing and watching member variables.
+- `ObjectHacker`'s `call`/`create` by name, annotations with `apply`/`around`, `when_*` hooks, `implant`
+  and `morph`.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every
 argument, return a value on every path of a routine that has one, use bare `Integer`/`Decimal` numbers, and

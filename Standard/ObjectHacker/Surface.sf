@@ -1,33 +1,124 @@
 module ObjectHacker
 
-# Suflae's surface of ObjectHacker: what an object is made of comes back in Suflae's own list, and a member
-# variable's position is an `Integer`.
+# Suflae's surface of ObjectHacker: what a type is made of, as `type_info(of:)` describes it.
 
-### A member variable as `memvars` reports it.
+### What kind of type a `TypeInfo` describes.
+choice TypeKind
+    ### A record: a value, copied when it is handed on.
+    RECORD
+    ### An entity: one object, shared by every name for it.
+    ENTITY
+    ### A crashable: an error a routine throws.
+    CRASHABLE
+    ### A choice: one of a fixed set of named cases.
+    CHOICE
+    ### A flags type: any set of named flags.
+    FLAGS
+    ### A variant: a value of one of several types.
+    VARIANT
+    ### A routine value.
+    ROUTINE
+
+### A member variable as `type_info(of:)` describes it.
 record MemberVariableInfo
     ### The member variable's name.
     name: Text
-    ### The name of the member variable's type.
-    type_name: Text
-    ### Whether the member variable is `secret`.
-    is_secret: Bool
-    ### The member variable's position in its type's declaration, from 0.
+    ### Its position in its type's declaration, from 0.
     order: Integer
+    ### The type it holds.
+    type: TypeInfo
+    ### Whether it is `secret`.
+    is_secret: Bool
 
-### What target is made of: every member variable, `secret` ones included, in declaration order.
+### What a type is made of, as `type_info(of:)` describes it. Each type is described once per call, so a type that
+### holds itself (a node with a `next` node) ends: the member variable's `type` is that same `TypeInfo`.
+entity TypeInfo
+    ### The unqualified name (`Hero`, `List[Integer]`).
+    name: Text
+    ### The name with its module (`Game.Hero`).
+    full_name: Text
+    ### The module that declares the type.
+    module_name: Text
+    ### What kind of type it is.
+    kind: TypeKind
+    ### The member variables of a record or an entity, `secret` ones included, in declaration order.
+    memvars: List[MemberVariableInfo]
+    ### The names of the protocols the type obeys.
+    protocols: List[Text]
+    ### The case names of a choice or a flags type, in declaration order.
+    cases: List[Text]
+    ### The arm types of a variant, in declaration order.
+    arms: List[TypeInfo]
+
+### Whether the type obeys a protocol.
+### :param name: The protocol's name (`"Hashable"`).
+### :returns: `true` when the type obeys it.
+routine TypeInfo.obeys_protocol(name: Text) -> Bool
+    return me.protocols.has(name)
+
+### The description of a type.
+### :param of: Any value or entity, or an `Unknown` (then the kept value's type).
+### :returns: The description.
+routine type_info(of: T) -> TypeInfo
+needs AnyType T
+    return info_from(fact: Unknown(from: of).type_fact(), seen: Dict[U64, TypeInfo]())
+
+### The description of the type of an `Unknown`'s kept value.
+### :returns: The description.
+routine Unknown.type_info() -> TypeInfo
+    return info_from(fact: me.type_fact(), seen: Dict[U64, TypeInfo]())
+
+### The member variables of target's type, `secret` ones included, in declaration order: `type_info(of: target).memvars`.
 ### :param of: Any value or entity.
 ### :returns: One entry per member variable.
 routine memvars(of: T) -> List[MemberVariableInfo]
 needs AnyType T
-    var found = List[MemberVariableInfo]()
-    # Named, so the list lives until the loop is done: a library body is lowered after analysis, where a loop
-    # over a call's result is not given a name of its own.
-    var infos = memvars(of: of)
-    each info in infos
-        found.add_last(value: MemberVariableInfo(
-            name: info.name,
-            type_name: info.type_name,
-            is_secret: info.is_secret,
-            order: info.order.to[Integer](),
+    return type_info(of: of).memvars
+
+secret routine kind_from(name: Text) -> TypeKind
+    if name == "ENTITY"
+        return TypeKind.ENTITY
+    if name == "CRASHABLE"
+        return TypeKind.CRASHABLE
+    if name == "CHOICE"
+        return TypeKind.CHOICE
+    if name == "FLAGS"
+        return TypeKind.FLAGS
+    if name == "VARIANT"
+        return TypeKind.VARIANT
+    if name == "ROUTINE"
+        return TypeKind.ROUTINE
+    return TypeKind.RECORD
+
+# A description already made in this walk is handed out again, so a type that holds itself ends.
+secret routine info_from(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
+    when try seen[fact.type_id]
+        is None => return new_info(fact: fact, seen: seen)
+        else as known => return known
+
+secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
+    var info = TypeInfo(
+        name: fact.name,
+        full_name: fact.full_name,
+        module_name: fact.module_name,
+        kind: kind_from(name: fact.kind),
+        memvars: List[MemberVariableInfo](),
+        protocols: List[Text](),
+        cases: List[Text](),
+        arms: List[TypeInfo](),
+    )
+    seen[fact.type_id] = info
+    each member in fact.memvars
+        info.memvars.add_last(value: MemberVariableInfo(
+            name: member.name,
+            order: member.order.to[Integer](),
+            type: info_from(fact: member.fact(), seen: seen),
+            is_secret: member.is_secret,
         ))
-    return found
+    each name in fact.protocols
+        info.protocols.add_last(value: name)
+    each name in fact.cases
+        info.cases.add_last(value: name)
+    each arm in fact.arms
+        info.arms.add_last(value: info_from(fact: arm.fact(), seen: seen))
+    return info

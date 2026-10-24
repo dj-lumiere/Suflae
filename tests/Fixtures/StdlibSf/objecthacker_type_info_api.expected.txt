@@ -1,0 +1,12 @@
+Node (Tests/StdlibSf/ObjectHackerTypeInfoApi.Node) in Tests/StdlibSf/ObjectHackerTypeInfoApi: ENTITY
+  0 value: S64 RECORD
+  1 next: Node ENTITY
+  next is a Node too: true
+Point: RECORD, Equatable: true
+Color: CHOICE ["RED", "GREEN", "BLUE"]
+Perm: FLAGS ["READ", "WRITE"]
+Shape: VARIANT
+  arm Point: RECORD
+  arm Text: RECORD
+Integer: RECORD
+DONE

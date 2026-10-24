@@ -3,7 +3,7 @@ module Tests/StdlibSf/ObjectHackerApi
 import IO/Console
 import ObjectHacker
 # ObjectHacker reads and changes live objects from the outside: what an object is made of, one member
-# variable (secret ones included), and a change every alias sees.
+# variable (secret ones included), a change every name of an entity sees, and a changed copy of a record.
 entity Hero
     name: Text
     hp: S64
@@ -26,29 +26,44 @@ routine start()
 
     show(f"type: {type_name(of: hero)}")
     each info in memvars(of: hero)
-        show(f"memvar {info.order}: {info.name}: {info.type_name}, secret: {info.is_secret}")
+        show(f"memvar {info.order}: {info.name}: {info.type.name}, secret: {info.is_secret}")
     show(f"memvars: {count_secret(infos: memvars(of: hero))} secret, last at {memvars(of: hero)[^1].order + 1}")
 
-    show(f"peek: {peek(target: hero)}")
     show(f"peek hp: {peek(target: hero, memvar: "hp")}")
     show(f"peek seed: {peek(target: hero, memvar: "seed")}")
     when try peek(target: hero, memvar: "mana")
         is None => show("peek mana: absent")
         else as v => show(f"peek mana: {v}")
+    when check peek(target: hero, memvar: "mana")
+        is NoSuchMemberVariableError as e => show(f"peek mana: {e.crash_message()}")
+        else => show("peek mana: found")
 
-    var s64_25: S64 = 25
-    poke(target: hero, memvar: "hp", value: SerialValue(from: s64_25))
+    var hp: S64 = 25
+    poke(target: hero, memvar: "hp", value: hp)
     show(f"after poke, alias.hp: {alias.hp}")
-    var s64_1: S64 = 1
-    when check poke(target: hero, memvar: "mana", value: SerialValue(from: s64_1))
+    var name: Text = "Bea"
+    poke(target: hero, memvar: "name", value: name)
+    show(f"after poke, alias.name: {alias.name}")
+    when check poke(target: hero, memvar: "mana", value: hp)
         is NoSuchMemberVariableError as e => show(f"poke mana: {e.crash_message()}")
         else => show("poke mana: done")
+    when check poke(target: hero, memvar: "hp", value: 5)
+        is MemberVariableTypeError as e => show(f"poke hp: {e.crash_message()}")
+        else => show("poke hp: done")
 
     var p = Point(x: 3, y: 4)
     show(f"point: {type_name(of: p)} {peek(target: p, memvar: "y")}")
+    var y: S64 = 9
+    var q = poked(target: p, memvar: "y", value: y)
+    show(f"poked: {p} -> {q}")
+    when check poke(target: p, memvar: "x", value: y)
+        is PokeKindError as e => show(f"poke record: {e.crash_message()}")
+        else => show("poke record: done")
+    when check poked(target: Unknown(from: hero), memvar: "hp", value: y)
+        is PokeKindError as e => show(f"poked entity: {e.crash_message()}")
+        else => show("poked entity: done")
 
     var seen = watch(target: hero)
     show(f"watched alive: {seen.is_alive()}")
 
     show("DONE")
-    return

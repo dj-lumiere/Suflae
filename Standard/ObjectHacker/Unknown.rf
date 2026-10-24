@@ -1,0 +1,369 @@
+module ObjectHacker
+
+import BuilderExpansion
+import BuilderQuery
+
+# `Unknown` and the type descriptions behind it. An `Unknown` keeps one value of any type in a cell of its own,
+# with a table of the routines that work on that type (show it, serialize it, read and change a member
+# variable, describe the type). The builder writes one table per type that reaches `Unknown(from:)`, through
+# the generic helpers below, so a type no program wraps costs nothing.
+
+### What the builder knows of one member variable, for `type_info(of:)`.
+secret record MemberFact
+    ### The member variable's name.
+    secret name: Text
+    ### Its position in the type's declaration, from 0.
+    secret order: U64
+    ### Whether it is `secret`.
+    secret is_secret: Bool
+    ### The description of its type, made when asked, so a type that holds itself is described once.
+    secret make_fact: Callable[(), TypeFact]
+
+### The description of the member variable's type.
+@readonly
+secret routine MemberFact.fact() -> TypeFact
+    return me.make_fact()
+
+### What the builder knows of one type, for `type_info(of:)`.
+secret record TypeFact
+    ### The type's id, the same for every value of the type.
+    secret type_id: U64
+    ### The unqualified name.
+    secret name: Text
+    ### The name with its module.
+    secret full_name: Text
+    ### The module that declares the type.
+    secret module_name: Text
+    ### What kind of type it is, as the case name of `TypeKind` (`"ENTITY"`).
+    secret kind: Text
+    ### The member variables of a record or an entity, in declaration order.
+    secret memvars: SF::System.List[MemberFact]
+    ### The protocols the type obeys.
+    secret protocols: SF::System.List[Text]
+    ### The case names of a choice or a flags type, in declaration order.
+    secret cases: SF::System.List[Text]
+    ### A variant's arms, in declaration order (each `make_fact` gives the arm's type).
+    secret arms: SF::System.List[MemberFact]
+
+### The routines that work on the value an `Unknown` keeps, one table per type.
+secret record UnknownKind
+    ### The kept value's type id.
+    secret type_id: U64
+    ### Whether the kept value is an entity (the cell keeps a handle to it).
+    secret is_entity: Bool
+    ### The description of the kept value's type.
+    secret make_fact: Callable[(), TypeFact]
+    ### The kept value's `represent()`.
+    secret do_show: Callable[(Addr,), Text]
+    ### The kept value's `serialize()`.
+    secret do_serialize: Callable[(Addr,), SerialValue]
+    ### One member variable of the kept value, or none when it has no member variable of that name.
+    secret do_peek: Callable[(Addr, Text), Unknown?]
+    ### Changes one member variable of the kept entity in place. `false` when the value given is not of the
+    ### member variable's type.
+    secret do_poke: Callable[(Addr, Text, Unknown), Bool]
+    ### A copy of the kept record with one member variable changed, or none when the value given is not of the
+    ### member variable's type.
+    secret do_poked: Callable[(Addr, Text, Unknown), Unknown?]
+    ### Lets go of the kept value and frees its cell.
+    secret do_release: Callable[(Addr,), None]
+
+### The cell an `Unknown` points at: the kept value and the routines for its type. It never changes after it is
+### made, so every copy of an `Unknown` can point at the same cell.
+secret entity UnknownCell
+    ### The address of the kept value.
+    secret data: Addr
+    ### The routines for the kept value's type.
+    secret kind: UnknownKind
+
+### Lets go of the kept value when the last `Unknown` pointing at this cell is gone.
+@override
+routine UnknownCell.destruct()
+    me.kind.do_release(me.data)
+    return
+
+### One value of any type, with its type known only while the program runs: a member variable `peek` read, an
+### argument `call` takes, a result `call` gives. `u.is[T]()` asks for the type, `try u.to[T]()` takes the value
+### out. An entity is kept as one more name for it, so a change through the `Unknown` reaches every name. A
+### record is kept as a copy.
+record Unknown
+    ### The cell holding the value.
+    secret cell: Roamed[UnknownCell]
+
+# ============================================================================
+# The per-type routines. Each takes the kept value's address and reads the value there without taking a holder
+# of its own (a load through `Hijacked`), so the cell keeps the only one.
+# ============================================================================
+
+secret routine unknown_show[T](data: Addr) -> Text
+needs RecordType T
+    danger
+        return Hijacked[T](data).peek().represent()
+
+secret routine unknown_serialize[T](data: Addr) -> SerialValue
+needs RecordType T
+    danger
+        return Hijacked[T](data).peek().serialize()
+
+secret routine unknown_peek[T](data: Addr, memvar: Text) -> Unknown?
+needs RecordType T
+    danger
+        expand m in allmemvarof(T)
+            if memvar == nameof(m)
+                return Unknown(from: Hijacked[T](data).peek().$nameof(m))
+    return none
+
+secret routine unknown_peek_entity[E](data: Addr, memvar: Text) -> Unknown?
+needs EntityType E
+    danger
+        expand m in allmemvarof(E)
+            if memvar == nameof(m)
+                Hijacked[Roamed[E]](data).peek().lock_enter()
+                var found = Unknown(from: Hijacked[Roamed[E]](data).peek().$nameof(m))
+                Hijacked[Roamed[E]](data).peek().lock_exit()
+                return found
+    return none
+
+# Changes one member variable of the kept entity under its lock, the way `List.setitem` changes an element: the
+# old value is let go in its place and the new one stored there.
+secret routine unknown_poke_entity[E](data: Addr, memvar: Text, value: Unknown) -> Bool
+needs EntityType E
+    danger
+        expand m in allmemvarof(E)
+            if memvar == nameof(m)
+                when try value.kept_as[$typeof(m)]()
+                    is None => return false
+                    else as new_value =>
+                        var base = Hijacked[Roamed[E]](data).peek().raw_inner().get_address()
+                        var slot = Hijacked[Byte](from: base).offset(bytes: ByteSize(bytes: placeof(m))).recast_as[$typeof(m)]()
+                        Hijacked[Roamed[E]](data).peek().lock_enter()
+                        slot.peek().destruct()
+                        slot.poke(new_value)
+                        Hijacked[Roamed[E]](data).peek().lock_exit()
+                        return true
+    return false
+
+# A record changes only as a copy (`unknown_poked`): the builder never reaches this.
+secret routine unknown_poke_record(data: Addr, memvar: Text, value: Unknown) -> Bool
+    return false
+
+secret routine unknown_poked[T](data: Addr, memvar: Text, value: Unknown) -> Unknown?
+needs RecordType T
+    danger
+        expand m in allmemvarof(T)
+            if memvar == nameof(m)
+                when try value.kept_as[$typeof(m)]()
+                    is None => return none
+                    else as new_value =>
+                        var changed = Hijacked[T](data).peek().share()
+                        changed.$nameof(m) = new_value
+                        return Unknown(from: changed)
+    return none
+
+secret routine unknown_release[T](data: Addr)
+needs RecordType T
+    danger
+        var gone = Hijacked[T](data).peek()
+        Hijacked[T](data).invalidate()
+    return
+
+# ============================================================================
+# Type descriptions
+# ============================================================================
+
+### A routine value that describes `T` when called. A description of a member type is made this way, so a
+### type that holds itself does not describe itself forever.
+secret common routine T.type_fact_maker() -> Callable[(), TypeFact]
+needs AnyType T
+    return () => type_fact_of[T]()
+
+### The description of `T`. A source that does not apply to `T`'s kind unrolls zero times, so one body serves
+### records, entities, choices, flags types and variants.
+secret routine type_fact_of[T]() -> TypeFact
+    var memvars = SF::System.List[MemberFact]()
+    expand m in allmemvarof(T)
+        memvars.add_last(value: MemberFact(
+            name: nameof(m),
+            order: orderof(m),
+            is_secret: visibilityof(m) == Visibility.SECRET,
+            make_fact: $typeof(m).type_fact_maker(),
+        ))
+    var cases = SF::System.List[Text]()
+    expand c in caseof(T)
+        cases.add_last(value: nameof(c))
+    var arms = SF::System.List[MemberFact]()
+    expand a in branchof(T)
+        arms.add_last(value: MemberFact(
+            name: nameof(a),
+            order: orderof(a),
+            is_secret: false,
+            make_fact: $typeof(a).type_fact_maker(),
+        ))
+    var protocols = SF::System.List[Text]()
+    expand p in protocolof(T)
+        protocols.add_last(value: nameof(p))
+    return TypeFact(
+        type_id: T.type_id(),
+        name: T.type_name(),
+        full_name: T.full_type_name(),
+        module_name: T.module_name(),
+        kind: T.type_kind().represent(),
+        memvars: memvars,
+        protocols: protocols,
+        cases: cases,
+        arms: arms,
+    )
+
+# ============================================================================
+# Making an Unknown
+# ============================================================================
+
+secret routine unknown_wrap[T](
+    value: T,
+    type_id: U64,
+    is_entity: Bool,
+    do_peek: Callable[(Addr, Text), Unknown?],
+    do_poke: Callable[(Addr, Text, Unknown), Bool],
+) -> Unknown
+needs RecordType T
+    danger
+        var cell = Hijacked[T](rf_allocate_dynamic(size: T.data_size()))
+        cell.poke(value)
+        var kind = UnknownKind(
+            type_id: type_id,
+            is_entity: is_entity,
+            make_fact: T.type_fact_maker(),
+            do_show: (data: Addr) => unknown_show[T](data: data),
+            do_serialize: (data: Addr) => unknown_serialize[T](data: data),
+            do_peek: do_peek,
+            do_poke: do_poke,
+            do_poked: (data: Addr, memvar: Text, value: Unknown) => unknown_poked[T](data: data, memvar: memvar, value: value),
+            do_release: (data: Addr) => unknown_release[T](data: data),
+        )
+        return Unknown(cell: Roamed[UnknownCell](from: UnknownCell(data: cell.get_address(), kind: kind)))
+
+### Keeps an entity: the `Unknown` is one more name for it.
+### :param from: The entity.
+### :returns: The `Unknown` keeping it.
+routine Unknown(from: Roamed[T]) -> Unknown
+needs EntityType T
+    return unknown_wrap[Roamed[T]](
+        value: from,
+        type_id: Roamed[T].type_id(),
+        is_entity: true,
+        do_peek: (data: Addr, memvar: Text) => unknown_peek_entity[T](data: data, memvar: memvar),
+        do_poke: (data: Addr, memvar: Text, value: Unknown) => unknown_poke_entity[T](data: data, memvar: memvar, value: value),
+    )
+
+### An `Unknown` given to `Unknown(from:)` is the same `Unknown`: it is never kept inside another one.
+### :param from: The `Unknown`.
+### :returns: The same value.
+routine Unknown(from: Unknown) -> Unknown
+    return Unknown(cell: from.cell)
+
+### Keeps a copy of a value of any type that is not an entity.
+### :param from: The value.
+### :returns: The `Unknown` keeping it.
+routine Unknown(from: T) -> Unknown
+needs RecordType T
+    return unknown_wrap[T](
+        value: from,
+        type_id: T.type_id(),
+        is_entity: false,
+        do_peek: (data: Addr, memvar: Text) => unknown_peek[T](data: data, memvar: memvar),
+        do_poke: unknown_poke_record,
+    )
+
+# ============================================================================
+# Reading an Unknown
+# ============================================================================
+
+### The routines for the kept value's type.
+@readonly
+secret routine Unknown.kind() -> UnknownKind
+    danger
+        return me.cell.view().kind
+
+### The address of the kept value.
+@readonly
+secret routine Unknown.data() -> Addr
+    danger
+        return me.cell.view().data
+
+### Whether the kept value is a `T`.
+### :returns: `true` when the kept value's type is `T`.
+@readonly
+routine Unknown.is[T]() -> Bool
+    return me.kind().type_id == T.type_id()
+
+### The kept value, as a `T`.
+### :returns: A copy of the kept record, or one more name for the kept entity.
+### :throws: {AbsentValueError} when the kept value is not a `T`.
+@readonly
+failable routine Unknown.to[T]() -> T
+needs RecordType T
+    return me.kept_as[T]()
+
+### `to[T]()` under a name of its own, for the library's member walks: a call spliced from a member's type is
+### bound after the walk is unrolled, where `to` would also match the conversions every type has.
+### Asked for an `Unknown` (a verb made concrete for an `Unknown` target), it gives this `Unknown` itself.
+@readonly
+secret failable routine Unknown.kept_as[T]() -> T
+needs RecordType T
+    danger
+        if T.type_id() == Unknown.type_id()
+            var whole = me
+            return Hijacked[T](from: whole.hijack().get_address()).peek().share()
+        if me.kind().type_id != T.type_id()
+            throw AbsentValueError()
+        return Hijacked[T](me.data()).peek().share()
+
+### The kept value's text, as its own `represent()` gives it.
+### :returns: The text.
+@readonly
+@override
+routine Unknown.represent() -> Text
+    return me.kind().do_show(me.data())
+
+### The kept value's `diagnose()` text is its `represent()` text: an `Unknown` adds nothing of its own to show.
+### :returns: The text.
+@readonly
+@override
+routine Unknown.diagnose() -> Text
+    return me.kind().do_show(me.data())
+
+### The kept value, serialized by its own `serialize()`.
+### :returns: The serialized value.
+@readonly
+@override
+routine Unknown.serialize() -> SerialValue
+    return me.kind().do_serialize(me.data())
+
+### Whether the kept value is an entity.
+@readonly
+secret routine Unknown.is_entity() -> Bool
+    return me.kind().is_entity
+
+### The description of the kept value's type.
+@readonly
+secret routine Unknown.type_fact() -> TypeFact
+    return me.kind().make_fact()
+
+### One member variable of the kept value, or none.
+@readonly
+secret routine Unknown.peek_memvar(memvar: Text) -> Unknown?
+    return me.kind().do_peek(me.data(), memvar)
+
+### Changes one member variable of the kept entity. `false` when the value is of another type.
+secret routine Unknown.poke_memvar(memvar: Text, value: Unknown) -> Bool
+    return me.kind().do_poke(me.data(), memvar, value)
+
+### A copy of the kept record with one member variable changed, or none when the value is of another type.
+@readonly
+secret routine Unknown.poked_memvar(memvar: Text, value: Unknown) -> Unknown?
+    return me.kind().do_poked(me.data(), memvar, value)
+
+### The description of `T`, for `type_info(of:)`.
+secret routine type_fact(of: T) -> TypeFact
+needs AnyType T
+    return type_fact_of[T]()

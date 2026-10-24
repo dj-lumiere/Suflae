@@ -1,10 +1,10 @@
 module Tests/StdlibSf/BytesApi
 
-import BuilderQuery
+import ObjectHacker
 import IO/Console
 routine start()
     var b = "hello".encode_as_utf8()
-    show(f"b type: {b.type_name()}")
+    show(f"b type: {type_name(of: b)}")
     show(f"b size: {b.count()}")
     show(f"b[0]: {b[0]}")  # 'h' = 0x68 = 104
     show(f"b[4]: {b[4]}")  # 'o' = 0x6f = 111

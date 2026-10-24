@@ -1,0 +1,57 @@
+module Tests/StdlibSf/ObjectHackerUnknownApi
+
+import IO/Console
+import ObjectHacker
+# Unknown keeps one value of any type: a record as a copy, an entity as one more name for it. `is[T]()` asks for
+# the type, `try to[T]()` takes the value out, and the ObjectHacker verbs work on what it keeps.
+record Point
+    x: S64
+    y: S64
+
+entity Hero
+    name: Text
+    hp: S64
+
+choice Color
+    RED
+    GREEN
+
+routine start()
+    var values: List[Unknown] = [Unknown(from: 5), Unknown(from: "five"), Unknown(from: Point(x: 1, y: 2)),
+        Unknown(from: Color.GREEN)]
+    each v in values
+        show(f"{type_name(of: v)}: {v} integer={v.is[Integer]()} text={v.is[Text]()}")
+
+    var point = values[2]
+    when try point.to[Point]()
+        is None => show("to Point: absent")
+        else as p => show(f"to Point: x={p.x}")
+    when try point.to[Text]()
+        is None => show("to Text: absent")
+        else as t => show(f"to Text: {t}")
+    show(f"serialized: {point.serialize()}")
+    show(f"peek through Unknown: {peek(target: point, memvar: "y")}")
+    var y: S64 = 7
+    var moved = poked(target: point, memvar: "y", value: y)
+    show(f"poked through Unknown: {moved}, kept: {point}")
+
+    var hero = Hero(name: "Ada", hp: 3)
+    var held = Unknown(from: hero)
+    var hp: S64 = 40
+    poke(target: held, memvar: "hp", value: hp)
+    show(f"hero.hp after poke through Unknown: {hero.hp}")
+    when try held.to[Hero]()
+        is None => show("to Hero: absent")
+        else as h => show(f"to Hero: same entity={h === hero}")
+    show(f"type_info: {held.type_info().name} {held.type_info().kind}")
+
+    var copies = List[Unknown]()
+    var i = 0
+    until i >= 100
+        var kept = Unknown(from: f"item {i}")
+        var again = Unknown(from: kept)
+        copies.add_last(value: again)
+        i = i + 1
+    show(f"copies: {copies.count()} last: {copies[99]}")
+
+    show("DONE")

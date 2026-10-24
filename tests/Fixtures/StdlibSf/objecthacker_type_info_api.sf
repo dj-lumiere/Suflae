@@ -1,0 +1,47 @@
+module Tests/StdlibSf/ObjectHackerTypeInfoApi
+
+import IO/Console
+import ObjectHacker
+# type_info(of:) describes a type: its names, its kind, its member variables (each with the type it holds), the
+# protocols it obeys, the cases of a choice or a flags type, and the arms of a variant.
+entity Node
+    value: S64
+    next: Node?
+
+record Point
+    x: S64
+    y: S64
+
+flags Perm
+    READ
+    WRITE
+
+choice Color
+    RED
+    GREEN
+    BLUE
+
+variant Shape
+    Point
+    Text
+
+routine start()
+    var node = Node(value: 1, next: none)
+    var info = type_info(of: node)
+    show(f"{info.name} ({info.full_name}) in {info.module_name}: {info.kind}")
+    each m in info.memvars
+        show(f"  {m.order} {m.name}: {m.type.name} {m.type.kind}")
+    show(f"  next is a {info.memvars[1].type.name} too: {info.memvars[1].type.name == info.name}")
+
+    var point = type_info(of: Point(x: 0, y: 0))
+    show(f"{point.name}: {point.kind}, Equatable: {point.obeys_protocol(name: "Equatable")}")
+    show(f"{type_info(of: Color.RED).name}: {type_info(of: Color.RED).kind} {type_info(of: Color.RED).cases}")
+    show(f"{type_info(of: Perm.READ).name}: {type_info(of: Perm.READ).kind} {type_info(of: Perm.READ).cases}")
+    var s: Shape = Point(x: 1, y: 2)
+    var shape = type_info(of: s)
+    show(f"{shape.name}: {shape.kind}")
+    each arm in shape.arms
+        show(f"  arm {arm.name}: {arm.kind}")
+    show(f"{type_info(of: 5).name}: {type_info(of: 5).kind}")
+
+    show("DONE")

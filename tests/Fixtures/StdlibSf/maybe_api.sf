@@ -1,6 +1,6 @@
 module Tests/StdlibSf/MaybeApi
 
-import BuilderQuery
+import ObjectHacker
 import IO/Console
 # Record return type — exercises Maybe[Record] (no Owned auto-wrap).
 record Point
@@ -16,7 +16,7 @@ routine start()
     var m_some = try make_point(use_zero: false)
     var m_none = try make_point(use_zero: true)
 
-    show(f"some type: {m_some.type_name()}")
+    show(f"some type: {type_name(of: m_some)}")
     show(f"some present: {m_some}")
     show(f"none present: {m_none}")
     show(f"some diagnose: {m_some:?}")

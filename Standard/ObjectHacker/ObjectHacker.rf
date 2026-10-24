@@ -1,30 +1,18 @@
 module ObjectHacker
 
-import BuilderExpansion
 import BuilderQuery
 import Collections
 
-### ObjectHacker works on live objects from the outside: it reads a member variable, changes it, and tells
-### what an object is made of. Every verb takes the object as an argument (`peek(target: hero, memvar: "hp")`),
-### never as a receiver: the hacker acts on the object. Values travel as `SerialValue`, the form `serialize`
-### gives every value, so one routine handles every type.
+### ObjectHacker works on live objects from the outside: it tells what an object is made of, reads a member
+### variable, changes it, and keeps a value whose type is known only while the program runs (`Unknown`). Every
+### verb takes the object as an argument (`peek(target: hero, memvar: "hp")`), never as a receiver: the hacker
+### acts on the object.
 ###
 ### Suflae's module. It is written in RazorForge for its buildtime member walk (`expand`), and lives with
 ### Suflae's standard library, which only Suflae builds read. Every routine is monomorphized per target type,
 ### so a type that nothing inspects costs nothing, and `secret` member variables are reachable too.
 
-### A member variable as `memvars` reports it.
-record MemberVariableInfo
-    ### The member variable's name.
-    name: Text
-    ### The name of the member variable's type.
-    type_name: Text
-    ### Whether the member variable is `secret`.
-    is_secret: Bool
-    ### The member variable's position in its type's declaration, from 0.
-    order: U64
-
-### Raised when `poke` names a member variable its target does not have.
+### Raised when a verb names a member variable its target does not have.
 crashable NoSuchMemberVariableError
     ### The target's type.
     type_name: Text
@@ -37,59 +25,109 @@ crashable NoSuchMemberVariableError
 routine NoSuchMemberVariableError.crash_message() -> Text
     return f"'{me.type_name}' has no member variable '{me.memvar}'"
 
+### Raised when `poke` or `poked` is given a value of another type than the member variable holds.
+crashable MemberVariableTypeError
+    ### The target's type.
+    type_name: Text
+    ### The member variable being changed.
+    memvar: Text
+    ### The type the member variable holds.
+    expected: Text
+    ### The type of the value given.
+    value_type: Text
+
+### Returns the message for a value of the wrong type.
+### :returns: The message.
+@readonly
+routine MemberVariableTypeError.crash_message() -> Text
+    return f"'{me.type_name}.{me.memvar}' holds {me.expected}, and the value you gave is {me.value_type}. Give it a value of type {me.expected}."
+
+### Raised when `poke` is given a record or `poked` an entity.
+crashable PokeKindError
+    ### The target's type.
+    type_name: Text
+    ### Whether the target is an entity.
+    is_entity: Bool
+
+### Returns the message for a target `poke`/`poked` does not change.
+### :returns: The message.
+@readonly
+routine PokeKindError.crash_message() -> Text
+    if me.is_entity
+        return f"'{me.type_name}' is an entity, and 'poked' makes a changed copy of a record. Change the entity in place with 'poke'."
+    return f"'{me.type_name}' is a record, so it does not change in place. Take the changed copy with 'p = poked(target: p, ...)'."
+
 ### The name of target's type.
-### :param of: Any value or entity.
+### :param of: Any value or entity, or an `Unknown` (then the kept value's type).
 ### :returns: The unqualified type name.
 routine type_name(of: T) -> Text
 needs AnyType T
-    return of.type_name()
+    return Unknown(from: of).type_fact().name
 
-### What target is made of: every member variable, `secret` ones included, in declaration order.
-### :param of: Any value or entity.
-### :returns: One entry per member variable.
-routine memvars(of: T) -> List[MemberVariableInfo]
-needs AnyType T
-    var found = List[MemberVariableInfo]()
-    expand m in allmemvarof(T)
-        found.add_last(MemberVariableInfo(
-            name: nameof(m),
-            type_name: $typeof(m).type_name(),
-            is_secret: visibilityof(m) == Visibility.SECRET,
-            order: orderof(m),
-        ))
-    return found
-
-### The whole of target, as `serialize` gives it.
-### :param target: Any value or entity.
-### :returns: The serialized target.
-routine peek(target: T) -> SerialValue
-needs AnyType T
-    return target.serialize()
+### Finds the member variable a verb names, with the type it holds.
+secret failable routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
+    each member in fact.memvars
+        if member.name == memvar
+            return member.fact()
+    throw NoSuchMemberVariableError(type_name: fact.name, memvar: memvar)
 
 ### One member variable of target, `secret` ones included.
-### :param target: Any value or entity.
+### :param target: Any value or entity, or an `Unknown` (then the kept value's member variable).
 ### :param memvar: The member variable's name.
-### :returns: The member variable's serialized value. Absent when target has no member variable of that name.
-failable routine peek(target: T, memvar: Text) -> SerialValue
-needs AnyType T
-    expand m in allmemvarof(T)
-        if memvar == nameof(m)
-            return target.$nameof(m).serialize()
-    throw AbsentValueError()
-### Changes one member variable of an entity, `secret` ones included: every alias sees the new value. Only an
-### entity can be poked: a record is a value, and changing a copy would reach nobody.
-### :param target: The entity.
-### :param memvar: The member variable's name.
-### :param value: The new value, in the form `serialize` gives it.
+### :returns: The member variable's value.
 ### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
-### :throws: {SerialShapeError} when value does not fit the member variable's type.
-failable routine poke(target: T, memvar: Text, value: SerialValue)
-needs EntityType T
-    expand m in allmemvarof(T)
-        if memvar == nameof(m)
-            target.$nameof(m) = value.to[$typeof(m)]()
-            return
-    throw NoSuchMemberVariableError(type_name: target.type_name(), memvar: memvar)
+failable routine peek(target: T, memvar: Text) -> Unknown
+needs AnyType T
+    var held = Unknown(from: target)
+    when held.peek_memvar(memvar: memvar)
+        is None => throw NoSuchMemberVariableError(type_name: held.type_fact().name, memvar: memvar)
+        else as found => return found
+
+### Changes one member variable of an entity in place, `secret` ones included: every name of the entity sees
+### the new value. A record is a value and does not change in place: take a changed copy with `poked`.
+### :param target: The entity, or an `Unknown` keeping one.
+### :param memvar: The member variable's name.
+### :param value: The new value, of the member variable's type (an `Unknown` is unwrapped).
+### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
+### :throws: {MemberVariableTypeError} when value is not of the member variable's type.
+### :throws: {PokeKindError} when target is a record.
+failable routine poke(target: T, memvar: Text, value: V)
+needs AnyType T
+needs AnyType V
+    var held = Unknown(from: target)
+    var new_value = Unknown(from: value)
+    var fact = held.type_fact()
+    if not held.is_entity()
+        throw PokeKindError(type_name: fact.name, is_entity: false)
+    var expected = memvar_type(fact: fact, memvar: memvar)
+    if not held.poke_memvar(memvar: memvar, value: new_value)
+        throw MemberVariableTypeError(type_name: fact.name, memvar: memvar, expected: expected.name, value_type: new_value.type_fact().name)
+    return
+
+### A copy of a record with one member variable changed, `secret` ones included. The record given stays as it
+### was: `p = poked(target: p, memvar: "x", value: v)`. An entity changes in place with `poke`.
+### :param target: The record, or an `Unknown` keeping one (then the changed copy is kept in a new `Unknown`).
+### :param memvar: The member variable's name.
+### :param value: The new value, of the member variable's type (an `Unknown` is unwrapped).
+### :returns: The changed copy.
+### :throws: {NoSuchMemberVariableError} when target has no member variable of that name.
+### :throws: {MemberVariableTypeError} when value is not of the member variable's type.
+### :throws: {PokeKindError} when target is an entity.
+failable routine poked(target: T, memvar: Text, value: V) -> T
+needs RecordType T
+needs AnyType V
+    var held = Unknown(from: target)
+    var changed = poked_unknown(held: held, memvar: memvar, value: Unknown(from: value))
+    return changed.kept_as[T]()
+
+secret failable routine poked_unknown(held: Unknown, memvar: Text, value: Unknown) -> Unknown
+    var fact = held.type_fact()
+    if held.is_entity()
+        throw PokeKindError(type_name: fact.name, is_entity: true)
+    var expected = memvar_type(fact: fact, memvar: memvar)
+    when held.poked_memvar(memvar: memvar, value: value)
+        is None => throw MemberVariableTypeError(type_name: fact.name, memvar: memvar, expected: expected.name, value_type: value.type_fact().name)
+        else as changed => return changed
 
 ### A non-pinning observation of an entity: it answers `is_alive()` after the entity is gone, and does not
 ### keep it alive.
