@@ -49,6 +49,11 @@ entity TypeInfo
     cases: List[Text]
     ### The arm types of a variant, in declaration order.
     arms: List[TypeInfo]
+    ### The member routines and common routines of the type that the build reached, in declaration order.
+    routines: List[RoutineInfo]
+    ### The creators of the type that the build reached: first the one taking one argument per member variable.
+    creators: List[RoutineInfo]
+    secret handle: TypeHandle
 
 ### Whether the type obeys a protocol.
 ### :param name: The protocol's name (`"Hashable"`).
@@ -106,6 +111,9 @@ secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
         protocols: List[Text](),
         cases: List[Text](),
         arms: List[TypeInfo](),
+        routines: List[RoutineInfo](),
+        creators: List[RoutineInfo](),
+        handle: fact.handle,
     )
     seen[fact.type_id] = info
     each member in fact.memvars
@@ -121,4 +129,182 @@ secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
         info.cases.add_last(value: name)
     each arm in fact.arms
         info.arms.add_last(value: info_from(fact: arm.fact(), seen: seen))
+    each listed in fact.handle.make_routines()
+        if listed.is_built
+            info.routines.add_last(value: routine_info_from(fact: listed, owner: fact.handle, seen: seen))
+    each maker in fact.handle.make_creators()
+        if maker.is_built
+            info.creators.add_last(value: routine_info_from(fact: maker, owner: fact.handle, seen: seen))
     return info
+
+### What kind of routine a `RoutineInfo` describes.
+choice RoutineKind
+    ### A member routine: it works on an object (`call(target:, name:, args:)`).
+    MEMBER
+    ### A common routine of a type.
+    COMMON
+    ### A creator: it makes a value of its type (`create(type:, args:)`).
+    CREATOR
+    ### A routine of a module, not of a type.
+    FREE
+
+### A parameter of a routine, as `RoutineInfo` describes it.
+record ParameterInfo
+    ### The parameter's name.
+    name: Text
+    ### Its position among the routine's parameters, from 0.
+    order: Integer
+    ### The type it takes.
+    type: TypeInfo
+    ### Whether the routine gives it a value when the call leaves it out.
+    has_default: Bool
+    ### That value, or none.
+    default: Unknown?
+
+### A routine the build reached, as `type_info(of:).routines`, `type_info(of:).creators` and `routines(in:)` describe it.
+entity RoutineInfo
+    ### The routine's name.
+    name: Text
+    ### The name with its type and module (`Game.Hero.attack`).
+    full_name: Text
+    ### The module that declares it.
+    module_name: Text
+    ### What kind of routine it is.
+    kind: RoutineKind
+    ### Its parameters, in order.
+    parameters: List[ParameterInfo]
+    ### What it returns, or none when it returns nothing.
+    returns: TypeInfo?
+    ### Whether it is failable.
+    is_failable: Bool
+    ### Whether it has type parameters of its own (a running program cannot call one).
+    is_generic: Bool
+    secret index: U64
+    secret owner: TypeHandle
+
+secret routine routine_kind_from(name: Text) -> RoutineKind
+    if name == "MEMBER"
+        return RoutineKind.MEMBER
+    if name == "COMMON"
+        return RoutineKind.COMMON
+    if name == "CREATOR"
+        return RoutineKind.CREATOR
+    return RoutineKind.FREE
+
+secret routine returns_from(fact: RoutineFact, seen: Dict[U64, TypeInfo]) -> TypeInfo?
+    if fact.has_returns
+        return info_from(fact: fact.make_returns(), seen: seen)
+    return none
+
+secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dict[U64, TypeInfo]) -> RoutineInfo
+    var parameters = List[ParameterInfo]()
+    each parameter in fact.parameters
+        parameters.add_last(value: ParameterInfo(
+            name: parameter.name,
+            order: parameter.order.to[Integer](),
+            type: info_from(fact: parameter.make_fact(), seen: seen),
+            has_default: parameter.has_default,
+            default: parameter.default,
+        ))
+    return RoutineInfo(
+        name: fact.name,
+        full_name: fact.full_name,
+        module_name: fact.module_name,
+        kind: routine_kind_from(name: fact.kind),
+        parameters: parameters,
+        returns: returns_from(fact: fact, seen: seen),
+        is_failable: fact.is_failable,
+        is_generic: fact.is_generic,
+        index: fact.index,
+        owner: owner,
+    )
+
+### Calls a member routine of target by its name, with the arguments by parameter name. Only routines the build
+### reached can be called: the build leaves out a routine nothing in the program calls (mark the type
+### `@reflectable` to keep all of them). A routine that fails while it runs crashes loudly with its message.
+### :param target: The object, or an `Unknown` keeping one.
+### :param name: The routine's name (`"attack"`) or full name (`"Game.Hero.attack"`).
+### :param args: One value per parameter, by name. A parameter with a default may be left out.
+### :returns: What the routine returns, kept in an `Unknown` (one keeping `none` when it returns nothing).
+### :throws: {NoSuchRoutineError} when target's type has no member routine of that name.
+### :throws: {RoutineNotBuiltError} when the build left the routine out.
+### :throws: {GenericRoutineCallError} when the routine has type parameters of its own.
+### :throws: {ArgumentError} when the arguments do not fit the routine.
+failable routine call(target: T, name: Text, args: Dict[Text, Unknown]) -> Unknown
+needs AnyType T
+    var held = Unknown(from: target)
+    var fact = held.type_fact()
+    var chosen = choose_routine(facts: fact.handle.make_routines(), name: name, args: args)
+    if chosen.problem == "NO_SUCH"
+        throw NoSuchRoutineError(owner: fact.name, routine_name: name)
+    if chosen.problem == "NOT_BUILT"
+        throw RoutineNotBuiltError(routine_name: chosen.full_name)
+    if chosen.problem == "GENERIC"
+        throw GenericRoutineCallError(routine_name: chosen.full_name)
+    if chosen.problem == "ARGUMENTS"
+        throw ArgumentError(routine_name: chosen.full_name, problem: chosen.detail)
+    return fact.handle.do_invoke(held, chosen.index, args)
+
+### Calls a routine `routines(in:)` or `type_info(of:)` describes: a routine of a module, a common routine or a
+### creator. A member routine works on an object: call it with `call(target:, name:, args:)`.
+### :param info: The routine.
+### :param args: One value per parameter, by name. A parameter with a default may be left out.
+### :returns: What the routine returns, kept in an `Unknown` (one keeping `none` when it returns nothing).
+### :throws: {CallTargetError} when the routine is a member routine.
+### :throws: {ArgumentError} when the arguments do not fit the routine.
+failable routine call(info: RoutineInfo, args: Dict[Text, Unknown]) -> Unknown
+    if info.kind == RoutineKind.MEMBER
+        throw CallTargetError(routine_name: info.full_name)
+    if info.is_generic
+        throw GenericRoutineCallError(routine_name: info.full_name)
+    if info.kind == RoutineKind.CREATOR
+        var creator_problem = listed_argument_problem(facts: info.owner.make_creators(), index: info.index, args: args)
+        if creator_problem != ""
+            throw ArgumentError(routine_name: info.full_name, problem: creator_problem)
+        return info.owner.do_create(info.index, args)
+    var problem = listed_argument_problem(facts: info.owner.make_routines(), index: info.index, args: args)
+    if problem != ""
+        throw ArgumentError(routine_name: info.full_name, problem: problem)
+    return info.owner.do_invoke(unknown_nothing(), info.index, args)
+
+### Makes a value of a type by one of its creators, chosen by the arguments' names and types. Every record and
+### entity has the creator that takes one argument per member variable.
+### :param type: The type, as `type_info(of:)` or `types(in:)` describes it.
+### :param args: One value per parameter, by name.
+### :returns: The new value, kept in an `Unknown`.
+### :throws: {NoSuchRoutineError} when the type has no creator.
+### :throws: {RoutineNotBuiltError} when the build left the creator out.
+### :throws: {ArgumentError} when no creator fits the arguments.
+failable routine create(type: TypeInfo, args: Dict[Text, Unknown]) -> Unknown
+    var chosen = choose_routine(facts: type.handle.make_creators(), name: type.name, args: args)
+    if chosen.problem == "NO_SUCH"
+        throw NoSuchRoutineError(owner: type.name, routine_name: type.name)
+    if chosen.problem == "NOT_BUILT"
+        throw RoutineNotBuiltError(routine_name: chosen.full_name)
+    if chosen.problem == "GENERIC"
+        throw GenericRoutineCallError(routine_name: chosen.full_name)
+    if chosen.problem == "ARGUMENTS"
+        throw ArgumentError(routine_name: chosen.full_name, problem: chosen.detail)
+    return type.handle.do_create(chosen.index, args)
+
+### The types of a module of the program that the build reached, in declaration order.
+### :param in: The module's name (`"Game"`).
+### :returns: One description per type.
+routine types(in: Text) -> List[TypeInfo]
+    var seen = Dict[U64, TypeInfo]()
+    var found = List[TypeInfo]()
+    each fact in reached_types()
+        if fact.module_name == in
+            found.add_last(value: info_from(fact: fact, seen: seen))
+    return found
+
+### The routines of a module of the program (not of its types) that the build reached, in declaration order.
+### :param in: The module's name (`"Game"`).
+### :returns: One description per routine.
+routine routines(in: Text) -> List[RoutineInfo]
+    var seen = Dict[U64, TypeInfo]()
+    var found = List[RoutineInfo]()
+    each fact in reached_routines()
+        if fact.module_name == in and fact.is_built
+            found.add_last(value: routine_info_from(fact: fact, owner: module_handle(), seen: seen))
+    return found

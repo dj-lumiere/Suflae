@@ -1,0 +1,317 @@
+module ObjectHacker
+
+import BuilderQuery
+
+# The routine tables behind `call`, `create`, `types(in:)` and `routines(in:)`. A table lists only what the build
+# reached: a routine nothing in the program calls is left out of the program, so it cannot be called by name
+# either. The builder writes each table after it has found every routine the program reaches, so a table never
+# keeps a routine alive by itself. The bodies below are what a table holds before the builder writes it.
+
+### Raised when `call` names a routine the type (or the module) does not have.
+crashable NoSuchRoutineError
+    ### The type or module asked.
+    owner: Text
+    ### The routine that was asked for.
+    routine_name: Text
+
+### Returns the message for a routine the type or module does not have.
+### :returns: The message.
+@readonly
+routine NoSuchRoutineError.crash_message() -> Text
+    return f"'{me.owner}' has no routine '{me.routine_name}'"
+
+### Raised when `call` or `create` names a routine the program never calls, so the build left it out.
+crashable RoutineNotBuiltError
+    ### The routine's full name.
+    routine_name: Text
+
+### Returns the message for a routine the build left out.
+### :returns: The message.
+@readonly
+routine RoutineNotBuiltError.crash_message() -> Text
+    return f"'{me.routine_name}' is not in this program: nothing in the program calls it, so the build left it out. Call it somewhere in the program, or mark its type '@reflectable' to keep every routine of the type."
+
+### Raised when `call` names a routine with type parameters of its own, which only a build can make concrete.
+crashable GenericRoutineCallError
+    ### The routine's full name.
+    routine_name: Text
+
+### Returns the message for a routine with its own type parameters.
+### :returns: The message.
+@readonly
+routine GenericRoutineCallError.crash_message() -> Text
+    return f"'{me.routine_name}' has type parameters of its own, and a running program cannot make a new version of it. Call it directly in the program instead."
+
+### Raised when the arguments given to `call` or `create` do not fit the routine.
+crashable ArgumentError
+    ### The routine's full name.
+    routine_name: Text
+    ### What does not fit.
+    problem: Text
+
+### Returns the message for arguments that do not fit.
+### :returns: The message.
+@readonly
+routine ArgumentError.crash_message() -> Text
+    return f"'{me.routine_name}': {me.problem}"
+
+### Raised when `call(routine:)` is given a member routine, which needs the object it works on.
+crashable CallTargetError
+    ### The routine's full name.
+    routine_name: Text
+
+### Returns the message for a member routine called without its object.
+### :returns: The message.
+@readonly
+routine CallTargetError.crash_message() -> Text
+    return f"'{me.routine_name}' works on an object. Call it with 'call(target: the_object, name: \"{me.routine_name}\", args: ...)'."
+
+### A type's routine tables (or the program's, for its modules' own routines): routine values only, so a copy is
+### the same tables.
+secret record TypeHandle
+    ### The reached member routines and common routines (or the modules' routines).
+    secret make_routines: Callable[(), SF::System.List[RoutineFact]]
+    ### Calls the routine at an index of `make_routines()`, on a target for a member routine.
+    secret do_invoke: Callable[(Unknown, U64, Roamed[SF::System.Dict[Text, Unknown]]), Unknown]
+    ### The creators.
+    secret make_creators: Callable[(), SF::System.List[RoutineFact]]
+    ### Calls the creator at an index of `make_creators()`.
+    secret do_create: Callable[(U64, Roamed[SF::System.Dict[Text, Unknown]]), Unknown]
+
+### The tables of the program's modules' own routines.
+secret routine module_handle() -> TypeHandle
+    return TypeHandle(
+        make_routines: () => reached_routines(),
+        do_invoke: (target: Unknown, index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reached_invoke(index: index, args: args),
+        make_creators: () => new_routine_facts(),
+        do_create: (index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => unknown_nothing(),
+    )
+
+### What the builder knows of one parameter of a reached routine.
+secret record ParameterFact
+    ### The parameter's name.
+    secret name: Text
+    ### Its position in the routine's parameters, from 0.
+    secret order: U64
+    ### The id of the type it takes.
+    secret type_id: U64
+    ### The description of the type it takes.
+    secret make_fact: Callable[(), TypeFact]
+    ### Whether the routine gives the parameter a value when the call leaves it out.
+    secret has_default: Bool
+    ### That value, or none.
+    secret default: Unknown?
+
+### What the builder knows of one routine of a type or a module.
+secret record RoutineFact
+    ### The routine's name.
+    secret name: Text
+    ### The name with its type and module (`Game.Hero.attack`).
+    secret full_name: Text
+    ### The module that declares the routine.
+    secret module_name: Text
+    ### `"MEMBER"` (works on an object), `"COMMON"` (a common routine of a type), `"CREATOR"` or `"FREE"`.
+    secret kind: Text
+    ### Its place in the table's dispatch routine.
+    secret index: U64
+    ### Whether the build reached it. One it did not reach is listed only to name it when a call asks for it.
+    secret is_built: Bool
+    ### Whether it is failable.
+    secret is_failable: Bool
+    ### Whether it has type parameters of its own.
+    secret is_generic: Bool
+    ### Its parameters, `me` left out.
+    secret parameters: SF::System.List[ParameterFact]
+    ### Whether it returns a value.
+    secret has_returns: Bool
+    ### The description of what it returns (of `Bool` when it returns nothing).
+    secret make_returns: Callable[(), TypeFact]
+
+### One parameter, for the builder's tables.
+secret routine parameter_fact[P](name: Text, order: U64, has_default: Bool, default: Unknown?) -> ParameterFact
+    return ParameterFact(
+        name: name,
+        order: order,
+        type_id: P.type_id(),
+        make_fact: P.type_fact_maker(),
+        has_default: has_default,
+        default: default,
+    )
+
+### One routine, for the builder's tables.
+secret routine routine_fact[R](
+    name: Text,
+    full_name: Text,
+    module_name: Text,
+    kind: Text,
+    index: U64,
+    is_built: Bool,
+    is_failable: Bool,
+    is_generic: Bool,
+    has_returns: Bool,
+    parameters: SF::System.List[ParameterFact],
+) -> RoutineFact
+    return RoutineFact(
+        name: name,
+        full_name: full_name,
+        module_name: module_name,
+        kind: kind,
+        index: index,
+        is_built: is_built,
+        is_failable: is_failable,
+        is_generic: is_generic,
+        parameters: steal parameters,
+        has_returns: has_returns,
+        make_returns: R.type_fact_maker(),
+    )
+
+### An empty list of routine facts, for the builder's tables.
+secret routine new_routine_facts() -> SF::System.List[RoutineFact]
+    return SF::System.List[RoutineFact]()
+
+### An empty list of parameter facts, for the builder's tables.
+secret routine new_parameter_facts() -> SF::System.List[ParameterFact]
+    return SF::System.List[ParameterFact]()
+
+### An empty list of type facts, for the builder's tables.
+secret routine new_type_facts() -> SF::System.List[TypeFact]
+    return SF::System.List[TypeFact]()
+
+### The reached member routines and common routines of `T`. The builder writes this body.
+secret routine reflected_routines[T]() -> SF::System.List[RoutineFact]
+    return SF::System.List[RoutineFact]()
+
+### Calls the routine of `T` at `index` of `reflected_routines[T]()`. The builder writes this body.
+secret routine reflected_invoke[T](target: Unknown, index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Unknown
+    return unknown_nothing()
+
+### The reached creators of `T`. The builder writes this body.
+secret routine reflected_creators[T]() -> SF::System.List[RoutineFact]
+    return SF::System.List[RoutineFact]()
+
+### Calls the creator of `T` at `index` of `reflected_creators[T]()`. The builder writes this body.
+secret routine reflected_create[T](index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Unknown
+    return unknown_nothing()
+
+### The types of the program's own modules that the build reached. The builder writes this body.
+secret routine reached_types() -> SF::System.List[TypeFact]
+    return SF::System.List[TypeFact]()
+
+### The free routines of the program's own modules, reached ones and the names of the others. The builder writes
+### this body.
+secret routine reached_routines() -> SF::System.List[RoutineFact]
+    return SF::System.List[RoutineFact]()
+
+### Calls the free routine at `index` of `reached_routines()`. The builder writes this body.
+secret routine reached_invoke(index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Unknown
+    return unknown_nothing()
+
+### One argument of a call, as the parameter's type.
+secret failable routine unknown_argument[P](args: Roamed[SF::System.Dict[Text, Unknown]], name: Text, routine_name: Text) -> P
+    when try args[name]
+        is None => throw ArgumentError(routine_name: routine_name, problem: f"the argument '{name}' is missing")
+        else as supplied =>
+            when try supplied.kept_as[P]()
+                is None => throw ArgumentError(routine_name: routine_name, problem: f"the argument '{name}' takes {P.type_name()}, and the value given is {supplied.type_fact().name}")
+                else as value => return value
+
+### Whether the call gives an argument of that name.
+secret routine has_argument(args: Roamed[SF::System.Dict[Text, Unknown]], name: Text) -> Bool
+    when try args[name]
+        is None => return false
+        else => return true
+
+### An entity the builder's creator table made, kept in an `Unknown` as a Suflae value is: by its handle.
+secret routine entity_unknown[E](value: E) -> Unknown
+needs EntityType E
+    return Unknown(from: Roamed[E](from: steal value))
+
+### What a routine that returns nothing gives back through `call`: an `Unknown` keeping `none`.
+secret routine unknown_nothing() -> Unknown
+    var empty: Bool? = none
+    return Unknown(from: empty)
+
+# ============================================================================
+# Choosing a routine
+# ============================================================================
+
+### Whether the arguments given fit a routine: every name is a parameter, every parameter without a default is
+### given, and every value is of its parameter's type.
+secret routine arguments_fit(fact: RoutineFact, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Bool
+    var matched: U64 = 0
+    each parameter in fact.parameters
+        when try args[parameter.name]
+            is None =>
+                if not parameter.has_default
+                    return false
+            else as supplied =>
+                if supplied.kind().type_id != parameter.type_id
+                    return false
+                matched = matched + 1
+    var named_count: U64 = 0
+    each name in args.keys()
+        named_count = named_count + 1
+    return matched == named_count
+
+### Why the arguments given do not fit a routine, for its error.
+secret routine argument_problem(fact: RoutineFact, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Text
+    each parameter in fact.parameters
+        when try args[parameter.name]
+            is None =>
+                if not parameter.has_default
+                    return f"the argument '{parameter.name}' is missing"
+            else as supplied =>
+                if supplied.kind().type_id != parameter.type_id
+                    return f"the argument '{parameter.name}' takes {parameter.make_fact().name}, and the value given is {supplied.type_fact().name}"
+    each name in args.keys()
+        var known = false
+        each parameter in fact.parameters
+            if parameter.name == name
+                known = true
+        if not known
+            return f"it has no parameter '{name}'"
+    return "the arguments do not fit"
+
+### Which routine among `facts` a call by name reaches, or why none does.
+secret record RoutineChoice
+    ### The routine's index in its table, when `problem` is `"NONE"`.
+    secret index: U64
+    ### `"NONE"`, `"NO_SUCH"`, `"NOT_BUILT"`, `"GENERIC"` or `"ARGUMENTS"`.
+    secret problem: Text
+    ### The routine's full name (the name asked for when there is no such routine).
+    secret full_name: Text
+    ### What does not fit, when `problem` is `"ARGUMENTS"`.
+    secret detail: Text
+
+### The routine named `name` among `facts` whose parameters fit the arguments given, or why there is none. The verbs
+### throw the matching error themselves.
+secret routine choose_routine(facts: SF::System.List[RoutineFact], name: Text, args: Roamed[SF::System.Dict[Text, Unknown]]) -> RoutineChoice
+    var any_named = false
+    var any_built = false
+    var left_out = name
+    each fact in facts
+        if fact.name == name or fact.full_name == name
+            if not any_named
+                left_out = fact.full_name
+            any_named = true
+            if fact.is_built
+                any_built = true
+                if arguments_fit(fact: fact, args: args)
+                    if fact.is_generic
+                        return RoutineChoice(index: 0, problem: "GENERIC", full_name: fact.full_name, detail: "")
+                    return RoutineChoice(index: fact.index, problem: "NONE", full_name: fact.full_name, detail: "")
+    if not any_named
+        return RoutineChoice(index: 0, problem: "NO_SUCH", full_name: name, detail: "")
+    if not any_built
+        return RoutineChoice(index: 0, problem: "NOT_BUILT", full_name: left_out, detail: "")
+    each fact in facts
+        if fact.is_built and (fact.name == name or fact.full_name == name)
+            return RoutineChoice(index: 0, problem: "ARGUMENTS", full_name: fact.full_name, detail: argument_problem(fact: fact, args: args))
+    return RoutineChoice(index: 0, problem: "NO_SUCH", full_name: name, detail: "")
+
+### Why the arguments given do not fit the routine at `index` of `facts`, or `""` when they fit.
+secret routine listed_argument_problem(facts: SF::System.List[RoutineFact], index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Text
+    each fact in facts
+        if fact.index == index and not arguments_fit(fact: fact, args: args)
+            return argument_problem(fact: fact, args: args)
+    return ""

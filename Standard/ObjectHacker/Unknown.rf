@@ -44,6 +44,8 @@ secret record TypeFact
     secret cases: SF::System.List[Text]
     ### A variant's arms, in declaration order (each `make_fact` gives the arm's type).
     secret arms: SF::System.List[MemberFact]
+    ### The type's routine tables, for `call` and `create`.
+    secret handle: TypeHandle
 
 ### The routines that work on the value an `Unknown` keeps, one table per type.
 secret record UnknownKind
@@ -251,6 +253,12 @@ secret routine type_fact_of[T]() -> TypeFact
         protocols: protocols,
         cases: cases,
         arms: arms,
+        handle: TypeHandle(
+            make_routines: () => reflected_routines[T](),
+            do_invoke: (target: Unknown, index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reflected_invoke[T](target: target, index: index, args: args),
+            make_creators: () => reflected_creators[T](),
+            do_create: (index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) => reflected_create[T](index: index, args: args),
+        ),
     )
 
 # ============================================================================

@@ -1416,6 +1416,20 @@ routine start()
   `S64` slot a typed variable). Given a record it throws `PokeKindError`: take the changed copy with
   `p = poked(target: p, memvar:, value:)` instead (`poked` given an entity throws `PokeKindError` too).
 - `watch(target:)`: an observation that does not keep the entity alive; `is_alive()`.
+- `call(target:, name:, args: Dict[Text, Unknown]) -> Unknown` (failable) calls a member routine by its name
+  (`"attack"`) or full name (`"Game.Hero.attack"`), arguments by parameter name, a defaulted one may be left out;
+  a routine that returns nothing gives an `Unknown` keeping `none`. `create(type: TypeInfo, args:) -> Unknown`
+  makes a value by a creator chosen by the arguments (every record and entity has the one taking one argument
+  per member variable). `type_info(of:).routines` / `.creators` are `List[RoutineInfo]` (`name`, `full_name`,
+  `module_name`, `kind: RoutineKind` = `MEMBER`/`COMMON`/`CREATOR`/`FREE`, `parameters: List[ParameterInfo]`
+  with `name`, `order`, `type`, `has_default`, `default`, `returns: TypeInfo?`, `is_failable`, `is_generic`).
+  `types(in: "Game")` and `routines(in: "Game")` list a module's types and free routines. `call(info:, args:)`
+  calls a free routine, a common routine or a creator from its `RoutineInfo`.
+- Only what the build reached is listed and callable: a routine nothing in the program calls is left out of
+  the program, and naming it fails with `RoutineNotBuiltError`. Mark a type `@reflectable` to keep every routine
+  it has. Other errors: `NoSuchRoutineError`, `ArgumentError` (missing, unknown or wrongly typed argument),
+  `GenericRoutineCallError` (a routine with type parameters of its own), `CallTargetError` (`call(info:)` given
+  a member routine).
 
 ## 20. CLI and `config.toml`
 
@@ -1550,12 +1564,12 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 Built and tested: the language described above, end to end: shared entities with cycle collection,
 nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and `ObjectHacker`'s
-`Unknown`, `type_info`, `peek`/`poke`/`poked` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
+`Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
 
 Not built yet:
 
 - a REPL and hot reload;
-- `ObjectHacker`'s `call`/`create` by name, annotations with `apply`/`around`, `when_*` hooks and `implant`;
+- `ObjectHacker`'s annotations with `apply`/`around`, `when_*` hooks and `implant`;
   hot reload and `morph` come after 0.5.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every

@@ -1,0 +1,27 @@
+attack: 90
+attack twice: 60
+renamed: Bea, hp: 60
+direct: 59
+sum: 7
+sum through Unknown: 7
+direct sum: 7 origin: Point(x: 0, y: 0)
+routine attack MEMBER ["power: S64 default=false", "times: S64 default=true"] returns S64
+routine rename MEMBER ["to: Text default=false"] returns nothing
+creator Hero with 2 parameters
+create: Cid 3
+gauge routines: 2
+halved: 4
+module routine twice
+module routine returns_name
+module routine show_problem
+module type Hero ENTITY
+module type Point RECORD
+module type Gauge RECORD
+twice: 42
+origin by info: Point(x: 0, y: 0)
+direct twice: 4
+unused: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.unused' is not in this program: nothing in the program calls it, so the build left it out. Call it somewhere in the program, or mark its type '@reflectable' to keep every routine of the type.
+fly: 'Hero' has no routine 'fly'
+attack: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.attack': the argument 'power' is missing
+attack: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.attack': the argument 'power' takes S64, and the value given is Integer
+DONE

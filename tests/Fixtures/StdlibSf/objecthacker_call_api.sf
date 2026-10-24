@@ -1,0 +1,115 @@
+module Tests/StdlibSf/ObjectHackerCallApi
+
+import IO/Console
+import ObjectHacker
+# call and create reach routines by name while the program runs. Only routines the build reached are listed and
+# callable: one nothing in the program calls is left out, and calling it fails loudly naming it. A type marked
+# @reflectable keeps all of its routines.
+entity Hero
+    name: Text
+    hp: S64
+
+routine Hero.attack(power: S64, times: S64 = 1) -> S64
+    me.hp = me.hp - power * times
+    return me.hp
+
+routine Hero.rename(to: Text)
+    me.name = to
+    return
+
+routine Hero.unused() -> S64
+    return 0
+
+record Point
+    x: S64
+    y: S64
+
+routine Point.sum() -> S64
+    return me.x + me.y
+
+common routine Point.origin() -> Point
+    return Point(x: 0, y: 0)
+
+@reflectable
+record Gauge
+    level: S64
+
+routine Gauge.doubled() -> S64
+    return me.level * 2
+
+routine Gauge.halved() -> S64
+    return me.level // 2
+
+routine twice(n: S64) -> S64
+    return n * 2
+
+routine never_called() -> S64
+    return 1
+
+routine returns_name(info: RoutineInfo) -> Text
+    if info.returns is None
+        return "nothing"
+    return info.returns.name
+
+routine show_problem(hero: Hero, name: Text, args: Dict[Text, Unknown])
+    when check call(target: hero, name: name, args: args)
+        is NoSuchRoutineError as e => show(f"{name}: {e.crash_message()}")
+        is RoutineNotBuiltError as e => show(f"{name}: {e.crash_message()}")
+        is ArgumentError as e => show(f"{name}: {e.crash_message()}")
+        is Unknown as result => show(f"{name}: {result}")
+        else => show(f"{name}: another failure")
+    return
+
+routine start()
+    var hero = Hero(name: "Ada", hp: 100)
+    hero.rename(to: "Ada")
+    var power: S64 = 10
+    var three: S64 = 3
+    show(f"attack: {call(target: hero, name: "attack", args: {"power": Unknown(from: power)})}")
+    show(f"attack twice: {call(target: hero, name: "attack", args: {"power": Unknown(from: power), "times": Unknown(from: three)})}")
+    call(target: hero, name: "rename", args: {"to": Unknown(from: "Bea")})
+    show(f"renamed: {hero.name}, hp: {hero.hp}")
+    show(f"direct: {hero.attack(power: 1)}")
+
+    var p = Point(x: 3, y: 4)
+    show(f"sum: {call(target: p, name: "sum", args: Dict[Text, Unknown]())}")
+    show(f"sum through Unknown: {call(target: Unknown(from: p), name: "Tests/StdlibSf/ObjectHackerCallApi.Point.sum", args: Dict[Text, Unknown]())}")
+    show(f"direct sum: {p.sum()} origin: {Point.origin()}")
+
+    var info = type_info(of: hero)
+    each r in info.routines
+        var params = List[Text]()
+        each param in r.parameters
+            params.add_last(value: f"{param.name}: {param.type.name} default={param.has_default}")
+        show(f"routine {r.name} {r.kind} {params} returns {returns_name(info: r)}")
+    each c in info.creators
+        show(f"creator {c.name} with {c.parameters.count()} parameters")
+
+    var made = create(type: info, args: {"name": Unknown(from: "Cid"), "hp": Unknown(from: three)})
+    when try made.to[Hero]()
+        is None => show("create: not a Hero")
+        else as cid => show(f"create: {cid.name} {cid.hp}")
+
+    var gauge = Gauge(level: 8)
+    var gauge_info = type_info(of: gauge)
+    show(f"gauge routines: {gauge_info.routines.count()}")
+    show(f"halved: {call(target: gauge, name: "halved", args: Dict[Text, Unknown]())}")
+
+    each r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
+        show(f"module routine {r.name}")
+    each t in types(in: "Tests/StdlibSf/ObjectHackerCallApi")
+        show(f"module type {t.name} {t.kind}")
+    var n: S64 = 21
+    each r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
+        if r.name == "twice"
+            show(f"twice: {call(info: r, args: {"n": Unknown(from: n)})}")
+    each r in type_info(of: p).routines
+        if r.name == "origin"
+            show(f"origin by info: {call(info: r, args: Dict[Text, Unknown]())}")
+    show(f"direct twice: {twice(n: 2)}")
+
+    show_problem(hero: hero, name: "unused", args: Dict[Text, Unknown]())
+    show_problem(hero: hero, name: "fly", args: Dict[Text, Unknown]())
+    show_problem(hero: hero, name: "attack", args: Dict[Text, Unknown]())
+    show_problem(hero: hero, name: "attack", args: {"power": Unknown(from: 5)})
+    show("DONE")
