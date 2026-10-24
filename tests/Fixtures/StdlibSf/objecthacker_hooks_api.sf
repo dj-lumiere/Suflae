@@ -1,0 +1,40 @@
+module Tests/StdlibSf/ObjectHackerHooksApi
+
+import IO/Console
+import ObjectHacker
+# when_changed calls a hook after every change of a member variable of one object, made by the program or by poke,
+# with the member variable's name, the old value and the new one. An object can have several hooks, and remove_hook
+# takes one off. Other objects of the same type are not hooked.
+entity Hero
+    name: Text
+    hp: S64
+
+routine Hero.hit(power: S64)
+    me.hp = me.hp - power
+
+record Point
+    x: S64
+    y: S64
+
+routine start()
+    var hero = Hero(name: "Ada", hp: 10)
+    var other = Hero(name: "Bea", hp: 10)
+    var log = List[Text]()
+    var first = when_changed(target: hero, handler: (memvar: Text, old: Unknown, now: Unknown) => log.add_last(value: f"first {memvar}: {old} -> {now}"))
+    var second = when_changed(target: hero, handler: (memvar: Text, old: Unknown, now: Unknown) => log.add_last(value: f"second {memvar}: {old} -> {now}"))
+    hero.hp = 7
+    hero.hit(power: 2)
+    other.hp = 1
+    var p = Point(x: 1, y: 2)
+    p.x = 5
+    var hp: S64 = 3
+    poke(target: hero, memvar: "hp", value: hp)
+    show(f"removed: {remove_hook(target: hero, hook: first)}")
+    hero.name = "Cid"
+    show(f"removed again: {remove_hook(target: hero, hook: first)}")
+    remove_hook(target: hero, hook: second)
+    hero.hp = 1
+    each line in log
+        show(line)
+    show(f"{hero.name} {hero.hp} {other.hp} {p.x}")
+    show("DONE")

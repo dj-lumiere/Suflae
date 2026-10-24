@@ -1,0 +1,96 @@
+module ObjectHacker
+
+# The change hooks of objects: `when_changed` and `remove_hook` (Hooks.rf) add and remove them, and the routines the
+# builder writes around every change of a member variable run them.
+
+secret record ChangeHook
+    secret id: U64
+    secret handler: failable Callable[(Text, Unknown, Unknown), None]
+
+# The hooks of one object, and the values its member variables had before the changes under way, innermost last.
+secret entity HookTable
+    secret target: Unknown
+    secret hooks: List[ChangeHook]
+    secret pending: List[Unknown]
+
+# Every object's hooks, by the object's key.
+secret entity HookRegistry
+    secret tables: Dict[U64, HookTable]
+    secret next_id: U64
+    secret hooked: U64
+
+secret routine hook_registry() -> HookRegistry
+    when stored_registry()
+        is None =>
+            var made = HookRegistry(tables: Dict[U64, HookTable](), next_id: 1, hooked: 0)
+            store_registry(registry: Unknown(from: made))
+            return made
+        else as kept => return kept.to[HookRegistry]()
+
+secret routine add_change_hook(key: U64, target: Unknown, handler: failable Callable[(Text, Unknown, Unknown), None]) -> U64
+    var registry = hook_registry()
+    var id = registry.next_id
+    registry.next_id = id + 1
+    when try registry.tables[key]
+        is None =>
+            var hooks = List[ChangeHook]()
+            hooks.add_last(value: ChangeHook(id: id, handler: handler))
+            registry.tables[key] = HookTable(target: target, hooks: hooks, pending: List[Unknown]())
+            registry.hooked = registry.hooked + 1
+            set_hooked_count(count: registry.hooked)
+        else as table => table.hooks.add_last(value: ChangeHook(id: id, handler: handler))
+    return id
+
+secret routine drop_change_hook(key: U64, hook: U64) -> Bool
+    when stored_registry()
+        is None => return false
+        else as kept =>
+            var registry = kept.to[HookRegistry]()
+            when try registry.tables[key]
+                is None => return false
+                else as table =>
+                    var left = List[ChangeHook]()
+                    var found = false
+                    each listed in table.hooks
+                        if listed.id == hook
+                            found = true
+                        else
+                            left.add_last(value: listed)
+                    table.hooks = left
+                    if left.count() == 0
+                        registry.tables.remove(key: key)
+                        registry.hooked = registry.hooked - 1
+                        set_hooked_count(count: registry.hooked)
+                    return found
+
+secret routine hooks_before(key: U64, memvar: Text)
+    when stored_registry()
+        is None => return
+        else as kept =>
+            when try kept.to[HookRegistry]().tables[key]
+                is None => return
+                else as table =>
+                    when table.target.peek_memvar(memvar: memvar)
+                        is None => return
+                        else as old => table.pending.add_last(value: old)
+
+secret routine hooks_after(key: U64, memvar: Text)
+    when stored_registry()
+        is None => return
+        else as kept =>
+            when try kept.to[HookRegistry]().tables[key]
+                is None => return
+                else as table =>
+                    if table.pending.count() == 0
+                        return
+                    var old = table.pending.remove_last()
+                    when table.target.peek_memvar(memvar: memvar)
+                        is None => return
+                        else as now =>
+                            # A copy, so a hook may add or remove hooks while they run.
+                            var running = List[ChangeHook]()
+                            each listed in table.hooks
+                                running.add_last(value: listed)
+                            each listed in running
+                                var handler = listed.handler
+                                handler(memvar, old, now)

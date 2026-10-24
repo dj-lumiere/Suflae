@@ -143,10 +143,15 @@ needs EntityType E
                     else as new_value =>
                         var base = Hijacked[Roamed[E]](data).peek().raw_inner().get_address()
                         var slot = Hijacked[Byte](from: base).offset(bytes: ByteSize(bytes: placeof(m))).recast_as[$typeof(m)]()
+                        var hooked = hooks_on()
+                        if hooked
+                            hooks_before(key: base.to[U64](), memvar: memvar)
                         Hijacked[Roamed[E]](data).peek().lock_enter()
                         slot.peek().destruct()
                         slot.poke(new_value)
                         Hijacked[Roamed[E]](data).peek().lock_exit()
+                        if hooked
+                            hooks_after(key: base.to[U64](), memvar: memvar)
                         return true
     return false
 

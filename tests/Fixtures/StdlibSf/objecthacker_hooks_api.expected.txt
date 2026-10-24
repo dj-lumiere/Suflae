@@ -1,0 +1,11 @@
+removed: true
+removed again: false
+first hp: 10 -> 7
+second hp: 10 -> 7
+first hp: 7 -> 5
+second hp: 7 -> 5
+first hp: 5 -> 3
+second hp: 5 -> 3
+second name: Ada -> Cid
+Cid 1 1 5
+DONE

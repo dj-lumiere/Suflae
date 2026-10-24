@@ -188,6 +188,8 @@ public sealed class SuflaeRules : LanguageRules
         EmitterSelfSynthesisPass.Run(files: files);
         // Annotations first: the globals' setup goes in front of the annotations' apply calls in start().
         bool annotated = AnnotationSynthesisPass.Run(files: files, report: report);
+        // Before the globals: their setup in start() changes the globals' holder, which no hook can reach.
+        ChangeHookBarrierPass.Run(files: files);
         return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report) && annotated;
     }
 
