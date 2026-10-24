@@ -1570,7 +1570,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
 - **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `each` `with`
   `break` `continue` `return` `throw` `todo` `becomes`
-- **Recovery**: `try` `check`
+- **Failure**: `failable` (on a routine's declaration: `failable routine parse(...)`) · **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
 - **Modules**: `import` `module`
 - **Other**: `using` `as` `define` `given` `nothing` (an empty body: a type's, or a block's that
@@ -1580,8 +1580,8 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Concurrency**: `f.to[Work](args)`
 - **Reserved, not usable in a program**: `danger` `dangerous`
 
-`!` (failable, on declarations) is a mark on the name, not a keyword. `steal` and `expand` are not Suflae
-words.
+A routine that can fail says so with `failable` before `routine`: `routine parse!(...)` is SF-G222, and a call never
+writes `!`. `steal` and `expand` are not Suflae words.
 
 The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
 operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `each x in xs`). Anywhere
