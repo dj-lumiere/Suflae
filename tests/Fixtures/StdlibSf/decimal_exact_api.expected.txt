@@ -6,3 +6,7 @@ none
 0.3
 0.3333333333333333333333333333333333
 the exact sum has more significant digits than a Decimal holds (34)
+round: 3 -2 0 -3
+fixed: 7.13 -7.12 -2
+floor ceil trunc: -3 -2 -2
+divide: 1000000000000000000000000000000001 -1000000000000000000000000000000000

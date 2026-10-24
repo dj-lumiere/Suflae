@@ -215,11 +215,12 @@ routine Decimal.floor() -> Decimal
 @rf("Decimal.ceil")
 routine Decimal.ceil() -> Decimal
 
-### Rounds to the nearest integral value, a value exactly halfway away from zero (Decimal's rounding).
+### Rounds half up (Decimal's rounding): the integral value n with n - 0.5 <= me < n + 0.5, that is floor(me + 0.5)
+### (2.5 -> 3, -2.5 -> -2, -0.5 -> 0).
 @rf("Decimal.round")
 routine Decimal.round() -> Decimal
 
-### Rounds to the nearest integral value the way Decimal rounds, a value exactly halfway away from zero.
+### Rounds the way Decimal rounds, half up: the same as `round()`.
 @rf("Decimal.rint")
 routine Decimal.rint() -> Decimal
 

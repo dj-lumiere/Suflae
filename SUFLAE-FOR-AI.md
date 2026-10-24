@@ -62,8 +62,9 @@ through a `.rf` module the program imports (section 18).
    significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Integer` values turns each into a `Decimal`
    first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
    `1.0 / 3` is `0.333…` too (§4). Every rounding a `Decimal` does (`/`, text read in, `round()`, `fixed(places:)`)
-   takes a value exactly halfway away from zero: `2.5` to `3`, `-2.5` to `-3` (`D32`, `D64`, `D128` keep IEEE 754's
-   ties to even).
+   is half up: x goes to the n (at the digit kept) with `n - 0.5 <= x < n + 0.5`, that is `floor(x + 0.5)`. `2.5` goes
+   to `3`, `-2.5` to `-2`, `-7.125` to 2 places to `-7.12`, and `round()` of `-0.5` is `0` (`D32`, `D64`, `D128` keep
+   IEEE 754's ties to even).
 6. **`routine start()` is optional.** The entry file may be a plain list of top-level statements (script
    mode). `show(...)` needs no import.
 7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before
