@@ -7,6 +7,42 @@ import BuilderQuery
 # a member variable, `changing_member` before it and `changed_member` after it, both behind `hooks_on()`, so a
 # program with no hooks pays one load and one branch per change.
 
+### Takes the lock of the hook registry, which every look at it and change of it is made under: one thread at a time,
+### and again by the thread that holds it (a hook's change of a hooked object). A thread that finds it taken waits.
+secret routine hooks_enter()
+    danger
+        C::ingrid_hooks_enter()
+    return
+
+### Leaves the lock `hooks_enter` took, once for each time it was taken.
+secret routine hooks_leave()
+    danger
+        C::ingrid_hooks_leave()
+    return
+
+### Makes a value the registry keeps safe to hold and let go on any thread: its handle counts with unbroken
+### arithmetic from now on. Called before the value is stored, while only the storing thread has it.
+### :param value: The value.
+secret routine share_across_threads(value: Unknown)
+    danger
+        C::ingrid_roam_promote(header: value.cell.controller_address())
+    return
+
+### The object's replacement for a member routine, or none: the test the builder writes at the top of every member
+### routine of an entity, behind `hooks_on()`. One look under the lock, so a replacement another thread removes
+### meanwhile is either found whole or not at all. The replacement was shared across threads when it was stored.
+### :param key: The object's key.
+### :param routine_key: The member routine's key.
+### :returns: An `Unknown` keeping the replacement, or none.
+secret routine implant_for(key: U64, routine_key: Text) -> Unknown?
+    hooks_enter()
+    if not has_implant_held(key: key, routine_key: routine_key)
+        hooks_leave()
+        return none
+    var found = implant_of_held(key: key, routine_key: routine_key)
+    hooks_leave()
+    return found
+
 ### Whether any object has change hooks. The builder tests it before every change of a member variable.
 ### :returns: True when at least one object does.
 @inline

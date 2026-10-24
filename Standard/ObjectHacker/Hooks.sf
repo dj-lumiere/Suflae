@@ -4,6 +4,12 @@ module ObjectHacker
 # routines the builder writes around every change of a member variable run them. `implant` and `remove_implant`
 # (written by the builder from `implant(target: hero, replacing: Hero.attack, with: f)`) replace a member routine for one
 # object, and the builder writes a test for a replacement at the top of every member routine of an entity.
+#
+# Every thread reaches the registry, so each routine here looks at it or changes it between `hooks_enter()` and
+# `hooks_leave()` (Hooks.rf), one thread at a time, and the registry and its tables are reached only there: the
+# `_held` routines do the work, and what they keep is let go before the lock is. A value that leaves the lock
+# (an implant's replacement) is shared across threads when it is stored. The hooks themselves run after the lock is
+# left, so a hook may wait for another thread that changes a hooked object.
 
 secret record ChangeHook
     secret id: U64
@@ -22,6 +28,7 @@ secret entity HookRegistry
     secret next_id: U64
     secret hooked: U64
 
+# The registry, made on first use. Called with the lock held.
 secret routine hook_registry() -> HookRegistry
     when stored_registry()
         is None =>
@@ -31,6 +38,12 @@ secret routine hook_registry() -> HookRegistry
         else as kept => return kept.to[HookRegistry]()
 
 secret routine add_change_hook(key: U64, target: Unknown, handler: failable Callable[(Text, Unknown, Unknown), None]) -> U64
+    hooks_enter()
+    var id = add_change_hook_held(key: key, target: target, handler: handler)
+    hooks_leave()
+    return id
+
+secret routine add_change_hook_held(key: U64, target: Unknown, handler: failable Callable[(Text, Unknown, Unknown), None]) -> U64
     var registry = hook_registry()
     var id = registry.next_id
     registry.next_id = id + 1
@@ -38,6 +51,7 @@ secret routine add_change_hook(key: U64, target: Unknown, handler: failable Call
         is None =>
             var hooks = List[ChangeHook]()
             hooks.add_last(value: ChangeHook(id: id, handler: handler))
+            share_across_threads(value: target)
             registry.tables[key] = HookTable(target: target, hooks: hooks, pending: List[Unknown](), implants: Dict[Text, Unknown]())
             registry.hooked = registry.hooked + 1
             set_hooked_count(count: registry.hooked)
@@ -52,6 +66,12 @@ secret routine forget_if_empty(registry: HookRegistry, key: U64, table: HookTabl
         set_hooked_count(count: registry.hooked)
 
 secret routine drop_change_hook(key: U64, hook: U64) -> Bool
+    hooks_enter()
+    var found = drop_change_hook_held(key: key, hook: hook)
+    hooks_leave()
+    return found
+
+secret routine drop_change_hook_held(key: U64, hook: U64) -> Bool
     when stored_registry()
         is None => return false
         else as kept =>
@@ -74,17 +94,31 @@ secret routine drop_change_hook(key: U64, hook: U64) -> Bool
 # routine on the object runs the replacement instead (an `Unknown` keeping the routine value, whose signature the
 # builder checks where `implant` is written). An implant keeps its object alive until it is removed.
 secret routine add_implant(key: U64, target: Unknown, routine_key: Text, replacement: Unknown)
+    hooks_enter()
+    add_implant_held(key: key, target: target, routine_key: routine_key, replacement: replacement)
+    hooks_leave()
+
+secret routine add_implant_held(key: U64, target: Unknown, routine_key: Text, replacement: Unknown)
     var registry = hook_registry()
+    # Any thread that calls the routine on the object takes the replacement out of the lock (implant_for).
+    share_across_threads(value: replacement)
     when try registry.tables[key]
         is None =>
             var implants = Dict[Text, Unknown]()
             implants[routine_key] = replacement
+            share_across_threads(value: target)
             registry.tables[key] = HookTable(target: target, hooks: List[ChangeHook](), pending: List[Unknown](), implants: implants)
             registry.hooked = registry.hooked + 1
             set_hooked_count(count: registry.hooked)
         else as table => table.implants[routine_key] = replacement
 
 secret routine drop_implant(key: U64, routine_key: Text) -> Bool
+    hooks_enter()
+    var found = drop_implant_held(key: key, routine_key: routine_key)
+    hooks_leave()
+    return found
+
+secret routine drop_implant_held(key: U64, routine_key: Text) -> Bool
     when stored_registry()
         is None => return false
         else as kept =>
@@ -96,9 +130,8 @@ secret routine drop_implant(key: U64, routine_key: Text) -> Bool
                     forget_if_empty(registry: registry, key: key, table: table)
                     return found
 
-# Whether the object has a replacement for a member routine: the builder's test at the top of every member routine of
-# an entity.
-secret routine has_implant(key: U64, routine_key: Text) -> Bool
+# Whether the object has a replacement for a member routine. Called with the lock held (implant_for).
+secret routine has_implant_held(key: U64, routine_key: Text) -> Bool
     when stored_registry()
         is None => return false
         else as kept =>
@@ -106,11 +139,16 @@ secret routine has_implant(key: U64, routine_key: Text) -> Bool
                 is None => return false
                 else as table => return table.implants.has_key(key: routine_key)
 
-# The object's replacement for a member routine, found by `has_implant`.
-secret routine implant_of(key: U64, routine_key: Text) -> Unknown
+# The object's replacement for a member routine, found by `has_implant_held`. Called with the lock held.
+secret routine implant_of_held(key: U64, routine_key: Text) -> Unknown
     return hook_registry().tables[key].implants[routine_key]
 
 secret routine hooks_before(key: U64, memvar: Text)
+    hooks_enter()
+    hooks_before_held(key: key, memvar: memvar)
+    hooks_leave()
+
+secret routine hooks_before_held(key: U64, memvar: Text)
     when stored_registry()
         is None => return
         else as kept =>
@@ -122,22 +160,35 @@ secret routine hooks_before(key: U64, memvar: Text)
                         else as old => table.pending.add_last(value: old)
 
 secret routine hooks_after(key: U64, memvar: Text)
+    # The values before and after the change, which only this thread holds once they are out of the registry.
+    var values = List[Unknown]()
+    hooks_enter()
+    var running = change_to_run(key: key, memvar: memvar, values: values)
+    hooks_leave()
+    if values.count() == 2
+        each listed in running
+            var handler = listed.handler
+            handler(memvar, values[0], values[1])
+
+# Takes the value a member variable had before the change out of the object's table, and puts it and the value it has
+# now in `values`. Returns a copy of the object's hooks, so a hook may add or remove hooks while they run. Called with
+# the lock held: nothing of the registry is kept after it returns.
+secret routine change_to_run(key: U64, memvar: Text, values: List[Unknown]) -> List[ChangeHook]
+    var running = List[ChangeHook]()
     when stored_registry()
-        is None => return
+        is None => return running
         else as kept =>
             when try kept.to[HookRegistry]().tables[key]
-                is None => return
+                is None => return running
                 else as table =>
                     if table.pending.count() == 0
-                        return
+                        return running
                     var old = table.pending.remove_last()
                     when table.target.peek_memvar(memvar: memvar)
-                        is None => return
+                        is None => return running
                         else as now =>
-                            # A copy, so a hook may add or remove hooks while they run.
-                            var running = List[ChangeHook]()
+                            values.add_last(value: old)
+                            values.add_last(value: now)
                             each listed in table.hooks
                                 running.add_last(value: listed)
-                            each listed in running
-                                var handler = listed.handler
-                                handler(memvar, old, now)
+                            return running

@@ -13,9 +13,9 @@ namespace Suflae.Passes;
 /// <c>var objecthacker_implant: Callable[(Hero, S64), S64] = f</c> (so a replacement of another signature is a build
 /// error there) and <c>add_implant(key: ..., routine_key: "Hero.attack(power:)", replacement: Unknown(from: ...))</c>;</item>
 /// <item><c>remove_implant(target: hero, replacing: Hero.attack)</c> becomes <c>drop_implant(...)</c>;</item>
-/// <item>every member routine of an entity starts with a test: when the object has a replacement for it, the
-/// replacement runs instead, given the object and the arguments. With no object hooked the test is one load and one
-/// branch.</item>
+/// <item>every member routine of an entity starts with a test: when the object has a replacement for it (one look at
+/// the registry under its lock, <c>implant_for</c>), the replacement runs instead, given the object and the arguments.
+/// With no object hooked the test is one load and one branch.</item>
 /// </list>
 /// A routine is named by its type, its name and its parameters' names, so overloads are told apart by the names.
 /// </summary>
@@ -31,7 +31,7 @@ internal static class ImplantPass
     /// <summary>ObjectHacker's routines the written statements call, which a program cannot name itself.</summary>
     private static readonly HashSet<string> HelperNames =
     [
-        "hooks_on", "own_hook_key", "hook_key", "has_implant", "implant_of", "add_implant", "drop_implant", "kept_as"
+        "hooks_on", "own_hook_key", "hook_key", "implant_for", "add_implant", "drop_implant", "kept_as"
     ];
 
     internal static bool Run(List<(Program Program, string FilePath)> files,
@@ -192,11 +192,16 @@ internal static class ImplantPass
         string key = Quote(text: KeyOf(routine: routine));
         string arguments = string.Concat(values: routine.Parameters.Select(selector: p => ", " + p.Name));
         string call = $"objecthacker_replacement(objecthacker_self{arguments})";
+        // One look at the registry (implant_for), so a replacement another thread removes meanwhile is found whole or
+        // not at all.
         string source =
-            $"    if hooks_on() and has_implant(key: me.own_hook_key(), routine_key: {key})\n" +
-            "        var objecthacker_self = me\n" +
-            $"        var objecthacker_replacement = implant_of(key: me.own_hook_key(), routine_key: {key}).kept_as[{TypePlaceholder}]()\n" +
-            (Returns(routine: routine) ? $"        return {call}\n" : $"        {call}\n        return\n");
+            "    if hooks_on()\n" +
+            $"        when implant_for(key: me.own_hook_key(), routine_key: {key})\n" +
+            "            is None => nothing\n" +
+            "            else as objecthacker_found =>\n" +
+            "                var objecthacker_self = me\n" +
+            $"                var objecthacker_replacement = objecthacker_found.kept_as[{TypePlaceholder}]()\n" +
+            (Returns(routine: routine) ? $"                return {call}\n" : $"                {call}\n                return\n");
         if (Parse(source: source, filePath: filePath, line: routine.Location.Line) is not BlockStatement block)
         {
             return null;
