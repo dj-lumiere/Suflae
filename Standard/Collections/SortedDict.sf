@@ -29,8 +29,8 @@ import BuilderQuery
 ### :see: {Dict[TKey, TValue]} for a hashed dictionary with O(1) average lookup.
 ### :see: {SortedList[T]} for a sorted sequence that allows duplicates.
 entity SortedDict[TKey, TValue]
-relates SortedDictEmittable[TKey, TValue] as Iter, TKey as Key, TValue as Value
-obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
+relates SortedDictEmitter[TKey, TValue] as Emitter, TKey as Key, TValue as Value
+obeys Emittable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
 needs TKey obeys Comparable
     ### The tree holding the entries.
     secret tree: SortedTree[TKey, TValue]
@@ -38,8 +38,8 @@ needs TKey obeys Comparable
 ### Walks the entries of a {SortedDict[TKey, TValue]} in ascending key order.
 ### :typeparam TKey: The key type.
 ### :typeparam TValue: The value type.
-entity SortedDictEmittable[TKey, TValue]
-obeys Emittable[DictEntry[TKey, TValue]]
+entity SortedDictEmitter[TKey, TValue]
+obeys Emitter[DictEntry[TKey, TValue]]
 needs TKey obeys Comparable
     ### The tree being walked, shared with the dictionary.
     secret tree: SortedTree[TKey, TValue]
@@ -210,12 +210,12 @@ routine SortedDict[TKey, TValue].values() -> List[TValue]
 # ============================================================================
 
 ### Returns a walk over the entries in ascending key order.
-routine SortedDict[TKey, TValue].iter() -> SortedDictEmittable[TKey, TValue]
-    return SortedDictEmittable[TKey, TValue](tree: me.tree, index: 0)
+routine SortedDict[TKey, TValue].emitter() -> SortedDictEmitter[TKey, TValue]
+    return SortedDictEmitter[TKey, TValue](tree: me.tree, index: 0)
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SortedDictEmittable[TKey, TValue].emit() -> DictEntry[TKey, TValue]
+failable routine SortedDictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var rank = me.index

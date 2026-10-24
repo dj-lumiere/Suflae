@@ -1,0 +1,74 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields elements present in both this emittable and another.
+### The second emittable is fully materialized into a set when iteration begins.
+### :typeparam T: The element type of both source sequences.
+### :typeparam TSource: The concrete primary source emittable type (borrowed).
+### :typeparam TOther: The concrete membership-test emittable type (borrowed).
+@rf("IntersectEmittable")
+entity IntersectEmittable[T, TSource, TOther]
+relates IntersectEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+needs TOther obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence and keeps only elements that appear in the membership set.
+### :typeparam T: The element type of the filtered sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("IntersectEmitter")
+entity IntersectEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Represents a lazy adapter that suppresses elements present in another emittable.
+### The exclusion emittable is fully materialized into a set when iteration begins.
+### :typeparam T: The element type of both source sequences.
+### :typeparam TSource: The concrete primary source emittable type (borrowed).
+### :typeparam TOther: The concrete exclusion emittable type (borrowed).
+@rf("ExcludeEmittable")
+entity ExcludeEmittable[T, TSource, TOther]
+relates ExcludeEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+needs TOther obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence and suppresses elements found in the exclusion set.
+### :typeparam T: The element type of the filtered sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("ExcludeEmitter")
+entity ExcludeEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Materializes `other` into a set and returns an emitter that filters `source` against it.
+### :returns: The resulting `IntersectEmitter[T, TSource/Emitter]` value.
+@rf("IntersectEmittable.emitter")
+routine IntersectEmittable[T, TSource, TOther].emitter() -> IntersectEmitter[T, TSource/Emitter]
+needs T obeys Hashable, Comparable
+
+### Returns the next source element that is also present in the membership set.
+### Source elements not found in the set are consumed and discarded.
+### :returns: The resulting `T` value.
+@rf("IntersectEmitter.emit")
+failable routine IntersectEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+needs T obeys Hashable, Comparable
+
+### Materializes `other` into a set and returns an emitter that removes matching elements.
+### :returns: The resulting `ExcludeEmitter[T, TSource/Emitter]` value.
+@rf("ExcludeEmittable.emitter")
+routine ExcludeEmittable[T, TSource, TOther].emitter() -> ExcludeEmitter[T, TSource/Emitter]
+needs T obeys Hashable, Comparable
+
+### Returns the next source element that is not present in the exclusion set.
+### Source elements found in the set are consumed and discarded.
+### :returns: The resulting `T` value.
+@rf("ExcludeEmitter.emit")
+failable routine ExcludeEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+needs T obeys Hashable, Comparable

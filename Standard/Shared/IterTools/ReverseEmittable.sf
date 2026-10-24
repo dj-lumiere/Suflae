@@ -6,12 +6,12 @@ module IterTools
 ### Represents a lazy adapter that yields source elements in reverse order.
 ### The source is fully materialized when iteration begins.
 ### :typeparam T: The element type of the source sequence.
-### :typeparam TSource: The concrete source iterable type (borrowed; enables build-time dispatch).
-@rf("ReverseIterable")
-entity ReverseIterable[T, TSource]
-relates ReverseEmittable[T] as Iter
-obeys Iterable[T]
-needs TSource obeys Iterable[T]
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("ReverseEmittable")
+entity ReverseEmittable[T, TSource]
+relates ReverseEmitter[T] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
     nothing
 
 ### Iterates over a pre-materialized buffer from back to front.
@@ -19,24 +19,24 @@ needs TSource obeys Iterable[T]
 ### that makes it, so the source outlives it, and a source cannot change while it is iterated. The buffer frees
 ### its storage and leaves the values to the source.
 ### :typeparam T: The element type of the reversed sequence.
-@rf("ReverseEmittable")
-entity ReverseEmittable[T]
-obeys Emittable[T]
+@rf("ReverseEmitter")
+entity ReverseEmitter[T]
+obeys Emitter[T]
     nothing
 
-### Materializes the source into a buffer and returns an iterator that walks it backwards.
-### :returns: The resulting `ReverseEmittable[T]` value.
-@rf("ReverseIterable.iter")
-routine ReverseIterable[T, TSource].iter() -> ReverseEmittable[T]
+### Materializes the source into a buffer and returns an emitter that walks it backwards.
+### :returns: The resulting `ReverseEmitter[T]` value.
+@rf("ReverseEmittable.emitter")
+routine ReverseEmittable[T, TSource].emitter() -> ReverseEmitter[T]
 
 ### Returns the next element counting backward through the buffer.
 ### Signals absence once all elements have been yielded.
 ### :returns: The resulting `T` value.
-@rf("ReverseEmittable.emit")
-failable routine ReverseEmittable[T].emit() -> T
+@rf("ReverseEmitter.emit")
+failable routine ReverseEmitter[T].emit() -> T
 
-### Returns a lazy adapter that yields this iterable's elements in reverse order.
+### Returns a lazy adapter that yields this emittable's elements in reverse order.
 ### The source is fully consumed when the returned adapter is first iterated.
-### :returns: The resulting `ReverseIterable[T, Me]` value.
-@rf("Iterable.reverse")
-routine Iterable[T].reverse() -> ReverseIterable[T, Me]
+### :returns: The resulting `ReverseEmittable[T, Me]` value.
+@rf("Emittable.reverse")
+routine Emittable[T].reverse() -> ReverseEmittable[T, Me]

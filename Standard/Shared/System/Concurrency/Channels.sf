@@ -9,29 +9,29 @@ module System/Concurrency
 secret entity Transmitter[T]
     nothing
 
-### The single-consumer receiving end. Obeys `Iterable[T]`: `for x in hop` drains it until the
+### The single-consumer receiving end. Obeys `Emittable[T]`: `for x in hop` drains it until the
 ### channel closes and the buffer empties. There is only ever one `Receiver` per channel (it is not
 ### cloneable — use a `SharedReceiver` for multiple consumers).
 @rf("Receiver")
 secret entity Receiver[T]
-relates ChannelDrain[T] as Iter
-obeys Iterable[T]
+relates ChannelDrain[T] as Emitter
+obeys Emittable[T]
     nothing
 
 ### A multi-consumer receiving handle. Clone one per consumer for a worker pool; any free worker
-### takes the next item. Obeys `Iterable[T]` like `Receiver`.
+### takes the next item. Obeys `Emittable[T]` like `Receiver`.
 @rf("SharedReceiver")
 secret entity SharedReceiver[T]
-relates ChannelDrain[T] as Iter
-obeys Iterable[T]
+relates ChannelDrain[T] as Emitter
+obeys Emittable[T]
     nothing
 
-### The iterator a receiving end hands to a `for` loop. It references the channel without owning it (the
+### The emitter a receiving end hands to a `for` loop. It references the channel without owning it (the
 ### owning `Receiver`/`SharedReceiver` holds the consumer reference); `emit!` receives one item, parking
 ### while the buffer is empty, and throws `AbsentValueError` once the channel is closed and drained — ending the loop.
 @rf("ChannelDrain")
 secret entity ChannelDrain[T]
-obeys Emittable[T]
+obeys Emitter[T]
     nothing
 
 ### Creates a single-consumer channel and returns its `(Transmitter, Receiver)` pair. `capacity` is the
@@ -79,10 +79,10 @@ secret routine Transmitter[T].close()
 @rf("Transmitter.is_closed")
 secret routine Transmitter[T].is_closed() -> Bool
 
-### Returns an iterator that draws items from the channel (receive == iterate).
+### Returns an emitter that draws items from the channel (receive == iterate).
 ### :returns: A `ChannelDrain[T]` over this channel.
-@rf("Receiver.iter")
-secret routine Receiver[T].iter() -> ChannelDrain[T]
+@rf("Receiver.emitter")
+secret routine Receiver[T].emitter() -> ChannelDrain[T]
 
 ### The number of buffered items right now. A racy snapshot for diagnostics/heuristics — never a
 ### synchronization decision (it can change the instant after you read it).
@@ -110,10 +110,10 @@ secret routine Receiver[T].capacity() -> U64
 @rf("SharedReceiver.duplicate")
 secret routine SharedReceiver[T].duplicate() -> SharedReceiver[T]
 
-### Returns an iterator that draws items from the channel (receive == iterate).
+### Returns an emitter that draws items from the channel (receive == iterate).
 ### :returns: A `ChannelDrain[T]` over this channel.
-@rf("SharedReceiver.iter")
-secret routine SharedReceiver[T].iter() -> ChannelDrain[T]
+@rf("SharedReceiver.emitter")
+secret routine SharedReceiver[T].emitter() -> ChannelDrain[T]
 
 ### The number of buffered items right now (racy snapshot — diagnostics only, not synchronization).
 ### :returns: The current buffered item count.

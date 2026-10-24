@@ -337,6 +337,13 @@ internal sealed class EntityLoweringPass
         var list = new List<Statement>(capacity: block.Statements.Count);
         foreach (Statement s in block.Statements)
         {
+            // An emitter kept in a local holds one more handle to what it walks, for as long as the local lives.
+            if (!_inLibraryRoutine && KeepAliveFor(stmt: s) is { } keep)
+            {
+                list.Add(item: LowerStatement(stmt: keep));
+                changed = true;
+            }
+
             Statement ns = LowerStatement(stmt: s);
             list.Add(item: ns);
             if (!ReferenceEquals(objA: ns, objB: s))
@@ -349,6 +356,80 @@ internal sealed class EntityLoweringPass
             ? block with { Statements = list }
             : block;
     }
+
+    private int _keepCount;
+
+    /// <summary>
+    /// For <c>var big = xs.where(...)</c>, a local holding an adapter that points at the container it was made from
+    /// (a member variable <c>Hijacked[S]</c>, <c>S</c> one of its own type parameters that obeys <c>Emittable</c>):
+    /// <c>var __emitter_keep_N = xs</c>, one more handle to that container, declared just before it in the same
+    /// block. Copying a handle shares the entity, so the container lives as long as the adapter's local can be
+    /// used, even when <c>xs</c> is given another value. Null for any other statement.
+    /// </summary>
+    private DeclarationStatement? KeepAliveFor(Statement stmt)
+    {
+        if (stmt is not DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ||
+            vd.Name.StartsWith(value: "_lf_", comparisonType: StringComparison.Ordinal) ||
+            !PointsAtSource(type: init.ResolvedType))
+        {
+            return null;
+        }
+
+        Expression head = init;
+        while (head is CallExpression { Callee: MemberExpression { Object: var receiver } })
+        {
+            head = receiver;
+        }
+
+        if (head is not (IdentifierExpression or MemberExpression) || head.ResolvedType is not EntityTypeSymbol &&
+            !IsRoamedType(t: head.ResolvedType))
+        {
+            return null;
+        }
+
+        return new DeclarationStatement(
+            Declaration: new VariableDeclaration(Name: $"__emitter_keep_{_keepCount++}",
+                Type: null,
+                Initializer: head,
+                Visibility: VisibilityModifier.Secret,
+                Location: vd.Location),
+            Location: stmt.Location);
+    }
+
+    /// <summary>Whether a value of <paramref name="type"/> is an adapter that keeps only a pointer to the emittable
+    /// it was made from.</summary>
+    private static bool PointsAtSource(TypeSymbol? type)
+    {
+        TypeSymbol? def = type switch
+        {
+            EntityTypeSymbol { GenericDefinition: { } entityDef } => entityDef,
+            RecordTypeSymbol { GenericDefinition: { } recordDef } => recordDef,
+            _ => null
+        };
+        List<MemberVariableInfo>? fields = def switch
+        {
+            EntityTypeSymbol e => e.MemberVariables,
+            RecordTypeSymbol r => r.MemberVariables,
+            _ => null
+        };
+        if (def?.GenericConstraints is not { } constraints || fields == null)
+        {
+            return false;
+        }
+
+        HashSet<string> sourceParams = constraints
+                                       .Where(predicate: c => c.ConstraintType == ConstraintKind.Obeys &&
+                                                              (c.ConstraintTypes ?? []).Any(predicate: t =>
+                                                                  t.Name == EmittableProtocolName))
+                                       .Select(selector: c => c.ParameterName)
+                                       .ToHashSet(comparer: StringComparer.Ordinal);
+        return fields.Any(predicate: f => f.Type.BareName == RuntimeContract.Hijacked &&
+                                          f.Type.TypeArguments is [GenericParameterTypeSymbol held] &&
+                                          sourceParams.Contains(item: held.Name));
+    }
+
+    /// <summary>The protocol of what can be walked.</summary>
+    private const string EmittableProtocolName = "Emittable";
 
     private Statement LowerDeclarationStatement(Statement stmt, DeclarationStatement ds,
         VariableDeclaration vd)

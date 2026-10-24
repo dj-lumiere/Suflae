@@ -8,8 +8,8 @@ module System
 ### :typeparam T: The type argument bound to `T`.
 @rf("Range")
 record Range[T]
-relates RangeEmittable[T] as Iter
-obeys Iterable[T], Container
+relates RangeEmitter[T] as Emitter
+obeys Emittable[T], Container
 needs RecordType T
 needs T obeys Comparable, Addable, Subtractable
     ### Stores the first value in the progression.
@@ -24,11 +24,11 @@ needs T obeys Comparable, Addable, Subtractable
     ### only its magnitude. A negative step held in a variable counts down too.
     descending: Bool
 
-### Represents the `RangeEmittable` entity.
-### `RangeEmittable[T]` holds the mutable iteration state for a `Range[T]`.
+### Represents the `RangeEmitter` entity.
+### `RangeEmitter[T]` holds the mutable iteration state for a `Range[T]`.
 ### :typeparam T: The type argument bound to `T`.
-@rf("RangeEmittable")
-entity RangeEmittable[T]
+@rf("RangeEmitter")
+entity RangeEmitter[T]
 needs RecordType T
 needs T obeys Comparable, Addable, Subtractable
     ### Stores the next value to yield.
@@ -113,16 +113,16 @@ routine Range[T].represent() -> Text
 @rf("Range.diagnose")
 routine Range[T].diagnose() -> Text
 
-### Creates an iterator for this value.
+### Creates an emitter for this value.
 ### The emitter starts at `me.start` and moves by the step's magnitude in the step's direction. A step of zero
 ### crashes here.
-### :returns: The resulting `RangeEmittable[T]` value.
-@rf("Range.iter")
-routine Range[T].iter() -> RangeEmittable[T]
+### :returns: The resulting `RangeEmitter[T]` value.
+@rf("Range.emitter")
+routine Range[T].emitter() -> RangeEmitter[T]
 
-### Returns the next value from this iterator.
+### Returns the next value from this emitter.
 ### Each successful call yields the current value and advances by `step`.
 ### :returns: The resulting `T` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
-@rf("RangeEmittable.emit")
-failable routine RangeEmittable[T].emit() -> T
+@rf("RangeEmitter.emit")
+failable routine RangeEmitter[T].emit() -> T

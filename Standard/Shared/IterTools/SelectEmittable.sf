@@ -1,0 +1,47 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy mapping adapter over an input emittable.
+### Each source element is transformed only when requested by iteration.
+### :typeparam T: The source element type.
+### :typeparam TResult: The projected output type.
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("SelectEmittable")
+entity SelectEmittable[T, TResult, TSource]
+relates SelectEmitter[T, TResult, TSource/Emitter] as Emitter
+obeys Emittable[TResult]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence and projects each yielded value through a transform routine.
+### :typeparam T: The source element type.
+### :typeparam TResult: The projected output type.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("SelectEmitter")
+entity SelectEmitter[T, TResult, TSourceEmitter]
+obeys Emitter[TResult]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that drives this projection adapter.
+### The emitted emitter reuses the same transform routine for every yielded
+### source value.
+### :returns: The resulting `SelectEmitter[T, TResult, TSource/Emitter]` value.
+@rf("SelectEmittable.emitter")
+routine SelectEmittable[T, TResult, TSource].emitter() -> SelectEmitter[T, TResult, TSource/Emitter]
+
+### Returns the next projected value from the mapped sequence.
+### The transform runs once for each successfully yielded source value.
+### :returns: The resulting `TResult` value.
+@rf("SelectEmitter.emit")
+failable routine SelectEmitter[T, TResult, TSourceEmitter].emit() -> TResult
+
+### Returns a lazy projection of this emittable.
+### The source sequence is not evaluated until the resulting emitter is
+### consumed.
+### :param transform: The routine used to map each source value to a result value.
+### :returns: The resulting `SelectEmittable[T, TResult, Me]` value.
+@rf("Emittable.select")
+routine Emittable[T].select[TResult](transform: Callable[(T,), TResult]) -> SelectEmittable[T, TResult, Me]

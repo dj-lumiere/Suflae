@@ -1,0 +1,86 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that suppresses duplicate values from a source emittable.
+### Two values are considered equal when they produce the same hash and compare as equal.
+### :typeparam T: The element type of the source sequence.
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("DistinctEmittable")
+entity DistinctEmittable[T, TSource]
+relates DistinctEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence while suppressing values already produced.
+### :typeparam T: The element type of the source sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("DistinctEmitter")
+entity DistinctEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Represents a lazy adapter that suppresses elements whose key has already been seen.
+### Two elements are considered duplicates when their computed keys produce the same hash
+### and compare as equal.
+### :typeparam T: The source element type.
+### :typeparam TKey: The key type used for equality comparison.
+### :typeparam TSource: The concrete source emittable type (borrowed).
+@rf("DistinctByEmittable")
+entity DistinctByEmittable[T, TKey, TSource]
+relates DistinctByEmitter[T, TKey, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence while suppressing elements whose key has already been produced.
+### :typeparam T: The source element type.
+### :typeparam TKey: The key type used for equality comparison.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("DistinctByEmitter")
+entity DistinctByEmitter[T, TKey, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that tracks already-seen values across calls.
+### :returns: The resulting `DistinctEmitter[T, TSource/Emitter]` value.
+@rf("DistinctEmittable.emitter")
+routine DistinctEmittable[T, TSource].emitter() -> DistinctEmitter[T, TSource/Emitter]
+needs T obeys Hashable, Comparable
+
+### Returns the next value not yet yielded by this emitter.
+### Source values that have already been seen are discarded until a new one is found.
+### :returns: The resulting `T` value.
+@rf("DistinctEmitter.emit")
+failable routine DistinctEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+needs T obeys Hashable, Comparable
+
+### Returns a lazy adapter that suppresses duplicate values.
+### :returns: The resulting `DistinctEmittable[T, Me]` value.
+@rf("Emittable.distinct")
+routine Emittable[T].distinct() -> DistinctEmittable[T, Me]
+needs T obeys Hashable, Comparable
+
+### Returns the stateful emitter that tracks already-seen keys across calls.
+### :returns: The resulting `DistinctByEmitter[T, TKey, TSource/Emitter]` value.
+@rf("DistinctByEmittable.emitter")
+routine DistinctByEmittable[T, TKey, TSource].emitter() -> DistinctByEmitter[T, TKey, TSource/Emitter]
+needs TKey obeys Hashable, Comparable
+
+### Returns the next element whose key has not yet been yielded.
+### Elements are consumed and discarded until one with a fresh key is found.
+### :returns: The resulting `T` value.
+@rf("DistinctByEmitter.emit")
+failable routine DistinctByEmitter[T, TKey, TSourceEmitter].emit() -> TSourceEmitter/Item
+needs TKey obeys Hashable, Comparable
+
+### Returns a lazy adapter that suppresses elements whose computed key has already appeared.
+### :param key: The routine that extracts the comparison key from each element.
+### :returns: The resulting `DistinctByEmittable[T, TKey, Me]` value.
+@rf("Emittable.distinct_by")
+routine Emittable[T].distinct_by[TKey](key: Callable[(T,), TKey]) -> DistinctByEmittable[T, TKey, Me]
+needs TKey obeys Hashable, Comparable

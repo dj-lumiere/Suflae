@@ -1,0 +1,40 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields one emittable after another.
+### The second sequence is not touched until the first one is exhausted.
+### :typeparam T: The element type produced by both source sequences.
+### :typeparam TFirstSource: The concrete first source emittable type (borrowed).
+### :typeparam TSecondSource: The concrete second source emittable type (borrowed).
+@rf("ExtendEmittable")
+entity ExtendEmittable[T, TFirstSource, TSecondSource]
+relates ExtendEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TFirstSource obeys Emittable[T]
+needs TSecondSource obeys Emittable[T]
+    nothing
+
+### Iterates over an `ExtendEmittable` by exhausting the first source before moving to the second.
+### :typeparam T: The element type produced by the concatenated sequence.
+### :typeparam TFirstEmitter: The concrete first source emitter type (owned).
+### :typeparam TSecondEmitter: The concrete second source emitter type (owned).
+@rf("ExtendEmitter")
+entity ExtendEmitter[T, TFirstEmitter, TSecondEmitter]
+obeys Emitter[T]
+needs TFirstEmitter obeys Emitter[T]
+needs TSecondEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that concatenates the two source sequences.
+### The returned emitter walks `first` to completion before switching to `second`.
+### :returns: The resulting `ExtendEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter]` value.
+@rf("ExtendEmittable.emitter")
+routine ExtendEmittable[T, TFirstSource, TSecondSource].emitter() -> ExtendEmitter[T, TFirstSource/Emitter, TSecondSource/Emitter]
+
+### Returns the next value from the concatenated sequence.
+### Once the first emitter is exhausted, all remaining values come from the second emitter.
+### :returns: The resulting `T` value.
+@rf("ExtendEmitter.emit")
+failable routine ExtendEmitter[T, TFirstEmitter, TSecondEmitter].emit() -> T

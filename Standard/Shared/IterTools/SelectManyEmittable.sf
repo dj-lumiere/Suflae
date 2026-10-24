@@ -1,0 +1,53 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy flat-map adapter that applies a transform to each source element and
+### yields all values produced by each resulting inner emittable in sequence.
+### :typeparam T: The source element type.
+### :typeparam TResult: The output element type produced by each inner emittable.
+### :typeparam TInner: The CONCRETE inner-emittable type the transform returns (the transform's
+###   return type).
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("SelectManyEmittable")
+entity SelectManyEmittable[T, TResult, TInner, TSource]
+relates SelectManyEmitter[T, TResult, TInner, TSource/Emitter] as Emitter
+obeys Emittable[TResult]
+needs TSource obeys Emittable[T]
+needs TInner obeys Emittable[TResult]
+    nothing
+
+### Iterates over source elements, expanding each through a transform to yield a flat sequence.
+### An internal buffer holds the current inner sequence; once drained the next outer element is fetched.
+### :typeparam T: The source element type.
+### :typeparam TResult: The element type yielded by each inner emittable.
+### :typeparam TInner: The concrete inner-emittable type returned by the transform.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("SelectManyEmitter")
+entity SelectManyEmitter[T, TResult, TInner, TSourceEmitter]
+obeys Emitter[TResult]
+needs TSourceEmitter obeys Emitter[T]
+needs TInner obeys Emittable[TResult]
+    nothing
+
+### Returns the stateful emitter that drives the flat-map expansion.
+### :returns: The resulting `SelectManyEmitter[T, TResult, TInner, TSource/Emitter]` value.
+@rf("SelectManyEmittable.emitter")
+routine SelectManyEmittable[T, TResult, TInner, TSource].emitter() -> SelectManyEmitter[T, TResult, TInner, TSource/Emitter]
+
+### Returns the next value from the current inner buffer, refilling it as needed.
+### The emitter calls `emit!` on the outer source whenever the buffer is exhausted.
+### :returns: The resulting `TResult` value.
+@rf("SelectManyEmitter.emit")
+failable routine SelectManyEmitter[T, TResult, TInner, TSourceEmitter].emit() -> TResult
+
+### Returns a lazy adapter that applies `transform` to each element and yields values from all
+### resulting inner emittables in sequence. The inner-emittable type `TInner` is an explicit type
+### argument (e.g. `select_many[S64, List[S64]]`) because the builder resolves the dispatch on it
+### at build time.
+### :param transform: The routine that maps each source element to an inner emittable.
+### :returns: The resulting `SelectManyEmittable[T, TResult, TInner, Me]` value.
+@rf("Emittable.select_many")
+routine Emittable[T].select_many[TResult, TInner](transform: Callable[(T,), TInner]) -> SelectManyEmittable[T, TResult, TInner, Me]
+needs TInner obeys Emittable[TResult]

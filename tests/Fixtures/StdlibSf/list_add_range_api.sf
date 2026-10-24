@@ -1,6 +1,6 @@
 module Tests/StdlibSf/ListAddRangeApi
 
-# add_range adds every element of an iterable at the back: a list literal, another list, and a rotatable list
+# add_range adds every element of an emittable at the back: a list literal, another list, and a rotatable list
 # taking a list.
 
 import IO/Console

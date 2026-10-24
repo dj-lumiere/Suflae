@@ -1,18 +1,18 @@
 module IterTools
 
-# Suflae's surface of the iterable terminals and adapters that count: counts are `Integer`, and the
+# Suflae's surface of the emittable terminals and adapters that count: counts are `Integer`, and the
 # collections they build are Suflae's own. A Suflae program calls these in place of the RazorForge routines of
 # the same names.
 
 ### Collects the values into a list, in order.
-routine Iterable[T].to[List[T]]() -> List[T]
+routine Emittable[T].to[List[T]]() -> List[T]
     var result = List[T]()
     each item in me
         result.add_last(value: item)
     return result
 
 ### Collects the values into a set. A repeated value is kept once.
-routine Iterable[T].to[Set[T]]() -> Set[T]
+routine Emittable[T].to[Set[T]]() -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T]()
     each item in me
@@ -20,20 +20,20 @@ needs T obeys Hashable, Equatable
     return result
 
 ### Returns how many values there are.
-routine Iterable[T].get_count() -> Integer
+routine Emittable[T].get_count() -> Integer
     return me.get_count().to[Integer]()
 
 ### Returns how many values satisfy `predicate`.
 ### :param predicate: The test applied to each value.
-routine Iterable[T].get_count(predicate: Callable[(T,), Bool]) -> Integer
+routine Emittable[T].get_count(predicate: Callable[(T,), Bool]) -> Integer
     return me.get_count(predicate: predicate).to[Integer]()
 
 ### Returns the values after the first `count`.
 ### :param count: How many values to leave out.
-routine Iterable[T].skip(count: Integer) -> SkipIterable[T, Me]
+routine Emittable[T].skip(count: Integer) -> SkipEmittable[T, Me]
     return me.skip(count: position_of(value: count))
 
 ### Returns the first `count` values.
 ### :param count: How many values to keep.
-routine Iterable[T].take(count: Integer) -> TakeIterable[T, Me]
+routine Emittable[T].take(count: Integer) -> TakeEmittable[T, Me]
     return me.take(count: position_of(value: count))

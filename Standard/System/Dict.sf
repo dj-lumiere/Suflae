@@ -24,8 +24,8 @@ import BuilderQuery
 ### :typeparam TValue: The value type associated with each key.
 ### :see: {Set[T]} for the set counterpart.
 entity Dict[TKey, TValue]
-relates DictEmittable[TKey, TValue] as Iter, TKey as Key, TValue as Value
-obeys Iterable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, Copyable, DictLiteral[TKey, TValue]
+relates DictEmitter[TKey, TValue] as Emitter, TKey as Key, TValue as Value
+obeys Emittable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, Copyable, DictLiteral[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
@@ -45,14 +45,14 @@ needs TKey obeys Hashable, Equatable
     secret k1: U64
 
 ### Walks the entries of a {Dict[TKey, TValue]} in insertion order.
-entity DictEmittable[TKey, TValue]
-obeys Emittable[DictEntry[TKey, TValue]]
+entity DictEmitter[TKey, TValue]
+obeys Emitter[DictEntry[TKey, TValue]]
     ### The walk over which entry places are live.
-    secret live: MemoryEmittable[Bool]
+    secret live: MemoryEmitter[Bool]
     ### The walk over the keys.
-    secret keys: MemoryEmittable[TKey]
+    secret keys: MemoryEmitter[TKey]
     ### The walk over the values.
-    secret vals: MemoryEmittable[TValue]
+    secret vals: MemoryEmitter[TValue]
     ### How many entry places are left to walk.
     secret left: U64
 
@@ -261,8 +261,8 @@ routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
 # ============================================================================
 
 ### Returns a walk over the entries in insertion order.
-routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
-    return DictEmittable[TKey, TValue](
+routine Dict[TKey, TValue].emitter() -> DictEmitter[TKey, TValue]
+    return DictEmitter[TKey, TValue](
         live: me.live.walking(first: 0, count: me.used),
         keys: me.keys.walking(first: 0, count: me.used),
         vals: me.vals.walking(first: 0, count: me.used),
@@ -271,7 +271,7 @@ routine Dict[TKey, TValue].iter() -> DictEmittable[TKey, TValue]
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine DictEmittable[TKey, TValue].emit() -> DictEntry[TKey, TValue]
+failable routine DictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
     until me.left == 0
         me.left = me.left - 1
         if me.live.emit()

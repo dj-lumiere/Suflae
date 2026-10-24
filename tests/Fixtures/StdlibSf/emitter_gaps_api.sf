@@ -22,13 +22,13 @@ entity Cell[T]
 routine Cell[T].get() -> T
     return me.value
 
-record Countdown obeys Iterable[Integer]
+record Countdown obeys Emittable[Integer]
     start: Integer
 
-entity CountdownWalk obeys Emittable[Integer]
+entity CountdownWalk obeys Emitter[Integer]
     next: Integer
 
-routine Countdown.iter() -> CountdownWalk
+routine Countdown.emitter() -> CountdownWalk
     return CountdownWalk(next: me.start)
 
 failable routine CountdownWalk.emit() -> Integer
@@ -58,7 +58,7 @@ routine start()
     var c = Cell[Integer](value: 5)
     show(c.get())
 
-    # An adapter walks a user's own Iterable.
+    # An adapter walks a user's own Emittable.
     show(Countdown(start: 5).where(predicate: (n: Integer) => n % 2 == 1).to[List]())
 
     # A field-by-field construction infers the type arguments.

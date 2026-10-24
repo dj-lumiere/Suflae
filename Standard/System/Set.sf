@@ -18,8 +18,8 @@ import BuilderQuery
 ### :typeparam T: The element type. Must obey {Hashable} and {Equatable}.
 ### :see: {Dict[TKey, TValue]} for the dictionary counterpart.
 entity Set[T]
-relates SetEmittable[T] as Iter
-obeys Iterable[T], Container, SetLiteral[T]
+relates SetEmitter[T] as Emitter
+obeys Emittable[T], Container, SetLiteral[T]
 needs T obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
@@ -37,12 +37,12 @@ needs T obeys Hashable, Equatable
     secret k1: U64
 
 ### Walks the values of a {Set[T]} in insertion order.
-entity SetEmittable[T]
-obeys Emittable[T]
+entity SetEmitter[T]
+obeys Emitter[T]
     ### The walk over which entry places are live.
-    secret live: MemoryEmittable[Bool]
+    secret live: MemoryEmitter[Bool]
     ### The walk over the values.
-    secret values: MemoryEmittable[T]
+    secret values: MemoryEmitter[T]
     ### How many entry places are left to walk.
     secret left: U64
 
@@ -161,8 +161,8 @@ routine Set[T].remove(value: T) -> Bool
 # ============================================================================
 
 ### Returns a walk over the values in insertion order.
-routine Set[T].iter() -> SetEmittable[T]
-    return SetEmittable[T](
+routine Set[T].emitter() -> SetEmitter[T]
+    return SetEmitter[T](
         live: me.live.walking(first: 0, count: me.used),
         values: me.values.walking(first: 0, count: me.used),
         left: me.used,
@@ -170,7 +170,7 @@ routine Set[T].iter() -> SetEmittable[T]
 
 ### Returns the next value.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SetEmittable[T].emit() -> T
+failable routine SetEmitter[T].emit() -> T
     until me.left == 0
         me.left = me.left - 1
         if me.live.emit()

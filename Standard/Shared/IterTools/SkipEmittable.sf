@@ -1,0 +1,35 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that discards the first `count` elements from a sequence.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("SkipEmittable")
+entity SkipEmittable[T, TSource]
+relates SkipEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence after discarding an initial prefix.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("SkipEmitter")
+entity SkipEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that discards the configured prefix lazily.
+### The returned emitter defers the actual skipping until iteration begins.
+### :returns: The resulting `SkipEmitter[T, TSource/Emitter]` value.
+@rf("SkipEmittable.emitter")
+routine SkipEmittable[T, TSource].emitter() -> SkipEmitter[T, TSource/Emitter]
+
+### Returns the next value after any remaining skipped prefix has been consumed.
+### Values are discarded only until `remaining` reaches zero.
+### :returns: The resulting `T` value.
+@rf("SkipEmitter.emit")
+failable routine SkipEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item

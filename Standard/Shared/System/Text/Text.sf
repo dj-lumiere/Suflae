@@ -16,15 +16,15 @@ module System/Text
 ### `data` points at constant data (or nowhere) and nothing is counted or freed.
 @rf("Text")
 record Text
-relates TextEmittable as Iter
-obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Iterable[Char], Container
+relates TextEmitter as Emitter
+obeys Copyable, Addable, Comparable, Hashable, TextRepeatable, Emittable[Char], Container
     nothing
 
-### Represents the iterator used to traverse a `Text` value.
-### The iterator reads the text sequentially from the first character to the
+### Represents the emitter used to traverse a `Text` value.
+### The emitter reads the text sequentially from the first character to the
 ### last.
-@rf("TextEmittable")
-entity TextEmittable
+@rf("TextEmitter")
+entity TextEmitter
     ### Stores the source text.
     text: Text
     ### Stores the current character index.
@@ -245,15 +245,15 @@ routine Text.represent() -> Text
 @rf("Text.diagnose")
 routine Text.diagnose() -> Text
 
-### Returns an iterator over this text value.
-### The iterator starts at index `0`.
-### :returns: The resulting `TextEmittable` value.
-@rf("Text.iter")
-routine Text.iter() -> TextEmittable
+### Returns an emitter over this text value.
+### The emitter starts at index `0`.
+### :returns: The resulting `TextEmitter` value.
+@rf("Text.emitter")
+routine Text.emitter() -> TextEmitter
 
-### Returns the next character from this iterator.
-### Each successful call advances the iterator by one character.
+### Returns the next character from this emitter.
+### Each successful call advances the emitter by one character.
 ### :returns: The resulting `Char` value.
 ### :throws: {AbsentValueError} Thrown when the requested value is unavailable.
-@rf("TextEmittable.emit")
-failable routine TextEmittable.emit() -> Char
+@rf("TextEmitter.emit")
+failable routine TextEmitter.emit() -> Char

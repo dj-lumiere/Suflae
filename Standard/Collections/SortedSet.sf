@@ -33,16 +33,16 @@ import BuilderQuery
 ### :see: {Set[T]} for an unsorted, hash-table-backed set with O(1) operations.
 ### :see: {SortedDict[K, V]} for a sorted mapping from keys to values.
 entity SortedSet[T]
-relates SortedSetEmittable[T] as Iter
-obeys Iterable[T], Container, SetLiteral[T]
+relates SortedSetEmitter[T] as Emitter
+obeys Emittable[T], Container, SetLiteral[T]
 needs T obeys Comparable
     ### The tree holding the elements as keys.
     secret tree: SortedTree[T, Bool]
 
 ### Walks the elements of a `SortedSet[T]` in ascending sorted order.
-### :typeparam T: The element type yielded by the iterator.
-entity SortedSetEmittable[T]
-obeys Emittable[T]
+### :typeparam T: The element type yielded by the emitter.
+entity SortedSetEmitter[T]
+obeys Emitter[T]
 needs T obeys Comparable
     ### The tree being walked, shared with the set.
     secret tree: SortedTree[T, Bool]
@@ -176,12 +176,12 @@ failable routine SortedSet[T].last() -> T
 # ============================================================================
 
 ### Returns a walk over the elements in ascending order.
-routine SortedSet[T].iter() -> SortedSetEmittable[T]
-    return SortedSetEmittable[T](tree: me.tree, index: 0)
+routine SortedSet[T].emitter() -> SortedSetEmitter[T]
+    return SortedSetEmitter[T](tree: me.tree, index: 0)
 
 ### Returns the next element.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SortedSetEmittable[T].emit() -> T
+failable routine SortedSetEmitter[T].emit() -> T
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)

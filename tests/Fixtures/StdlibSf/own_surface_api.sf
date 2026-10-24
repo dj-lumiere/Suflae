@@ -3,7 +3,7 @@ module Tests/StdlibSf/OwnSurfaceApi
 import IO/Console
 import IterTools
 
-# Suflae's surface of the types it shares with RazorForge: Array, Text, Bytes, Character and the iterable
+# Suflae's surface of the types it shares with RazorForge: Array, Text, Bytes, Character and the emittable
 # terminals count and index with Integer and build Suflae lists, while the values stay the same types.
 routine total(nums...: Integer) -> Integer
     var sum = 0

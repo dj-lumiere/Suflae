@@ -30,16 +30,16 @@ import BuilderQuery
 ### :see: {SortedSet[T]} for a duplicate-free sorted collection.
 ### :see: {SortedDict[K, V]} for sorted key-value storage.
 entity SortedList[T]
-relates SortedListEmittable[T] as Iter
-obeys Iterable[T], Container, ListLiteral[T]
+relates SortedListEmitter[T] as Emitter
+obeys Emittable[T], Container, ListLiteral[T]
 needs T obeys Comparable
     ### The tree holding the elements as keys.
     secret tree: SortedTree[T, Bool]
 
 ### Walks the elements of a {SortedList[T]} in ascending order.
 ### :typeparam T: The stored element type.
-entity SortedListEmittable[T]
-obeys Emittable[T]
+entity SortedListEmitter[T]
+obeys Emitter[T]
 needs T obeys Comparable
     ### The tree being walked, shared with the list.
     secret tree: SortedTree[T, Bool]
@@ -186,12 +186,12 @@ failable routine SortedList[T].last() -> T
 # ============================================================================
 
 ### Returns a walk over the elements in ascending order.
-routine SortedList[T].iter() -> SortedListEmittable[T]
-    return SortedListEmittable[T](tree: me.tree, index: 0)
+routine SortedList[T].emitter() -> SortedListEmitter[T]
+    return SortedListEmitter[T](tree: me.tree, index: 0)
 
 ### Returns the next element.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SortedListEmittable[T].emit() -> T
+failable routine SortedListEmitter[T].emit() -> T
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var result = me.tree.key_at(rank: me.index)

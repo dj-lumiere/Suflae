@@ -1,0 +1,38 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy adapter that yields at most `limit` elements from a source sequence.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("TakeEmittable")
+entity TakeEmittable[T, TSource]
+relates TakeEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over at most the configured number of values from the source sequence.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("TakeEmitter")
+entity TakeEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that enforces the configured take limit.
+### The emitted emitter decrements its remaining budget on each successful
+### yield.
+### :returns: The resulting `TakeEmitter[T, TSource/Emitter]` value.
+@rf("TakeEmittable.emitter")
+routine TakeEmittable[T, TSource].emitter() -> TakeEmitter[T, TSource/Emitter]
+
+### Returns the next value while the remaining take budget is still positive.
+### Iteration stops once the configured limit has been reached, even if the
+### source still has more values available.
+### :returns: The resulting `T` value.
+### :throws: {AbsentValueError} Thrown when the take limit has been exhausted or the source ends first.
+@rf("TakeEmitter.emit")
+failable routine TakeEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item

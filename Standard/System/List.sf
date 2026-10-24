@@ -27,8 +27,8 @@ import BuilderQuery
 ###
 ### :typeparam T: The element type stored in the list.
 entity List[T]
-relates MemoryEmittable[T] as Iter
-obeys Iterable[T], Container, Equatable, Copyable, ListLiteral[T]
+relates MemoryEmitter[T] as Emitter
+obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
     secret items: Memory[T]
     ### How many elements there are.
@@ -124,7 +124,7 @@ routine List[T].add_first(value: T)
 
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
-routine List[T].add_range(you: Iterable[T])
+routine List[T].add_range(you: Emittable[T])
     each value in you
         me.add_last(value: value)
     return
@@ -267,7 +267,7 @@ routine List[T].getitem(range: Range[Integer]) -> List[T]
 # ============================================================================
 
 ### Returns a walk over the elements, front to back.
-routine List[T].iter() -> MemoryEmittable[T]
+routine List[T].emitter() -> MemoryEmitter[T]
     return me.items.walk_at(first: 0, count: me.count)
 
 ### Returns whether both lists hold equal elements in the same order.

@@ -30,8 +30,8 @@ import BuilderQuery
 ###
 ### :typeparam T: The element type stored in the rotatable list.
 entity RotatableList[T]
-relates MemoryEmittable[T] as Iter
-obeys Iterable[T], Container, Equatable, Copyable, ListLiteral[T]
+relates MemoryEmitter[T] as Emitter
+obeys Emittable[T], Container, Equatable, Copyable, ListLiteral[T]
     ### The places the elements live in.
     secret items: Memory[T]
     ### The place the first element sits in.
@@ -121,7 +121,7 @@ routine RotatableList[T].add_first(value: T)
 
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
-routine RotatableList[T].add_range(you: Iterable[T])
+routine RotatableList[T].add_range(you: Emittable[T])
     each value in you
         me.add_last(value: value)
     return
@@ -327,7 +327,7 @@ failable routine RotatableList[T].rotate_right(n: Integer)
 # ============================================================================
 
 ### Returns a walk over the elements, front to back.
-routine RotatableList[T].iter() -> MemoryEmittable[T]
+routine RotatableList[T].emitter() -> MemoryEmitter[T]
     return me.items.walk_at(first: me.head, count: me.count)
 
 ### Returns whether both lists hold equal elements in the same order.

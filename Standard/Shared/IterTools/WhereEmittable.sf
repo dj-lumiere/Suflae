@@ -1,0 +1,50 @@
+module IterTools
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### Represents a lazy filtering adapter over a source emittable.
+### The adapter can keep either matching or non-matching items depending on `inverted`.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSource: The concrete source emittable type (borrowed; enables build-time dispatch).
+@rf("WhereEmittable")
+entity WhereEmittable[T, TSource]
+relates WhereEmitter[T, TSource/Emitter] as Emitter
+obeys Emittable[T]
+needs TSource obeys Emittable[T]
+    nothing
+
+### Iterates over a source sequence while yielding only values that satisfy the effective filter.
+### :typeparam T: The element type produced by the source sequence.
+### :typeparam TSourceEmitter: The concrete source emitter type (owned).
+@rf("WhereEmitter")
+entity WhereEmitter[T, TSourceEmitter]
+obeys Emitter[T]
+needs TSourceEmitter obeys Emitter[T]
+    nothing
+
+### Returns the stateful emitter that applies the filter lazily.
+### Source values are examined only as the caller requests more output values.
+### :returns: The resulting `WhereEmitter[T, TSource/Emitter]` value.
+@rf("WhereEmittable.emitter")
+routine WhereEmittable[T, TSource].emitter() -> WhereEmitter[T, TSource/Emitter]
+
+### Returns the next value that satisfies the effective filter condition.
+### Source values are consumed and discarded until one passes the filter.
+### :returns: The resulting `T` value.
+@rf("WhereEmitter.emit")
+failable routine WhereEmitter[T, TSourceEmitter].emit() -> TSourceEmitter/Item
+
+### Returns a lazy adapter that keeps only values for which `predicate` returns
+### `true`.
+### :param predicate: The filter predicate.
+### :returns: The resulting `WhereEmittable[T, Me]` value.
+@rf("Emittable.where")
+routine Emittable[T].where(predicate: Callable[(T,), Bool]) -> WhereEmittable[T, Me]
+
+### Returns a lazy adapter that keeps only values for which `predicate` returns
+### `false`.
+### :param predicate: The filter predicate.
+### :returns: The resulting `WhereEmittable[T, Me]` value.
+@rf("Emittable.where_not")
+routine Emittable[T].where_not(predicate: Callable[(T,), Bool]) -> WhereEmittable[T, Me]

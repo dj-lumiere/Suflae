@@ -29,8 +29,8 @@ import BuilderQuery
 ###
 ### :typeparam T: The element type stored in the memory.
 entity Memory[T]
-relates MemoryEmittable[T] as Iter
-obeys Iterable[T], Container
+relates MemoryEmitter[T] as Emitter
+obeys Emittable[T], Container
     ### The places, a handle shared with every span and walk of this memory.
     secret block: MemoryBlock[T]
 
@@ -40,8 +40,8 @@ obeys Iterable[T], Container
 ### of a span is a span of the same memory. A span covers a fixed run of places, so it does not grow.
 ### :typeparam T: The element type stored in the memory.
 entity Span[T]
-relates MemoryEmittable[T] as Iter
-obeys Iterable[T], Container
+relates MemoryEmitter[T] as Emitter
+obeys Emittable[T], Container
     ### The places of the memory, a handle shared with the memory and every span and walk of it.
     secret block: MemoryBlock[T]
     ### The block's place this span starts at.
@@ -59,8 +59,8 @@ secret entity MemoryBlock[T]
 
 ### Walks places of a `Memory[T]` or a `Span[T]` in order, from a first place, wrapping past the end to the start.
 ### :typeparam T: The element type produced.
-entity MemoryEmittable[T]
-obeys Emittable[T]
+entity MemoryEmitter[T]
+obeys Emitter[T]
     ### The places being walked, kept alive by the walk.
     secret block: MemoryBlock[T]
     ### The block's place the walked places start at.
@@ -464,18 +464,18 @@ needs T obeys Comparable
 # ============================================================================
 
 ### Returns a walk over every place, front to back.
-routine Memory[T].iter() -> MemoryEmittable[T]
+routine Memory[T].emitter() -> MemoryEmitter[T]
     return me.walking(first: 0, count: me.block.room)
 
 ### Returns a walk over every place of the span, front to back.
-routine Span[T].iter() -> MemoryEmittable[T]
+routine Span[T].emitter() -> MemoryEmitter[T]
     return me.walking(first: 0, count: me.room)
 
 ### Returns a walk over `count` places from `first`, wrapping past the end of the memory to its start: the elements
 ### of a collection that keeps them as a ring.
 ### :param first: The place the walk starts at.
 ### :param count: How many places the walk reads, at most `capacity()`.
-failable routine Memory[T].walk(first: Integer, count: Integer) -> MemoryEmittable[T]
+failable routine Memory[T].walk(first: Integer, count: Integer) -> MemoryEmitter[T]
     if count.is_negative()
         throw NegativeIndexError(index: count)
     if count == 0
@@ -486,7 +486,7 @@ failable routine Memory[T].walk(first: Integer, count: Integer) -> MemoryEmittab
 ### does, counted with `U64`.
 ### :param first: The place the walk starts at.
 ### :param count: How many places the walk reads, at most `room()`.
-failable routine Memory[T].walk_at(first: U64, count: U64) -> MemoryEmittable[T]
+failable routine Memory[T].walk_at(first: U64, count: U64) -> MemoryEmitter[T]
     if count == 0
         return me.walking(first: 0, count: 0)
     if count > me.block.room
@@ -494,16 +494,16 @@ failable routine Memory[T].walk_at(first: U64, count: U64) -> MemoryEmittable[T]
     return me.walking(first: places_checked(room: me.block.room, position: first), count: count)
 
 ### A walk over `count` places from `first`, both already checked.
-secret routine Memory[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
-    return MemoryEmittable[T](block: me.block, base: 0, room: me.block.room, first: first, index: 0, count: count)
+secret routine Memory[T].walking(first: U64, count: U64) -> MemoryEmitter[T]
+    return MemoryEmitter[T](block: me.block, base: 0, room: me.block.room, first: first, index: 0, count: count)
 
 ### A walk over `count` places of the span from `first`, both already checked.
-secret routine Span[T].walking(first: U64, count: U64) -> MemoryEmittable[T]
-    return MemoryEmittable[T](block: me.block, base: me.start, room: me.room, first: first, index: 0, count: count)
+secret routine Span[T].walking(first: U64, count: U64) -> MemoryEmitter[T]
+    return MemoryEmitter[T](block: me.block, base: me.start, room: me.room, first: first, index: 0, count: count)
 
 ### Returns what the next place holds.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine MemoryEmittable[T].emit() -> T
+failable routine MemoryEmitter[T].emit() -> T
     if me.index >= me.count
         throw AbsentValueError()
     var place = me.first + me.index
@@ -515,7 +515,7 @@ failable routine MemoryEmittable[T].emit() -> T
         return result
 
 ### Moves the walk past its next place without reading it. Does nothing once the walk is over.
-routine MemoryEmittable[T].skip()
+routine MemoryEmitter[T].skip()
     if me.index < me.count
         me.index = me.index +% 1
     return

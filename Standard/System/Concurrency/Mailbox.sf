@@ -13,8 +13,8 @@ module System/Concurrency
 ### :typeparam T: The values the mailbox carries.
 @self_locking
 entity Mailbox[T]
-relates RF::System.ChannelDrain[T] as Iter
-obeys Iterable[T]
+relates RF::System.ChannelDrain[T] as Emitter
+obeys Emittable[T]
     ### The transmitting side, kept open until `close()`.
     secret transmitter: RF::System.Transmitter[T]
     ### The taking side, shared by every reader.
@@ -48,7 +48,7 @@ failable routine Mailbox[T].add_last_if_room(value: T) -> Bool
 ### :returns: The value that was first.
 ### :throws: Crashes when the mailbox is closed and empty.
 failable routine Mailbox[T].remove_first() -> T
-    var drain = me.receiver.iter()
+    var drain = me.receiver.emitter()
     return drain.emit()
 
 ### Ends the mailbox: a later `add_last` crashes, and `each` takes what is left and then ends.
@@ -69,5 +69,5 @@ routine Mailbox[T].count() -> Integer
 
 ### Takes values in order (`each x in m`), waiting while the mailbox is empty, until it is closed and empty.
 ### :returns: The walk over the mailbox.
-routine Mailbox[T].iter() -> RF::System.ChannelDrain[T]
-    return me.receiver.iter()
+routine Mailbox[T].emitter() -> RF::System.ChannelDrain[T]
+    return me.receiver.emitter()
