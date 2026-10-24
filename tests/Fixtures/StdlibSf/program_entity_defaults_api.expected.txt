@@ -1,0 +1,17 @@
+to list: [1, 2, 3]
+sum: 10
+first: 1
+any: true
+max: 4
+where: [2, 4, 6]
+select: [10, 20, 30]
+take: [1, 2]
+skip: [4, 5]
+kept: 6
+kept: 7
+kept: 8
+handed out: 1
+rest: [2, 3, 4, 5]
+shelf: [1, 2]
+tom 1 tom 2
+greeted: 2

@@ -1,0 +1,63 @@
+module Tests/StdlibSf/AdapterKeptApi
+
+# An adapter keeps the collection it walks, wherever the adapter is kept: a member variable, a returned value, an
+# argument, a chain of adapters, or a variable whose collection is dropped.
+import IterTools
+
+entity Holder
+    big: WhereEmittable[Integer, List[Integer]]
+
+routine bigger(xs: List[Integer]) -> WhereEmittable[Integer, List[Integer]]
+    return xs.where(predicate: v => v > 1)
+
+routine fresh() -> WhereEmittable[Integer, List[Integer]]
+    return [4, 9, 2].where(predicate: v => v > 3)
+
+routine hold(walk: WhereEmittable[Integer, List[Integer]]) -> Holder
+    return Holder(big: walk)
+
+entity Stairs
+obeys Emitter[Integer]
+    current: Integer
+    top: Integer
+
+failable routine Stairs.emit() -> Integer
+    if me.current > me.top
+        throw AbsentValueError()
+    var value = me.current
+    me.current = me.current + 1
+    return value
+
+entity Lift
+    up: WhereEmittable[Integer, Stairs]
+
+routine start()
+    # A returned adapter over a list the caller made in the call.
+    var w = bigger(xs: [1, 2, 3])
+    var noise = [100, 200, 300, 400]
+    show(f"returned: {w.to[List]()}")
+
+    # A returned adapter over a list the routine made.
+    show(f"made inside: {fresh().to[List]()}")
+
+    # An adapter in a member variable, its list made in the same statement.
+    var h = Holder(big: [5, 1, 7].where(predicate: v => v > 4))
+    noise = [500, 600, 700]
+    show(f"in a member variable: {h.big.to[List]()}")
+
+    # An adapter handed to a routine that keeps it, after the list's variable gets another list.
+    var xs = [8, 3, 9]
+    var kept = hold(walk: xs.where(predicate: v => v > 5))
+    xs = [0]
+    show(f"handed on: {kept.big.to[List]()}")
+
+    # A chain of adapters in a variable: each link keeps the one it walks.
+    var chain = [1, 2, 3, 4, 5, 6].where(predicate: v => v % 2 == 0).select(transform: v => v * 100)
+    noise = [1]
+    each c in chain
+        show(f"chain: {c}")
+
+    # An adapter over an emitter the program writes, in a member variable.
+    var lift = Lift(up: Stairs(current: 1, top: 6).where(predicate: v => v > 4))
+    show(f"emitter in a member variable: {lift.up.to[List]()}")
+    show(f"noise: {noise.count()}")

@@ -1,0 +1,75 @@
+module Tests/StdlibSf/ProgramEntityDefaultsApi
+
+# Library routines a protocol writes for every type that obeys it, run on entities the program writes.
+import IterTools
+
+# An emitter the program writes: each step hands out the next number up to `top`.
+entity Stairs
+obeys Emitter[Integer]
+    current: Integer
+    top: Integer
+
+failable routine Stairs.emit() -> Integer
+    if me.current > me.top
+        throw AbsentValueError()
+    var value = me.current
+    me.current = me.current + 1
+    return value
+
+routine stairs(top: Integer) -> Stairs
+    return Stairs(current: 1, top: top)
+
+# Something the program writes that can be walked: its emitter is another entity of the program.
+entity Shelf
+obeys Emittable[Integer]
+    books: List[Text]
+
+routine Shelf.emitter() -> Stairs
+    return Stairs(current: 1, top: me.books.count())
+
+# A protocol of the program with a routine written for every type that obeys it.
+protocol Greetable
+    routine Me.greet() -> Text
+
+routine Greetable.greet_twice() -> Text
+    return f"{me.greet()} {me.greet()}"
+
+entity Cat
+obeys Greetable
+    name: Text
+    greeted: Integer
+
+routine Cat.greet() -> Text
+    me.greeted = me.greeted + 1
+    return f"{me.name} {me.greeted}"
+
+routine start()
+    # Terminals on an emitter the program writes.
+    show(f"to list: {stairs(top: 3).to[List]()}")
+    show(f"sum: {stairs(top: 4).sum()}")
+    show(f"first: {stairs(top: 3).first()}")
+    show(f"any: {stairs(top: 3).any(predicate: v => v == 2)}")
+    show(f"max: {stairs(top: 4).max()}")
+
+    # Adapters on it, collected or walked.
+    show(f"where: {stairs(top: 6).where(predicate: v => v % 2 == 0).to[List]()}")
+    show(f"select: {stairs(top: 3).select(transform: v => v * 10).to[List]()}")
+    show(f"take: {stairs(top: 9).take(count: 2).to[List]()}")
+    show(f"skip: {stairs(top: 5).skip(count: 3).to[List]()}")
+    var big = stairs(top: 8).where(predicate: v => v > 5)
+    each v in big
+        show(f"kept: {v}")
+
+    # A terminal takes what the emitter has not handed out yet.
+    var walk = stairs(top: 5)
+    show(f"handed out: {walk.emit()}")
+    show(f"rest: {walk.to[List]()}")
+
+    # An emittable the program writes, walked through the emitter it gives.
+    var shelf = Shelf(books: ["a", "b"])
+    show(f"shelf: {shelf.to[List]()}")
+
+    # A routine the program's own protocol writes, run on an entity.
+    var cat = Cat(name: "tom", greeted: 0)
+    show(cat.greet_twice())
+    show(f"greeted: {cat.greeted}")

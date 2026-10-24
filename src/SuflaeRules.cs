@@ -103,11 +103,38 @@ public sealed class SuflaeRules : LanguageRules
                 break;
             }
 
-            text = text[..at] + text[(at + wrapper.Length)..close] + text[(close + 1)..];
-            at = FindWrapper(text: text, wrapper: wrapper, from: at);
+            // The handle's module qualifier (`System.` of `System.Roamed[...]`, as a type argument is named) goes
+            // with it, or the entity would read `System.SF::System.List`.
+            int start = QualifierStart(text: text, at: at);
+            text = text[..start] + text[(at + wrapper.Length)..close] + text[(close + 1)..];
+            at = FindWrapper(text: text, wrapper: wrapper, from: start);
         }
 
         return text;
+    }
+
+    /// <summary>Where the module qualifier written right before the name at <paramref name="at"/> starts
+    /// (<c>System.</c>, <c>System/Memory.</c>), or <paramref name="at"/> when there is none.</summary>
+    private static int QualifierStart(string text, int at)
+    {
+        int start = at;
+        while (start > 0 && text[index: start - 1] == '.')
+        {
+            int word = start - 1;
+            while (word > 0 && (char.IsLetterOrDigit(c: text[index: word - 1]) || text[index: word - 1] is '_' or '/'))
+            {
+                word--;
+            }
+
+            if (word == start - 1)
+            {
+                break;
+            }
+
+            start = word;
+        }
+
+        return start;
     }
 
     /// <summary>The next <paramref name="wrapper"/> that starts a name (not the tail of a longer one), or -1.</summary>

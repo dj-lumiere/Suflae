@@ -1,0 +1,9 @@
+returned: [2, 3]
+made inside: [4, 9]
+in a member variable: [5, 7]
+handed on: [8, 9]
+chain: 200
+chain: 400
+chain: 600
+emitter in a member variable: [5, 6]
+noise: 1

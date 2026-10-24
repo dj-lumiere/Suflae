@@ -1000,10 +1000,15 @@ each entry in ages
   which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
   yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An entity a program writes that obeys `Emitter[T]` (it has a
   failable `emit()`) is walked as it is: `each n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
-  An emitter or adapter kept in a variable keeps the collection it walks alive (one more reference to it), even when
-  the variable that named the collection gets another value. Giving the variable another adapter later
-  (`kept = make().where(...)`) keeps the new collection alive the same way. Changing the collection's shape while an
-  `each` walks it crashes, as below.
+  An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
+  member variable, a returned value, an argument, or the next link of a chain. So a member variable or a return type
+  may name an adapter (`big: WhereEmittable[Integer, List[Integer]]`, `-> WhereEmittable[Integer, List[Integer]]`),
+  and the adapter stays valid after the variable that named the collection is given another value or goes away.
+  Changing the collection's shape while an `each` walks it crashes, as below.
+- Library routines written for every emittable (`to[List]()`, `sum()`, `first()`, `where(...)`, `select(...)`,
+  `take(count:)`, ...) work on an entity the program writes that obeys `Emitter[T]` or `Emittable[T]`, and a
+  protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
+  works on the program's entities the same way.
 - Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
   `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `each` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.

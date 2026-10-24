@@ -196,7 +196,6 @@ internal sealed class EntityLoweringPass
 
         _roamedLocals.Clear();
         _borrowNames.Clear();
-        _keepOf.Clear();
         _inLibraryRoutine = IsStdlibPath(file: r.Location.FileName);
         _borrowNames.Add(item: "me");
         // A constructor is the `routine T(...) -> T` form (named after the type it builds). It returns
@@ -231,7 +230,6 @@ internal sealed class EntityLoweringPass
     {
         _roamedLocals.Clear();
         _borrowNames.Clear();
-        _keepOf.Clear();
         _inLibraryRoutine = routine.Location?.FileName is { } variantFile && IsStdlibPath(file: variantFile);
         _borrowNames.Add(item: "me");
         _inCreateRoutine = false;
@@ -339,16 +337,15 @@ internal sealed class EntityLoweringPass
         var list = new List<Statement>(capacity: block.Statements.Count);
         foreach (Statement s in block.Statements)
         {
-            // An emitter kept in a local holds one more handle to what it walks, for as long as the local lives.
-            Statement current = s;
-            if (!_inLibraryRoutine && KeepAliveFor(stmt: s) is ({ } keep, { } walked))
+            // An emitter adapter made here keeps the collection it walks alive (KeepSourcesOf).
+            if (!_inLibraryRoutine && KeepSourcesOf(stmt: s) is { } withKeeps)
             {
-                list.Add(item: LowerStatement(stmt: keep));
-                current = walked;
+                list.AddRange(collection: withKeeps.Select(selector: LowerStatement));
                 changed = true;
+                continue;
             }
 
-            Statement ns = LowerStatement(stmt: current);
+            Statement ns = LowerStatement(stmt: s);
             list.Add(item: ns);
             if (!ReferenceEquals(objA: ns, objB: s))
             {
@@ -363,107 +360,283 @@ internal sealed class EntityLoweringPass
 
     private int _keepCount;
 
-    /// <summary>The hidden handle each local holding an adapter keeps to what the adapter walks, by the local's
-    /// name. Reset per routine body.</summary>
-    private readonly Dictionary<string, string> _keepOf = new(comparer: StringComparer.Ordinal);
-
     /// <summary>
-    /// For <c>var big = xs.where(...)</c>, a local holding an adapter that points at the container it was made from
-    /// (a member variable <c>Hijacked[S]</c>, <c>S</c> one of its own type parameters that obeys <c>Emittable</c>):
-    /// <c>var __emitter_keep_N = xs</c>, one more handle to that container, declared just before it in the same
-    /// block, and the adapter made from that handle. Copying a handle shares the entity, so the container lives as
-    /// long as the adapter's local can be used, even when <c>xs</c> is given another value, and a container made in
-    /// the statement (<c>var big = make().where(...)</c>) is kept as well. A later <c>big = ys.where(...)</c> gives
-    /// the same hidden handle the new container first (<c>__emitter_keep_N = ys</c>), so it lives as long as
-    /// <c>big</c> does, wherever the assignment is. Null for any other statement.
+    /// An emitter adapter made from a collection (<c>xs.where(...)</c>: a value of a type holding a member variable
+    /// <c>Hijacked[S]</c>, <c>S</c> one of its type parameters that obeys <c>Emittable</c>) holds only a pointer to
+    /// it. So the adapter itself keeps the collection alive: right after it is made, <c>adapter.keep(source:
+    /// xs.controller_address())</c> gives the adapter's controller one more handle to the collection, let go when
+    /// the adapter's last handle goes. The adapter is then safe wherever it ends up: a variable given another
+    /// collection later, a member variable, a returned value, an argument. An adapter made over another adapter keeps
+    /// that one, and so on to the collection.
+    /// <para>The adapter a variable is declared with or given (<c>var big = xs.where(...)</c>, <c>big = ...</c>) is
+    /// kept through the variable, after the statement. One made anywhere else (<c>Holder(big: xs.where(...))</c>,
+    /// <c>return xs.where(...)</c>, the inner link of a chain) is first put in a hidden variable of its own. A
+    /// collection made in the statement (<c>make().where(...)</c>) is put in a hidden variable first, so it is made
+    /// once. An adapter a terminal uses up in the same statement (<c>xs.where(...).to[List]()</c>) needs nothing.
+    /// Adapters inside a lambda, a conditional, or the right side of <c>and</c> / <c>or</c> are left as they are, since
+    /// moving them out would change what runs.</para>
+    /// Returns the statements to put in place of <paramref name="stmt"/>, or null when it makes no adapter to keep.
     /// </summary>
-    private (Statement Keep, Statement Walked)? KeepAliveFor(Statement stmt)
+    private List<Statement>? KeepSourcesOf(Statement stmt)
     {
+        var keeper = new AdapterKeeper(pass: this, location: stmt.Location);
+        Statement rewritten;
         switch (stmt)
         {
-            case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ds
-                when !vd.Name.StartsWith(value: "_lf_", comparisonType: StringComparison.Ordinal) &&
-                     PointsAtSource(type: init.ResolvedType) && WalkedHead(walk: init) is { } head:
+            case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ds:
             {
-                string keepName = $"__emitter_keep_{_keepCount++}";
-                _keepOf[key: vd.Name] = keepName;
-                var keep = new DeclarationStatement(
-                    Declaration: new VariableDeclaration(Name: keepName,
-                        Type: null,
-                        Initializer: head,
-                        Visibility: VisibilityModifier.Secret,
-                        Location: vd.Location),
-                    Location: stmt.Location);
-                return (keep, ds with
-                {
-                    Declaration = vd with { Initializer = WithHead(walk: init, head: KeepReference(name: keepName, head: head)) }
-                });
+                Expression value = keeper.Keep(expr: init, keptBy: vd.Name);
+                rewritten = ReferenceEquals(objA: value, objB: init)
+                    ? stmt
+                    : ds with { Declaration = vd with { Initializer = value } };
+                break;
             }
-            case AssignmentStatement { Target: IdentifierExpression target, Value: { } value } assign
-                when _keepOf.TryGetValue(key: target.Name, value: out string? keepName) &&
-                     PointsAtSource(type: value.ResolvedType) && WalkedHead(walk: value) is { } head:
+            case AssignmentStatement { Value: { } value } assign:
             {
-                var keep = new AssignmentStatement(Target: KeepReference(name: keepName, head: head),
-                    Value: head,
-                    Location: assign.Location);
-                return (keep, assign with { Value = WithHead(walk: value, head: KeepReference(name: keepName, head: head)) });
+                Expression kept = keeper.Keep(expr: value,
+                    keptBy: assign.Target is IdentifierExpression named ? named.Name : null);
+                rewritten = ReferenceEquals(objA: kept, objB: value)
+                    ? stmt
+                    : assign with { Value = kept };
+                break;
             }
             case ExpressionStatement
             {
-                Expression: BinaryExpression
-                {
-                    Operator: BinaryOperator.Assign, Left: IdentifierExpression target, Right: { } value
-                } bin
-            } es when _keepOf.TryGetValue(key: target.Name, value: out string? keepName) &&
-                      PointsAtSource(type: value.ResolvedType) && WalkedHead(walk: value) is { } head:
+                Expression: BinaryExpression { Operator: BinaryOperator.Assign, Right: { } right } bin
+            } es:
             {
-                var keep = new ExpressionStatement(
-                    Expression: bin with { Left = KeepReference(name: keepName, head: head), Right = head },
-                    Location: es.Location);
-                return (keep, es with
-                {
-                    Expression = bin with { Right = WithHead(walk: value, head: KeepReference(name: keepName, head: head)) }
-                });
+                Expression kept = keeper.Keep(expr: right,
+                    keptBy: bin.Left is IdentifierExpression named ? named.Name : null);
+                rewritten = ReferenceEquals(objA: kept, objB: right)
+                    ? stmt
+                    : es with { Expression = bin with { Right = kept } };
+                break;
+            }
+            case ExpressionStatement es:
+            {
+                Expression kept = keeper.Keep(expr: es.Expression, keptBy: null);
+                rewritten = ReferenceEquals(objA: kept, objB: es.Expression)
+                    ? stmt
+                    : es with { Expression = kept };
+                break;
+            }
+            case ReturnStatement { Value: { } value } ret:
+            {
+                Expression kept = keeper.Keep(expr: value, keptBy: null);
+                rewritten = ReferenceEquals(objA: kept, objB: value)
+                    ? stmt
+                    : ret with { Value = kept };
+                break;
             }
             default:
                 return null;
         }
-    }
 
-    /// <summary>The container at the head of an adapter chain (<c>xs</c> of <c>xs.where(...).select(...)</c>, or the
-    /// call that makes it), when it is an entity or its handle. Null otherwise.</summary>
-    private static Expression? WalkedHead(Expression walk)
-    {
-        Expression head = walk;
-        while (head is CallExpression { Callee: MemberExpression { Object: var receiver } })
+        if (keeper.Before.Count == 0 && keeper.After.Count == 0)
         {
-            head = receiver;
+            return null;
         }
 
-        return ReferenceEquals(objA: head, objB: walk) ||
-               head.ResolvedType is not EntityTypeSymbol && !IsRoamedType(t: head.ResolvedType)
-            ? null
-            : head;
+        return [.. keeper.Before, rewritten, .. keeper.After];
     }
 
-    /// <summary><paramref name="walk"/> with the container at the head of its chain replaced by
-    /// <paramref name="head"/>.</summary>
-    private static Expression WithHead(Expression walk, Expression head)
+    /// <summary>
+    /// Finds the adapters one statement makes and arranges for each to keep its collection (see
+    /// <see cref="KeepSourcesOf"/>): <see cref="Before"/> gets the hidden variables and their keeps, <see cref="After"/>
+    /// the keep of the adapter the statement's variable is given.
+    /// </summary>
+    private sealed class AdapterKeeper(EntityLoweringPass pass, SourceLocation location) : AstRewriter
     {
-        return walk is CallExpression { Callee: MemberExpression { Object: var receiver } member } call
-            ? call with { Callee = member with { Object = WithHead(walk: receiver, head: head) } }
-            : head;
+        public List<Statement> Before { get; } = [];
+        public List<Statement> After { get; } = [];
+
+        // The variable the whole value is given to, while the value itself is visited.
+        private string? _keptBy;
+        private Expression? _whole;
+
+        /// <summary>The statement's value <paramref name="expr"/> with its adapters kept. <paramref name="keptBy"/> is
+        /// the variable the value is given to, if any.</summary>
+        public Expression Keep(Expression expr, string? keptBy)
+        {
+            _keptBy = keptBy;
+            _whole = expr;
+            return VisitExpression(expr: expr);
+        }
+
+        protected override Expression VisitCall(CallExpression e)
+        {
+            bool whole = ReferenceEquals(objA: e, objB: _whole);
+            if (e.Callee is not MemberExpression { Object: var receiver } member ||
+                !PointsAtSource(type: e.ResolvedType) || !IsEntityValue(type: receiver.ResolvedType))
+            {
+                // A terminal on an adapter (`xs.where(...).sum()`) uses it up in the statement, while everything
+                // the statement made is still alive: the chain it walks is left as it is.
+                return MakesAdapter(expr: CalleeReceiver(callee: e.Callee))
+                    ? e with { Arguments = e.Arguments.Select(selector: VisitExpression).ToList() }
+                    : base.VisitCall(e: e);
+            }
+
+            // The adapters it is made over first: each keeps its own collection, and this one keeps it.
+            Expression source = VisitExpression(expr: receiver);
+            if (!IsReadPath(expr: source))
+            {
+                source = Hide(value: source, prefix: "__emitter_source");
+            }
+
+            CallExpression made = ReferenceEquals(objA: source, objB: receiver)
+                ? e
+                : e with { Callee = member with { Object = source } };
+            if (whole && _keptBy != null)
+            {
+                if (pass.KeepCall(adapter: Reference(name: _keptBy, like: made), source: source) is { } keep)
+                {
+                    After.Add(item: keep);
+                }
+
+                return made;
+            }
+
+            IdentifierExpression adapter = Hide(value: made, prefix: "__emitter_adapter");
+            if (pass.KeepCall(adapter: adapter, source: source) is { } hiddenKeep)
+            {
+                Before.Add(item: hiddenKeep);
+            }
+
+            return adapter;
+        }
+
+        protected override Expression VisitConditional(ConditionalExpression e)
+        {
+            return e;
+        }
+
+        protected override Expression VisitGenericMemberRoutineCall(GenericMemberRoutineCallExpression e)
+        {
+            // A bracket terminal (`xs.where(...).to[List]()`) uses the chain up in the statement, as above.
+            return MakesAdapter(expr: e.Object)
+                ? e
+                : base.VisitGenericMemberRoutineCall(e: e);
+        }
+
+        /// <summary>The receiver of a call's callee (<c>xs</c> of <c>xs.f</c> or <c>xs.f[T]</c>), or null.</summary>
+        private static Expression? CalleeReceiver(Expression callee)
+        {
+            return callee switch
+            {
+                MemberExpression { Object: var receiver } => receiver,
+                GenericMemberExpression { Object: var receiver } => receiver,
+                _ => null
+            };
+        }
+
+        /// <summary>Whether <paramref name="expr"/> is a call that makes an adapter over an entity.</summary>
+        private static bool MakesAdapter(Expression? expr)
+        {
+            return expr is CallExpression { Callee: MemberExpression { Object: var receiver } } call &&
+                   PointsAtSource(type: call.ResolvedType) && IsEntityValue(type: receiver.ResolvedType);
+        }
+
+        protected override Expression VisitBinary(BinaryExpression e)
+        {
+            return e.Operator is BinaryOperator.And or BinaryOperator.Or
+                ? e with { Left = VisitExpression(expr: e.Left) }
+                : base.VisitBinary(e: e);
+        }
+
+        /// <summary>A hidden variable declared before the statement with <paramref name="value"/>, and a reference to
+        /// it typed as the value.</summary>
+        private IdentifierExpression Hide(Expression value, string prefix)
+        {
+            string name = $"{prefix}_{pass._keepCount++}";
+            Before.Add(item: new DeclarationStatement(
+                Declaration: new VariableDeclaration(Name: name,
+                    Type: null,
+                    Initializer: value,
+                    Visibility: VisibilityModifier.Secret,
+                    Location: location),
+                Location: location));
+            return Reference(name: name, like: value);
+        }
+
+        private static IdentifierExpression Reference(string name, Expression like)
+        {
+            return new IdentifierExpression(Name: name, Location: like.Location) { ResolvedType = like.ResolvedType };
+        }
+
+        /// <summary>Whether reading <paramref name="expr"/> twice reads the same value: a variable, or a member
+        /// variable path from one (<c>me.items</c>).</summary>
+        private static bool IsReadPath(Expression expr)
+        {
+            return expr switch
+            {
+                IdentifierExpression => true,
+                MemberExpression { Object: var inner } => IsReadPath(expr: inner),
+                _ => false
+            };
+        }
+
+        private static bool IsEntityValue(TypeSymbol? type)
+        {
+            return type is EntityTypeSymbol || IsRoamedType(t: type);
+        }
     }
 
-    /// <summary>A reference to the hidden handle <paramref name="name"/>, typed as the container it keeps.</summary>
-    private static IdentifierExpression KeepReference(string name, Expression head)
+    /// <summary>
+    /// <c>adapter.keep(source: source.controller_address())</c>: the adapter's controller holds one more handle to
+    /// <paramref name="source"/>'s entity. Null when either is not a shared entity.
+    /// </summary>
+    private ExpressionStatement? KeepCall(Expression adapter, Expression source)
     {
-        return new IdentifierExpression(Name: name, Location: head.Location) { ResolvedType = head.ResolvedType };
+        if (HandleOf(type: adapter.ResolvedType) is not { } adapterHandle ||
+            HandleOf(type: source.ResolvedType) is not { } sourceHandle ||
+            _registry.LookupType(name: AddressTypeName) is not { } address)
+        {
+            return null;
+        }
+
+        RoutineInfo? controllerAddress = _registry.LookupMemberRoutineOverload(type: sourceHandle,
+            memberRoutineName: ControllerAddressRoutineName,
+            argTypes: []);
+        RoutineInfo? keep = _registry.LookupMemberRoutineOverload(type: adapterHandle,
+            memberRoutineName: RuntimeContract.RoamedMemberRoutine.Keep,
+            argTypes: [address]);
+        if (controllerAddress == null || keep == null)
+        {
+            return null;
+        }
+
+        var addressCall = new CallExpression(
+            Callee: new MemberExpression(Object: source, MemberName: ControllerAddressRoutineName,
+                Location: source.Location) { ResolvedType = address },
+            Arguments: [],
+            Location: source.Location) { ResolvedRoutine = controllerAddress, ResolvedType = address };
+        var keepCall = new CallExpression(
+            Callee: new MemberExpression(Object: adapter, MemberName: RuntimeContract.RoamedMemberRoutine.Keep,
+                Location: adapter.Location) { ResolvedType = keep.ReturnType },
+            Arguments: [new NamedArgumentExpression(Name: "source", Value: addressCall, Location: source.Location)],
+            Location: adapter.Location) { ResolvedRoutine = keep, ResolvedType = keep.ReturnType };
+        return new ExpressionStatement(Expression: keepCall, Location: adapter.Location);
     }
+
+    /// <summary>The shared handle a value of <paramref name="type"/> is held as: the handle itself, or
+    /// <c>Roamed[E]</c> for an entity this pass has not made a handle of yet. Null for anything else.</summary>
+    private TypeSymbol? HandleOf(TypeSymbol? type)
+    {
+        return type switch
+        {
+            _ when IsRoamedType(t: type) => type,
+            EntityTypeSymbol entity when _registry.LookupType(name: RuntimeContract.Roamed) is { } roamedDef =>
+                _registry.GetOrCreateResolution(genericDef: roamedDef, typeArguments: [entity]),
+            _ => null
+        };
+    }
+
+    private const string AddressTypeName = "Addr";
+    private const string ControllerAddressRoutineName = "controller_address";
 
     /// <summary>Whether a value of <paramref name="type"/> is an adapter that keeps only a pointer to the emittable
     /// it was made from.</summary>
-    private static bool PointsAtSource(TypeSymbol? type)
+    internal static bool PointsAtSource(TypeSymbol? type)
     {
         TypeSymbol? def = type switch
         {

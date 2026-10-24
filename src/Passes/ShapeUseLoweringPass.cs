@@ -222,16 +222,32 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         }
 
         Expression current = walked;
-        while (current is CallExpression { Callee: MemberExpression step })
+        // An adapter a chain is made over may sit in a variable of its own (`var w = xs.where(...)`, or the hidden
+        // variable an inner link of a chain is kept in): the walk goes on through its declaration, a bounded number of
+        // times.
+        for (int hops = 0; hops < MaxAdapterHops; hops++)
         {
-            if (step.MemberName is RuntimeContract.Control or RuntimeContract.Access &&
-                step.Object.ResolvedType is { } handleType && IsRoamed(type: handleType))
+            while (current is CallExpression { Callee: MemberExpression step })
             {
+                if (step.MemberName is RuntimeContract.Control or RuntimeContract.Access &&
+                    step.Object.ResolvedType is { } handleType && IsRoamed(type: handleType))
+                {
+                    current = step.Object;
+                    break;
+                }
+
                 current = step.Object;
+            }
+
+            if (Unprojected(expr: current) is not IdentifierExpression bound || bound.ResolvedType is not { } boundType ||
+                !EntityLoweringPass.PointsAtSource(type: RoamedTransparency.SharedEntityOf(type: boundType)) ||
+                !_initializers.TryGetValue(key: bound.Name, value: out Expression? boundTo) ||
+                UnwrapHandleCreation(expr: boundTo) is not CallExpression { Callee: MemberExpression } boundChain)
+            {
                 break;
             }
 
-            current = step.Object;
+            current = boundChain;
         }
 
         return IsNamedPath(expr: current) && HasShapeUse(container: current)
@@ -719,6 +735,9 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
         return type != null && ctx.Registry.TypeObeysProtocol(type: RoamedTransparency.SharedEntityOf(type: type),
             protocolName: EmitterProtocolName);
     }
+
+    /// <summary>How many variables holding adapters a walk is followed through to find its collection.</summary>
+    private const int MaxAdapterHops = 8;
 
     /// <summary>The protocol of what walks a value one element at a time.</summary>
     private const string EmitterProtocolName = "Emitter";
