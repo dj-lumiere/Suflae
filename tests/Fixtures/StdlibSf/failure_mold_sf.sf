@@ -1,0 +1,81 @@
+module Tests/StdlibSf/FailureMoldSf
+
+# A failure is written into the failure mold of the flow it is thrown on, and the `check` that receives it copies it
+# out into the Check it gives: a Check kept in a variable keeps its own error after the next failure, two jobs that
+# fail over and over each keep their own errors, `try` gives none, and a crashable bigger than 64 bytes is thrown and
+# kept like any other.
+
+crashable CodeError
+    code: S64
+
+routine CodeError.crash_message() -> Text
+    return f"code {me.code}"
+
+# Ten numbers: 80 bytes.
+crashable WideError
+    a: S64
+    b: S64
+    c: S64
+    d: S64
+    e: S64
+    f: S64
+    g: S64
+    h: S64
+    i: S64
+    j: S64
+
+routine WideError.crash_message() -> Text
+    return f"wide {me.a}..{me.j}"
+
+failable routine fail_with_code(code: S64) -> S64
+    if code > 0
+        throw CodeError(code: code)
+    return code
+
+failable routine fail_wide(n: S64) -> S64
+    if n > 0
+        throw WideError(a: n, b: n + 1, c: n + 2, d: n + 3, e: n + 4, f: n + 5, g: n + 6, h: n + 7, i: n + 8, j: n + 9)
+    return n
+
+routine racer(code: S64) -> S64
+    var total: S64 = 0
+    var round: S64 = 0
+    until round >= 5
+        var got = check fail_with_code(code: code)
+        # the other job runs and fails meanwhile
+        waitfor(2ms)
+        when got
+            is CodeError as e => total += e.code
+            is S64 as v => total += v
+        round += 1
+    return total
+
+routine start()
+    when check fail_with_code(code: 7)
+        is CodeError as e => show(f"caught code {e.code}")
+        is S64 as v => show(f"value {v}")
+
+    var kept = check fail_with_code(code: 1)
+    var other = check fail_with_code(code: 2)
+    show(f"kept: {kept}")
+    show(f"other: {other}")
+    when kept
+        is CodeError as e => show(f"kept code {e.code}")
+        is S64 as v => show(f"value {v}")
+
+    var wide = check fail_wide(n: 1)
+    var later = check fail_with_code(code: 3)
+    show(f"later: {later}")
+    when wide
+        is WideError as e => show(f"wide {e.a} {e.j}")
+        is S64 as v => show(f"value {v}")
+
+    show(f"try: {try fail_with_code(code: 4)}")
+    show(f"try ok: {try fail_with_code(code: 0)}")
+
+    var first = racer.to[Work](code: 10)
+    var second = racer.to[Work](code: 1000)
+    first.start_now()
+    second.start_now()
+    show(f"first: {first.retrieve()}")
+    show(f"second: {second.retrieve()}")

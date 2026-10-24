@@ -812,7 +812,16 @@ category: only a crashable can be thrown.
   `crash_message()`, `represent()` (also `f"{e}"`), `diagnose()` and `crash_type_id()` reach the actual
   error's own routines. The caught error is held in the `Check` itself, and which routine runs is decided
   by the error's type among the errors the program throws: nothing is looked up while the program runs.
-- **A crashable holds a few values** (numbers, a `Text`): at most 64 bytes, a bigger one is SF-S711.
+- **A crashable holds a few values** (numbers, a `Text`); it has no size limit.
+- **Failure molds.** Every flow (the program's thread, and each piece of work started with `start_now()`)
+  has one failure mold, made when the flow starts, as big as the program's largest crashable. `throw`
+  writes the error into the mold of the flow it runs on (its member variables copied at that moment), and
+  the failure passes up through the routines it fails without its values. The `check` that receives it
+  copies the error out of the mold into the `Check` it gives, so a `Check` kept in a variable keeps its own
+  error after the next failure, and two pieces of work failing at once never mix up their errors. `try`
+  copies nothing. One failure is on its way at a time in each flow: errors are never stacked (to keep
+  several, keep several `Check` values). An error thrown again (`throw e`, a work's error at `retrieve()`)
+  goes back into the mold of the flow that throws it.
 - The builder collects the errors each routine can throw (its own `throw`s and those of the failable
   routines it calls). `@throws([NopeError, AbsentValueError])` above a failable routine fixes that list:
   an error the routine can throw that the list leaves out is SF-S712, and the annotation on a routine
@@ -1431,7 +1440,6 @@ number). At most 20 are shown per batch.
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
 | SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
-| SF-S711       | crashable bigger than 64 bytes                      | keep a few values in it                           |
 | SF-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
 | SF-S750       | `throw` in a routine not declared `failable`        | declare it `failable routine name(...)`           |
 | SF-G211       | `!` written at a call site                          | drop it; recover with `try`/`check`               |
