@@ -142,7 +142,7 @@ it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Num
 `Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
-`PriorityQueue`, …), `IterTools` (iterator adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
+`PriorityQueue`, …), `IterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `BuilderQuery`
 (`x.type_name()`), `ObjectHacker`. Writing an import that is already in the prelude (many fixtures write `import IO/Console`) is
 harmless. A standard library module is its folder (`Suflae/Standard/System/Text/` is `System/Text`), and a
 `module` line that names another module is a build error. `migrate --step modules` drops imports of `Core` and
@@ -227,7 +227,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   the library's own helpers push no frame. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
 - `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
-  reads its members. An `Iterable[T]` user type gets its `Iter` from `iter()`, so IterTools adapters walk it.
+  reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so IterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
 - A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
@@ -451,7 +451,7 @@ loop                      # doesn't end by itself: break, return or throw leaves
 ```
 
 `each` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry has
-`.key` and `.value`) and anything that `obeys Iterable`. `enumerate()` and `zip(a:, b:)` (from
+`.key` and `.value`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
 Loops are `until c`, `loop` and `each`. `until c` stops when `c` becomes true, tested before each round: write the
@@ -850,8 +850,8 @@ needs T obeys Greetable
   parameter count, types per place and return type, parameter names and `!` aside) obeys the protocol anyway.
   Write it to ask the builder for derived routines (`obeys Hashable`) or to hear about a missing routine at the
   declaration. A type that does not fit is SF-S150 where it is passed, naming the missing or mismatched routine.
-  The protocol's type arguments count too: a `List[Text]` passed where `Iterable[S64]` is taken is SF-S150.
-- Common protocols: `Equatable`, `Comparable`, `Hashable`, `Iterable[T]`, `Copyable`.
+  The protocol's type arguments count too: a `List[Text]` passed where `Emittable[S64]` is taken is SF-S150.
+- Common protocols: `Equatable`, `Comparable`, `Hashable`, `Emittable[T]`, `Copyable`.
 - Every generic use is specialized per concrete type at build time; there is no runtime dispatch.
 
 ## 13. Text and formatting
@@ -931,8 +931,8 @@ each entry in ages
   specialized containers (`SortedDict`, `SortedList`, `SortedSet`, `PriorityQueue`,
   `BitList`, `Array[T, COUNT]`) are constructor-only and come from `import Collections`.
 - A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
-  on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Iterable[S64]` builds a `List[S64]`, and
-  `{1: "a"}` given to an `Iterable[DictEntry[U16, Text]]` builds a `Dict[U16, Text]`. With nothing to go by,
+  on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
+  `{1: "a"}` given to an `Emittable[DictEntry[U16, Text]]` builds a `Dict[U16, Text]`. With nothing to go by,
   `[1, 2]` is a `List[Integer]`. The empty set literal is `{}` and the empty dict literal `{:}`
   (`s[b] = {:}` on a `List[Dict[Integer, Integer]]`). A `{}` where a dict is expected is SF-S558.
 - `sv.to[List[Integer]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
@@ -992,9 +992,18 @@ each entry in ages
   grow. Before 0.5 a range of a memory was itself a `Memory[T]`: a name or a routine result written `Memory[T]` that
   holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
   `Memory[T]`).
-- Iterator adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
-  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `.to[List]()` or `each`:
+- **Emitters.** What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
+  with `emitter()`. `each` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
+  for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `each x in it`,
+  which goes on from where `it` is. An emitter or adapter kept in a variable keeps the collection it walks alive
+  (one more reference to it), even when the variable that named the collection gets another value. Changing the
+  collection's shape while an `each` walks it crashes, as below.
+- Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
+  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `each` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
+- **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
+  values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
+  (pairs), `to[RotatableList]()`, `to[BitList]()` (Bools), `to[PriorityQueue]()` (`(priority, element)` pairs).
 
 **Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that
 its next element is really the next one, so it is not allowed:
@@ -1095,7 +1104,8 @@ routine start()
     show(f"one => {a.retrieve()}")       # wait for the value
 
     var jobs = [fetch.to[Work](id: 2), fetch.to[Work](id: 3)]
-    var results = jobs.gather()          # start both, wait for all
+    jobs.start_now()                     # start both together
+    var results = jobs.gather()          # wait for all
     show(f"{results[0]} {results[1]}")
     return
 ```
@@ -1121,6 +1131,9 @@ routine start()
   there. Retrieving a cancelled Work waits for it to stop, then crashes with `CancelRequested` (the name
   carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
 - Starting a Work twice, or retrieving it twice, crashes with `WorkStartError`.
+- `jobs.start_now()` starts every Work of a `List[Work[T]]` together: each one is made ready first and then all are
+  let go at once, so none runs before the others are ready (a Work of the list started already is a
+  `WorkStartError`). `gather`, `race` and the rest only collect, and start the Works nothing started the same way.
 - `jobs.gather()` runs a `List[Work[T]]` concurrently and returns every result in input order, and
   throws the first failure it meets (in list order). `jobs.race()` returns the first finisher's value,
   and throws the winner's failure. `jobs.cancel_all()` returns nothing: it cancels every job and

@@ -136,7 +136,7 @@ failable routine List[Work[T]].start_now()
 
 ### Starts every Work of the list that nothing started yet, all together, the way `gather` and `race` start them.
 ### :returns: `false` if a Work could not be started.
-secret routine List[Work[T]].launch_together() -> Bool
+routine List[Work[T]].launch_together() -> Bool
     var started = true
     each job in me
         if not job.launch_held()
