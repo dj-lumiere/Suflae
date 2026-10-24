@@ -158,6 +158,7 @@ public sealed class SuflaeRules : LanguageRules
     public override bool SynthesizeBeforeAnalysis(List<(Program Program, string FilePath)> files,
         Action<SemanticDiagnosticCode, string, SourceLocation> report)
     {
+        EmitterSelfSynthesisPass.Run(files: files);
         return ModuleGlobalsSynthesisPass.Run(orderedFiles: files, report: report);
     }
 

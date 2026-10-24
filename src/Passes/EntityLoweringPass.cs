@@ -196,6 +196,7 @@ internal sealed class EntityLoweringPass
 
         _roamedLocals.Clear();
         _borrowNames.Clear();
+        _keepOf.Clear();
         _inLibraryRoutine = IsStdlibPath(file: r.Location.FileName);
         _borrowNames.Add(item: "me");
         // A constructor is the `routine T(...) -> T` form (named after the type it builds). It returns
@@ -230,6 +231,7 @@ internal sealed class EntityLoweringPass
     {
         _roamedLocals.Clear();
         _borrowNames.Clear();
+        _keepOf.Clear();
         _inLibraryRoutine = routine.Location?.FileName is { } variantFile && IsStdlibPath(file: variantFile);
         _borrowNames.Add(item: "me");
         _inCreateRoutine = false;
@@ -338,13 +340,15 @@ internal sealed class EntityLoweringPass
         foreach (Statement s in block.Statements)
         {
             // An emitter kept in a local holds one more handle to what it walks, for as long as the local lives.
-            if (!_inLibraryRoutine && KeepAliveFor(stmt: s) is { } keep)
+            Statement current = s;
+            if (!_inLibraryRoutine && KeepAliveFor(stmt: s) is ({ } keep, { } walked))
             {
                 list.Add(item: LowerStatement(stmt: keep));
+                current = walked;
                 changed = true;
             }
 
-            Statement ns = LowerStatement(stmt: s);
+            Statement ns = LowerStatement(stmt: current);
             list.Add(item: ns);
             if (!ReferenceEquals(objA: ns, objB: s))
             {
@@ -359,41 +363,102 @@ internal sealed class EntityLoweringPass
 
     private int _keepCount;
 
+    /// <summary>The hidden handle each local holding an adapter keeps to what the adapter walks, by the local's
+    /// name. Reset per routine body.</summary>
+    private readonly Dictionary<string, string> _keepOf = new(comparer: StringComparer.Ordinal);
+
     /// <summary>
     /// For <c>var big = xs.where(...)</c>, a local holding an adapter that points at the container it was made from
     /// (a member variable <c>Hijacked[S]</c>, <c>S</c> one of its own type parameters that obeys <c>Emittable</c>):
     /// <c>var __emitter_keep_N = xs</c>, one more handle to that container, declared just before it in the same
-    /// block. Copying a handle shares the entity, so the container lives as long as the adapter's local can be
-    /// used, even when <c>xs</c> is given another value. Null for any other statement.
+    /// block, and the adapter made from that handle. Copying a handle shares the entity, so the container lives as
+    /// long as the adapter's local can be used, even when <c>xs</c> is given another value, and a container made in
+    /// the statement (<c>var big = make().where(...)</c>) is kept as well. A later <c>big = ys.where(...)</c> gives
+    /// the same hidden handle the new container first (<c>__emitter_keep_N = ys</c>), so it lives as long as
+    /// <c>big</c> does, wherever the assignment is. Null for any other statement.
     /// </summary>
-    private DeclarationStatement? KeepAliveFor(Statement stmt)
+    private (Statement Keep, Statement Walked)? KeepAliveFor(Statement stmt)
     {
-        if (stmt is not DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ||
-            vd.Name.StartsWith(value: "_lf_", comparisonType: StringComparison.Ordinal) ||
-            !PointsAtSource(type: init.ResolvedType))
+        switch (stmt)
         {
-            return null;
+            case DeclarationStatement { Declaration: VariableDeclaration { Initializer: { } init } vd } ds
+                when !vd.Name.StartsWith(value: "_lf_", comparisonType: StringComparison.Ordinal) &&
+                     PointsAtSource(type: init.ResolvedType) && WalkedHead(walk: init) is { } head:
+            {
+                string keepName = $"__emitter_keep_{_keepCount++}";
+                _keepOf[key: vd.Name] = keepName;
+                var keep = new DeclarationStatement(
+                    Declaration: new VariableDeclaration(Name: keepName,
+                        Type: null,
+                        Initializer: head,
+                        Visibility: VisibilityModifier.Secret,
+                        Location: vd.Location),
+                    Location: stmt.Location);
+                return (keep, ds with
+                {
+                    Declaration = vd with { Initializer = WithHead(walk: init, head: KeepReference(name: keepName, head: head)) }
+                });
+            }
+            case AssignmentStatement { Target: IdentifierExpression target, Value: { } value } assign
+                when _keepOf.TryGetValue(key: target.Name, value: out string? keepName) &&
+                     PointsAtSource(type: value.ResolvedType) && WalkedHead(walk: value) is { } head:
+            {
+                var keep = new AssignmentStatement(Target: KeepReference(name: keepName, head: head),
+                    Value: head,
+                    Location: assign.Location);
+                return (keep, assign with { Value = WithHead(walk: value, head: KeepReference(name: keepName, head: head)) });
+            }
+            case ExpressionStatement
+            {
+                Expression: BinaryExpression
+                {
+                    Operator: BinaryOperator.Assign, Left: IdentifierExpression target, Right: { } value
+                } bin
+            } es when _keepOf.TryGetValue(key: target.Name, value: out string? keepName) &&
+                      PointsAtSource(type: value.ResolvedType) && WalkedHead(walk: value) is { } head:
+            {
+                var keep = new ExpressionStatement(
+                    Expression: bin with { Left = KeepReference(name: keepName, head: head), Right = head },
+                    Location: es.Location);
+                return (keep, es with
+                {
+                    Expression = bin with { Right = WithHead(walk: value, head: KeepReference(name: keepName, head: head)) }
+                });
+            }
+            default:
+                return null;
         }
+    }
 
-        Expression head = init;
+    /// <summary>The container at the head of an adapter chain (<c>xs</c> of <c>xs.where(...).select(...)</c>, or the
+    /// call that makes it), when it is an entity or its handle. Null otherwise.</summary>
+    private static Expression? WalkedHead(Expression walk)
+    {
+        Expression head = walk;
         while (head is CallExpression { Callee: MemberExpression { Object: var receiver } })
         {
             head = receiver;
         }
 
-        if (head is not (IdentifierExpression or MemberExpression) || head.ResolvedType is not EntityTypeSymbol &&
-            !IsRoamedType(t: head.ResolvedType))
-        {
-            return null;
-        }
+        return ReferenceEquals(objA: head, objB: walk) ||
+               head.ResolvedType is not EntityTypeSymbol && !IsRoamedType(t: head.ResolvedType)
+            ? null
+            : head;
+    }
 
-        return new DeclarationStatement(
-            Declaration: new VariableDeclaration(Name: $"__emitter_keep_{_keepCount++}",
-                Type: null,
-                Initializer: head,
-                Visibility: VisibilityModifier.Secret,
-                Location: vd.Location),
-            Location: stmt.Location);
+    /// <summary><paramref name="walk"/> with the container at the head of its chain replaced by
+    /// <paramref name="head"/>.</summary>
+    private static Expression WithHead(Expression walk, Expression head)
+    {
+        return walk is CallExpression { Callee: MemberExpression { Object: var receiver } member } call
+            ? call with { Callee = member with { Object = WithHead(walk: receiver, head: head) } }
+            : head;
+    }
+
+    /// <summary>A reference to the hidden handle <paramref name="name"/>, typed as the container it keeps.</summary>
+    private static IdentifierExpression KeepReference(string name, Expression head)
+    {
+        return new IdentifierExpression(Name: name, Location: head.Location) { ResolvedType = head.ResolvedType };
     }
 
     /// <summary>Whether a value of <paramref name="type"/> is an adapter that keeps only a pointer to the emittable

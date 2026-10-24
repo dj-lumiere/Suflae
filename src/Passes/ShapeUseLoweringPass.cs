@@ -176,7 +176,9 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             source = WalkedContainer(loop: loop) ?? (loop.AdapterSourcePath == null ? source : null);
         }
 
-        if (source == null || !HasShapeUse(container: source))
+        // A loop over an emitter (`each n in steps`) walks the emitter itself: what the walk changes is where the emitter
+        // is, not the shape of a container.
+        if (source == null || !HasShapeUse(container: source) || IsEmitter(type: source.ResolvedType))
         {
             return [loop with { Body = LowerNested(stmt: loop.Body) }];
         }
@@ -710,6 +712,16 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
 
         return _libraryRoutines.GetValueOrDefault(key: (file, line));
     }
+
+    /// <summary>Whether <paramref name="type"/> (a handle's entity, for a handle) obeys <c>Emitter</c>.</summary>
+    private bool IsEmitter(TypeSymbol? type)
+    {
+        return type != null && ctx.Registry.TypeObeysProtocol(type: RoamedTransparency.SharedEntityOf(type: type),
+            protocolName: EmitterProtocolName);
+    }
+
+    /// <summary>The protocol of what walks a value one element at a time.</summary>
+    private const string EmitterProtocolName = "Emitter";
 
     private static bool IsRoamed(TypeSymbol type)
     {

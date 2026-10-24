@@ -8,3 +8,9 @@ skipped: 1
 sum of the rest: 14
 skipped: 4
 where on the rest: [3]
+first step: 1
+step: 2
+step: 3
+kept: 5
+kept: 7
+noise: 4
