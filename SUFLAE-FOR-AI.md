@@ -640,7 +640,7 @@ routine start()
   entity has them, with no `obeys` line, when each of its member variables has `==` (the builder compares
   member by member, a `routine T.eq(you: T) -> Bool` you write takes its place). Two different entities with
   equal contents are `==` and not `===` (`Player("Ada") == Player("Ada")` is true). A member variable without
-  `==` (a routine value such as `Callable[(), None]`, an optional `T?`) means the type has none: `==` on it, or
+  `==` (a routine value such as `Callable[(), None]`) means the type has none: `==` on it, or
   passing it where `needs T obeys Equatable` is asked, is a build error naming that member variable
   (SF-S065 / SF-S150). A record also hashes automatically (a `Dict` key or `Set` element, no `obeys`) when every
   member variable hashes. An entity hashes only when it declares `obeys Hashable`, since its member variables
@@ -648,7 +648,11 @@ routine start()
   such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
   `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
   in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Integer` and
-  `Decimal` hash their value (two equal ones hash the same however they were built).
+  `Decimal` hash their value (two equal ones hash the same however they were built). An optional `T?` has `==`
+  and a hash when `T` does: two absent ones are equal, an absent and a present one differ. When member variables
+  lead back to entities being compared (a parent and its children, a ring of nodes, an entity pointing at itself),
+  meeting such a pair again counts as equal, so the comparison ends and compares the structures by shape. A hash
+  stops at an entity it is already inside of. A hand-written `eq` is used as written.
 - Every type gets `represent()` (what `show` and `f"{x}"` print, e.g. `Point(x: 3, y: 4)`) and
   `diagnose()` (the debug form, `f"{x:?}"`). Write your own to change them.
 

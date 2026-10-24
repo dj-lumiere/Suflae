@@ -1,0 +1,54 @@
+module Tests/StdlibSf/CyclicEqualityApi
+
+# The builder's `==` on entities whose member variables lead back to entities being compared (a parent and its
+# children, a two-node ring, an entity pointing at itself) compares them by shape and ends. A hash stops at an entity
+# it is inside of already.
+
+entity Person
+    name: Text
+    parent: Person?
+    children: List[Person]
+
+entity Node
+    value: Integer
+    next: Node?
+    prev: Node?
+
+entity Loop
+obeys Hashable
+    label: Text
+    me_too: Loop?
+
+routine family(child_name: Text) -> Person
+    var root = Person(name: "Ada", parent: none, children: [])
+    var kid = Person(name: child_name, parent: root, children: [])
+    root.children.add_last(kid)
+    return root
+
+routine ring(first: Integer, second: Integer) -> Node
+    var a = Node(value: first, next: none, prev: none)
+    var b = Node(value: second, next: a, prev: a)
+    a.next = b
+    a.prev = b
+    return a
+
+routine compare_all()
+    show(f"equal trees: {family("Bo") == family("Bo")}")
+    show(f"other child: {family("Bo") == family("Cy")}")
+    show(f"equal rings: {ring(1, 2) == ring(1, 2)}")
+    show(f"other ring: {ring(1, 2) == ring(1, 3)}")
+    var x = Loop(label: "x", me_too: none)
+    x.me_too = x
+    var y = Loop(label: "x", me_too: none)
+    y.me_too = y
+    show(f"self loops: {x == y}")
+    show(f"self hash: {x.hash(k0: 1, k1: 2) == y.hash(k0: 1, k1: 2)}")
+    var loops = Set[Loop]()
+    loops.add(x)
+    loops.add(y)
+    show(f"loops in set: {loops.count()}")
+
+# The cycles made above are reaped here, so they don't count in another program's collection.
+routine start()
+    compare_all()
+    cyclic_collect()

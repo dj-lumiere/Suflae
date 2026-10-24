@@ -1,0 +1,7 @@
+equal trees: true
+other child: false
+equal rings: true
+other ring: false
+self loops: true
+self hash: true
+loops in set: 1

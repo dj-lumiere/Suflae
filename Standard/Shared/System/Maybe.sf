@@ -61,3 +61,19 @@ failable routine Maybe[T].strip_out() -> T
 
 @rf("Maybe.is_present")
 routine Maybe[T].is_present() -> Bool
+
+### Returns whether both optionals are equal: both absent, or both present with equal values.
+### :param you: The other optional to compare against.
+### :returns: `true` when both are absent or both hold equal values, `false` when only one is absent.
+@rf("Maybe.eq")
+routine Maybe[T].eq(you: Maybe[T]) -> Bool
+needs T obeys Equatable
+
+### Returns a keyed hash of this optional: a fixed value when absent, the value's own hash when present, so equal
+### optionals hash the same.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: The resulting `U64` value.
+@rf("Maybe.hash")
+routine Maybe[T].hash(k0: U64, k1: U64) -> U64
+needs T obeys Hashable
