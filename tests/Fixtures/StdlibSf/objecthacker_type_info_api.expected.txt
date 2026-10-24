@@ -9,4 +9,5 @@ Shape: VARIANT
   arm Point: RECORD
   arm Text: RECORD
 Integer: RECORD
+Comparable: true, Equatable: true
 DONE

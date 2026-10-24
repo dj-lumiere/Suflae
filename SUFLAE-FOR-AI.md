@@ -1413,7 +1413,8 @@ routine start()
   `BuilderQuery`). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
   (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
   (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
-  ones included), `protocols` (names), `obeys_protocol(name:)`, `cases` (a choice's or flags' case names) and
+  ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Integer` obeys `Comparable`, so
+  `Equatable` too), `obeys_protocol(name:)`, `cases` (a choice's or flags' case names) and
   `arms` (a variant's arm types). `memvars(of: x)` is `type_info(of: x).memvars`.
 - `peek(target:, memvar:) -> Unknown` is failable: `NoSuchMemberVariableError` for a name the type does not have.
 - `poke(target:, memvar:, value:)` changes an entity in place, under its lock; the value must be of the member
