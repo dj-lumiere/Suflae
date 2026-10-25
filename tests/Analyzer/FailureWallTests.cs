@@ -8,7 +8,7 @@ using static TestHelpers;
 /// <summary>
 /// Failures rise only through failable routines: a <c>throw</c> in a routine that is not failable crashes where it
 /// stands, <c>try</c>/<c>check</c> over an expression that reaches no failable call is SF-S760, a routine value that
-/// may fail goes only to a <c>failable Callable[...]</c> (SF-S761), and <c>pierce</c> is not a keyword (SF-G227).
+/// may fail goes only to a <c>failable Callable[...]</c> (SF-S761), and <c>pierce</c> is an ordinary name.
 /// </summary>
 public sealed class FailureWallTests
 {
@@ -63,13 +63,23 @@ public sealed class FailureWallTests
             filter: e => e.Code == SemanticDiagnosticCode.FailableValueToPlainParameter);
     }
 
+    /// <summary><c>pierce</c> is not a keyword: it names a variable, a routine and a field like any other
+    /// name.</summary>
     [Fact]
-    public void Pierce_IsGrammarError()
+    public void Pierce_IsAnOrdinaryName()
     {
-        (_, Builder.Parser.Parser parser) = ParseSuflaeWithErrors(source: """
-                                                                       routine start()
-                                                                           pierce LogicBreachedError()
-                                                                       """);
-        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "pierce"));
+        AssertAnalyzesSaSuflae(source: """
+                                       record Arrow
+                                           pierce: S64
+                                       routine pierce(n: S64) -> S64
+                                           return n + 1
+                                       routine aim(pierce: S64) -> S64
+                                           var a = Arrow(pierce: pierce)
+                                           return a.pierce
+                                       routine start()
+                                           var hit = pierce(n: 1)
+                                           var pierced = aim(pierce: hit)
+                                           return
+                                       """);
     }
 }

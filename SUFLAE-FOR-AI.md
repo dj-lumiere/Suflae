@@ -1554,7 +1554,6 @@ number). At most 20 are shown per batch.
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
-| SF-G227       | a line written `pierce X`                           | `throw X` in a routine that is not failable (`migrate --step pierce`) |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
 | SF-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
