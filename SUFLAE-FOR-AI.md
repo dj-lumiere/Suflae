@@ -197,6 +197,9 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 
 - Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
   `B128` and `C256` are the widest, and exact arithmetic is `Integer` and the decimals.
+- Complex `* / abs norm reciprocal` round each part once from the exact value. `sqrt`, `ln`, the inverse functions
+  and `tan`/`tanh` take principal branches, a `-0` part picking the side of a cut (`sqrt` of `-4 - 0i` is `0-2i`).
+  `exp_unchecked`/`sinh_unchecked`/`cosh_unchecked` give inf past the range, the checked forms crash.
 - Geometry takes `import Math3D` (`B32` elements): `Vector2D`/`Vector3D`/`Vector4D`, `Q128`/`Q256`, and the
   matrices `Matrix2R2C`, `Matrix3R3C`, `Matrix4R4C`, stored column by column (`vec2`/`vec3`/`vec4` build a column
   or a vector: `Matrix2R2C(c0: vec2(4.0, 2.0), c1: vec2(7.0, 6.0))` is `[[4, 7], [2, 6]]`). `m.get(row:, col:)` is
