@@ -909,7 +909,7 @@ var name = "Ada"
 var n: S64 = 42
 var price = 1.5
 show(f"Hello, {name}! n={n}")
-show(f"{n:?}")            # the diagnose (debug) form: S64(42)
+show(f"{n:?}")            # the diagnose (debug) form: S64(42), a text Text(count: 2, "a\t")
 show(f"{n:=}")            # n=42
 show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
 ```
