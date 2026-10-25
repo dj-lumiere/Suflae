@@ -5,7 +5,8 @@ All notable changes to Suflae are documented here. This project follows
 
 ## [0.5.0] — unreleased
 
-Suflae's version number now moves with its builder's release, so the release after 0.1.0 is 0.5.0.
+Suflae's version number now moves with its builder's release, so the release after 0.1.0 is 0.5.0. This section
+lists what differs from 0.1.0.
 
 0.5 changes the language surface in many places. Read **Breaking changes** before you move a 0.1 project.
 
@@ -21,9 +22,9 @@ file only once its other old spellings are gone.
 ### Breaking changes
 
 **Source layout and tools**
-- Indentation is a multiple of 4 spaces. Any other indent is SF-G053. 0.1 sources used 2 spaces: default `migrate`
-  doubles the leading spaces of each line of such a file first (`migrate --step indent` does only that, and leaves
-  the lines inside a text literal as they are).
+- Indentation is a multiple of 4 spaces. Any other indent is `SF-G053`. 0.1 sources used 2 spaces: default
+  `migrate` doubles the leading spaces of each line of such a file first (`migrate --step indent` does only that,
+  and leaves the lines inside a text literal as they are).
 - The project manifest is `config.toml`. The 0.1 manifest file with no `config.toml` next to it is a build error
   that names `config.toml`, and default `migrate` renames it. Settings that were environment variables are
   `[target]` and `[debug]` keys in it: when the old deadlock variable is still set, every command prints a warning
@@ -34,57 +35,74 @@ file only once its other old spellings are gone.
 
 **Failure and recovery**
 - A routine that can fail says so on its declaration: `failable routine parse(...)`. `routine parse!(...)` is
-  SF-G222 (`migrate --step failable`). A call never writes `!` (SF-G211).
+  `SF-G222` (`migrate --step failable`). A call never writes `!` (`SF-G211`).
 - Recovery is a keyword at the call: `try f(x)` gives a `Maybe[T]`, `check f(x)` gives a `Check[T]`. The
   `try_f` / `check_f` / `lookup_f` routines are gone. Default `migrate` writes `try f(x)` for `try_f(x)` (and
   `try r.f(x)` for `r.try_f(x)`) and `check f(x)` for `check_f(x)` and `lookup_f(x)`, and the build error on an old
   name names the keyword.
+- Failures rise only through failable routines. A `throw` in a routine that is not `failable` crashes there with the
+  crashable's message, so `pierce` is gone and is an ordinary name: `migrate --step pierce` writes `throw` for each
+  `pierce` in a routine that is not failable and lists the ones in failable routines, where a `throw` goes to the
+  caller instead.
+- A routine that is not failable is a wall: a failure inside it crashes there, even under a `try` or `check` above
+  its caller. Declare the routine `failable` to let its failures go up.
+- `try` or `check` in front of an expression that reaches no failable call is `SF-S760`. Remove the keyword, or
+  declare the routine `failable`.
+- A lambda that can fail goes only to a parameter of type `failable Callable[...]`: handing one to a plain
+  `Callable[...]` is `SF-S761`. The call that hands it over can fail through it
+  (`try items.select(transform: x => 10 // x).to[List]()`). The standard library routines that take a lambda
+  (`select`, `where`, `any`, `all`, `sort_by`, ...) take it as `failable Callable[...]`.
 - `Result[T]` is `Check[T]`. `Lookup[T]` is gone. The build errors say so.
 - `absent` is gone: a routine with nothing to give throws, `throw AbsentValueError()` (default `migrate`).
-- The `Crashable` protocol is the `Crashables` record. Every crashable writes its own `crash_message()` (SF-S704).
-  A crashable larger than 64 bytes is a build error.
+- The `Crashable` protocol is the `Crashables` record. Every crashable writes its own `crash_message()` (`SF-S704`).
+- `MemoryAllocationError` is `OutOfMemoryError` (default `migrate`, `migrate --step type-names`).
 
 **Syntax**
 - A loop is `until c` (it stops when `c` becomes true) or `loop` (it ends only with `break`, `return` or `throw`).
-  `while` is not a keyword: `while c` is SF-G224 (`migrate --step until`). `until false` warns (SF-W304, quick fix
-  `loop`). A loop takes no `else` (SF-G219). A loop's `then` block runs after `break` too.
-- A line with no work is `nothing`. `pass` is SF-G225 (`migrate --step nothing`). A type declaration with an empty
-  body is SF-S211 (write `nothing` under the header).
+  `while` is not a keyword: `while c` is `SF-G224` (`migrate --step until`). `until false` warns (`SF-W304`, quick
+  fix `loop`). A loop takes no `else` (`SF-G219`). A loop's `then` block runs after `break` too.
+- A line with no work is `nothing`. `pass` is `SF-G225` (`migrate --step nothing`). A type declaration with an empty
+  body is `SF-S211` (write `nothing` under the header).
 - A number takes its type from where it goes or from its declaration (`var x: U8 = 5`). Type suffixes (`5_u8`,
-  `10n`, `2.5dn`) are SF-G010 (`migrate --step suffix`). `inf` and `nan` are literals.
+  `10n`, `2.5dn`) are `SF-G010` (`migrate --step suffix`). `inf` and `nan` are literals.
 - Fixed-width numbers are visible without an import. Default `migrate` removes `import Numerics`.
 - Binary floats are `B16`, `B32`, `B64`, `B128` (the build error names the `B` type for an `F` name). Complex types
   are named by their total bits: 0.1's `C64` is `C128` and 0.1's `C128` is `C256`, and `C64` is now two `B32`
   parts. Default `migrate` renames them in a project it moves (a file with no `config.toml` above it gets them
   listed instead, because the old names still build).
-- `S64 / S64` is SF-S065. Write `a // b`, or `a.to[Decimal]() / b.to[Decimal]()`.
+- `S64 / S64` is `SF-S065`. Write `a // b`, or `a.to[Decimal]() / b.to[Decimal]()`.
 - Containment is a call on the collection: `xs.has(x)`, `xs.lacks(x)`, `d.has_key(k)`, `d.lacks_key(k)`. The
   `have` / `lack` operators are gone (`migrate --step have`), `contains` is `has` (default `migrate`), `x in xs` as
-  a test is SF-G212, and `notin` is gone.
+  a test is `SF-G212`, and `notin` is gone.
 - `x but y` is `x.without(y)`, `unless c` is `if not (c)` (default `migrate`). `disobeys` is gone.
 - A pattern binds with `as`: `is T as x`, `else as p` (default `migrate`). `else as x` needs exactly one type left
-  (SF-S359).
+  (`SF-S359`).
 - `Character` is `Char` and `Routine[...]` is `Callable[...]` (default `migrate`).
 - Operator levels: `and` and `or` share one level, and so do the bitwise operators, so mixing them needs
-  parentheses (SF-G216). A range binds looser than arithmetic and tighter than comparisons. `**` binds tighter than
-  a leading `-`: `-2 ** 2` is `-4`. Default `migrate` writes `(-x) ** n` for each `-x ** n`, which keeps what the
-  line computed in 0.1, and lists each one.
+  parentheses (`SF-G216`). A range binds looser than arithmetic and tighter than comparisons. `**` binds tighter
+  than a leading `-`: `-2 ** 2` is `-4`. Default `migrate` writes `(-x) ** n` for each `-x ** n`, which keeps what
+  the line computed in 0.1, and lists each one.
 - A range counts down only with a negative step: `10 to 1` is empty, write `10 to 1 by -1`. Default `migrate` adds
   the step where both ends are literals and lists the ranges whose start is not a literal.
 - A chained comparison goes one way. There is no `<<<`.
 - A constructor is `routine T(...)`. `routine T.create(...)` declares an ordinary member routine named `create`.
   Default `migrate` rewrites it to `routine T(...)` (and a call `T.create(...)` to `T(...)`), and a member routine
-  `create` that gives back its own type is warning SF-W104.
-- A `var` that hides a parameter or an outer local is SF-S008. An unknown annotation is SF-G221.
-- The right side of a compound assignment is checked like a binary expression (`Integer += S64` is SF-S502).
-- `===` and `!==` take entities only.
+  `create` that gives back its own type is warning `SF-W104`.
+- A `var` that hides a parameter or an outer local is `SF-S008`. An unknown annotation is `SF-G221`.
+- The right side of a compound assignment is checked like a binary expression (`Integer += S64` is `SF-S502`).
+- `==` compares values and `===` tells whether two names refer to the same entity. Two entities with equal member
+  variables are `==` (`Player("Ada") == Player("Ada")` is true) and not `===`. `===` and `!==` take entities only.
 - `discard` is gone. A result you do not need takes no marker: write the call on its own line (`discard` and
-  `drop` are SF-G150, default `migrate` removes `discard`).
-- A program does not write `destruct` (SF-S821). An entity ends when the last name that refers to it goes away or
+  `drop` are `SF-G150`, default `migrate` removes `discard`).
+- A program does not write `destruct` (`SF-S821`). An entity ends when the last name that refers to it goes away or
   when the cycle collector finds it unreachable. Default `migrate` renames `destroy`.
-- `@readonly` and `@reshaping` are gone (SF-S706).
+- `@readonly` and `@reshaping` are gone (`SF-S706`).
 - A program's own files cannot use `danger`, `dangerous` or foreign routines. Code that calls C goes into a library
   the program imports (default `migrate` lists these lines).
+- Choice values (`OK: 200`) and flags bits (`MINE: 0`) are written on every member or on none, and with none the
+  members count 0, 1, 2, ... in order. Some with and some without is `SF-S417`.
+- The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
+  `all_off()` is gone, and its build error names `none`.
 
 **Standard library**
 - A module is its folder. The base module is `System` and every file sees it and the modules under it
@@ -95,9 +113,16 @@ file only once its other old spellings are gone.
 - Float operations and math routines crash on an inf or NaN result. The raw result is `+! -! *! /! **!` and the
   `_unchecked` routines.
 - A conversion is `x.to[T]()`: `S32(from: x)` and `x.S32()` are rewritten by default `migrate`, and a missing
-  conversion is SF-S458.
-- `Decimal` holds 34 significant digits. `+`, `-` and `*` are exact or crash with `NumericOverflowError`. `/` and
-  the math routines round to 34 digits. The arbitrary-precision `Real` is gone.
+  conversion is `SF-S458`. Collecting is a conversion too: `xs.List()` is `xs.to[List]()` (`SF-S458` names it).
+- What walks a value is an emitter: `Iterable[T]` is `Emittable[T]`, 0.1's `Emittable[T]` is `Emitter[T]`, and
+  `iter()` is `emitter()`. The build error on an old name names the new one.
+- `x.type_name()` is `type_name(of: x)`.
+- `Decimal` holds 34 significant digits and has one form per value: every result is normalized, so `1.0` and `1.00`
+  are the same value, and a zero is never `-0` (`(-0.5).fixed(0)` is `0`). `+`, `-` and `*` are exact or crash with
+  `NumericOverflowError`. Every rounding a `Decimal` does (`/`, `round()`, `fixed()`, text, literals, `pow`, `sqrt`
+  and the other math routines) is half up: `2.5` goes to `3` and `-2.5` to `-2`. The arbitrary-precision `Real` is
+  gone.
+- `Decimal`'s `rem` is the Euclidean remainder, like integer `%`: `0 <= r < |b|` (`-7` by `2` is `1`).
 - Channels are `Mailbox[T]` (`add_last`, `add_last_if_room`, `remove_first`, `close`, `each x in m`). Default
   `migrate` lists each `make_channel` for a rewrite by hand.
 - `List` keeps its elements from the first place on. The ring operations (`rotate_left`, `keep_last`, ...) are
@@ -107,9 +132,12 @@ file only once its other old spellings are gone.
 - The time is read with `Clock.now()`, `Clock.monotonic()` and `CpuClock.now()` (the build error on `Moment.now`
   says so). A `Moment` is written with two digits for each part after the year: `2026-01-15 12:30:00` (0.1 wrote
   `2026-1-15 12:30:0`).
-- `FileManager` does every file system task, and `IO/FileSystem` is gone (the import error names `FileManager`). Reading or writing a missing file fails,
-  `make_file` fails on an existing file unless you pass `replacing: true`, and there is no `touch`. The
-  directories and the environment variables are `Environment`'s, random bytes are `Entropy`'s.
+- A collection shows itself the way its literal looks. A `ByteSize` shows its byte count grouped by `_` with a `B`
+  (`{4kib}` is `4_096B`).
+- `FileManager` does every file system task, and `IO/FileSystem` is gone (the import error names `FileManager`).
+  Reading or writing a missing file fails, `make_file` fails on an existing file unless you pass `replacing: true`,
+  and there is no `touch`. The directories and the environment variables are `Environment`'s, random bytes are
+  `Entropy`'s.
 - `ask_line` and `ask_word` fail with `EndOfInputError` at the end of input.
 - `Dict.items()` gives `(key, value)` tuples: `each (k, v) in d.items()`. `d[k] = v` adds a missing key, and
   `d.add(key:, value:)` is rewritten to it.
@@ -118,20 +146,15 @@ file only once its other old spellings are gone.
 - `Indexable` is `ViewingIndexable` and `MutableIndexable` is `ModifyingIndexable` (the build error names the new
   name, and so does the one on `PQEntry`, `gather` and `race`).
 - Concurrency: `suspended` is gone. Any routine runs concurrently through `f.to[Work](args)` (default `migrate`
-  adds `.to[Work]` to the calls). A piece of handed-off work is a `Work[T]`, made with
-  `f.to[Work](args)` and started with `start_now()`, the one start verb. `start_here()` and `start_apart()` are
-  build errors that point to `start_now()`. `migrate --step work` rewrites `Agent` to `Work` and the other start
-  verbs to `start_now()`, and a remaining `Agent` is a build error that names `Work`.
-  `execute()` is gone (default `migrate` writes `start_now()`). `gather()` and `race()` are routines on the Work
-  list: `jobs.gather()`. When the last name that refers to a Work goes away, the work is cancelled and waited
-  for.
+  adds `.to[Work]` to the calls). A piece of handed-off work is a `Work[T]` (it was `Agent[T]`), started with
+  `start_now()`. `migrate --step work` rewrites `Agent` to `Work`, and a remaining `Agent` is a build error that
+  names `Work`. `execute()` is gone (default `migrate` writes `start_now()`). `gather()` and `race()` are routines on
+  the Work list: `jobs.gather()`. When the last name that refers to a Work goes away, the work is cancelled and
+  waited for, and a failure its work came to crashes the program there. `job.cancel()` throws the failure away.
+- A number several jobs change is a `global` or an entity's member variable: the builder makes each change safe.
+  There is no `Atomic` (`SF-S447` names these two ways).
 - Byte flows (`FileSource`, `FileSink`, `stdin()`, `stdout()`) read with `pull(max:)` and write with `push(data:)`
   (`migrate --step verbs`).
-- `Atomic[T]` is `Unbroken[T]` (a value whose one change is never broken partway), and `CircularList[T]` is
-  `RotatableList[T]`. The routines keep their names. Default `migrate` and `migrate --step type-names` rewrite the
-  old names, and a remaining old name is a build error that names the new one.
-- The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
-  `all_off()` is gone, and its build error names `none`.
 
 ### Added
 
@@ -139,24 +162,62 @@ file only once its other old spellings are gone.
 - A routine that returns nothing ends without `return`.
 - `Integer / Integer` is a `Decimal` (`7 / 2` is `3.5`). An `Integer` and a `Decimal` mix in arithmetic and give a
   `Decimal`.
-- `global name: Type = init`: module-level state. Changes to a global from several jobs are serialized.
 - Loops carry values: `until c with total = 0`, `continue with total: v`, and `then` sees them.
 - A `when` that gives a value ends a block arm with `becomes value`. One arm can match several values
-  (`== 4, 6, 9, 11 =>`). An arm can be `throw ...` in a `failable` routine (SF-S750 elsewhere, with a quick fix that
-  writes `failable`).
+  (`== 4, 6, 9, 11 =>`). An arm can be `throw ...`.
+- Records and entities have `==` and `!=` without `obeys Equatable` when every member variable has `==` (a written
+  `eq` replaces it). Records hash the same way, and an entity hashes only with `obeys Hashable`, so it can be a `Set`
+  or `Dict` key only when it says so. A `T?` has `==` and a hash when `T` does. Entities whose member variables form
+  a cycle compare and hash by shape. A missing `==` or hash is a build error that names the member variable that
+  lacks it.
 - Backtick names, tuple swap `(a, b) = (b, a)`, record patterns, inline variants `A | B`, `define` type aliases,
   generic variants, `@infix` routines, named and short arguments mixed (`area(width, height: 4)`), `todo`.
 - Presets are computed at buildtime. Hex float literals (`0x1.8p3`) for binary floats.
 - `@throws([...])` lists what a routine throws and the builder checks it.
+- A crashable has no size limit. A `Check` bound to a name keeps its own error after later failures, and a failure
+  in one job never overwrites another's.
 - A file without a `module` header takes its module path from its place under `module_paths`.
 - Collection literals take their element type from the expected type, like numbers do.
+
+**ObjectHacker** (`import ObjectHacker`, working on live objects while the program runs)
+- `Unknown` keeps a value of any type: `Unknown(from: v)`, `u.is[T]()`, `try u.to[T]()`, and `==` and a hash by the
+  kept type's own, so an `Unknown` can be a `Set` or `Dict` key.
+- `type_name(of:)` and `type_info(of:)`: a type's name, module, kind, member variables, protocols, cases, arms,
+  routines and creators. `memvars(of:)`, `types(in:)` and `routines(in:)`.
+- `peek(target:, memvar:)` gives an `Unknown`. `poke(target:, memvar:, value:)` changes an entity in place, and
+  `poked(...)` gives a changed copy of a record. `watch(target:)` observes an entity without keeping it alive.
+- `call(target:, name:, args:)` calls a member routine by name, `call(info:, args:)` a free routine, a common routine
+  or a creator, and `create(type:, args:)` makes a value. Only routines the build reached are listed and callable
+  (`RoutineNotBuiltError`): mark a type `@reflectable` to keep every routine it has.
+- A program's own annotations: a record that obeys `Annotation` is written `@Memoize(limit: 100)` on a routine, a
+  record or an entity. Its `apply(to:)` runs once per declaration when the program starts, and its
+  `around(call: Invocation)` runs in place of every call of the routine, with `call.proceed()` running the routine.
+- `when_changed(target:, handler:)` calls a handler after each change of one object's member variables, with the
+  name and the old and new values as `Unknown`s, and `remove_hook` takes it off.
+- `implant(target:, replacing: Hero.attack, with: ...)` replaces a member routine for one object, checked against the
+  routine's signature (`SF-S201`), and `remove_implant` gives it back.
+- Hooks and implants may be added, removed and used from several jobs at once.
 
 **Standard library**
 - Collections, `Text`, `Bytes` and the IO routines count with `Integer`. `Memory` and `Span`. `List`, `Dict`,
   `Set`, `PriorityQueue` and the sorted collections are built for Suflae.
-- `type_name`, `memvars`, `peek`, `poke` and `watch` for looking into values at run time. `T(from: SerialValue)`
-  builds a value from serial data (`SerialShapeError`).
-- Changing a collection's shape during `each` over it crashes with `ReshapingWhileInUseError`.
+- Emitters: `var it = xs.emitter()`, then `it.emit()` or `each x in it`, which goes on from where `it` is. An
+  emitter is an emittable, so `it.to[List]()`, `it.sum()` and the adapters work on it. An entity a program writes
+  that obeys `Emitter[T]` or `Emittable[T]` works with every library routine written for emittables.
+- An emittable collects into any collection with `to[...]`: `to[List]`, `to[Set]`, `to[Dict]` (of `(key, value)`
+  pairs), `to[SortedList]`, `to[SortedSet]`, `to[SortedDict]`, `to[RotatableList]`, `to[BitList]`,
+  `to[PriorityQueue]` (of `(priority, element)` pairs), and `to[Array[T, N]]`.
+- `RotatableList[T]`: a list that adds and removes at both ends and rotates.
+- `jobs.start_now()` on a list of Works starts every Work in it and lets them all go together, so none runs before
+  the others are ready. `gather` and `race` start the ones not started yet the same way.
+- `RoundingRule` (`HALF_UP`, `HALF_EVEN`, `HALF_AWAY`, `FLOOR`, `CEIL`, `TRUNC`) for the routines that round on
+  purpose: `x.round(places:, rule:)`, `x.fixed(places:, rule:)`, and on `Decimal` `divide(by:, places:, rule:)`,
+  `add`, `subtract` and `multiply` with `places:` and `rule:` (computed exactly, rounded once). Leaving out `rule` gives
+  the type's own rule.
+- `Decimal`, `D32`, `D64` and `D128` are `Hashable`: equal values hash the same whatever their digits.
+- `T(from: SerialValue)` builds a value from serial data (`SerialShapeError`).
+- Changing a collection's shape during `each` over it crashes with `ReshapingWhileInUseError`, also when the change
+  comes from a lambda that captured the collection, goes through an element, or the loop walks an adapter of it.
 - `TextPattern` and `BytesPattern`: patterns built from named pieces, matched in time linear in the input, with
   `from_regex`, `matches`, `find`, `find_all`, `replace` and `split`.
 - Deadlock detection in debug builds.
@@ -181,18 +242,11 @@ file only once its other old spellings are gone.
 
 ### Fixed
 
-- An entity captured by a lambda that several jobs call, sent on a channel, or reached as an element of a list the
-  jobs share takes its lock around each statement, so no update is lost.
-- A change of a list while a loop walks it crashes with `ReshapingWhileInUseError` also when the change comes from a
-  lambda that captured the list, when the loop walks a global list or an adapter of the list (`xs.where(...)`), and
-  when it goes through an element (`rows[0].add_last(...)`).
-- `var (tx, rx) = make_channel[T](capacity: n)` gives channel ends that work when passed to a routine or a Work
-  (they crashed with a segmentation fault).
-- `cs[0].n = cs[0].n + 1` inside a Work's routine no longer stops the builder.
-- A started Work nobody retrieves crashes with its work's failure where it is dropped, instead of losing it.
-  `job.cancel()` throws the failure away.
+- An entity captured by a lambda that several jobs call, sent between jobs, or reached as an element of a list the
+  jobs share is changed one statement at a time, so no update is lost.
 - Two jobs adding to one `List` lost updates.
 - `total += xs[0]` crashed, and a `global` `S64` lost digits.
+- Globals of one name in two modules stay apart.
 - `x in dict` gave a wrong error.
 - A `when` with no subject, a typed `E?` local, member defaults, destructuring arms and `??` were rejected or built
   wrongly.
@@ -201,22 +255,20 @@ file only once its other old spellings are gone.
 - Importing a module that has globals.
 - A stack overflow crashes with exit code 82 and reports that the program ran out of memory.
 - A crash inside the standard library points to the caller's line.
-- Two or more recovered calls inside one generic routine no longer stop the build.
 - `Integer ** -n` crashes with `NumericDomainError`.
-- `each (i, xs) in make().enumerate()` crashed. `.List()` now points to `x.to[List]()` (SF-S458).
-- `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (SF-S502).
-- `flags.lacks(A and B)` answered "not all of them on" instead of "none of them on".
-- A `Random` from `Random.from_entropy()` crashed when passed to a routine, and gave a false
-  `ReshapingWhileInUseError` as an entity's member variable.
+- `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (`SF-S502`).
 - A syntax error inside a value `when` no longer reports the rest of the routine as top-level statements.
 - Converting the smallest `S128` or `S256` to `B128` crashed. `B128.rem` crashed on operands near the top of the
   range.
-- `try` / `check` around `text.to[B16]()` or `text.to[B32]()` failed to build.
+- A range that reaches the ends of its type runs to the end and stops there.
 
 ### Removed
-- `Result[T]`, `Lookup[T]`, `Crashable`, `absent`, `discard`, and the `try_` / `check_` / `lookup_` routines.
+- `Result[T]`, `Lookup[T]`, `Crashable`, `absent`, `discard`, `pierce`, and the `try_` / `check_` / `lookup_`
+  routines.
 - `unless`, `but`, `disobeys`, `notin`, `have`, `lack`, `while`, `pass`, `suspended`.
 - `Agent.execute()`, channels and `make_channel` (use `Mailbox`).
+- `Atomic` (use a `global` or an entity's member variable).
+- `Iterable` (now `Emittable`), `iter()` (now `emitter()`), and the `List()` terminal (now `to[List]()`).
 - The `Signals` module and `IO/FileSystem`.
 - `Real`, arbitrary-precision `Complex`, the `?.` operator.
 - `@readonly`, `@reshaping`, `import Numerics`.

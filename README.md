@@ -19,7 +19,7 @@
   <a href="https://suflae.lumi-dev.xyz/">Documentation</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="SUFLAE-FOR-AI.md">Reference for AI assistants</a> ·
-  <a href="https://github.com/dj-lumiere/RazorForge/blob/master/CHANGELOG.md">Changelog</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/dj-lumiere/RazorForge">RazorForge</a>
 </p>
 
