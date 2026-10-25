@@ -376,8 +376,9 @@ routine start()
   (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
   overflow** instead of crashing. Every other type (`Integer`, `Decimal`, `Text`, records, wider numbers)
-  is serialized through a lock. A logical update spread over several statements
-  (`var t = g` … `g = t + 1`) is not atomic; serialize it yourself. A global and an entity's member variable are
+  is serialized through a lock. A value read earlier and written back later
+  (`var t = g`, other statements, then `g = t + 1`) can overwrite a change another job made in between, so
+  write an update of a shared value based on itself as one statement (`g += 1`, `g = g + 1`, `e.count += 1`). A global and an entity's member variable are
   the one way to change a shared value: there is no `Unbroken` (SF-S447 names this way).
 - Use a global for state the whole process has one of (a log, configuration, a registry); pass per-task
   context as parameters.
