@@ -411,7 +411,8 @@ routine start()
   `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
   The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `rsqrt` (1 / sqrt(x) rounded once, also on
   `Decimal` and the D types, a tie as the type rounds one, `x <= 0` stops), `sin_cos`, `gamma`,
-  `ln_gamma`, `mul_add`, `mod_trunc` (truncated remainder), `rem` (IEEE remainder, on `Decimal` the Euclidean remainder), `fract`, `is_sign_negative`,
+  `ln_gamma`, `mul_add`, `powi(n)` and `midpoint` (each rounded once on `Decimal` and the D types, a D-type power
+  that is exact keeps the exponent `n` times x's: `2.0.powi(2)` is `4.00`), `mod_trunc` (truncated remainder), `rem` (IEEE remainder, on `Decimal` the Euclidean remainder), `fract`, `is_sign_negative`,
   `total_compare`, and so on. Float/decimal `max`/`min` return the other operand when one is NaN (`migrate --step
   names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).
 - Infix routines: a member routine with one parameter, marked `@infix`, is written between its operands

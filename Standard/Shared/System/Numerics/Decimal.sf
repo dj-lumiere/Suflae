@@ -115,8 +115,8 @@ routine Decimal.clamp(min_val: Decimal, max_val: Decimal) -> Decimal
 @rf("Decimal.recip")
 routine Decimal.recip() -> Decimal
 
-### Returns `(me + you) / 2`, rounded to the nearest 34-digit value like any quotient. A non-finite intermediate
-### crashes, as for all `Decimal` arithmetic.
+### Returns `(me + you) / 2`, rounded once to 34 digits (a tie half up): the sum is not rounded on its own, so the
+### midpoint of two Decimals is always a Decimal.
 ### :param you: The other value.
 ### :returns: The arithmetic midpoint of `me` and `you`.
 @rf("Decimal.midpoint")

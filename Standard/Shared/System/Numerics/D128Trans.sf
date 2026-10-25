@@ -243,7 +243,7 @@ routine D128.is_negative() -> Bool
 @rf("D128.is_positive")
 routine D128.is_positive() -> Bool
 
-### True if me is a finite, nonzero value at the minimum exponent (-6176) with fewer than 34 digits.
+### True if me is finite, nonzero, and below the smallest normal value (10^emin), at any exponent.
 @rf("D128.is_subnormal")
 routine D128.is_subnormal() -> Bool
 
@@ -262,12 +262,6 @@ routine D128.fpclassify() -> FpClass
 ### Absolute value |me| (clears the sign bit, keeps specials and the cohort). Never crashes.
 @rf("D128.abs")
 routine D128.abs() -> D128
-
-### Signed total-order band for a decoded decimal class (sign + special). Ordered so that a
-### plain `<=` ranks cross-class operands per IEEE 754 totalOrder:
-### -qNaN < -sNaN < -inf < -finite < +finite < +inf < +sNaN < +qNaN.
-@rf("decimal_order_band")
-routine decimal_order_band(sign: Bool, special: U64) -> S64
 
 ### IEEE 754 totalOrder for decimals: a total order over all values including signed zeros, cohorts
 ### (equal value with differing exponents), and NaNs. For finite operands of equal value the smaller-exponent

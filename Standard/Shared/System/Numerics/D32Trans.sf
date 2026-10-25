@@ -243,7 +243,7 @@ routine D32.is_negative() -> Bool
 @rf("D32.is_positive")
 routine D32.is_positive() -> Bool
 
-### True if me is a finite, nonzero value at the minimum exponent (-101) with fewer than 7 digits.
+### True if me is finite, nonzero, and below the smallest normal value (10^emin), at any exponent.
 @rf("D32.is_subnormal")
 routine D32.is_subnormal() -> Bool
 

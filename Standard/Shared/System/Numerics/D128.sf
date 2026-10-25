@@ -83,14 +83,6 @@ routine d128_to_binary(x: D128, which: U32) -> U128
 @rf("d128_of_b128")
 routine d128_of_b128(x: B128) -> D128
 
-### The truncated integer magnitude of a finite decimal coeff * 10^exp as a U256. Throws when it exceeds U256.
-@rf("d128_int_magnitude")
-failable routine d128_int_magnitude(coeff: U128, exp: S64) -> U256
-
-### The truncated integer magnitude of a finite decimal as a U128. Throws when it exceeds U128.
-@rf("d128_int_magnitude_u128")
-failable routine d128_int_magnitude_u128(coeff: U128, exp: S64) -> U128
-
 ### Returns `me + you`. Checked: crashes if the result is non-finite. Use `add_unchecked` for raw
 ### IEEE.
 @rf("D128.add")
@@ -185,14 +177,17 @@ routine D128.clamp(min_val: D128, max_val: D128) -> D128
 @rf("D128.recip")
 routine D128.recip() -> D128
 
-### Returns `me` raised to the integer power `n` via exponentiation by squaring.
-### A negative `n` inverts the result.
+### Returns `me` raised to the integer power `n`, rounded once to 34 digits (a tie to the even one), not one rounding
+### per multiplication. An exact power takes the exponent `n` times `me`'s when its digits allow (`2.0.powi(2)` is
+### `4.00`, `10.powi(3)` is `1000`). `x.powi(0)` is 1 for every x, a zero to a negative power is an infinity, and a
+### result past the range is an infinity or a zero, as IEEE 754 pown says. Never crashes.
 ### :param n: The integer exponent.
 ### :returns: `me ** n`.
 @rf("D128.powi")
 routine D128.powi(n: S32) -> D128
 
-### Returns `(me + you) / 2`.
+### Returns `(me + you) / 2`, rounded once to 34 digits (a tie to the even one): the sum is not rounded on its own,
+### so the midpoint of two finite values is finite and exact where it can be.
 ### :param you: The other value.
 ### :returns: The arithmetic midpoint of `me` and `you`.
 @rf("D128.midpoint")

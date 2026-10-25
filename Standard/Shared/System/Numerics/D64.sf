@@ -138,7 +138,8 @@ routine D64.compare(you: D64) -> ComparisonSign
 @rf("D64.pow")
 failable routine D64.pow(you: D64) -> D64
 
-### Shortest decimal text (widens to D128Parts and reuses the shared formatter).
+### The decimal text, every digit of the coefficient kept: positional for an exponent of at most 0 not below 1e-6
+### (`1.50`, `0.001`), `d.dddE+x` otherwise (`1E+3`).
 @rf("D64.represent")
 routine D64.represent() -> Text
 
@@ -170,14 +171,17 @@ routine D64.clamp(min_val: D64, max_val: D64) -> D64
 @rf("D64.recip")
 routine D64.recip() -> D64
 
-### Returns `me` raised to the integer power `n` via exponentiation by squaring.
-### A negative `n` inverts the result.
+### Returns `me` raised to the integer power `n`, rounded once to 16 digits (a tie to the even one), not one rounding
+### per multiplication. An exact power takes the exponent `n` times `me`'s when its digits allow (`2.0.powi(2)` is
+### `4.00`, `10.powi(3)` is `1000`). `x.powi(0)` is 1 for every x, a zero to a negative power is an infinity, and a
+### result past the range is an infinity or a zero, as IEEE 754 pown says. Never crashes.
 ### :param n: The integer exponent.
 ### :returns: `me ** n`.
 @rf("D64.powi")
 routine D64.powi(n: S32) -> D64
 
-### Returns `(me + you) / 2`.
+### Returns `(me + you) / 2`, rounded once to 16 digits (a tie to the even one): the sum is not rounded on its own,
+### so the midpoint of two finite values is finite and exact where it can be.
 ### :param you: The other value.
 ### :returns: The arithmetic midpoint of `me` and `you`.
 @rf("D64.midpoint")

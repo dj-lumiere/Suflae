@@ -341,18 +341,6 @@ routine B128.represent() -> Text
 @rf("B128.diagnose")
 routine B128.diagnose() -> Text
 
-### Builds the `B128` value of a small non-negative integer (castFromInt).
-### :param n: The integer to convert.
-### :returns: The corresponding `B128`.
-@rf("b128_from_int")
-routine b128_from_int(n: U64) -> B128
-
-### Returns the unbiased binary exponent (floor log2 |v|), TLFloat's `ilogb`.
-### :param v: The value (assumed nonzero).
-### :returns: The binary exponent.
-@rf("b128_ilogb")
-routine b128_ilogb(v: B128) -> S64
-
 ### Returns the next representable value after `me` toward `you` (C `nextafter`).
 @rf("B128.nextafter")
 routine B128.nextafter(you: B128) -> B128
