@@ -20,6 +20,13 @@ secret routine hooks_leave()
         C::ingrid_hooks_leave()
     return
 
+### The flow a change of a hooked object runs on: the coroutine when inside one (the same wherever it runs), else
+### the thread. Each flow keeps its own values from before its changes under way.
+### :returns: The flow's id.
+secret routine hook_flow_id() -> U64
+    danger
+        return C::rf_current_task_id()
+
 ### Makes a value the registry keeps safe to hold and let go on any thread: its handle counts with unbroken
 ### arithmetic from now on. Called before the value is stored, while only the storing thread has it.
 ### :param value: The value.

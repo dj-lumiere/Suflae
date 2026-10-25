@@ -1441,7 +1441,8 @@ routine start()
   0.3 ns per change while no object has hooks), a build that does not pays nothing. Annotate the lambda's
   parameters (SF-S638 otherwise). Hooks and implants may be added, removed and used from several jobs at once: the
   program's hooks are looked at and changed by one job at a time, and a hook runs on the job that made the change,
-  after that look.
+  after that look. A change pairs with the old value its own job saw: two jobs changing one hooked object at once
+  each hand their hooks their own old value.
 - `implant(target: ada, replacing: Hero.attack, with: (hero: Hero, power: S64) => ...)` replaces a member routine for
   that one object: its calls run the replacement, given the object first and then the arguments. The member routine
   is named by its type and name (`Hero.attack`, an entity's routine that is not common, has no type parameters and

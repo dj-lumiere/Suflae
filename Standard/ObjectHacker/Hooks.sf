@@ -15,11 +15,13 @@ secret record ChangeHook
     secret id: U64
     secret handler: failable Callable[(Text, Unknown, Unknown), None]
 
-# The hooks of one object, and the values its member variables had before the changes under way, innermost last.
+# The hooks of one object, and the values its member variables had before the changes under way: one list for each
+# flow (a thread, or a coroutine wherever it runs) that is changing the object, innermost last, so a change on one
+# flow pairs with its own value before even when another flow changes the same object meanwhile.
 secret entity HookTable
     secret target: Unknown
     secret hooks: List[ChangeHook]
-    secret pending: List[Unknown]
+    secret pending: Dict[U64, List[Unknown]]
     secret implants: Dict[Text, Unknown]
 
 # Every object's hooks, by the object's key.
@@ -52,7 +54,7 @@ secret routine add_change_hook_held(key: U64, target: Unknown, handler: failable
             var hooks = List[ChangeHook]()
             hooks.add_last(value: ChangeHook(id: id, handler: handler))
             share_across_threads(value: target)
-            registry.tables[key] = HookTable(target: target, hooks: hooks, pending: List[Unknown](), implants: Dict[Text, Unknown]())
+            registry.tables[key] = HookTable(target: target, hooks: hooks, pending: Dict[U64, List[Unknown]](), implants: Dict[Text, Unknown]())
             registry.hooked = registry.hooked + 1
             set_hooked_count(count: registry.hooked)
         else as table => table.hooks.add_last(value: ChangeHook(id: id, handler: handler))
@@ -107,7 +109,7 @@ secret routine add_implant_held(key: U64, target: Unknown, routine_key: Text, re
             var implants = Dict[Text, Unknown]()
             implants[routine_key] = replacement
             share_across_threads(value: target)
-            registry.tables[key] = HookTable(target: target, hooks: List[ChangeHook](), pending: List[Unknown](), implants: implants)
+            registry.tables[key] = HookTable(target: target, hooks: List[ChangeHook](), pending: Dict[U64, List[Unknown]](), implants: implants)
             registry.hooked = registry.hooked + 1
             set_hooked_count(count: registry.hooked)
         else as table => table.implants[routine_key] = replacement
@@ -157,7 +159,14 @@ secret routine hooks_before_held(key: U64, memvar: Text)
                 else as table =>
                     when table.target.peek_memvar(memvar: memvar)
                         is None => return
-                        else as old => table.pending.add_last(value: old)
+                        else as old =>
+                            var flow = hook_flow_id()
+                            when try table.pending[flow]
+                                is None =>
+                                    var olds = List[Unknown]()
+                                    olds.add_last(value: old)
+                                    table.pending[flow] = olds
+                                else as olds => olds.add_last(value: old)
 
 secret routine hooks_after(key: U64, memvar: Text)
     # The values before and after the change, which only this thread holds once they are out of the registry.
@@ -181,9 +190,16 @@ secret routine change_to_run(key: U64, memvar: Text, values: List[Unknown]) -> L
             when try kept.to[HookRegistry]().tables[key]
                 is None => return running
                 else as table =>
-                    if table.pending.count() == 0
+                    var flow = hook_flow_id()
+                    var olds = List[Unknown]()
+                    when try table.pending[flow]
+                        is None => return running
+                        else as found => olds = found
+                    if olds.count() == 0
                         return running
-                    var old = table.pending.remove_last()
+                    var old = olds.remove_last()
+                    if olds.count() == 0
+                        table.pending.remove(key: flow)
                     when table.target.peek_memvar(memvar: memvar)
                         is None => return running
                         else as now =>
