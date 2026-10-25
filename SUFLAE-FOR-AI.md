@@ -197,6 +197,13 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 
 - Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
   `B128` and `C256` are the widest, and exact arithmetic is `Integer` and the decimals.
+- Geometry takes `import Math3D` (`B32` elements): `Vector2D`/`Vector3D`/`Vector4D`, `Q128`/`Q256`, and the
+  matrices `Matrix2R2C`, `Matrix3R3C`, `Matrix4R4C`, stored column by column (`vec2`/`vec3`/`vec4` build a column
+  or a vector: `Matrix2R2C(c0: vec2(4.0, 2.0), c1: vec2(7.0, 6.0))` is `[[4, 7], [2, 6]]`). `m.get(row:, col:)` is
+  one element, `m[row]` a row, `m.transform(v:)` is `m · v`, `*` the matrix product. `inverse()` and `solve(b:)`
+  (A x = b) are Gaussian elimination with partial pivoting and are failable: `SingularMatrixError` when a pivot is
+  exactly 0 (no near-singular tolerance), and an inf or NaN during the computation crashes like checked float
+  math. `inverse_unchecked()` is the raw IEEE result. There is no n×n matrix type.
 - **Counts, positions, widths and amounts are always `Integer`**, whatever the value's type: a fixed-width
   number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
   `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes

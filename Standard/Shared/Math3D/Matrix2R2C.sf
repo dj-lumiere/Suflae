@@ -1,0 +1,148 @@
+module Math3D
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 2-row, 2-column single-precision matrix, stored **column-major** as two SIMD column vectors
+### (`Vector[B32, 2]`), the same layout as `Matrix3R3C` and `Matrix4R4C`. Element `(row, col)` lives at
+### `column[col][row]`, and angles are in **radians**, counterclockwise.
+@rf("Matrix2R2C")
+record Matrix2R2C
+obeys Addable, Subtractable, Multiplicable, Negatable, Equatable
+    ### Column 0.
+    c0: Vector[B32, 2]
+    ### Column 1.
+    c1: Vector[B32, 2]
+
+### Builds a `Vector[B32, 2]` from its two lanes.
+### :param x: Lane 0.
+### :param y: Lane 1.
+### :returns: The packed 2-lane vector `<x, y>`.
+@rf("vec2")
+routine vec2(x: B32, y: B32) -> Vector[B32, 2]
+
+### The 2x2 identity matrix.
+### :returns: A matrix with ones on the diagonal, zeros elsewhere.
+@rf("Matrix2R2C.identity")
+common routine Matrix2R2C.identity() -> Matrix2R2C
+
+### The 2x2 zero matrix (every element zero).
+### :returns: A matrix of all zeros.
+@rf("Matrix2R2C.zero")
+common routine Matrix2R2C.zero() -> Matrix2R2C
+
+### A non-uniform scaling matrix.
+### :param sx: X scale.
+### :param sy: Y scale.
+### :returns: The scaling matrix.
+@rf("Matrix2R2C.scaling")
+common routine Matrix2R2C.scaling(sx: B32, sy: B32) -> Matrix2R2C
+
+### A counterclockwise rotation of the plane.
+### :param angle: The rotation angle in radians.
+### :returns: The rotation matrix `[[cos, -sin], [sin, cos]]`.
+@rf("Matrix2R2C.rotation")
+common routine Matrix2R2C.rotation(angle: B32) -> Matrix2R2C
+
+### Returns column `index` (0 or 1) as a `Vector[B32, 2]`.
+### :param index: The column index.
+### :returns: The column vector.
+@rf("Matrix2R2C.column")
+routine Matrix2R2C.column(index: U64) -> Vector[B32, 2]
+
+### Returns the element at `(row, col)` (both 0 or 1).
+### :param row: The row index.
+### :param col: The column index.
+### :returns: The scalar element.
+@rf("Matrix2R2C.get")
+routine Matrix2R2C.get(row: U64, col: U64) -> B32
+
+### Returns row `index` (0 or 1) as a `Vector[B32, 2]`, the `me[index]` read operator, so `m[row][col]` reads one
+### element.
+### :param index: The row index (0 or 1).
+### :returns: The row vector `<m(row,0), m(row,1)>`.
+### :throws: {IndexOutOfBoundsError} if `index >= 2`.
+@rf("Matrix2R2C.getitem")
+failable routine Matrix2R2C.getitem(index: U64) -> Vector[B32, 2]
+
+### Element-wise matrix sum.
+### :param you: The matrix to add.
+### :returns: `me + you`.
+@rf("Matrix2R2C.add")
+routine Matrix2R2C.add(you: Matrix2R2C) -> Matrix2R2C
+
+### Element-wise matrix difference.
+### :param you: The matrix to subtract.
+### :returns: `me - you`.
+@rf("Matrix2R2C.sub")
+routine Matrix2R2C.sub(you: Matrix2R2C) -> Matrix2R2C
+
+### Element-wise negation.
+### :returns: `-me`.
+@rf("Matrix2R2C.neg")
+routine Matrix2R2C.neg() -> Matrix2R2C
+
+### Scales every element by a scalar.
+### :param factor: The scalar multiplier.
+### :returns: `factor · me`.
+@rf("Matrix2R2C.scale")
+routine Matrix2R2C.scale(factor: B32) -> Matrix2R2C
+
+### Transforms a vector: `me · v` (matrix times column vector).
+### :param v: The vector to transform.
+### :returns: `me · v`, computed as `c0·v.x + c1·v.y`.
+@rf("Matrix2R2C.transform")
+routine Matrix2R2C.transform(v: Vector[B32, 2]) -> Vector[B32, 2]
+
+### Matrix product `me · you`. Each result column is `me · you.column`.
+### :param you: The right-hand matrix.
+### :returns: `me · you`.
+@rf("Matrix2R2C.mul")
+routine Matrix2R2C.mul(you: Matrix2R2C) -> Matrix2R2C
+
+### The transpose (rows and columns swapped).
+### :returns: `meᵀ`.
+@rf("Matrix2R2C.transpose")
+routine Matrix2R2C.transpose() -> Matrix2R2C
+
+### The determinant of this matrix.
+### :returns: `det(me)`.
+@rf("Matrix2R2C.determinant")
+routine Matrix2R2C.determinant() -> B32
+
+### The inverse of this matrix, by Gaussian elimination with partial pivoting.
+### :returns: `me⁻¹`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
+@rf("Matrix2R2C.inverse")
+failable routine Matrix2R2C.inverse() -> Matrix2R2C
+
+### The inverse of this matrix by the same elimination in raw IEEE 754 arithmetic: no check, so a singular
+### matrix gives infinities or NaN.
+### :returns: `me⁻¹`, or non-finite elements when `me` is singular.
+@rf("Matrix2R2C.inverse_unchecked")
+routine Matrix2R2C.inverse_unchecked() -> Matrix2R2C
+
+### Solves `me · x = b` for `x` by Gaussian elimination with partial pivoting.
+### :param b: The right-hand side.
+### :returns: The solution `x`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
+@rf("Matrix2R2C.solve")
+failable routine Matrix2R2C.solve(b: Vector[B32, 2]) -> Vector[B32, 2]
+
+### Returns `true` when all four elements compare equal.
+### :param you: The matrix to compare against.
+### :returns: `true` if every column matches.
+@rf("Matrix2R2C.eq")
+routine Matrix2R2C.eq(you: Matrix2R2C) -> Bool
+
+### Formats the matrix row by row as `[[m00, m01], [m10, m11]]`.
+### :returns: The resulting `Text` value.
+@rf("Matrix2R2C.represent")
+routine Matrix2R2C.represent() -> Text
+
+### Returns a diagnostic string wrapping the value with its type name.
+### :returns: The resulting `Text` value.
+@rf("Matrix2R2C.diagnose")
+routine Matrix2R2C.diagnose() -> Text

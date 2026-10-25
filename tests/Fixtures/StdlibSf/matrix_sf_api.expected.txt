@@ -1,0 +1,15 @@
+a2: [[4, 7], [2, 6]], determinant: 10, transpose: [[4, 2], [7, 6]]
+a2 * a2: [[30, 70], [20, 50]], a2 transforms (1, 1): <11, 8>
+a2 row 1: <2, 6>, element (0, 1): 7
+a2 inverse: [[0.6, -0.7], [-0.2, 0.4]], inverse * A within tolerance: true
+solve2 (5, 10): <1, 3>
+after pivot2 inverse: The 2x2 matrix is singular: elimination met a pivot that is exactly 0, so the matrix has no inverse and A x = b has no single solution.
+zero column2 inverse_unchecked (0, 0) finite: false
+t3: [[1, 2, 3], [4, 5, 6], [7, 8, 10]], determinant: -3
+t3 inverse * A within tolerance: true
+solve3 (6, -4, 27): <5, 3, -2>
+rotation_z(90) maps x to y: true
+zero column3 solve: The 3x3 matrix is singular: elimination met a pivot that is exactly 0, so the matrix has no inverse and A x = b has no single solution.
+a4 inverse * A within tolerance: true
+after pivot4 inverse: The 4x4 matrix is singular: elimination met a pivot that is exactly 0, so the matrix has no inverse and A x = b has no single solution.
+translation4 inverse: [[1, 0, 0, -1], [0, 1, 0, -2], [0, 0, 1, -3], [0, 0, 0, 1]]

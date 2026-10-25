@@ -143,11 +143,26 @@ routine Matrix4R4C.transpose() -> Matrix4R4C
 @rf("Matrix4R4C.determinant")
 routine Matrix4R4C.determinant() -> B32
 
-### The inverse of this matrix. A singular matrix (determinant 0) yields the zero
-### matrix.
-### :returns: `me⁻¹`, or the zero matrix if `me` is singular.
+### The inverse of this matrix, by Gaussian elimination with partial pivoting.
+### :returns: `me⁻¹`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
 @rf("Matrix4R4C.inverse")
-routine Matrix4R4C.inverse() -> Matrix4R4C
+failable routine Matrix4R4C.inverse() -> Matrix4R4C
+
+### The inverse of this matrix by the same elimination in raw IEEE 754 arithmetic: no check, so a singular
+### matrix gives infinities or NaN.
+### :returns: `me⁻¹`, or non-finite elements when `me` is singular.
+@rf("Matrix4R4C.inverse_unchecked")
+routine Matrix4R4C.inverse_unchecked() -> Matrix4R4C
+
+### Solves `me · x = b` for `x` by Gaussian elimination with partial pivoting.
+### :param b: The right-hand side.
+### :returns: The solution `x`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
+@rf("Matrix4R4C.solve")
+failable routine Matrix4R4C.solve(b: Vector[B32, 4]) -> Vector[B32, 4]
 
 ### Returns `true` when all sixteen elements compare equal.
 ### :param you: The matrix to compare against.

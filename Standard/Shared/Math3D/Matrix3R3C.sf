@@ -1,0 +1,170 @@
+module Math3D
+
+# Each declaration below creates nothing: `@rf` names the shared declaration it shows, and validate-stdlib
+# checks that the two still match.
+
+### A 3-row, 3-column single-precision matrix, stored **column-major** as three SIMD column vectors
+### (`Vector[B32, 3]`), the same layout as `Matrix2R2C` and `Matrix4R4C`. Element `(row, col)` lives at
+### `column[col][row]`. Conventions: **right-handed**, angles in **radians**.
+@rf("Matrix3R3C")
+record Matrix3R3C
+obeys Addable, Subtractable, Multiplicable, Negatable, Equatable
+    ### Column 0.
+    c0: Vector[B32, 3]
+    ### Column 1.
+    c1: Vector[B32, 3]
+    ### Column 2.
+    c2: Vector[B32, 3]
+
+### Builds a `Vector[B32, 3]` from its three lanes.
+### :param x: Lane 0.
+### :param y: Lane 1.
+### :param z: Lane 2.
+### :returns: The packed 3-lane vector `<x, y, z>`.
+@rf("vec3")
+routine vec3(x: B32, y: B32, z: B32) -> Vector[B32, 3]
+
+### The 3x3 identity matrix.
+### :returns: A matrix with ones on the diagonal, zeros elsewhere.
+@rf("Matrix3R3C.identity")
+common routine Matrix3R3C.identity() -> Matrix3R3C
+
+### The 3x3 zero matrix (every element zero).
+### :returns: A matrix of all zeros.
+@rf("Matrix3R3C.zero")
+common routine Matrix3R3C.zero() -> Matrix3R3C
+
+### A non-uniform scaling matrix.
+### :param sx: X scale.
+### :param sy: Y scale.
+### :param sz: Z scale.
+### :returns: The scaling matrix.
+@rf("Matrix3R3C.scaling")
+common routine Matrix3R3C.scaling(sx: B32, sy: B32, sz: B32) -> Matrix3R3C
+
+### A right-handed rotation about the X axis.
+### :param angle: The rotation angle in radians.
+### :returns: The rotation matrix.
+@rf("Matrix3R3C.rotation_x")
+common routine Matrix3R3C.rotation_x(angle: B32) -> Matrix3R3C
+
+### A right-handed rotation about the Y axis.
+### :param angle: The rotation angle in radians.
+### :returns: The rotation matrix.
+@rf("Matrix3R3C.rotation_y")
+common routine Matrix3R3C.rotation_y(angle: B32) -> Matrix3R3C
+
+### A right-handed rotation about the Z axis.
+### :param angle: The rotation angle in radians.
+### :returns: The rotation matrix.
+@rf("Matrix3R3C.rotation_z")
+common routine Matrix3R3C.rotation_z(angle: B32) -> Matrix3R3C
+
+### A rotation matrix from a (unit) quaternion: the top left 3x3 block of `Matrix4R4C.from_quaternion`.
+### :param q: The rotation quaternion (assumed normalized).
+### :returns: The equivalent rotation matrix.
+@rf("Matrix3R3C.from_quaternion")
+common routine Matrix3R3C.from_quaternion(q: Q128) -> Matrix3R3C
+
+### Returns column `index` (0 to 2) as a `Vector[B32, 3]`.
+### :param index: The column index.
+### :returns: The column vector.
+@rf("Matrix3R3C.column")
+routine Matrix3R3C.column(index: U64) -> Vector[B32, 3]
+
+### Returns the element at `(row, col)` (both 0 to 2).
+### :param row: The row index.
+### :param col: The column index.
+### :returns: The scalar element.
+@rf("Matrix3R3C.get")
+routine Matrix3R3C.get(row: U64, col: U64) -> B32
+
+### Returns row `index` (0 to 2) as a `Vector[B32, 3]`, the `me[index]` read operator, so `m[row][col]` reads one
+### element.
+### :param index: The row index (0 to 2).
+### :returns: The row vector `<m(row,0), m(row,1), m(row,2)>`.
+### :throws: {IndexOutOfBoundsError} if `index >= 3`.
+@rf("Matrix3R3C.getitem")
+failable routine Matrix3R3C.getitem(index: U64) -> Vector[B32, 3]
+
+### Element-wise matrix sum.
+### :param you: The matrix to add.
+### :returns: `me + you`.
+@rf("Matrix3R3C.add")
+routine Matrix3R3C.add(you: Matrix3R3C) -> Matrix3R3C
+
+### Element-wise matrix difference.
+### :param you: The matrix to subtract.
+### :returns: `me - you`.
+@rf("Matrix3R3C.sub")
+routine Matrix3R3C.sub(you: Matrix3R3C) -> Matrix3R3C
+
+### Element-wise negation.
+### :returns: `-me`.
+@rf("Matrix3R3C.neg")
+routine Matrix3R3C.neg() -> Matrix3R3C
+
+### Scales every element by a scalar.
+### :param factor: The scalar multiplier.
+### :returns: `factor · me`.
+@rf("Matrix3R3C.scale")
+routine Matrix3R3C.scale(factor: B32) -> Matrix3R3C
+
+### Transforms a vector: `me · v` (matrix times column vector).
+### :param v: The vector to transform.
+### :returns: `me · v`, computed as `c0·v.x + c1·v.y + c2·v.z`.
+@rf("Matrix3R3C.transform")
+routine Matrix3R3C.transform(v: Vector[B32, 3]) -> Vector[B32, 3]
+
+### Matrix product `me · you`. Each result column is `me · you.column`.
+### :param you: The right-hand matrix.
+### :returns: `me · you`.
+@rf("Matrix3R3C.mul")
+routine Matrix3R3C.mul(you: Matrix3R3C) -> Matrix3R3C
+
+### The transpose (rows and columns swapped).
+### :returns: `meᵀ`.
+@rf("Matrix3R3C.transpose")
+routine Matrix3R3C.transpose() -> Matrix3R3C
+
+### The determinant of this matrix.
+### :returns: `det(me)`.
+@rf("Matrix3R3C.determinant")
+routine Matrix3R3C.determinant() -> B32
+
+### The inverse of this matrix, by Gaussian elimination with partial pivoting.
+### :returns: `me⁻¹`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
+@rf("Matrix3R3C.inverse")
+failable routine Matrix3R3C.inverse() -> Matrix3R3C
+
+### The inverse of this matrix by the same elimination in raw IEEE 754 arithmetic: no check, so a singular
+### matrix gives infinities or NaN.
+### :returns: `me⁻¹`, or non-finite elements when `me` is singular.
+@rf("Matrix3R3C.inverse_unchecked")
+routine Matrix3R3C.inverse_unchecked() -> Matrix3R3C
+
+### Solves `me · x = b` for `x` by Gaussian elimination with partial pivoting.
+### :param b: The right-hand side.
+### :returns: The solution `x`.
+### :throws: {SingularMatrixError} when a pivot is exactly 0. An infinity or NaN during the computation crashes
+###     like the checked `B32` operators.
+@rf("Matrix3R3C.solve")
+failable routine Matrix3R3C.solve(b: Vector[B32, 3]) -> Vector[B32, 3]
+
+### Returns `true` when all nine elements compare equal.
+### :param you: The matrix to compare against.
+### :returns: `true` if every column matches.
+@rf("Matrix3R3C.eq")
+routine Matrix3R3C.eq(you: Matrix3R3C) -> Bool
+
+### Formats the matrix row by row as `[[m00, m01, m02], [m10, m11, m12], [m20, m21, m22]]`.
+### :returns: The resulting `Text` value.
+@rf("Matrix3R3C.represent")
+routine Matrix3R3C.represent() -> Text
+
+### Returns a diagnostic string wrapping the value with its type name.
+### :returns: The resulting `Text` value.
+@rf("Matrix3R3C.diagnose")
+routine Matrix3R3C.diagnose() -> Text

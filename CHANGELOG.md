@@ -123,6 +123,9 @@ file only once its other old spellings are gone.
   and the other math routines) is half up: `2.5` goes to `3` and `-2.5` to `-2`. The arbitrary-precision `Real` is
   gone.
 - `Decimal`'s `rem` is the Euclidean remainder, like integer `%`: `0 <= r < |b|` (`-7` by `2` is `1`).
+- `Matrix4R4C.inverse()` is failable: a singular matrix throws `SingularMatrixError` (0.1 gave the zero matrix).
+  The inverse is Gaussian elimination with partial pivoting, so a result that isn't exact can differ from 0.1's in
+  its last bits. `inverse_unchecked()` gives the raw result (infinities or NaN for a singular matrix).
 - Channels are `Mailbox[T]` (`add_last`, `add_last_if_room`, `remove_first`, `close`, `each x in m`). Default
   `migrate` lists each `make_channel` for a rewrite by hand.
 - `List` keeps its elements from the first place on. The ring operations (`rotate_left`, `keep_last`, ...) are
@@ -210,6 +213,11 @@ file only once its other old spellings are gone.
 - An emittable collects into any collection with `to[...]`: `to[List]`, `to[Set]`, `to[Dict]` (of `(key, value)`
   pairs), `to[SortedList]`, `to[SortedSet]`, `to[SortedDict]`, `to[RotatableList]`, `to[BitList]`,
   `to[PriorityQueue]` (of `(priority, element)` pairs), and `to[Array[T, N]]`.
+- `Math3D` has `Matrix2R2C` and `Matrix3R3C` beside `Matrix4R4C`, with the same routines, `vec2` and `vec3`, a 2D
+  `rotation`, `rotation_x`, `rotation_y`, `rotation_z` and `from_quaternion` on `Matrix3R3C`, and `scaling`. All three
+  have `inverse()`, `inverse_unchecked()` and `solve(b:)` (A x = b), computed by Gaussian elimination with partial
+  pivoting. `inverse()` and `solve(b:)` throw `SingularMatrixError` when a pivot is exactly 0, and an infinity or NaN
+  during the computation crashes like the other checked float operations.
 - `RotatableList[T]`: a list that adds and removes at both ends and rotates.
 - `jobs.start_now()` on a list of Works starts every Work in it and lets them all go together, so none runs before
   the others are ready. `gather` and `race` start the ones not started yet the same way.
