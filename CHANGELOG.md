@@ -259,6 +259,9 @@ file only once its other old spellings are gone.
   file whose numbers still have type suffixes, and leave the suffixes for `--step suffix`.
 - The language server: diagnostics, formatting, hover, go to definition, rename and quick fixes.
 - Rider plugin and VS Code extension.
+- A crash trace holds the program's routines only: a standard library routine keeps no frame, and a crash
+  inside one reports the line where the program called it. `[debug] trace-stdlib = true` keeps the library's
+  frames too (for work on the library).
 
 ### Fixed
 
