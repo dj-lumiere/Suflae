@@ -103,6 +103,21 @@ failable routine B32.sqrt() -> B32
 @rf("B32.sqrt_unchecked")
 routine B32.sqrt_unchecked() -> B32
 
+### Returns 1 divided by the square root of this value, correctly rounded: the exact 1 / sqrt(me) rounded once to the
+### nearest `B32` (ties to even), identical on every platform, not `1 / me.sqrt()` (two roundings). Checked: crashes
+### when the result isn't finite. Use `rsqrt_unchecked` for raw IEEE 754 results.
+### :returns: The correctly rounded reciprocal square root.
+### :throws: {NumericDomainError} when `me` is below zero or NaN (no real result).
+### :throws: {NumericOverflowError} when `me` is zero (the result is infinite).
+@rf("B32.rsqrt")
+failable routine B32.rsqrt() -> B32
+
+### Returns 1 divided by the square root of this value, correctly rounded, with raw IEEE 754 results: +0 gives
+### +infinity, -0 gives -infinity, +infinity gives +0, and a value below zero or NaN gives NaN.
+### :returns: The correctly rounded reciprocal square root.
+@rf("B32.rsqrt_unchecked")
+routine B32.rsqrt_unchecked() -> B32
+
 ### Returns the absolute value.
 ### :returns: The resulting `B32` value.
 @rf("B32.abs")

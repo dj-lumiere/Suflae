@@ -281,3 +281,18 @@ routine B128.sin_cos() -> (B128, B128)
 ### :returns: The correctly rounded square root.
 @rf("B128.sqrt_unchecked")
 routine B128.sqrt_unchecked() -> B128
+
+### Returns 1 divided by the square root of this value, correctly rounded: the exact 1 / sqrt(me) rounded once to the
+### nearest `B128` (ties to even), identical on every platform, not `1 / me.sqrt()` (two roundings). Checked: crashes
+### when the result isn't finite. Use `rsqrt_unchecked` for raw IEEE 754 results.
+### :returns: The correctly rounded reciprocal square root.
+### :throws: {NumericDomainError} when `me` is below zero or NaN (no real result).
+### :throws: {NumericOverflowError} when `me` is zero (the result is infinite).
+@rf("B128.rsqrt")
+failable routine B128.rsqrt() -> B128
+
+### Returns 1 divided by the square root of this value, correctly rounded, with raw IEEE 754 results: +0 gives
+### +infinity, -0 gives -infinity, +infinity gives +0, and a value below zero or NaN gives NaN.
+### :returns: The correctly rounded reciprocal square root.
+@rf("B128.rsqrt_unchecked")
+routine B128.rsqrt_unchecked() -> B128

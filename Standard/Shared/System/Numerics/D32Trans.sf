@@ -84,6 +84,18 @@ failable routine D32.sqrt() -> D32
 @rf("D32.sqrt_unchecked")
 routine D32.sqrt_unchecked() -> D32
 
+### 1 / sqrt(me), rounded once to 7 digits (ties to even), not `1 / me.sqrt()` (two roundings). Crashes on a
+### non-finite result (NumericDomainError below zero or for a NaN, NumericOverflowError at zero).
+### :throws: {NumericDomainError} when `me` is below zero or NaN.
+### :throws: {NumericOverflowError} when `me` is zero.
+@rf("D32.rsqrt")
+failable routine D32.rsqrt() -> D32
+
+### 1 / sqrt(me) rounded once, raw IEEE: +0 gives +infinity, -0 gives -infinity, +infinity gives +0, and a value
+### below zero or NaN gives NaN.
+@rf("D32.rsqrt_unchecked")
+routine D32.rsqrt_unchecked() -> D32
+
 ### The real cube root of me, correctly rounded.
 @rf("D32.cbrt")
 routine D32.cbrt() -> D32

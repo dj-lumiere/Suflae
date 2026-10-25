@@ -402,7 +402,8 @@ routine start()
   sign fill for `>>`). A shift amount and a subscript index may be an `Integer` or any fixed-width integer
   (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
   `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
-  The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `recip_sqrt`, `sin_cos`, `gamma`,
+  The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `rsqrt` (1 / sqrt(x) rounded once, also on
+  `Decimal` and the D types, a tie as the type rounds one, `x <= 0` stops), `sin_cos`, `gamma`,
   `ln_gamma`, `mul_add`, `mod_trunc` (truncated remainder), `rem` (IEEE remainder, on `Decimal` the Euclidean remainder), `fract`, `is_sign_negative`,
   `total_compare`, and so on. Float/decimal `max`/`min` return the other operand when one is NaN (`migrate --step
   names` rewrites the C names, `expm1`, `log`, `fma`, `fmod`, `remainder`, `fmax`, `frac`, `signbit`, `cmp`, ...).

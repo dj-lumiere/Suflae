@@ -808,15 +808,15 @@ routine BF16.cbrt() -> BF16
 ### Returns 1 divided by the square root of this value with raw IEEE 754 results (a pole, overflow or a value outside the domain passes
 ### through as ±infinity or NaN), correctly rounded to BF16.
 ### :returns: The correctly rounded result.
-@rf("BF16.recip_sqrt_unchecked")
-routine BF16.recip_sqrt_unchecked() -> BF16
+@rf("BF16.rsqrt_unchecked")
+routine BF16.rsqrt_unchecked() -> BF16
 
-### Returns 1 divided by the square root of this value, correctly rounded. Checked: crashes when the result isn't finite. Use `recip_sqrt_unchecked` for raw IEEE 754 results.
+### Returns 1 divided by the square root of this value, correctly rounded. Checked: crashes when the result isn't finite. Use `rsqrt_unchecked` for raw IEEE 754 results.
 ### :returns: The result.
 ### :throws: {NumericDomainError} when there is no real result.
 ### :throws: {NumericOverflowError} when the result is out of range.
-@rf("BF16.recip_sqrt")
-failable routine BF16.recip_sqrt() -> BF16
+@rf("BF16.rsqrt")
+failable routine BF16.rsqrt() -> BF16
 
 ### Returns `me` raised to `exp` with raw IEEE 754 results, correctly rounded; the special cases follow C `pow`.
 ### :param exp: The exponent.

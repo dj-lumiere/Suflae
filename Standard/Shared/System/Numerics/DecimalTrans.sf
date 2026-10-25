@@ -43,6 +43,11 @@ failable routine Decimal.pow(you: Decimal) -> Decimal
 @rf("Decimal.sqrt")
 failable routine Decimal.sqrt() -> Decimal
 
+### 1 / sqrt(me), correctly rounded to 34 digits (a tie half up), not `1 / me.sqrt()` (two roundings).
+### :throws: {NumericDomainError} when `me` is zero or below.
+@rf("Decimal.rsqrt")
+failable routine Decimal.rsqrt() -> Decimal
+
 ### Cube root of me.
 @rf("Decimal.cbrt")
 routine Decimal.cbrt() -> Decimal
