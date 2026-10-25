@@ -1,0 +1,64 @@
+module Tests/StdlibSf/IntegerSmallBigSfApi
+
+import IO/Console
+
+# Integer arithmetic around 2^64, where a value stops fitting in one word: every pair of operands below crosses
+# that line in some way. 2^64 written in the program and 2^64 reached by adding are the same value. A zero result
+# is never negative, so no line shows "-0".
+
+routine s64_text(a: Integer) -> Text
+    var t = "none"
+    when try a.to[S64]()
+        is None => t = "none"
+        else as v => t = f"{v}"
+    return t
+
+routine u64_text(a: Integer) -> Text
+    var t = "none"
+    when try a.to[U64]()
+        is None => t = "none"
+        else as v => t = f"{v}"
+    return t
+
+routine order_text(a: Integer, b: Integer) -> Text
+    var t = ""
+    t = t + (if a < b then "<" else ".")
+    t = t + (if a <= b then "l" else ".")
+    t = t + (if a == b then "=" else ".")
+    t = t + (if a != b then "!" else ".")
+    t = t + (if a >= b then "g" else ".")
+    t = t + (if a > b then ">" else ".")
+    return t
+
+routine show_pair(a: Integer, b: Integer)
+    var line = f"{a} {b}: {a + b} {a - b} {order_text(a: a, b: b)} {a & b} {a | b} {a ^ b}"
+    if b == 0
+        show(line)
+    else
+        show(f"{line} {a // b} {a % b}")
+
+routine show_one(a: Integer)
+    var shifts = f"{a << 1} {a << 63} {a << 64} {a >> 1} {a >> 63} {a >> 64}"
+    var signs = f"{-a} {a.abs()} {a == 0} {a < 0} {a > 0} {a % 2 == 0}"
+    show(f"{a}: {shifts} | {signs} | {s64_text(a: a)} {u64_text(a: a)}")
+
+routine start()
+    var max = 18446744073709551615
+    var values = [0, 1, -1, 7, -7, 9223372036854775807, -9223372036854775808, 9223372036854775808]
+    values.add_last(value: max - 1)
+    values.add_last(value: max)
+    values.add_last(value: -max)
+    values.add_last(value: max + 1)
+    values.add_last(value: max + 2)
+    values.add_last(value: 18446744073709551616)
+    values.add_last(value: -18446744073709551616)
+    values.add_last(value: 340282366920938463463374607431768211461)
+    each a in values
+        show_one(a: a)
+    each a in values
+        each b in values
+            show_pair(a: a, b: b)
+    var two_64 = 18446744073709551616
+    show(f"{two_64 - 1} {two_64 - two_64} {-two_64 + two_64} {(max + 1) - two_64}")
+    show(f"{(two_64 * two_64) // two_64} {(two_64 * 3) % two_64} {two_64 >> 64} {(two_64 >> 1) << 1}")
+    show("DONE")
