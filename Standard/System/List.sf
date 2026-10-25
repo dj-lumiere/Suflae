@@ -44,13 +44,17 @@ routine List[T]() -> List[T]
 
 ### Creates an empty list with room for at least `capacity` elements.
 ### :param capacity: The number of elements to make room for.
-routine List[T](capacity: Integer) -> List[T]
+### :throws: {NegativeIndexError} if `capacity` is negative.
+### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine List[T](capacity: Integer) -> List[T]
     return List[T](items: Memory[T](capacity: capacity), count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
 ### :param count: The number of elements.
 ### :param fill_value: The value every element starts as.
-routine List[T](count: Integer, fill_value: T) -> List[T]
+### :throws: {NegativeIndexError} if `count` is negative.
+### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine List[T](count: Integer, fill_value: T) -> List[T]
     return List[T](items: Memory[T](count: count, fill: fill_value), count: count.to[U64]())
 
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
@@ -202,9 +206,11 @@ routine List[T].clear()
 
 ### Makes room for at least `new_capacity` elements without growing again.
 ### :param new_capacity: The number of elements to make room for.
-routine List[T].reserve(new_capacity: Integer)
+### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them. The list then stays
+###     as it was.
+failable routine List[T].reserve(new_capacity: Integer)
     if new_capacity > me.items.room().to[Integer]()
-        me.items.grow_to(room: new_capacity.to[U64]())
+        me.items.grow_to(room: room_of(capacity: new_capacity))
     return
 
 # ============================================================================

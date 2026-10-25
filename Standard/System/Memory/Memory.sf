@@ -80,18 +80,23 @@ obeys Emitter[T]
 
 ### Creates a memory of `capacity` places, all zero.
 ### :param capacity: How many places it has.
-routine Memory[T](capacity: Integer) -> Memory[T]
-    return Memory[T](room: capacity.to[U64]())
+### :throws: {NegativeIndexError} if `capacity` is negative.
+### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine Memory[T](capacity: Integer) -> Memory[T]
+    return Memory[T](room: room_of(capacity: capacity))
 
 ### Creates a memory of `room` places, all zero, counted with `U64`.
 ### :param room: How many places it has.
-routine Memory[T](room: U64) -> Memory[T]
+### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine Memory[T](room: U64) -> Memory[T]
     return Memory[T](block: new_memory_block[T](room: room))
 
 ### Creates a memory of `count` places, each holding `fill`.
 ### :param count: The number of places.
 ### :param fill: The value every place starts as.
-routine Memory[T](count: Integer, fill: T) -> Memory[T]
+### :throws: {NegativeIndexError} if `count` is negative.
+### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine Memory[T](count: Integer, fill: T) -> Memory[T]
     var result = Memory[T](capacity: count)
     var i: U64 = 0
     until i >= result.room()
@@ -101,11 +106,12 @@ routine Memory[T](count: Integer, fill: T) -> Memory[T]
     return result
 
 ### A block of `room` places, all zero.
-secret routine new_memory_block[T](room: U64) -> MemoryBlock[T]
+### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
+secret failable routine new_memory_block[T](room: U64) -> MemoryBlock[T]
     danger
         var data = Hijacked[T].hollow()
         if room > 0
-            data = hijacked_from[T](rf_allocate_dynamic(T.data_size() * room))
+            data = hijacked_from[T](allocate_storage(element_size: T.data_size(), count: room))
         return MemoryBlock[T](data: data, room: room)
 
 # ============================================================================
@@ -370,8 +376,11 @@ routine Span[T].fill(value: T)
 ### Moves everything into a new row of `capacity` places, the first ones holding what this memory holds and the rest
 ### zero. Spans made before keep the old row, which is left all zero.
 ### :param capacity: How many places the new row has, at least `capacity()`.
+### :throws: {IndexOutOfBoundsError} if `capacity` is less than `capacity()`.
+### :throws: {OutOfMemoryError} if the places take more bytes than a `U64` counts, or there is no memory left for them.
+###     The memory then stays as it was.
 failable routine Memory[T].grow(capacity: Integer)
-    me.grow_to(room: capacity.to[U64]())
+    me.grow_to(room: room_of(capacity: capacity))
     return
 
 ### Moves everything into a new row of `room` places, as `grow` does, counted with `U64`.

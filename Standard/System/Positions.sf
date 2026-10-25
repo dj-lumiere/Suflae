@@ -9,6 +9,18 @@ failable routine position_of(value: Integer) -> U64
         throw NegativeIndexError(index: value)
     return value.to[U64]()
 
+### The number of places a collection makes room for when it is asked for `capacity` elements.
+### :param capacity: The element count.
+### :returns: The place count.
+### :throws: {NegativeIndexError} if `capacity` is negative.
+### :throws: {OutOfMemoryError} if `capacity` is more than a `U64` counts.
+failable routine room_of(capacity: Integer) -> U64
+    if capacity.is_negative()
+        throw NegativeIndexError(index: capacity)
+    if capacity > U64_MAX.to[Integer]()
+        throw OutOfMemoryError(requested_bytes: U64_MAX)
+    return capacity.to[U64]()
+
 ### The memory positions a collection keeps for `range`: the same range, counted with `U64`. A range that
 ### counts down keeps its direction: the positions count down by the step's magnitude.
 ### :param range: The positions, from 0.

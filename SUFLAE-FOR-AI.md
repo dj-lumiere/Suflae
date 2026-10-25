@@ -1040,6 +1040,13 @@ each entry in ages
   a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
 - Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
+- Making room up front is failable: `reserve(new_capacity:)` on `List`, `RotatableList`, `BitList` and
+  `PriorityQueue`, and the creators `List[T](capacity:)`, `List[T](count:, fill_value:)`, `RotatableList[T](capacity:)`,
+  `BitList(capacity:)`, `PriorityQueue[P, E](capacity:)`, `Memory[T](capacity:)` and `Memory[T](count:, fill:)`
+  throw `OutOfMemoryError` when the elements take more bytes than a `U64` counts or there is no memory left for
+  them, and `NegativeIndexError` for a negative count. `check xs.reserve(new_capacity: n)` receives the failure,
+  and the collection then stays as it was. Growing on the way (`add_last` past the capacity) is not failable:
+  running out of memory there stops the program.
 - `Memory[T]` (`System/Memory`) is the row of places every collection keeps its elements in, and a program can use
   it too: `Memory[Integer](capacity: 5)` makes five places that start as zero (`0`, `""`, `false`, no entity),
   `Memory[Text](count: 3, fill: "a")` fills them. `mem[i]`, `mem[i] = v`, `take(index:)`, `erase(index:)`,

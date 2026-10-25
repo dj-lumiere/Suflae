@@ -1,0 +1,13 @@
+list reserve past U64: Failed to allocate the storage: its size is more bytes than a U64 counts
+list reserve too many: OutOfMemoryError
+list after: [1, 2] count 2
+list capacity too many: OutOfMemoryError
+list fill past U64: OutOfMemoryError
+list capacity -1: NegativeIndexError
+rotatable reserve: OutOfMemoryError
+rotatable after: [5]
+bits reserve: OutOfMemoryError
+bits after: 1
+queue reserve: OutOfMemoryError
+queue after: 1
+memory capacity: OutOfMemoryError

@@ -66,7 +66,9 @@ routine PriorityQueue[TPriority, TElement]() -> PriorityQueue[TPriority, TElemen
 
 ### Creates an empty priority pool with room for `capacity` entries.
 ### :param capacity: The number of entries to make room for.
-routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[TPriority, TElement]
+### :throws: {NegativeIndexError} if `capacity` is negative.
+### :throws: {OutOfMemoryError} if the entries take more bytes than a `U64` counts, or there is no memory left for them.
+failable routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[TPriority, TElement]
     return PriorityQueue[TPriority, TElement](
         priorities: Memory[TPriority](capacity: capacity),
         elements: Memory[TElement](capacity: capacity),
@@ -97,9 +99,11 @@ routine PriorityQueue[TPriority, TElement].clear()
 
 ### Makes room for at least `new_capacity` entries without growing again.
 ### :param new_capacity: The minimum entry count to guarantee.
-routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
+### :throws: {OutOfMemoryError} if the entries take more bytes than a `U64` counts, or there is no memory left for them.
+###     The pool then holds what it held.
+failable routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
     if new_capacity > me.priorities.capacity()
-        me.make_room(room: new_capacity.to[U64]())
+        me.make_room(room: room_of(capacity: new_capacity))
     return
 
 # ============================================================================
@@ -282,9 +286,11 @@ secret routine PriorityQueue[TPriority, TElement].swap_entries(a: U64, b: U64)
     return
 
 ### Moves both buffers into rows of `room` places.
-secret routine PriorityQueue[TPriority, TElement].make_room(room: U64)
-    me.priorities.grow_to(room: room)
+secret failable routine PriorityQueue[TPriority, TElement].make_room(room: U64)
+    # The elements grow first: the pool's room is the priorities' room, so a failure growing the priorities leaves
+    # a pool whose elements merely have more room than it uses.
     me.elements.grow_to(room: room)
+    me.priorities.grow_to(room: room)
     return
 
 ### The entries as text in the order `shown_order` gives: `[1: "a", 3: "b"]`.

@@ -1,0 +1,55 @@
+module Tests/StdlibSf/ReserveFailureSf
+
+import IO/Console
+import Collections
+
+# Making room up front fails with OutOfMemoryError, which check receives: a count past what a U64 counts, or more
+# memory than there is. The collection stays as it was and can still be used.
+
+routine start()
+    var xs = [1]
+    var past_u64 = 10 ** 30
+    when check xs.reserve(new_capacity: past_u64)
+        is None => show("list reserve past U64: reserved")
+        is OutOfMemoryError as e => show(f"list reserve past U64: {e.crash_message()}")
+    var too_many = 10 ** 18
+    when check xs.reserve(new_capacity: too_many)
+        is None => show("list reserve too many: reserved")
+        is OutOfMemoryError => show("list reserve too many: OutOfMemoryError")
+    xs.add_last(value: 2)
+    show(f"list after: {xs} count {xs.count()}")
+
+    when check List[Integer](capacity: too_many)
+        is List[Integer] => show("list capacity too many: made")
+        is OutOfMemoryError => show("list capacity too many: OutOfMemoryError")
+    when check List[Integer](count: past_u64, fill_value: 0)
+        is List[Integer] => show("list fill past U64: made")
+        is OutOfMemoryError => show("list fill past U64: OutOfMemoryError")
+    when check List[Integer](capacity: -1)
+        is List[Integer] => show("list capacity -1: made")
+        is NegativeIndexError => show("list capacity -1: NegativeIndexError")
+
+    var ring = RotatableList[Integer]()
+    ring.add_last(value: 5)
+    when check ring.reserve(new_capacity: too_many)
+        is None => show("rotatable reserve: reserved")
+        is OutOfMemoryError => show("rotatable reserve: OutOfMemoryError")
+    show(f"rotatable after: {ring}")
+
+    var bits = BitList()
+    bits.add_last(value: true)
+    when check bits.reserve(new_capacity: past_u64)
+        is None => show("bits reserve: reserved")
+        is OutOfMemoryError => show("bits reserve: OutOfMemoryError")
+    show(f"bits after: {bits.count()}")
+
+    var queue = PriorityQueue[Integer, Text]()
+    queue.add(element: "a", priority: 1)
+    when check queue.reserve(new_capacity: too_many)
+        is None => show("queue reserve: reserved")
+        is OutOfMemoryError => show("queue reserve: OutOfMemoryError")
+    show(f"queue after: {queue.count()}")
+
+    when check Memory[Integer](capacity: too_many)
+        is Memory[Integer] => show("memory capacity: made")
+        is OutOfMemoryError => show("memory capacity: OutOfMemoryError")
