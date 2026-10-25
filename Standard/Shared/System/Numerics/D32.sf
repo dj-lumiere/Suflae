@@ -6,7 +6,7 @@ module System/Numerics
 ### A software decimal32 value in BID storage.
 @rf("D32")
 record D32
-obeys Numeric, Comparable, Copyable
+obeys Numeric, Comparable, Copyable, Hashable
     nothing
 
 ### Reinterprets the 32-bit BID storage as a raw U32 (no decode).
@@ -120,6 +120,14 @@ routine D32.truediv_unchecked(you: D32) -> D32
 ### finite values compare by value, so different cohorts of the same number are equal).
 @rf("D32.eq")
 routine D32.eq(you: D32) -> Bool
+
+### Returns a SipHash-2-4 keyed hash of the value: equal values hash equal whatever their digits (`1.0` and `1.00`,
+### `+0` and `-0`), and every NaN hashes the same.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("D32.hash")
+routine D32.hash(k0: U64, k1: U64) -> U64
 
 ### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
 ### maps to `SAME` (matching the B128 engine convention).

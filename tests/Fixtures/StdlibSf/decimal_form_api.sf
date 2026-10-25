@@ -43,4 +43,21 @@ routine start()
     var pl: Decimal = 1.0000000000000000000000000000000005
     var nl2: Decimal = -2.0000000000000000000000000000000015
     show(f"long literals: {nl} {pl} {nl2}")
+    var nb: Decimal = -1.5
+    var e29: Decimal = 29
+    var em50: Decimal = -50
+    show(f"exact ties: {nb.pow(you: e29)} {em50.exp2()} {two.pow(you: em50)}")
+
+    var d1: D128 = 1.0
+    var d2: D128 = 1.00
+    var dz: D128 = 0
+    var dnz: D128 = -0.000
+    var e1: D64 = 2.50
+    var e2: D64 = 2.5
+    var f1: D32 = 2.500
+    var f2: D32 = 25e-1
+    show(f"D hash: {d1.hash(k0: 1, k1: 2) == d2.hash(k0: 1, k1: 2)} {dz.hash(k0: 1, k1: 2) == dnz.hash(k0: 1, k1: 2)} {d1.hash(k0: 1, k1: 2) == dz.hash(k0: 1, k1: 2)} {e1.hash(k0: 1, k1: 2) == e2.hash(k0: 1, k1: 2)} {f1.hash(k0: 1, k1: 2) == f2.hash(k0: 1, k1: 2)}")
+    var dkeys = Set[D128]()
+    dkeys.add(d1)
+    show(f"D set: {dkeys.has(d2)} {dkeys.has(dz)}")
     show("DONE")

@@ -6,7 +6,7 @@ module System/Numerics
 ### A software decimal128 value in BID storage.
 @rf("D128")
 record D128
-obeys Numeric, Comparable, Copyable
+obeys Numeric, Comparable, Copyable, Hashable
     nothing
 
 ### Reinterprets this value as its raw decimal128 bit pattern.
@@ -133,6 +133,14 @@ routine D128.truediv_unchecked(you: D128) -> D128
 ### (so different cohorts of the same number — e.g. 1.0 and 1.00 — are equal).
 @rf("D128.eq")
 routine D128.eq(you: D128) -> Bool
+
+### Returns a SipHash-2-4 keyed hash of the value: equal values hash equal whatever their digits (`1.0` and `1.00`,
+### `+0` and `-0`), and every NaN hashes the same.
+### :param k0: The first 64-bit key word.
+### :param k1: The second 64-bit key word.
+### :returns: A `U64` keyed hash suitable for denial-of-service-resistant hash tables.
+@rf("D128.hash")
+routine D128.hash(k0: U64, k1: U64) -> U64
 
 ### Three-way decimal comparison under IEEE ordered semantics. NaN is unordered and
 ### maps to `SAME` (matching the B128 engine convention).

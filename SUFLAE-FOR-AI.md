@@ -652,7 +652,8 @@ routine start()
   such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
   `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
   in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Integer` and
-  `Decimal` hash their value (two equal ones hash the same however they were built). An optional `T?` has `==`
+  `Decimal` hash their value (two equal ones hash the same however they were built). `D32`/`D64`/`D128` hash
+  their value too, not the digits they keep: `1.0` and `1.00`, `+0` and `-0` hash the same, and every NaN hashes the same. An optional `T?` has `==`
   and a hash when `T` does: two absent ones are equal, an absent and a present one differ. When member variables
   lead back to entities being compared (a parent and its children, a ring of nodes, an entity pointing at itself),
   meeting such a pair again counts as equal, so the comparison ends and compares the structures by shape. A hash
