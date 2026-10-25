@@ -5,8 +5,8 @@ module System
 
 ### Represents the crashable raised when the runtime cannot satisfy an
 ### allocation request.
-@rf("MemoryAllocationError")
-crashable MemoryAllocationError
+@rf("OutOfMemoryError")
+crashable OutOfMemoryError
     ### Stores the number of bytes requested by the failed allocation.
     requested_bytes: U64
 
@@ -23,8 +23,8 @@ crashable MemoryBoundsError
 
 ### Returns the default message for allocation failure.
 ### :returns: The resulting `Text` value.
-@rf("MemoryAllocationError.crash_message")
-routine MemoryAllocationError.crash_message() -> Text
+@rf("OutOfMemoryError.crash_message")
+routine OutOfMemoryError.crash_message() -> Text
 
 ### Returns the default message for out-of-bounds memory access.
 ### :returns: The resulting `Text` value.
