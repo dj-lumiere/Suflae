@@ -8,5 +8,7 @@
   "token.entityType": "Entity type (a value with an identity)",
   "token.constant": "Preset, global, or case",
   "token.docTag": "Doc comment field (:param, :returns)",
-  "token.docValue": "Doc comment field name or reference"
+  "token.docValue": "Doc comment field name or reference",
+  "command.runFile": "Run this file",
+  "command.runFolder": "Run this solution (the folder with config.toml)"
 }

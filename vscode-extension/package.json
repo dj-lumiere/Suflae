@@ -127,6 +127,65 @@
         "command": "suflae.restartServer",
         "title": "%command.restart%",
         "category": "Suflae"
+      },
+      {
+        "command": "suflae.runFile",
+        "title": "%command.runFile%",
+        "category": "Suflae",
+        "icon": "$(play)"
+      },
+      {
+        "command": "suflae.runFolder",
+        "title": "%command.runFolder%",
+        "category": "Suflae",
+        "icon": "$(run-all)"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "suflae.runFile",
+          "when": "resourceLangId == suflae",
+          "group": "navigation@1"
+        },
+        {
+          "command": "suflae.runFolder",
+          "when": "resourceLangId == suflae",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "suflae.runFile",
+          "when": "resourceLangId == suflae",
+          "group": "z_commands@1"
+        },
+        {
+          "command": "suflae.runFolder",
+          "when": "resourceLangId == suflae",
+          "group": "z_commands@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "suflae.runFile",
+          "when": "resourceLangId == suflae",
+          "group": "z_commands@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "suflae.runFile",
+        "key": "ctrl+f5",
+        "mac": "cmd+f5",
+        "when": "editorLangId == suflae"
+      },
+      {
+        "command": "suflae.runFolder",
+        "key": "ctrl+shift+f5",
+        "mac": "cmd+shift+f5",
+        "when": "editorLangId == suflae"
       }
     ]
   },
