@@ -163,6 +163,31 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     /// </summary>
     private List<Statement> LowerLoop(LoopStatement loop, List<Statement> preceding)
     {
+        if (loop.IteratorName is not { } iterator)
+        {
+            return LowerLoopOver(loop: loop, preceding: preceding);
+        }
+
+        _loopIterators.Add(item: iterator);
+        try
+        {
+            return LowerLoopOver(loop: loop, preceding: preceding);
+        }
+        finally
+        {
+            _loopIterators.Remove(item: iterator);
+        }
+    }
+
+    /// <summary>
+    /// The hidden variables holding the emitter each enclosing <c>each</c> loop walks (<c>_lf_iter_N</c>). The program
+    /// cannot name one, and a loop over an emitter opens no shape use, so no use of an emitter's shape is ever open
+    /// when its loop takes the next step: the step's <c>emit</c> needs no <c>control_to_reshape</c>.
+    /// </summary>
+    private readonly HashSet<string> _loopIterators = new(comparer: StringComparer.Ordinal);
+
+    private List<Statement> LowerLoopOver(LoopStatement loop, List<Statement> preceding)
+    {
         Expression? source = loop.IterationSourceName is { } name
             ? LoopSource(name: name, preceding: preceding)
             : loop.IterationSourcePath is { } path
@@ -492,7 +517,8 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                 if (e is CallExpression { ResolvedRoutine: { } callee, Callee: MemberExpression { Object: var target } } &&
                     ChangesShape(routine: callee) &&
                     Unprojected(expr: target) is var handle && !ReferenceEquals(objA: handle, objB: target) &&
-                    IsNamedPath(expr: handle) && HasShapeUse(container: handle))
+                    IsNamedPath(expr: handle) && HasShapeUse(container: handle) &&
+                    !(handle is IdentifierExpression { Name: var walked } && _loopIterators.Contains(item: walked)))
                 {
                     handles.Add(item: handle);
                 }
@@ -549,7 +575,8 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
                             Callee: MemberExpression { MemberName: RuntimeContract.Control, Object: var handle } projection
                         } projected
                     } receiver
-                } call || !pass.ChangesShape(routine: callee) || handle.ResolvedType is not { } handleType ||
+                } call || handle is IdentifierExpression { Name: var walked } && pass._loopIterators.Contains(item: walked) ||
+                !pass.ChangesShape(routine: callee) || handle.ResolvedType is not { } handleType ||
                 !IsRoamed(type: handleType) || !pass.HasShapeUse(container: handle) ||
                 (pass.Registry.LookupMemberRoutine(type: handleType,
                      memberRoutineName: RuntimeContract.ShapeUse.ControlToReshape, isFailable: true) ??

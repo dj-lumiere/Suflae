@@ -93,6 +93,7 @@ common routine List[T].from_literal(elements...: T) -> List[T]
 # ============================================================================
 
 ### Returns the number of elements.
+@inline
 routine List[T].count() -> Integer
     return me.count.to[Integer]()
 
@@ -101,6 +102,7 @@ routine List[T].capacity() -> Integer
     return me.items.room().to[Integer]()
 
 ### Returns whether the list has no elements.
+@inline
 routine List[T].is_empty() -> Bool
     return me.count == 0
 
@@ -110,9 +112,11 @@ routine List[T].is_empty() -> Bool
 
 ### Adds `value` at the back. The list moves into a bigger memory when it is full.
 ### :param value: The value to add.
+@inline
 routine List[T].add_last(value: T)
     me.make_room(extra: 1)
-    me.items.put(position: me.count, value: value)
+    danger
+        me.items.put_unchecked(position: me.count, value: value)
     me.count = me.count + 1
     return
 
@@ -222,14 +226,16 @@ failable routine List[T].reserve(new_capacity: Integer)
 failable routine List[T].first() -> T
     if me.count == 0
         throw AbsentValueError()
-    return me.items.at(position: 0)
+    danger
+        return me.items.at_unchecked(position: 0)
 
 ### Returns the last element.
 ### :throws: {AbsentValueError} The list is empty.
 failable routine List[T].last() -> T
     if me.count == 0
         throw AbsentValueError()
-    return me.items.at(position: me.count - 1)
+    danger
+        return me.items.at_unchecked(position: me.count - 1)
 
 ### Returns the first element, or `default_value` if the list is empty.
 ### :param default_value: The value to return when there is no element.
@@ -247,14 +253,21 @@ routine List[T].last_or_default(default_value: T) -> T
 
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
+@inline
 failable routine List[T].getitem(index: Integer) -> T
-    return me.items.at(position: me.checked_position(index: index))
+    # The list's own check is the only one: its count never passes the memory's room.
+    var at = me.checked_position(index: index)
+    danger
+        return me.items.at_unchecked(position: at)
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
+@inline
 failable routine List[T].setitem(index: Integer, value: T)
-    me.items.put(position: me.checked_position(index: index), value: value)
+    var at = me.checked_position(index: index)
+    danger
+        me.items.put_unchecked(position: at, value: value)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
@@ -363,8 +376,12 @@ routine List[T].sorted_by(compare: failable Callable[(T, T), Bool]) -> List[T]
 ### Swaps the elements at `first` and `second` in place.
 ### :param first: One position.
 ### :param second: The other position.
+@inline
 failable routine List[T].swap(first: Integer, second: Integer)
-    me.items.swap_at(first: me.checked_position(index: first), second: me.checked_position(index: second))
+    var a = me.checked_position(index: first)
+    var b = me.checked_position(index: second)
+    danger
+        me.items.swap_unchecked(first: a, second: b)
     return
 
 ### Reverses the order of the elements.
@@ -377,6 +394,7 @@ routine List[T].reverse_in_place()
 # ============================================================================
 
 ### The position `index` names, crashing unless it is the position of an element.
+@inline
 secret failable routine List[T].checked_position(index: Integer) -> U64
     var at = position_of(value: index)
     if at >= me.count
@@ -394,11 +412,17 @@ secret routine List[T].cut(kept: U64)
 
 ### Moves into a bigger memory when fewer than `extra` places are free: twice the room, at least four, or as much
 ### as needed.
+@inline
 secret routine List[T].make_room(extra: U64)
     var needed = me.count + extra
+    if needed > me.items.room()
+        me.grow_for(needed: needed)
+    return
+
+### Moves into a memory with room for at least `needed` elements: twice the room, at least four, or as much as
+### needed.
+secret routine List[T].grow_for(needed: U64)
     var room = me.items.room()
-    if needed <= room
-        return
     var grown: U64 = if room < 4 then 4 else room * 2
     if grown < needed
         grown = needed

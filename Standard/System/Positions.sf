@@ -4,6 +4,7 @@ module System
 ### and with `U64` inside.
 ### :param value: The position or count, from 0.
 ### :throws: {NegativeIndexError} if `value` is negative.
+@inline
 failable routine position_of(value: Integer) -> U64
     if value.is_negative()
         throw NegativeIndexError(index: value)

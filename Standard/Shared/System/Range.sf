@@ -44,6 +44,12 @@ needs T obeys Comparable, Addable, Subtractable
     inclusive: Bool
     ### Stores whether iteration has already completed.
     done: Bool
+    ### Stores whether `limit` holds: the range's end leaves room for one whole step past it on the side the walk
+    ### comes from, so each step is one comparison against `limit`.
+    steady: Bool
+    ### Stores the value from which one more step still lands inside the range (`end - step` counting up,
+    ### `end + step` counting down), when `steady` is true.
+    limit: T
 
 ### Creates an inclusive range from `start` to `end` using a step of `1`.
 ### :param start: The inclusive starting position.

@@ -123,6 +123,7 @@ routine Memory[T].capacity() -> Integer
     return me.block.room.to[Integer]()
 
 ### Returns how many places the memory has, as a `U64`.
+@inline
 routine Memory[T].room() -> U64
     return me.block.room
 
@@ -140,6 +141,7 @@ routine Span[T].room() -> U64
 
 ### Returns what the place at `index` holds (`mem[i]`).
 ### :param index: The position to read.
+@inline
 failable routine Memory[T].getitem(index: Integer) -> T
     return me.at(position: position_of(value: index))
 
@@ -151,6 +153,7 @@ failable routine Span[T].getitem(index: Integer) -> T
 ### Replaces what the place at `index` holds (`mem[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new value.
+@inline
 failable routine Memory[T].setitem(index: Integer, value: T)
     me.put(position: position_of(value: index), value: value)
     return
@@ -188,6 +191,32 @@ failable routine Memory[T].put(position: U64, value: T)
 @inline
 failable routine Span[T].put(position: U64, value: T)
     places_put[T](base: me.base(), room: me.room, position: position, value: value)
+    return
+
+### Returns what the place at `position` holds, for a caller that has already checked `position` against the places
+### it keeps its elements in (a list checks its count, which never passes the memory's room). A place of entities
+### that holds no entity yet still crashes with `EmptyPlaceError`.
+### :param position: The position to read, inside the memory.
+@inline
+failable dangerous routine Memory[T].at_unchecked(position: U64) -> T
+    return places_held[T](base: me.block.data, position: position)
+
+### Replaces what the place at `position` holds, for a caller that has already checked `position` against the places
+### it keeps its elements in.
+### :param position: The position to write, inside the memory.
+### :param value: The new value.
+@inline
+dangerous routine Memory[T].put_unchecked(position: U64, value: T)
+    places_write[T](base: me.block.data, position: position, value: value)
+    return
+
+### Swaps what the places at `first` and `second` hold, for a caller that has already checked both positions against
+### the places it keeps its elements in.
+### :param first: One position, inside the memory.
+### :param second: The other position, inside the memory.
+@inline
+dangerous routine Memory[T].swap_unchecked(first: U64, second: U64)
+    places_swap[T](base: me.block.data, a: first, b: second)
     return
 
 ### Hands out what the place at `position` holds and leaves the place zero, counted with `U64`.
@@ -346,6 +375,7 @@ failable routine Span[T].swap(first: Integer, second: Integer)
 ### Swaps what the places at `first` and `second` hold, counted with `U64`.
 ### :param first: One position.
 ### :param second: The other position.
+@inline
 failable routine Memory[T].swap_at(first: U64, second: U64)
     var a = places_checked(room: me.block.room, position: first)
     var b = places_checked(room: me.block.room, position: second)
@@ -519,7 +549,7 @@ failable routine MemoryEmitter[T].emit() -> T
     if place >= me.room
         place = place - me.room
     danger
-        var result = me.block.data.offset(T.data_size() * (me.base + place)).peek()
+        var result = place_at[T](base: me.block.data, position: me.base + place).peek()
         me.index = me.index +% 1
         return result
 
@@ -584,10 +614,11 @@ routine Span[T].diagnose() -> Text
 secret routine Span[T].base() -> Hijacked[T]
     return place_at[T](base: me.block.data, position: me.start)
 
-### The place at `position` of the places from `base`.
+### The place at `position` of the places from `base`. Every position given is inside a row whose byte size was
+### checked when the row was allocated, so the byte offset cannot pass what a `U64` counts.
 @inline
 secret routine place_at[T](base: Hijacked[T], position: U64) -> Hijacked[T]
-    return base.offset(T.data_size() * position)
+    return base.offset(ByteSize(bytes: T.data_size().byte_size() *% position))
 
 ### `position` checked against `room` places.
 @inline
@@ -599,12 +630,17 @@ secret failable routine places_checked(room: U64, position: U64) -> U64
 ### `position` checked against `room` places and, for places of entities, against a place that holds no entity yet.
 @inline
 secret failable routine places_filled[T](base: Hijacked[T], room: U64, position: U64) -> U64
-    var place = places_checked(room: room, position: position)
+    return places_present[T](base: base, position: places_checked(room: room, position: position))
+
+### `position`, already checked against the room, checked for places of entities against a place that holds no
+### entity yet.
+@inline
+secret failable routine places_present[T](base: Hijacked[T], position: U64) -> U64
     if T.type_kind() == TypeKind.ENTITY
         danger
-            if place_at[T](base: base, position: place).peek_as[Addr]().is_hollow()
-                throw EmptyPlaceError(index: place.to[Integer]())
-    return place
+            if place_at[T](base: base, position: position).peek_as[Addr]().is_hollow()
+                throw EmptyPlaceError(index: position.to[Integer]())
+    return position
 
 ### What a place already checked holds, as it sits in memory (no holder of its own).
 @inline
@@ -617,11 +653,22 @@ secret routine places_read[T](base: Hijacked[T], position: U64) -> T
 secret failable routine places_at[T](base: Hijacked[T], room: U64, position: U64) -> T
     return places_read[T](base: base, position: places_filled[T](base: base, room: room, position: position)).share()
 
+### What the place at `position`, already checked against the room, holds, a value of its own.
+@inline
+secret failable routine places_held[T](base: Hijacked[T], position: U64) -> T
+    return places_read[T](base: base, position: places_present[T](base: base, position: position)).share()
+
 ### Replaces what the place at `position` holds.
 @inline
 secret failable routine places_put[T](base: Hijacked[T], room: U64, position: U64, value: T)
+    places_write[T](base: base, position: places_checked(room: room, position: position), value: value)
+    return
+
+### Replaces what the place at `position`, already checked against the room, holds.
+@inline
+secret routine places_write[T](base: Hijacked[T], position: U64, value: T)
     danger
-        var slot = place_at[T](base: base, position: places_checked(room: room, position: position))
+        var slot = place_at[T](base: base, position: position)
         slot.peek().destruct()
         slot.poke(value)
     return
@@ -760,18 +807,10 @@ secret routine places_clear[T](base: Hijacked[T], from: U64, count: U64)
     return
 
 ### Swaps the bits of the places at `a` and `b`.
+@inline
 secret routine places_swap[T](base: Hijacked[T], a: U64, b: U64)
-    if a == b
-        return
-    var size = T.data_size()
     danger
-        var held = hijacked_from[T](rf_allocate_dynamic_uninit(size))
-        var first = place_at[T](base: base, position: a)
-        var second = place_at[T](base: base, position: b)
-        rf_copy_bytes_at(dest: held.get_address(), src: first.get_address(), size: size)
-        rf_copy_bytes_at(dest: first.get_address(), src: second.get_address(), size: size)
-        rf_copy_bytes_at(dest: second.get_address(), src: held.get_address(), size: size)
-        held.invalidate()
+        LLVM::swap_values[T](a: place_at[T](base: base, position: a), b: place_at[T](base: base, position: b))
     return
 
 # ============================================================================
