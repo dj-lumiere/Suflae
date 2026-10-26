@@ -142,18 +142,6 @@
       }
     ],
     "menus": {
-      "editor/title/run": [
-        {
-          "command": "suflae.runFile",
-          "when": "resourceLangId == suflae",
-          "group": "navigation@1"
-        },
-        {
-          "command": "suflae.runFolder",
-          "when": "resourceLangId == suflae",
-          "group": "navigation@2"
-        }
-      ],
       "editor/context": [
         {
           "command": "suflae.runFile",
@@ -171,6 +159,18 @@
           "command": "suflae.runFile",
           "when": "resourceLangId == suflae",
           "group": "z_commands@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "suflae.runFile",
+          "when": "resourceLangId == suflae",
+          "group": "navigation@1"
+        },
+        {
+          "command": "suflae.runFolder",
+          "when": "resourceLangId == suflae",
+          "group": "navigation@2"
         }
       ]
     },
