@@ -45,7 +45,7 @@ public class ValueEqualityTests
                             name: Text
 
                         record Point
-                            x: Integer
+                            x: Int
 
                         record Button
                             on_click: Callable[(), None]
@@ -82,7 +82,7 @@ public class ValueEqualityTests
 
                         record Seat
                             holder: Player
-                            row: Integer
+                            row: Int
 
                         record Button
                             on_click: Callable[(), None]
@@ -116,7 +116,7 @@ public class ValueEqualityTests
 
                         record Seat
                             holder: Player
-                            row: Integer
+                            row: Int
 
                         routine start()
                             var players = Set[Player]()

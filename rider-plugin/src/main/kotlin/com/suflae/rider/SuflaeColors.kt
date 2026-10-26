@@ -102,21 +102,21 @@ class SuflaeColorSettingsPage : ColorSettingsPage {
     override fun getDemoText(): String = """
         import <module>IO</module>/<module>Console</module>
 
-        global <preset>visits</preset>: <record>Integer</record> = 0
+        global <preset>visits</preset>: <record>Int</record> = 0
 
         choice <record>Shape</record>
             CIRCLE
             SQUARE
 
         record <record>Point</record>
-            x: <record>Integer</record>
-            y: <record>Integer</record>
+            x: <record>Int</record>
+            y: <record>Int</record>
 
         entity <entity>Account</entity> obeys <protocol>Displayable</protocol>
             owner: <record>Text</record>
             history: <entity>List</entity>[<record>Point</record>]
 
-        routine <entity>Account</entity>.<routine>deposit</routine>(amount: <record>Integer</record>)
+        routine <entity>Account</entity>.<routine>deposit</routine>(amount: <record>Int</record>)
             me.balance <op>+=</op> amount
             return
 

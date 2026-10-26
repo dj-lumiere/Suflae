@@ -74,7 +74,7 @@ internal static class WrapperForwarderSynthesis
         return type != null && InternalBorrowTokens.Contains(item: BareTypeName(name: type.Name));
     }
 
-    /// <summary>The fixed-width integer types, which Suflae's own surface replaces with <c>Integer</c>.</summary>
+    /// <summary>The fixed-width integer types, which Suflae's own surface replaces with <c>Int</c>.</summary>
     private static readonly HashSet<string> FixedWidthIntegers = new(collection:
         ["U8", "U16", "U32", "U64", "U128", "U256", "S8", "S16", "S32", "S64", "S128", "S256"],
         comparer: StringComparer.Ordinal);
@@ -89,7 +89,7 @@ internal static class WrapperForwarderSynthesis
 
     /// <summary>A dedup key for a member routine: its name and parameter names. Types are left out on purpose: a
     /// wrapper method replaces the inner one called the same way even when its types differ (Suflae's
-    /// <c>getitem(index: Integer)</c> replaces RazorForge's <c>getitem(index: U64)</c>).</summary>
+    /// <c>getitem(index: Int)</c> replaces RazorForge's <c>getitem(index: U64)</c>).</summary>
     private static string ForwarderSignatureKey(RoutineDeclaration r)
     {
         return
@@ -314,8 +314,8 @@ internal static class WrapperForwarderSynthesis
             return false;
         }
 
-        // Suflae counts and indexes with `Integer`, so a wrapper never shows a fixed-width integer: a method
-        // taking or returning one is either written again by hand with `Integer` (`count`, `getitem`) or left
+        // Suflae counts and indexes with `Int`, so a wrapper never shows a fixed-width integer: a method
+        // taking or returning one is either written again by hand with `Int` (`count`, `getitem`) or left
         // out (the raw and sorting helpers).
         if (inner.Parameters.Any(predicate: p => p.Name != "me" && MentionsFixedWidthInteger(type: p.Type)) ||
             MentionsFixedWidthInteger(type: inner.ReturnType))

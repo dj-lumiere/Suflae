@@ -8,11 +8,11 @@ obeys Hashable
 
 record Team
     lead: Player
-    size: Integer
+    size: Int
 
 record Seat
     holder: Player
-    row: Integer
+    row: Int
 
 routine start()
     var ada = Player(name: "Ada")

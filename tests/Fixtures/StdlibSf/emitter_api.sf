@@ -4,10 +4,10 @@ module Tests/StdlibSf/EmitterApi
 import IterTools
 import Collections
 
-routine square(n: Integer) -> Integer
+routine square(n: Int) -> Int
     return n * n
 
-routine make() -> List[Integer]
+routine make() -> List[Int]
     return [4, 1, 3, 1]
 
 routine start()
@@ -48,7 +48,7 @@ routine start()
     show(f"noise: {noise.count()}")
 
     # A list of Works started together, then collected.
-    var jobs = List[Work[Integer]]()
+    var jobs = List[Work[Int]]()
     each i in 1 to 3
         jobs.add_last(value: square.to[Work](n: i))
     jobs.start_now()

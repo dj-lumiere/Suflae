@@ -80,8 +80,8 @@ secret routine BitArray[BITS].count_raw() -> U64
 ### Returns the fixed number of bits in this array.
 ### This is always equal to the buildtime parameter `BITS`.
 ### :returns: The bit count `BITS`.
-routine BitArray[BITS].count() -> Integer
-    return me.count_raw().to[Integer]()
+routine BitArray[BITS].count() -> Int
+    return me.count_raw().to[Int]()
 
 ### Returns true when the buildtime bit count is zero.
 ### :returns: `true` if `BITS == 0`.
@@ -108,7 +108,7 @@ secret failable routine BitArray[BITS].getitem_raw(index: U64) -> Bool
 ### :param index: The zero-based bit position to read.
 ### :returns: `true` if the bit at `index` is set; `false` if it is clear.
 ### :throws: {IndexOutOfBoundsError} if `index >= BITS`.
-failable routine BitArray[BITS].getitem(index: Integer) -> Bool
+failable routine BitArray[BITS].getitem(index: Int) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
 secret failable routine BitArray[BITS].setitem_raw(index: U64, value: Bool)
@@ -138,7 +138,7 @@ secret failable routine BitArray[BITS].setitem_raw(index: U64, value: Bool)
 ### :param index: The zero-based bit position to update.
 ### :param value: The new bit value.
 ### :throws: {IndexOutOfBoundsError} if `index >= BITS`.
-failable routine BitArray[BITS].setitem(index: Integer, value: Bool)
+failable routine BitArray[BITS].setitem(index: Int, value: Bool)
     me.setitem_raw(index: position_of(value: index), value: value)
     return
 
@@ -167,7 +167,7 @@ secret routine BitArray[BITS].with_set_raw(index: U64, value: Bool) -> BitArray[
 ### :param index: The zero-based bit position to change.
 ### :param value: The new bit value.
 ### :returns: A copy of this array with the specified bit updated.
-routine BitArray[BITS].with_set(index: Integer, value: Bool) -> BitArray[BITS]
+routine BitArray[BITS].with_set(index: Int, value: Bool) -> BitArray[BITS]
     return me.with_set_raw(index: position_of(value: index), value: value)
 
 secret routine BitArray[BITS].with_flipped_raw(index: U64) -> BitArray[BITS]
@@ -181,7 +181,7 @@ secret routine BitArray[BITS].with_flipped_raw(index: U64) -> BitArray[BITS]
 ### If `index >= BITS`, the original array is returned unmodified.
 ### :param index: The zero-based bit position to flip.
 ### :returns: A copy of this array with the specified bit inverted.
-routine BitArray[BITS].with_flipped(index: Integer) -> BitArray[BITS]
+routine BitArray[BITS].with_flipped(index: Int) -> BitArray[BITS]
     return me.with_flipped_raw(index: position_of(value: index))
 
 # ============================================================================
@@ -199,16 +199,16 @@ secret routine BitArray[BITS].count_trues_raw() -> U64
 
 ### Returns the number of bits currently set to `true`.
 ### :returns: The count of one-bits in this array.
-routine BitArray[BITS].count_trues() -> Integer
-    return me.count_trues_raw().to[Integer]()
+routine BitArray[BITS].count_trues() -> Int
+    return me.count_trues_raw().to[Int]()
 
 secret routine BitArray[BITS].count_falses_raw() -> U64
     return BITS -% me.count_trues_raw()
 
 ### Returns the number of bits currently set to `false`.
 ### :returns: `BITS` minus the number of one-bits.
-routine BitArray[BITS].count_falses() -> Integer
-    return me.count_falses_raw().to[Integer]()
+routine BitArray[BITS].count_falses() -> Int
+    return me.count_falses_raw().to[Int]()
 
 ### Returns true when at least one stored bit is `true`.
 ### :returns: `true` if any bit is set; `false` if all bits are clear.
@@ -254,11 +254,11 @@ routine BitArray[BITS].lacks(value: Bool) -> Bool
 ### Returns the position of the first `true` bit.
 ### :returns: The lowest index whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit is `true`.
-failable routine BitArray[BITS].first_true() -> Integer
+failable routine BitArray[BITS].first_true() -> Int
     var i: U64 = 0
     until i >= BITS
         if me.getitem_raw(index: i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
@@ -266,25 +266,25 @@ failable routine BitArray[BITS].first_true() -> Integer
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit after `after` is `true`.
-failable routine BitArray[BITS].next_true(after: Integer) -> Integer
+failable routine BitArray[BITS].next_true(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= BITS
         throw AbsentValueError()
     var i: U64 = start + 1
     until i >= BITS
         if me.getitem_raw(index: i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
 ### Returns the position of the first `false` bit.
 ### :returns: The lowest index whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit is `false`.
-failable routine BitArray[BITS].first_false() -> Integer
+failable routine BitArray[BITS].first_false() -> Int
     var i: U64 = 0
     until i >= BITS
         if not me.getitem_raw(index: i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
@@ -292,14 +292,14 @@ failable routine BitArray[BITS].first_false() -> Integer
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit after `after` is `false`.
-failable routine BitArray[BITS].next_false(after: Integer) -> Integer
+failable routine BitArray[BITS].next_false(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= BITS
         throw AbsentValueError()
     var i: U64 = start + 1
     until i >= BITS
         if not me.getitem_raw(index: i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 

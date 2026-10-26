@@ -2,7 +2,7 @@ module Tests/StdlibSf/OwnNumbersApi
 
 import IO/Console
 
-# Suflae's surface of the numbers: counts, positions, shift amounts, radixes and places are Integer.
+# Suflae's surface of the numbers: counts, positions, shift amounts, radixes and places are Int.
 routine start()
     var a: U32 = 0xF0
     var ones = a.count_ones() + 1
@@ -14,8 +14,8 @@ routine start()
     var d: D64 = 1.5
     show(f"dfixed={d.fixed(places: 3)}")
 
-    var big = Integer(text: "ff", radix: 16)
-    var plain = "12".to[Integer]()
+    var big = Int(text: "ff", radix: 16)
+    var plain = "12".to[Int]()
     show(f"big={big} plain={plain} shl={big.shift_left(bits: 4)} pow={big.pow(exp: 2)} sign={(0 - big).signum()}")
     show(f"bits={big.bit_length() + 0} hex={big.to_text(radix: 16)}")
     var x = 2.5

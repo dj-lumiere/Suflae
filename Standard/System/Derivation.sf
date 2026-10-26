@@ -1,7 +1,7 @@
 module System
 
 # Suflae's derives for its own choices and flags: the cases come in Suflae's own `List`, and the number of
-# cases is an `Integer`. A choice or flags declared in RazorForge keeps RazorForge's derives.
+# cases is an `Int`. A choice or flags declared in RazorForge keeps RazorForge's derives.
 
 ### Every declared case, in declaration order.
 @overridable
@@ -23,7 +23,7 @@ needs FlagsType T
 
 ### The number of declared cases.
 @overridable
-routine T.count() -> Integer
+routine T.count() -> Int
 needs ChoiceType T
     var n: U64 = 0
     expand c in caseof(T)
@@ -32,7 +32,7 @@ needs ChoiceType T
 
 ### The number of declared members.
 @overridable
-routine T.count() -> Integer
+routine T.count() -> Int
 needs FlagsType T
     var n: U64 = 0
     expand c in caseof(T)

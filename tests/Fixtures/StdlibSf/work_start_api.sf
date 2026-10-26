@@ -6,16 +6,16 @@ import IO/Console
 # retrieve() waits for its value (starting it first if nothing has).
 
 record Pair
-    a: Integer
-    b: Integer
+    a: Int
+    b: Int
 
-routine Pair.sum() -> Integer
+routine Pair.sum() -> Int
     return me.a + me.b
 
-routine add(a: Integer, b: Integer) -> Integer
+routine add(a: Int, b: Int) -> Int
     return a + b
 
-failable routine checked(n: Integer) -> Integer
+failable routine checked(n: Int) -> Int
     if n < 0
         throw VerificationFailedError()
     return n

@@ -4,7 +4,7 @@ import ObjectHacker
 # Two Unknowns keeping a type that has no == (a record holding a routine value) cannot be compared: the comparison
 # fails loudly with a message naming the type.
 record Action
-    run: Callable[(), Integer]
+    run: Callable[(), Int]
 
 routine start()
     var a = Unknown(from: Action(run: () => 1))

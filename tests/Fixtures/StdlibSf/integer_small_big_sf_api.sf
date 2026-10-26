@@ -2,25 +2,25 @@ module Tests/StdlibSf/IntegerSmallBigSfApi
 
 import IO/Console
 
-# Integer arithmetic around 2^64, where a value stops fitting in one word: every pair of operands below crosses
+# Int arithmetic around 2^64, where a value stops fitting in one word: every pair of operands below crosses
 # that line in some way. 2^64 written in the program and 2^64 reached by adding are the same value. A zero result
 # is never negative, so no line shows "-0".
 
-routine s64_text(a: Integer) -> Text
+routine s64_text(a: Int) -> Text
     var t = "none"
     when try a.to[S64]()
         is None => t = "none"
         else as v => t = f"{v}"
     return t
 
-routine u64_text(a: Integer) -> Text
+routine u64_text(a: Int) -> Text
     var t = "none"
     when try a.to[U64]()
         is None => t = "none"
         else as v => t = f"{v}"
     return t
 
-routine order_text(a: Integer, b: Integer) -> Text
+routine order_text(a: Int, b: Int) -> Text
     var lt = if a < b then "<" else "."
     var le = if a <= b then "l" else "."
     var eq = if a == b then "=" else "."
@@ -29,14 +29,14 @@ routine order_text(a: Integer, b: Integer) -> Text
     var gt = if a > b then ">" else "."
     return f"{lt}{le}{eq}{ne}{ge}{gt}"
 
-routine show_pair(a: Integer, b: Integer)
+routine show_pair(a: Int, b: Int)
     var line = f"{a} {b}: {a + b} {a - b} {order_text(a: a, b: b)} {a & b} {a | b} {a ^ b}"
     if b == 0
         show(line)
     else
         show(f"{line} {a // b} {a % b}")
 
-routine show_one(a: Integer)
+routine show_one(a: Int)
     var shifts = f"{a << 1} {a << 63} {a << 64} {a >> 1} {a >> 63} {a >> 64}"
     var signs = f"{-a} {a.abs()} {a == 0} {a < 0} {a > 0} {a % 2 == 0}"
     show(f"{a}: {shifts} | {signs} | {s64_text(a: a)} {u64_text(a: a)}")

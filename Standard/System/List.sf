@@ -2,7 +2,7 @@ module System
 
 import BuilderQuery
 
-### A growable sequence of elements, counted and indexed with `Integer`.
+### A growable sequence of elements, counted and indexed with `Int`.
 ###
 ### `List[T]` keeps its elements in a `Memory[T]`, one after another from the first place. Reading or writing by
 ### position is O(1). Adding or removing at the back is O(1) amortized: the list moves into a memory twice the size
@@ -46,7 +46,7 @@ routine List[T]() -> List[T]
 ### :param capacity: The number of elements to make room for.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
-failable routine List[T](capacity: Integer) -> List[T]
+failable routine List[T](capacity: Int) -> List[T]
     return List[T](items: Memory[T](capacity: capacity), count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
@@ -54,7 +54,7 @@ failable routine List[T](capacity: Integer) -> List[T]
 ### :param fill_value: The value every element starts as.
 ### :throws: {NegativeIndexError} if `count` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
-failable routine List[T](count: Integer, fill_value: T) -> List[T]
+failable routine List[T](count: Int, fill_value: T) -> List[T]
     return List[T](items: Memory[T](count: count, fill: fill_value), count: count.to[U64]())
 
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
@@ -79,7 +79,7 @@ failable common routine List[T].from_serial(value: SerialValue) -> List[T]
 ### Builds the list a `[a, b, c]` literal writes.
 ### :param elements: The elements, in order.
 common routine List[T].from_literal(elements...: T) -> List[T]
-    var result = List[T](capacity: elements.count().to[Integer]())
+    var result = List[T](capacity: elements.count().to[Int]())
     var i: U64 = 0
     # Each element moves into the list: `add_last` makes the list's holder, and the caller releases the
     # literal's own afterwards.
@@ -94,12 +94,12 @@ common routine List[T].from_literal(elements...: T) -> List[T]
 
 ### Returns the number of elements.
 @inline
-routine List[T].count() -> Integer
-    return me.count.to[Integer]()
+routine List[T].count() -> Int
+    return me.count.to[Int]()
 
 ### Returns the number of elements the list holds without growing.
-routine List[T].capacity() -> Integer
-    return me.items.room().to[Integer]()
+routine List[T].capacity() -> Int
+    return me.items.room().to[Int]()
 
 ### Returns whether the list has no elements.
 @inline
@@ -141,7 +141,7 @@ routine List[T].add_range(you: Emittable[T])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-failable routine List[T].add_range(source: List[T], from: Integer, count: Integer)
+failable routine List[T].add_range(source: List[T], from: Int, count: Int)
     var first = position_of(value: from)
     var n = position_of(value: count)
     if first + n > source.count
@@ -156,7 +156,7 @@ failable routine List[T].add_range(source: List[T], from: Integer, count: Intege
 ### Inserts `value` at `index`, moving the elements from there one place back.
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
-failable routine List[T].add_at(index: Integer, value: T)
+failable routine List[T].add_at(index: Int, value: T)
     var at = position_of(value: index)
     if at > me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)
@@ -187,7 +187,7 @@ failable routine List[T].remove_first() -> T
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
-failable routine List[T].remove_at(index: Integer) -> T
+failable routine List[T].remove_at(index: Int) -> T
     var at = me.checked_position(index: index)
     var value = me.items.take_at(position: at)
     me.items.carry(source: at + 1, target: at, count: me.count - at - 1)
@@ -196,7 +196,7 @@ failable routine List[T].remove_at(index: Integer) -> T
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
-failable routine List[T].truncate(new_count: Integer)
+failable routine List[T].truncate(new_count: Int)
     var kept = position_of(value: new_count)
     if kept > me.count
         throw IndexOutOfBoundsError(index: kept, count: me.count)
@@ -212,8 +212,8 @@ routine List[T].clear()
 ### :param new_capacity: The number of elements to make room for.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them. The list then stays
 ###     as it was.
-failable routine List[T].reserve(new_capacity: Integer)
-    if new_capacity > me.items.room().to[Integer]()
+failable routine List[T].reserve(new_capacity: Int)
+    if new_capacity > me.items.room().to[Int]()
         me.items.grow_to(room: room_of(capacity: new_capacity))
     return
 
@@ -254,7 +254,7 @@ routine List[T].last_or_default(default_value: T) -> T
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
 @inline
-failable routine List[T].getitem(index: Integer) -> T
+failable routine List[T].getitem(index: Int) -> T
     # The list's own check is the only one: its count never passes the memory's room.
     var at = me.checked_position(index: index)
     danger
@@ -264,7 +264,7 @@ failable routine List[T].getitem(index: Integer) -> T
 ### :param index: The position to write.
 ### :param value: The new element.
 @inline
-failable routine List[T].setitem(index: Integer, value: T)
+failable routine List[T].setitem(index: Int, value: T)
     var at = me.checked_position(index: index)
     danger
         me.items.put_unchecked(position: at, value: value)
@@ -273,9 +273,9 @@ failable routine List[T].setitem(index: Integer, value: T)
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
 ### list are skipped, and a range that counts down (`by -1`) gives the elements in reverse.
 ### :param range: The positions to copy.
-routine List[T].getitem(range: Range[Integer]) -> List[T]
+routine List[T].getitem(range: Range[Int]) -> List[T]
     var result = List[T]()
-    var count = me.count.to[Integer]()
+    var count = me.count.to[Int]()
     each i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.items.at(position: i.to[U64]()))
@@ -330,7 +330,7 @@ routine List[T].diagnose() -> Text
 
 ### Returns a new list holding copies of the elements.
 routine List[T].duplicate() -> List[T]
-    var result = List[T](capacity: me.count.to[Integer]())
+    var result = List[T](capacity: me.count.to[Int]())
     each element in me
         result.add_last(value: element)
     return result
@@ -377,7 +377,7 @@ routine List[T].sorted_by(compare: failable Callable[(T, T), Bool]) -> List[T]
 ### :param first: One position.
 ### :param second: The other position.
 @inline
-failable routine List[T].swap(first: Integer, second: Integer)
+failable routine List[T].swap(first: Int, second: Int)
     var a = me.checked_position(index: first)
     var b = me.checked_position(index: second)
     danger
@@ -395,7 +395,7 @@ routine List[T].reverse_in_place()
 
 ### The position `index` names, crashing unless it is the position of an element.
 @inline
-secret failable routine List[T].checked_position(index: Integer) -> U64
+secret failable routine List[T].checked_position(index: Int) -> U64
     var at = position_of(value: index)
     if at >= me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)

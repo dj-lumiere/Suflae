@@ -8,10 +8,10 @@ import Collections
 # fixed arrays. Enough entries go in and out here to split, merge and shift nodes at several levels.
 
 entity Box
-    id: Integer
+    id: Int
 
 routine start()
-    var numbers = SortedList[Integer]()
+    var numbers = SortedList[Int]()
     var i = 0
     until i >= 3000
         numbers.add(value: (i * 7919) % 1000)
@@ -33,7 +33,7 @@ routine start()
         i = i + 1
     show(f"after removes: count={numbers.count()} first={numbers.first()} last={numbers.last()} has 3: {numbers.has(3)}")
 
-    var squares = SortedSet[Integer]()
+    var squares = SortedSet[Int]()
     i = 0
     until i >= 2000
         squares.add(value: (i * i) % 1543)
@@ -45,15 +45,15 @@ routine start()
             squares.remove(value: i)
         i = i + 1
     show(f"set: distinct={size} left={squares.count()} min={squares.min()} max={squares.max()}")
-    var a = SortedSet[Integer]()
-    var b = SortedSet[Integer]()
+    var a = SortedSet[Int]()
+    var b = SortedSet[Int]()
     a.add(value: 3)
     a.add(value: 1)
     b.add(value: 1)
     b.add(value: 3)
-    show(f"small sets: {a} {SortedSet[Integer]()} equal={a == b}")
+    show(f"small sets: {a} {SortedSet[Int]()} equal={a == b}")
 
-    var names = SortedDict[Text, Integer]()
+    var names = SortedDict[Text, Int]()
     i = 0
     until i >= 500
         names[f"k{i}"] = i
@@ -74,7 +74,7 @@ routine start()
 
     var box = Box(id: 1)
     var watched = watch(target: box)
-    var boxes = SortedDict[Integer, Box]()
+    var boxes = SortedDict[Int, Box]()
     i = 0
     until i >= 300
         boxes[i] = box
@@ -86,7 +86,7 @@ routine start()
     boxes[1] = Box(id: 2)
     show(f"boxes: count={boxes.count()} key 1 id={boxes[1].id} key 3 id={boxes[3].id}")
     box = Box(id: 0)
-    boxes = SortedDict[Integer, Box]()
+    boxes = SortedDict[Int, Box]()
     show(f"released: {not watched.is_alive()}")
     show("DONE")
     return

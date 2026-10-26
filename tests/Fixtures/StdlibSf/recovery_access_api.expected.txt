@@ -10,7 +10,7 @@ grab score(empty): nope: empty
 try narrow(100): 100
 grab narrow(300): The value does not fit in the target type.
 try parsed(42): 42
-grab parsed(4x): Cannot parse "4x" as Integer.
+grab parsed(4x): Cannot parse "4x" as Int.
 try last_plus_one(nums): 6
 grab last_plus_one(empty): Index -1 is negative: positions count from 0
 try nums[7]: none

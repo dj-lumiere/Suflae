@@ -4,7 +4,7 @@ module Tests/StdlibSf/CpuEventManagerSf
 # system's action held the slot), which a library calls from its own handler to keep it running, and which puts the
 # old one back when it is set again.
 
-global calls: Integer = 0
+global calls: Int = 0
 
 routine first()
     show("first handler")

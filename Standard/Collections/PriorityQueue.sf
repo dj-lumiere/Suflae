@@ -53,7 +53,7 @@ needs TPriority obeys Comparable
 ### :returns: A priority pool of the given pairs.
 common routine PriorityQueue[TPriority, TElement].from_literal(pairs...: DictEntry[TPriority, TElement]) -> PriorityQueue[TPriority, TElement]
 needs TPriority obeys Comparable
-    var result = PriorityQueue[TPriority, TElement](capacity: pairs.count().to[Integer]())
+    var result = PriorityQueue[TPriority, TElement](capacity: pairs.count().to[Int]())
     var i: U64 = 0
     until i >= pairs.count()
         result.add(element: pairs.get_raw(index: i).value, priority: pairs.get_raw(index: i).key)
@@ -68,7 +68,7 @@ routine PriorityQueue[TPriority, TElement]() -> PriorityQueue[TPriority, TElemen
 ### :param capacity: The number of entries to make room for.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if the entries take more bytes than a `U64` counts, or there is no memory left for them.
-failable routine PriorityQueue[TPriority, TElement](capacity: Integer) -> PriorityQueue[TPriority, TElement]
+failable routine PriorityQueue[TPriority, TElement](capacity: Int) -> PriorityQueue[TPriority, TElement]
     return PriorityQueue[TPriority, TElement](
         priorities: Memory[TPriority](capacity: capacity),
         elements: Memory[TElement](capacity: capacity),
@@ -80,8 +80,8 @@ failable routine PriorityQueue[TPriority, TElement](capacity: Integer) -> Priori
 # ============================================================================
 
 ### Returns the number of entries currently stored in the pool.
-routine PriorityQueue[TPriority, TElement].count() -> Integer
-    return me.count.to[Integer]()
+routine PriorityQueue[TPriority, TElement].count() -> Int
+    return me.count.to[Int]()
 
 ### Returns true if the pool holds no entries.
 routine PriorityQueue[TPriority, TElement].is_empty() -> Bool
@@ -101,7 +101,7 @@ routine PriorityQueue[TPriority, TElement].clear()
 ### :param new_capacity: The minimum entry count to guarantee.
 ### :throws: {OutOfMemoryError} if the entries take more bytes than a `U64` counts, or there is no memory left for them.
 ###     The pool then holds what it held.
-failable routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Integer)
+failable routine PriorityQueue[TPriority, TElement].reserve(new_capacity: Int)
     if new_capacity > me.priorities.capacity()
         me.make_room(room: room_of(capacity: new_capacity))
     return
@@ -187,7 +187,7 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
 ### calls give (`each (priority, element) in pq.drain()`).
 ### :returns: The pairs, in removal order.
 routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)]
-    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
+    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Int]())
     until me.count == 0
         var priority = me.priorities.at(position: 0)
         var element = me.remove()
@@ -198,7 +198,7 @@ routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)
 ### (`each (priority, element) in pq.ordered()`).
 ### :returns: The pairs, in removal order.
 routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElement)]
-    var copy = PriorityQueue[TPriority, TElement](capacity: me.count.to[Integer]())
+    var copy = PriorityQueue[TPriority, TElement](capacity: me.count.to[Int]())
     var i: U64 = 0
     until i >= me.count
         copy.add(element: me.elements.at(position: i), priority: me.priorities.at(position: i))
@@ -209,7 +209,7 @@ routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElemen
 ### order does not matter (`each (priority, element) in pq.unordered()`).
 ### :returns: The pairs, in heap storage order.
 routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElement)]
-    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Integer]())
+    var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Int]())
     var i: U64 = 0
     until i >= me.count
         result.add_last(value: (me.priorities.at(position: i), me.elements.at(position: i)))

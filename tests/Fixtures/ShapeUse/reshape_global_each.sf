@@ -4,7 +4,7 @@ import IO/Console
 # A loop over a global list calls a routine that adds to the same global: the change crashes with
 # ReshapingWhileInUseError.
 
-global NUMS: List[Integer] = [1, 2]
+global NUMS: List[Int] = [1, 2]
 
 routine grow()
     NUMS.add_last(value: 9)

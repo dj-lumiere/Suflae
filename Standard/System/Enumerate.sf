@@ -5,23 +5,23 @@ module System
 ### :typeparam TSource: The emittable.
 entity EnumerateEmittable[T, TSource]
 relates EnumerateEmitter[T, TSource/Emitter] as Emitter
-obeys Emittable[Tuple[Integer, T]]
+obeys Emittable[Tuple[Int, T]]
 needs TSource obeys Emittable[T]
     ### The emittable (borrowed, not owned).
     secret source: Hijacked[TSource]
     ### The position of the first value.
-    secret start_index: Integer
+    secret start_index: Int
 
 ### Walks an `EnumerateEmittable`.
 ### :typeparam T: The value type.
 ### :typeparam TSourceEmitter: The emitter of the source.
 entity EnumerateEmitter[T, TSourceEmitter]
-obeys Emitter[Tuple[Integer, T]]
+obeys Emitter[Tuple[Int, T]]
 needs TSourceEmitter obeys Emitter[T]
     ### The emitter over the source (owned).
     secret source: TSourceEmitter
     ### The position of the next value.
-    secret index: Integer
+    secret index: Int
 
 ### Returns a walk over the pairs.
 routine EnumerateEmittable[T, TSource].emitter() -> EnumerateEmitter[T, TSource/Emitter]
@@ -33,7 +33,7 @@ routine EnumerateEmittable[T, TSource].emitter() -> EnumerateEmitter[T, TSource/
 
 ### Returns the next pair.
 ### :throws: {AbsentValueError} The source has no more values.
-failable routine EnumerateEmitter[T, TSourceEmitter].emit() -> Tuple[Integer, TSourceEmitter/Item]
+failable routine EnumerateEmitter[T, TSourceEmitter].emit() -> Tuple[Int, TSourceEmitter/Item]
     var position = me.index
     me.index = me.index + 1
     # The value goes into the pair straight from the source, so the pair is its only holder.
@@ -46,6 +46,6 @@ routine Emittable[T].enumerate() -> EnumerateEmittable[T, Me]
 
 ### Returns the values paired with their positions, from `start`.
 ### :param start: The position of the first value.
-routine Emittable[T].enumerate(start: Integer) -> EnumerateEmittable[T, Me]
+routine Emittable[T].enumerate(start: Int) -> EnumerateEmittable[T, Me]
     danger
         return EnumerateEmittable[T, Me](source: me.hijack(), start_index: start)

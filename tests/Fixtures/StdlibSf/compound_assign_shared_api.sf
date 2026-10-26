@@ -8,7 +8,7 @@ import IO/Console
 entity Account
     owner: Text
     balance: Decimal
-    visits: Integer
+    visits: Int
     hits: S64
 
 routine start()
@@ -23,7 +23,7 @@ routine start()
     counts.add_last(2)
     var same = counts
     same[1] += 10
-    var totals = List[Integer]()
+    var totals = List[Int]()
     totals.add_last(10)
     totals[0] -= 4
     show(f"{counts[1]} {totals[0]}")

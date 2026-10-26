@@ -5,23 +5,23 @@ import IterTools
 
 # An emitter the program writes: each step hands out the next number up to `top`.
 entity Stairs
-obeys Emitter[Integer]
-    current: Integer
-    top: Integer
+obeys Emitter[Int]
+    current: Int
+    top: Int
 
-failable routine Stairs.emit() -> Integer
+failable routine Stairs.emit() -> Int
     if me.current > me.top
         throw AbsentValueError()
     var value = me.current
     me.current = me.current + 1
     return value
 
-routine stairs(top: Integer) -> Stairs
+routine stairs(top: Int) -> Stairs
     return Stairs(current: 1, top: top)
 
 # Something the program writes that can be walked: its emitter is another entity of the program.
 entity Shelf
-obeys Emittable[Integer]
+obeys Emittable[Int]
     books: List[Text]
 
 routine Shelf.emitter() -> Stairs
@@ -37,7 +37,7 @@ routine Greetable.greet_twice() -> Text
 entity Cat
 obeys Greetable
     name: Text
-    greeted: Integer
+    greeted: Int
 
 routine Cat.greet() -> Text
     me.greeted = me.greeted + 1

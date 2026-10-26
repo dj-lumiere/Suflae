@@ -10,7 +10,7 @@ entity Person
     children: List[Person]
 
 entity Node
-    value: Integer
+    value: Int
     next: Node?
     prev: Node?
 
@@ -25,7 +25,7 @@ routine family(child_name: Text) -> Person
     root.children.add_last(kid)
     return root
 
-routine ring(first: Integer, second: Integer) -> Node
+routine ring(first: Int, second: Int) -> Node
     var a = Node(value: first, next: none, prev: none)
     var b = Node(value: second, next: a, prev: a)
     a.next = b

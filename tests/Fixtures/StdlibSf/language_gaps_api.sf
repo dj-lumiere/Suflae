@@ -5,7 +5,7 @@ import Collections
 
 global log: List[Text] = []
 
-define Integer | Text as Key
+define Int | Text as Key
 
 protocol Named
     routine Me.name() -> Text
@@ -55,7 +55,7 @@ routine List[Wrapped[T]].unwrapped() -> List[T]
 
 entity Player
     name: Text
-    score: Integer
+    score: Int
 
 variant Seat
     Player
@@ -67,7 +67,7 @@ routine add_point(seat: Seat)
         is Text => show("empty seat")
 
 record Deposit
-    amount: Integer
+    amount: Int
 
 record Report
     title: Text
@@ -93,12 +93,12 @@ routine note(line: Text)
 
 routine start()
     # An optional variable takes a value later.
-    var n: Integer? = none
+    var n: Int? = none
     n = 5
     show(n)
 
     # A tuple arm compares each member with a literal.
-    var p: (Integer, Integer) = (1, 2)
+    var p: (Int, Int) = (1, 2)
     when p
         (1, 2) => show("one two")
         (1, y) => show(f"one {y}")
@@ -113,22 +113,22 @@ routine start()
 
     # Collections are read back from their serialized form.
     var d = {"a": 1, "b": 2}
-    var back = d.serialize().to[Dict[Text, Integer]]()
+    var back = d.serialize().to[Dict[Text, Int]]()
     show(back["b"])
     var numbered = {1: "one", 2: "two"}
-    show(numbered.serialize().to[Dict[Integer, Text]]()[2])
+    show(numbered.serialize().to[Dict[Int, Text]]()[2])
     var s = {3, 4}
-    show(s.serialize().to[Set[Integer]]().has(4))
-    var sd = SortedDict[Text, Integer]()
+    show(s.serialize().to[Set[Int]]().has(4))
+    var sd = SortedDict[Text, Int]()
     sd["z"] = 26
-    show(sd.serialize().to[SortedDict[Text, Integer]]()["z"])
-    var sl = SortedList[Integer]()
+    show(sd.serialize().to[SortedDict[Text, Int]]()["z"])
+    var sl = SortedList[Int]()
     sl.add(value: 9)
-    show(sl.serialize().to[SortedList[Integer]]().count())
-    var ss = SortedSet[Integer]()
+    show(sl.serialize().to[SortedList[Int]]().count())
+    var ss = SortedSet[Int]()
     ss.add(value: 5)
-    show(ss.serialize().to[SortedSet[Integer]]().has(5))
-    var bad = try numbered.serialize().to[Dict[Integer, Integer]]()
+    show(ss.serialize().to[SortedSet[Int]]().has(5))
+    var bad = try numbered.serialize().to[Dict[Int, Int]]()
     when bad
         is None => show("not a dictionary of numbers")
         else => show("read back")
@@ -138,8 +138,8 @@ routine start()
     note(line: "b")
     show(log)
 
-    # A negative exponent has no Integer result, and `try` says so.
-    var two: Integer = 2
+    # A negative exponent has no Int result, and `try` says so.
+    var two: Int = 2
     var power = try two ** -1
     when power
         is None => show("no integer power")
@@ -152,7 +152,7 @@ routine start()
     show(lead(source: Words(all: ["x", "y"])))
 
     # A loop inside a routine written for a list of a generic type.
-    show([Wrapped[Integer](value: 1), Wrapped[Integer](value: 2)].unwrapped())
+    show([Wrapped[Int](value: 1), Wrapped[Int](value: 2)].unwrapped())
 
     # Values of different types go into a list of a variant.
     var keys: List[Key] = [1, "two"]

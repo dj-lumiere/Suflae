@@ -14,12 +14,12 @@ crashable NegativeTotalError
 routine NegativeTotalError.crash_message() -> Text
     return "the total is negative"
 
-routine require_balanced(total: Integer) -> Integer
+routine require_balanced(total: Int) -> Int
     if total > 100
         throw BrokenInvariantError()
     return total
 
-failable routine audit(total: Integer) -> Integer
+failable routine audit(total: Int) -> Int
     if total < 0
         throw NegativeTotalError()
     return require_balanced(total: total) + 1

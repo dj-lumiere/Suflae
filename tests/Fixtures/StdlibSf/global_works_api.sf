@@ -1,9 +1,9 @@
 module Tests/StdlibSf/GlobalWorksApi
 
-# Four jobs change the same globals at once. An S64 global and an Integer global both keep every update: the read
+# Four jobs change the same globals at once. An S64 global and an Int global both keep every update: the read
 # and the write of `visits = visits + 1` stay under one lock even where the update can fail.
 global visits: S64 = 0
-global big: Integer = 0
+global big: Int = 0
 
 routine visit(name: Text) -> Text
     each _ in 1 to 10000

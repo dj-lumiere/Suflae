@@ -138,11 +138,11 @@ failable common routine U128.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tu
 @rf("U128.to_digit_bytes")
 failable routine U128.to_digit_bytes() -> Bytes
 
-@rf("Integer.from_digit_bytes")
-failable common routine Integer.from_digit_bytes(bytes: Bytes) -> Integer
+@rf("Int.from_digit_bytes")
+failable common routine Int.from_digit_bytes(bytes: Bytes) -> Int
 
-@rf("Integer.from_digit_bytes_at")
-failable common routine Integer.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[Integer, U64]
+@rf("Int.from_digit_bytes_at")
+failable common routine Int.from_digit_bytes_at(bytes: Bytes, start: U64) -> Tuple[Int, U64]
 
-@rf("Integer.to_digit_bytes")
-failable routine Integer.to_digit_bytes() -> Bytes
+@rf("Int.to_digit_bytes")
+failable routine Int.to_digit_bytes() -> Bytes

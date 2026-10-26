@@ -31,7 +31,7 @@ global memo: Dict[Unknown, Unknown] = Dict[Unknown, Unknown]()
 global routes: List[Text] = List[Text]()
 global trace: List[Text] = List[Text]()
 # The cpu_event_manager_sf fixture has a global of this name too, each module keeps its own.
-global calls: Integer = 0
+global calls: Int = 0
 
 routine Memoize.around(call: Invocation) -> Unknown
     var key = call.args[0]
@@ -49,7 +49,7 @@ routine Traced.around(call: Invocation) -> Unknown
     return result
 
 @Memoize(limit: 100)
-routine fib(n: Integer) -> Integer
+routine fib(n: Int) -> Int
     calls = calls + 1
     if n < 2
         return n

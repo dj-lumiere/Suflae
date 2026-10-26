@@ -10,7 +10,7 @@ flags CellMarks
 
 record Cell
     marks: CellMarks
-    adjacent_mines: Integer
+    adjacent_mines: Int
 
 preset EMPTY_MARKS: CellMarks = none
 preset BLANK: Cell = Cell(marks: none, adjacent_mines: 0)

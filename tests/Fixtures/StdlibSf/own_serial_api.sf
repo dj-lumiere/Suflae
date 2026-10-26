@@ -5,9 +5,9 @@ import IO/Console
 # Suflae's own list reads back from its serialized form, and `try` recovers a value that does not fit.
 routine start()
     var xs = [3, 1, 2]
-    var back = xs.serialize().to[List[Integer]]()
+    var back = xs.serialize().to[List[Int]]()
     show(f"back={back} count={back.count()} first={back[0] + 1}")
-    var bad = try "x".serialize().to[List[Integer]]()
+    var bad = try "x".serialize().to[List[Int]]()
     show(f"bad={bad is None}")
     show("DONE")
     return

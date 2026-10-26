@@ -1,7 +1,7 @@
 module Tests/StdlibSf/CollectionLiteralExpectedApi
 
 # A collection literal takes its element types from where it goes, the way a bare number does: a protocol
-# parameter (`Emittable[S64]`), a concrete collection type, or a dict's entries. Without one it stays List[Integer].
+# parameter (`Emittable[S64]`), a concrete collection type, or a dict's entries. Without one it stays List[Int].
 
 import IO/Console
 import Collections

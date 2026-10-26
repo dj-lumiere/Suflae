@@ -47,6 +47,7 @@ public class ReleaseHintTests
     [Theory]
     [InlineData("Atomic[S64]", "A number every job changes is a 'global' or a member variable of an entity")]
     [InlineData("CircularList[S64]", "It is called 'RotatableList' now (migrate --step type-names rewrites it).")]
+    [InlineData("Integer", "It is called 'Int' now (migrate --step type-names rewrites it).")]
     public void RenamedType_NamesTheNewName(string type, string hint)
     {
         string errors = Errors(source: $"""

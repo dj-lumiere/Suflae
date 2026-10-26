@@ -1,11 +1,11 @@
 module System
 
-### The position or count a collection keeps for `value`. Collections count with `Integer` on their surface
+### The position or count a collection keeps for `value`. Collections count with `Int` on their surface
 ### and with `U64` inside.
 ### :param value: The position or count, from 0.
 ### :throws: {NegativeIndexError} if `value` is negative.
 @inline
-failable routine position_of(value: Integer) -> U64
+failable routine position_of(value: Int) -> U64
     if value.is_negative()
         throw NegativeIndexError(index: value)
     return value.to[U64]()
@@ -15,10 +15,10 @@ failable routine position_of(value: Integer) -> U64
 ### :returns: The place count.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if `capacity` is more than a `U64` counts.
-failable routine room_of(capacity: Integer) -> U64
+failable routine room_of(capacity: Int) -> U64
     if capacity.is_negative()
         throw NegativeIndexError(index: capacity)
-    if capacity > U64_MAX.to[Integer]()
+    if capacity > U64_MAX.to[Int]()
         throw OutOfMemoryError(requested_bytes: U64_MAX)
     return capacity.to[U64]()
 
@@ -26,7 +26,7 @@ failable routine room_of(capacity: Integer) -> U64
 ### counts down keeps its direction: the positions count down by the step's magnitude.
 ### :param range: The positions, from 0.
 ### :throws: {NegativeIndexError} if the range starts or ends at a negative position.
-failable routine positions_of(range: Range[Integer]) -> Range[U64]
+failable routine positions_of(range: Range[Int]) -> Range[U64]
     return Range[U64](
         start: position_of(value: range.start),
         end: position_of(value: range.end),

@@ -24,7 +24,7 @@ obeys Emittable[T]
 ### a taker).
 ### :param capacity: How many values it holds.
 ### :returns: The new mailbox.
-routine Mailbox[T](capacity: Integer) -> Mailbox[T]
+routine Mailbox[T](capacity: Int) -> Mailbox[T]
     var (transmitter, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
     return Mailbox[T](transmitter: transmitter, receiver: receiver)
 
@@ -64,8 +64,8 @@ routine Mailbox[T].is_closed() -> Bool
 ### How many values wait in the mailbox right now. Another job can change it at once, so it is for showing, not
 ### for deciding.
 ### :returns: The number of values waiting.
-routine Mailbox[T].count() -> Integer
-    return me.receiver.count().to[Integer]()
+routine Mailbox[T].count() -> Int
+    return me.receiver.count().to[Int]()
 
 ### Takes values in order (`each x in m`), waiting while the mailbox is empty, until it is closed and empty.
 ### :returns: The walk over the mailbox.

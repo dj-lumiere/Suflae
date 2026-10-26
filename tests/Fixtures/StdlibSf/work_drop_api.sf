@@ -7,7 +7,7 @@ import IO/Console
 
 global stopped: S64 = 0
 
-routine spin() -> Integer
+routine spin() -> Int
     var turns = 0
     until cancellation_requested()
         waitfor(1ms)

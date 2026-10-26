@@ -2,11 +2,11 @@ module Tests/StdlibSf/OwnCollectionsApi
 
 import IO/Console
 
-# Suflae's own List, Dict and Set count and index with Integer: a count adds to an Integer with no
-# conversion, an Integer variable indexes a list, and a slice takes an Integer range. The rest of each
+# Suflae's own List, Dict and Set count and index with Int: a count adds to an Int with no
+# conversion, an Int variable indexes a list, and a slice takes an Int range. The rest of each
 # collection is RazorForge's, passed through.
 routine start()
-    var xs = List[Integer]()
+    var xs = List[Int]()
     xs.add_last(value: 3)
     xs.add_last(value: 5)
     var n = xs.count()
@@ -24,7 +24,7 @@ routine start()
     var zs = ys.duplicate()
     show(f"ys={ys} has8={ys.has(8)} eq={ys == zs} sorted={[3, 1, 2].sorted()} slice={ys[1 til 3]}")
     var filled = List[Text](count: 2, fill_value: "ab")
-    show(f"filled={filled} capacity_ok={List[Integer](capacity: 8).capacity() >= 8}")
+    show(f"filled={filled} capacity_ok={List[Int](capacity: 8).capacity() >= 8}")
 
     var d = {"a": 1, "b": 2}
     d["c"] = 3
@@ -39,6 +39,6 @@ routine start()
     var t = {2, 3, 4}
     show(f"s={s} count={s.count()} has2={s.has(2)}")
     show(f"union={s.union(other: t)} inter={s.intersection(other: t)} diff={s.difference(other: t)}")
-    show(f"subset={s.is_subset(other: t)} list={s.to[List[Integer]]()}")
+    show(f"subset={s.is_subset(other: t)} list={s.to[List[Int]]()}")
     show("DONE")
     return

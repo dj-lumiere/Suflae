@@ -1,8 +1,8 @@
 module Tests/StdlibSf/WhenComparisonIntegerApi
 
 import IO/Console
-# A comparison arm (`>= 100 =>`) over an Integer subject: its literal is an Integer like the subject.
-routine rank(score: Integer) -> Text
+# A comparison arm (`>= 100 =>`) over an Int subject: its literal is an Int like the subject.
+routine rank(score: Int) -> Text
     when score
         >= 100 => return "legend"
         == 50 => return "half"

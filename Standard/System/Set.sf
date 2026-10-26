@@ -56,7 +56,7 @@ obeys Emitter[T]
 ### :returns: A set of the distinct given elements.
 common routine Set[T].from_literal(elements...: T) -> Set[T]
 needs T obeys Hashable, Equatable
-    var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Integer]())
+    var result = Set[T](key: SecureHashKey.random(), capacity: elements.count().to[Int]())
     var i: U64 = 0
     until i >= elements.count()
         result.add(value: elements.get_raw(index: i))
@@ -75,7 +75,7 @@ routine Set[T](key: SecureHashKey) -> Set[T]
 ### Creates an empty set hashing with `key`, with room for `capacity` values.
 ### :param key: The SipHash key.
 ### :param capacity: How many values to make room for.
-routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
+routine Set[T](key: SecureHashKey, capacity: Int) -> Set[T]
     var room: U64 = 16
     if capacity > 16
         room = capacity.to[U64]()
@@ -94,8 +94,8 @@ routine Set[T](key: SecureHashKey, capacity: Integer) -> Set[T]
 # ============================================================================
 
 ### Returns the number of values.
-routine Set[T].count() -> Integer
-    return me.count.to[Integer]()
+routine Set[T].count() -> Int
+    return me.count.to[Int]()
 
 ### Returns whether the set has no values.
 routine Set[T].is_empty() -> Bool
@@ -183,7 +183,7 @@ failable routine SetEmitter[T].emit() -> T
 # ============================================================================
 
 routine Set[T].union(other: Set[T]) -> Set[T]
-    var result = Set[T](key: SecureHashKey.random(), capacity: (me.count + other.count).to[Integer]())
+    var result = Set[T](key: SecureHashKey.random(), capacity: (me.count + other.count).to[Int]())
     each val in me
         result.add(value: val)
     each val in other

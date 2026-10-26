@@ -43,7 +43,7 @@ routine start()
     each arm in shape.arms
         show(f"  arm {arm.name}: {arm.kind}")
     show(f"{type_info(of: 5).name}: {type_info(of: 5).kind}")
-    # Integer obeys Comparable, which refines Equatable, so it obeys Equatable as well.
+    # Int obeys Comparable, which refines Equatable, so it obeys Equatable as well.
     var number = type_info(of: 5)
     show(f"Comparable: {number.obeys_protocol(name: "Comparable")}, Equatable: {number.obeys_protocol(name: "Equatable")}")
 

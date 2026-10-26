@@ -5,11 +5,11 @@ import IO/Console
 # the comparisons stop at the first false link. So a failure in any operand is a failure point a recovery
 # keyword recovers, the last operand included, even when an earlier link is already false.
 
-routine noisy(label: Text, value: Integer) -> Integer
+routine noisy(label: Text, value: Int) -> Int
     show(f"  eval {label}")
     return value
 
-failable routine in_band(a: Integer, b: Integer, hi: Integer) -> Bool
+failable routine in_band(a: Int, b: Int, hi: Int) -> Bool
     return 0 <= a // b <= hi
 
 routine start()

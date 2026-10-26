@@ -6,7 +6,7 @@ import ObjectHacker
 # Suflae's Dict and Set keep their entries in Memories in insertion order, over one HashIndex probe table.
 
 entity Box
-    id: Integer
+    id: Int
 
 routine start()
     var ages = {"ann": 31, "bob": 25}
@@ -19,7 +19,7 @@ routine start()
     show(f"missing: {missing is None} default: {ages.get_or_default(key: "ann", default_value: -1)}")
 
     # Many adds and removes: the entries are packed and the table rebuilt along the way.
-    var squares = Dict[Integer, Integer]()
+    var squares = Dict[Int, Int]()
     var i = 0
     until i >= 200
         squares[i] = i * i
@@ -41,12 +41,12 @@ routine start()
     show(f"set: {seen} count={seen.count()} have 4: {seen.has(4)} have 1: {seen.has(1)}")
     var other = {3, 4, 5}
     show(f"union={seen.union(other)} inter={seen.intersection(other)} diff={seen.difference(other)}")
-    var many = Set[Integer]()
+    var many = Set[Int]()
     i = 0
     until i >= 100
         many.add(value: i % 37)
         i = i + 1
-    show(f"distinct: {many.count()} empty set: {Set[Integer]()}")
+    show(f"distinct: {many.count()} empty set: {Set[Int]()}")
 
     var box = Box(id: 1)
     var watched = watch(target: box)
@@ -55,7 +55,7 @@ routine start()
     by_name["b"] = box
     by_name["a"] = Box(id: 2)
     by_name.remove(key: "b")
-    var boxes = Set[Integer]()
+    var boxes = Set[Int]()
     boxes.add(value: 1)
     box = Box(id: 0)
     show(f"released: {not watched.is_alive()} left: {by_name["a"].id}")

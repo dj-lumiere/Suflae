@@ -52,14 +52,14 @@ public class CompoundAssignmentTests
     #region Operand type checking
 
     /// <summary>
-    /// A Suflae <c>Integer += S64</c> needs an explicit conversion. Unchecked, the emitter passed the raw
-    /// <c>i64</c> where <c>Integer.add</c> takes an <c>Integer</c> record and the program crashed.
+    /// A Suflae <c>Int += S64</c> needs an explicit conversion. Unchecked, the emitter passed the raw
+    /// <c>i64</c> where <c>Int.add</c> takes an <c>Int</c> record and the program crashed.
     /// </summary>
     [Fact]
     public void Analyze_SuflaeIntegerPlusFixedWidthCompoundAssignment_ReportsError()
     {
         string source = """
-                        routine accumulate(start_value: Integer, v: S64)
+                        routine accumulate(start_value: Int, v: S64)
                             var t = start_value
                             t += v
                             return

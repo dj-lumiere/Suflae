@@ -158,7 +158,7 @@ failable routine List[Work[T]].race() -> T
         var race = C::rf_race_begin()
         each job in me
             job.join_race(race: race)
-        var winner = (C::rf_race_wait(race: race)).to[Integer]()
+        var winner = (C::rf_race_wait(race: race)).to[Int]()
         C::rf_race_end(race: race)
         var value = me[winner].result()
         each job in me
@@ -192,7 +192,7 @@ failable routine List[Work[T]].next_finished() -> Work[T]
         var race = C::rf_race_begin()
         each job in me
             job.join_race(race: race)
-        var winner = (C::rf_race_wait(race: race)).to[Integer]()
+        var winner = (C::rf_race_wait(race: race)).to[Int]()
         C::rf_race_end(race: race)
         return me.remove_at(index: winner)
 

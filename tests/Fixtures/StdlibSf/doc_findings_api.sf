@@ -7,15 +7,15 @@ import Collections
 # link time.
 
 entity Node
-    value: Integer
+    value: Int
     next: Node?
 
 record Circle
-    center: Integer
-    radius: Integer
+    center: Int
+    radius: Int
 
 record Square
-    side: Integer
+    side: Int
 
 variant Shape
     Circle
@@ -28,14 +28,14 @@ choice Color
 
 record User
     name: Text
-    age: Integer = 30
+    age: Int = 30
 
 protocol Sized
-    routine Me.size() -> Integer
+    routine Me.size() -> Int
 
 record Box
 obeys Sized
-    n: Integer
+    n: Int
 
 crashable BadNumberError
     text: Text
@@ -48,26 +48,26 @@ protocol Parsable
 
 record Digit
 obeys Parsable
-    value: Integer
+    value: Int
 
 # A protocol's creator requirement is met by a creator of the type with the same parameters.
 failable routine Digit(text: Text) -> Digit
     if text == "" or text.count() > 1
         throw BadNumberError(text: text)
-    return Digit(value: text.to[Integer]())
+    return Digit(value: text.to[Int]())
 
-routine Box.size() -> Integer
+routine Box.size() -> Int
     return me.n
 
 # A routine written on a protocol: every type obeying it gets it.
-routine Sized.doubled() -> Integer
+routine Sized.doubled() -> Int
     return me.size() * 2
 
 # A routine written on Suflae's own List.
 routine List[T].second() -> T
     return me[1]
 
-failable routine find(n: Integer) -> Integer
+failable routine find(n: Int) -> Int
     if n < 0
         throw AbsentValueError()
     return n
@@ -85,7 +85,7 @@ routine color_name(c: Color) -> Text
         == Color.BLUE => return "blue"
 
 # A vararg parameter followed by a parameter that has a default.
-routine joined(nums...: Integer, separator: Text = ", ") -> Text
+routine joined(nums...: Int, separator: Text = ", ") -> Text
     var out = ""
     each n in nums
         if out != ""
@@ -99,7 +99,7 @@ routine describe(s: Shape) -> Text
         is Square as sq => return f"square of side {sq.side}"
 
 routine start()
-    # A `when` without a subject, as an expression, comparing an Integer with literals.
+    # A `when` without a subject, as an expression, comparing an Int with literals.
     var n = 12
     var label = when
         n > 10 => "big"
@@ -117,7 +117,7 @@ routine start()
         cur = cur.next
     show(total)
 
-    # An Integer converted to a Decimal.
+    # An Int converted to a Decimal.
     var seven = 7
     var exact = seven.to[Decimal]()
     show(exact / 2.0)

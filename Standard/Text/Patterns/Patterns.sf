@@ -1,6 +1,6 @@
 module Text/Patterns
 
-# Suflae's surface of the text patterns: the pieces every pattern starts from, counts and positions as `Integer`,
+# Suflae's surface of the text patterns: the pieces every pattern starts from, counts and positions as `Int`,
 # and lists as Suflae lists. A Suflae program calls these in place of the shared routines of the same names.
 
 ### One ASCII digit, `0` to `9`. `unicode_digit` takes the digits of every script.
@@ -42,39 +42,39 @@ preset end_of_bytes: BytesPiece = BytesPiece(code: "\u010000\u010008\u010000\u01
 ### The piece exactly `count` times in a row.
 ### :param count: How many times.
 ### :returns: The new piece.
-routine TextPiece.repeat(count: Integer) -> TextPiece
+routine TextPiece.repeat(count: Int) -> TextPiece
     return me.repeat(count: position_of(value: count))
 
 ### The piece a number of times in a row in a range, as many as it can: `digit.repeat(2 to 4)`.
 ### :param range: The counts, `to` including its end and `til` leaving it out.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
-failable routine TextPiece.repeat(range: Range[Integer]) -> TextPiece
+failable routine TextPiece.repeat(range: Range[Int]) -> TextPiece
     return me.repeat(range: positions_of(range: range))
 
 ### The piece `count` times in a row or more, as many as it can.
 ### :param count: The fewest times.
 ### :returns: The new piece.
-routine TextPiece.repeat_at_least(count: Integer) -> TextPiece
+routine TextPiece.repeat_at_least(count: Int) -> TextPiece
     return me.repeat_at_least(count: position_of(value: count))
 
 ### The piece exactly `count` times in a row.
 ### :param count: How many times.
 ### :returns: The new piece.
-routine BytesPiece.repeat(count: Integer) -> BytesPiece
+routine BytesPiece.repeat(count: Int) -> BytesPiece
     return me.repeat(count: position_of(value: count))
 
 ### The piece a number of times in a row in a range, as many as it can.
 ### :param range: The counts, `to` including its end and `til` leaving it out.
 ### :returns: The new piece.
 ### :throws: {InvalidPatternError} The range holds no count or doesn't count up by 1.
-failable routine BytesPiece.repeat(range: Range[Integer]) -> BytesPiece
+failable routine BytesPiece.repeat(range: Range[Int]) -> BytesPiece
     return me.repeat(range: positions_of(range: range))
 
 ### The piece `count` times in a row or more, as many as it can.
 ### :param count: The fewest times.
 ### :returns: The new piece.
-routine BytesPiece.repeat_at_least(count: Integer) -> BytesPiece
+routine BytesPiece.repeat_at_least(count: Int) -> BytesPiece
     return me.repeat_at_least(count: position_of(value: count))
 
 ### One of the pieces: the one that matches the longest text at that place (the first one written, of those as
@@ -167,20 +167,20 @@ routine BytesPattern.split(bytes: Bytes) -> List[Bytes]
 
 ### Where the match starts.
 ### :returns: The position of its first character, from 0.
-routine TextMatch.start() -> Integer
-    return me.start().to[Integer]()
+routine TextMatch.start() -> Int
+    return me.start().to[Int]()
 
 ### Where the match ends.
 ### :returns: The position just past its last character.
-routine TextMatch.end() -> Integer
-    return me.end().to[Integer]()
+routine TextMatch.end() -> Int
+    return me.end().to[Int]()
 
 ### Where the match starts.
 ### :returns: The position of its first byte, from 0.
-routine BytesMatch.start() -> Integer
-    return me.start().to[Integer]()
+routine BytesMatch.start() -> Int
+    return me.start().to[Int]()
 
 ### Where the match ends.
 ### :returns: The position just past its last byte.
-routine BytesMatch.end() -> Integer
-    return me.end().to[Integer]()
+routine BytesMatch.end() -> Int
+    return me.end().to[Int]()

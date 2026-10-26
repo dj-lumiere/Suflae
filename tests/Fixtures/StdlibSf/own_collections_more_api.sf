@@ -3,10 +3,10 @@ module Tests/StdlibSf/OwnCollectionsMoreApi
 import IO/Console
 import Collections
 
-# Suflae's own BitList, BitArray, PriorityQueue and sorted collections count and index with Integer, like List,
+# Suflae's own BitList, BitArray, PriorityQueue and sorted collections count and index with Int, like List,
 # Dict and Set. A RotatableList is a deque: it adds and removes at both ends and rotates.
 routine start()
-    var q = RotatableList[Integer]()
+    var q = RotatableList[Int]()
     q.add_last(value: 1)
     q.add_last(value: 2)
     q.add_first(value: 0)
@@ -33,22 +33,22 @@ routine start()
     fixed[7] = true
     show(f"fixed={fixed} count={fixed.count()} ones={fixed.count_trues()} f7={fixed[7]}")
 
-    var pq = PriorityQueue[Integer, Text]()
+    var pq = PriorityQueue[Int, Text]()
     pq.add(element: "low", priority: 5)
     pq.add(element: "high", priority: 1)
     show(f"pq count={pq.count()} first={pq.remove()} then={pq.count()}")
 
-    var sl = SortedList[Integer]()
+    var sl = SortedList[Int]()
     sl.add(value: 3)
     sl.add(value: 1)
     sl.add(value: 2)
     sl.add(value: 2)
     show(f"sl={sl} count={sl.count()} twos={sl.count_of(value: 2)} rank1={sl.get_by_rank(rank: 1)}")
-    var ss = SortedSet[Integer]()
+    var ss = SortedSet[Int]()
     ss.add(value: 5)
     ss.add(value: 3)
     show(f"ss={ss} count={ss.count()} rank0={ss.get_by_rank(rank: 0)}")
-    var sd = SortedDict[Text, Integer]()
+    var sd = SortedDict[Text, Int]()
     sd["b"] = 2
     sd["a"] = 1
     show(f"sd={sd} count={sd.count()} rank0={sd.get_by_rank(i: 0)}")

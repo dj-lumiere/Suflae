@@ -1,7 +1,7 @@
 module System/Text
 
 # Suflae's surface of `Bytes`, `Char` and `Byte`: the same values as RazorForge's, counted and indexed with
-# `Integer`, and split into Suflae lists. A Suflae program calls these in place of the RazorForge routines of the
+# `Int`, and split into Suflae lists. A Suflae program calls these in place of the RazorForge routines of the
 # same names.
 
 ### Creates empty bytes.
@@ -19,35 +19,35 @@ routine Bytes(from_byte: Byte) -> Bytes
     return Bytes(from_byte: from_byte)
 
 ### Returns the number of bytes.
-routine Bytes.count() -> Integer
-    return me.count().to[Integer]()
+routine Bytes.count() -> Int
+    return me.count().to[Int]()
 
 ### Returns how many times `byte` appears.
 ### :param byte: The byte to count.
-routine Bytes.count_of(byte: Byte) -> Integer
-    return me.count_of(byte: byte).to[Integer]()
+routine Bytes.count_of(byte: Byte) -> Int
+    return me.count_of(byte: byte).to[Int]()
 
 ### Returns the byte at `index` (`bytes[i]`).
 ### :param index: The position, from 0.
-failable routine Bytes.getitem(index: Integer) -> Byte
+failable routine Bytes.getitem(index: Int) -> Byte
     return me.getitem(index: position_of(value: index))
 
 ### Returns the bytes at the positions in `range` (`bytes[a til b]`). Positions past the end are skipped.
 ### :param range: The positions, from 0.
-routine Bytes.getitem(range: Range[Integer]) -> Bytes
+routine Bytes.getitem(range: Range[Int]) -> Bytes
     return me.getitem(range: positions_of(range: range))
 
 ### Returns the position of the first `byte`.
 ### :param byte: The byte to look for.
 ### :throws: {AbsentValueError} There is no such byte.
-failable routine Bytes.find(byte: Byte) -> Integer
-    return me.find(byte: byte).to[Integer]()
+failable routine Bytes.find(byte: Byte) -> Int
+    return me.find(byte: byte).to[Int]()
 
 ### Returns the position where the first `other` starts.
 ### :param other: The bytes to look for.
 ### :throws: {AbsentValueError} The bytes do not contain `other`.
-failable routine Bytes.find(other: Bytes) -> Integer
-    return me.find(other: other).to[Integer]()
+failable routine Bytes.find(other: Bytes) -> Int
+    return me.find(other: other).to[Int]()
 
 ### Returns the parts between the `separator` bytes.
 ### :param separator: The byte between parts.
@@ -61,7 +61,7 @@ routine Bytes.split(separator: Bytes) -> List[Bytes]
 
 ### Returns the bytes written `times` times in a row.
 ### :param times: How many copies.
-routine Bytes.repeat(times: Integer) -> Bytes
+routine Bytes.repeat(times: Int) -> Bytes
     return me.repeat(times: position_of(value: times))
 
 ### Returns the text's UTF-16 code units.
@@ -69,14 +69,14 @@ routine Text.encode_as_utf16() -> List[U16]
     return me.encode_as_utf16().to[List[U16]]()
 
 ### Returns the character's Unicode code point.
-routine Char.codepoint() -> Integer
-    return me.codepoint().to[Integer]()
+routine Char.codepoint() -> Int
+    return me.codepoint().to[Int]()
 
 ### The character whose code point is `n`: `Char.from_codepoint(n: 0x41)` is `'A'`.
 ### :param n: The code point.
 ### :throws: {InvalidValueError} when `n` is no Unicode scalar: below 0, a surrogate (0xD800 to 0xDFFF), or above
 ###     0x10FFFF.
-failable common routine Char.from_codepoint(n: Integer) -> Char
+failable common routine Char.from_codepoint(n: Int) -> Char
     if n < 0 or n > 0x10FFFF
         throw InvalidValueError(input: n.represent(), target: "Char")
     return Char.from_codepoint(n: n.to[U32]())
@@ -85,27 +85,27 @@ failable common routine Char.from_codepoint(n: Integer) -> Char
 ### `base: 16` also `a` to `f` and `A` to `F` (10 to 15). A digit must be below `base`.
 ### :param base: The base the digit is read in, 2 to 16.
 ### :throws: {InvalidDigitError} when this character is not a digit of `base`.
-failable routine Char.digit_value(base: Integer = 10) -> Integer
+failable routine Char.digit_value(base: Int = 10) -> Int
     if base < 2 or base > 16
         throw InvalidDigitError()
-    return me.digit_value(base: base.to[U8]()).to[Integer]()
+    return me.digit_value(base: base.to[U8]()).to[Int]()
 
 ### Returns the character `delta` code points away (`'a'.offset(delta: 2)` is `'c'`).
 ### :param delta: How far to move. A negative one moves back.
 ### :throws: {InvalidValueError} when the result is no Unicode scalar.
-failable routine Char.offset(delta: Integer) -> Char
+failable routine Char.offset(delta: Int) -> Char
     return me.offset(delta: delta.to[S64]())
 
 ### The byte's value, 0 to 255: `b.value()`.
-routine Byte.value() -> Integer
-    return me.value().to[Integer]()
+routine Byte.value() -> Int
+    return me.value().to[Int]()
 
 ### Returns the value of an ASCII decimal digit byte.
 ### :throws: {InvalidDigitError} if the byte is not a digit.
-failable routine Byte.digit_value() -> Integer
-    return me.digit_value().to[Integer]()
+failable routine Byte.digit_value() -> Int
+    return me.digit_value().to[Int]()
 
 ### Returns the value of an ASCII hexadecimal digit byte.
 ### :throws: {InvalidHexDigitError} if the byte is not a hexadecimal digit.
-failable routine Byte.hex_value() -> Integer
-    return me.hex_value().to[Integer]()
+failable routine Byte.hex_value() -> Int
+    return me.hex_value().to[Int]()

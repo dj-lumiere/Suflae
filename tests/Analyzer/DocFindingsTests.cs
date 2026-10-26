@@ -11,7 +11,7 @@ using static TestHelpers;
 /// </summary>
 public class DocFindingsTests
 {
-    /// <summary><c>Integer</c> has no <c>/</c>: an integer quotient is <c>//</c>.</summary>
+    /// <summary><c>Int</c> has no <c>/</c>: an integer quotient is <c>//</c>.</summary>
     [Fact]
     public void Analyze_IntegerTrueDivision_ReportsMissingOperator()
     {
@@ -69,7 +69,7 @@ public class DocFindingsTests
     }
 
     /// <summary>A memberwise construction whose values the member variables cannot hold is reported (no creator
-    /// of <c>Label</c> takes two <c>Integer</c>s).</summary>
+    /// of <c>Label</c> takes two <c>Int</c>s).</summary>
     [Fact]
     public void Analyze_MemberwiseConstructionWithWrongValueType_ReportsMismatch()
     {
@@ -122,7 +122,7 @@ public class DocFindingsTests
                             return me.what
 
                         @crash_only
-                        failable routine boom(n: Integer) -> Integer
+                        failable routine boom(n: Int) -> Int
                             if n < 0
                                 throw BadError(what: "negative")
                             return n
@@ -146,7 +146,7 @@ public class DocFindingsTests
         string source = """
                         import IO/Console
 
-                        failable routine find(n: Integer) -> Integer
+                        failable routine find(n: Int) -> Int
                             if n < 0
                                 absent
                             return n
@@ -174,7 +174,7 @@ public class DocFindingsTests
 
                         record Num
                         obeys Parsable
-                            n: Integer
+                            n: Int
 
                         routine start()
                             show(Num(n: 1).n)
@@ -199,7 +199,7 @@ public class DocFindingsTests
                         record Team
                         obeys Comparable
                             lead: Player
-                            size: Integer
+                            size: Int
 
                         routine start()
                             show(Team(lead: Player(name: "Ada"), size: 3).size)

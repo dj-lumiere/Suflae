@@ -4,7 +4,7 @@ import IO/Console
 
 # A mailbox carries values from one job to another in order: `add_last` waits while it is full, `each` and
 # `remove_first` wait while it is empty, and `each` ends once it is closed and empty.
-routine produce(q: Mailbox[Integer], n: Integer) -> Integer
+routine produce(q: Mailbox[Int], n: Int) -> Int
     var i = 1
     until i > n
         q.add_last(value: i)
@@ -13,12 +13,12 @@ routine produce(q: Mailbox[Integer], n: Integer) -> Integer
     return n
 
 routine start()
-    var q = Mailbox[Integer](capacity: 2)
+    var q = Mailbox[Int](capacity: 2)
     var job = produce.to[Work](q: q, n: 5)
     job.start_now()
     var first = q.remove_first()
     var total = first
-    var seen = List[Integer]()
+    var seen = List[Int]()
     seen.add_last(value: first)
     each x in q
         total = total + x

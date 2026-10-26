@@ -72,8 +72,8 @@ needs T obeys Comparable
 # ============================================================================
 
 ### Returns the total number of elements in this list, counting duplicates separately.
-routine SortedList[T].count() -> Integer
-    return me.tree.count().to[Integer]()
+routine SortedList[T].count() -> Int
+    return me.tree.count().to[Int]()
 
 ### Returns true if this list contains no elements.
 routine SortedList[T].is_empty() -> Bool
@@ -98,9 +98,9 @@ routine SortedList[T].lacks(value: T) -> Bool
 ### Returns the number of times `value` appears in this list.
 ### :param value: The value to count.
 ### :returns: The occurrence count; zero if the value is not present.
-routine SortedList[T].count_of(value: T) -> Integer
+routine SortedList[T].count_of(value: T) -> Int
     var after = me.tree.rank(key: value, after: true)
-    return (after - me.tree.rank(key: value, after: false)).to[Integer]()
+    return (after - me.tree.rank(key: value, after: false)).to[Int]()
 
 ### Inserts `value` in its sorted position, after any equal elements.
 ### :param value: The value to insert.
@@ -119,7 +119,7 @@ routine SortedList[T].remove(value: T) -> Bool
 ### :param value: The value whose every copy is removed.
 ### :returns: The number of elements that were removed.
 @discardable
-routine SortedList[T].remove_all(value: T) -> Integer
+routine SortedList[T].remove_all(value: T) -> Int
     var removed = 0
     until not me.tree.remove(key: value)
         removed = removed + 1
@@ -133,7 +133,7 @@ routine SortedList[T].remove_all(value: T) -> Integer
 ### :param rank: Zero-based position in sorted order.
 ### :returns: The element at that rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-failable routine SortedList[T].get_by_rank(rank: Integer) -> T
+failable routine SortedList[T].get_by_rank(rank: Int) -> T
     var position = position_of(value: rank)
     var count = me.tree.count()
     if position >= count

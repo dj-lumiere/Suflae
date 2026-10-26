@@ -3,7 +3,7 @@ module Tests/ExitCode/DeepCalls
 # Calls that go deeper than the memory for them holds crash with an out of memory report (status 82), never a
 # segmentation fault.
 
-routine depth(n: Integer) -> Integer
+routine depth(n: Int) -> Int
     if n == 0
         return 0
     return depth(n: n - 1) + 1

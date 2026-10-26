@@ -79,7 +79,7 @@ failable routine variant_from_serial[T](value: SerialValue) -> T
 needs VariantType T
 
 ### Rebuilds a value from its serialized form, the reverse of `serialize`: `sv.to[Point]()`,
-### `try sv.to[List[Integer]]()`. Each type rebuilds itself in `failable common routine T.from_serial(value: SerialValue)`:
+### `try sv.to[List[Int]]()`. Each type rebuilds itself in `failable common routine T.from_serial(value: SerialValue)`:
 ### the builder writes it for records, entities, choices, flags and variants, and a type may write its own.
 ### :returns: The rebuilt value.
 ### :throws: {SerialShapeError} when the value does not have the shape `T` needs.

@@ -4,10 +4,10 @@ module Tests/StdlibSf/TupleToApi
 # is written in the call, or comes from where the value goes (a declared variable, names declared with a type).
 
 routine start()
-    var date = "2024 4 1".to[(Integer, Integer, Integer)]()
+    var date = "2024 4 1".to[(Int, Int, Int)]()
     show(f"{date}")
-    var (name, age): (Text, Integer) = "Lumi 30".to()
+    var (name, age): (Text, Int) = "Lumi 30".to()
     show(f"{name} {age}")
-    var bad = try "1 x".to[(Integer, Integer)]()
+    var bad = try "1 x".to[(Int, Int)]()
     show(f"not a number: {bad is None}")
     show("DONE")

@@ -6,5 +6,5 @@ fixed=[true, false, false, false, false, false, false, true] count=8 ones=2 f7=t
 pq count=2 first=high then=1
 sl=[1, 2, 2, 3] count=4 twos=2 rank1=2
 ss={3, 5} count=2 rank0=3
-sd={"a": 1, "b": 2} count=2 rank0=DictEntry[Text, Integer](key: a, value: 1)
+sd={"a": 1, "b": 2} count=2 rank0=DictEntry[Text, Int](key: a, value: 1)
 DONE

@@ -20,7 +20,7 @@ routine start()
     var values: List[Unknown] = [Unknown(from: 5), Unknown(from: "five"), Unknown(from: Point(x: 1, y: 2)),
         Unknown(from: Color.GREEN)]
     each v in values
-        show(f"{type_name(of: v)}: {v} integer={v.is[Integer]()} text={v.is[Text]()}")
+        show(f"{type_name(of: v)}: {v} integer={v.is[Int]()} text={v.is[Text]()}")
 
     var point = values[2]
     when try point.to[Point]()

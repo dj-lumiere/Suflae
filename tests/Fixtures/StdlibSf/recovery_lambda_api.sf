@@ -7,32 +7,32 @@ import IterTools
 # them, through `any`/`all`/`sort_by`, through a routine that calls the value it was handed, a value passed down two
 # levels, a value kept in a member variable, and an `each` loop over an adapter in a failable routine.
 
-routine apply(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: failable Callable[(Int,), Int], x: Int) -> Int
     return f(x)
 
-routine apply_twice(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply_twice(f: failable Callable[(Int,), Int], x: Int) -> Int
     return apply(f: f, x: apply(f: f, x: x))
 
-failable routine sum_inverse(xs: List[Integer]) -> Integer
+failable routine sum_inverse(xs: List[Int]) -> Int
     var total = 0
     each y in xs.select(transform: x => 100 // x)
         total += y
     return total
 
-failable routine hundred_over(x: Integer) -> Integer
+failable routine hundred_over(x: Int) -> Int
     return 100 // x
 
 record Holder
-    f: failable Callable[(Integer,), Integer]
+    f: failable Callable[(Int,), Int]
 
-routine run(holder: Holder, x: Integer) -> Integer
+routine run(holder: Holder, x: Int) -> Int
     return holder.f(x)
 
 routine start()
-    var ok = List[Integer]()
+    var ok = List[Int]()
     ok.add_last(value: 5)
     ok.add_last(value: 2)
-    var bad = List[Integer]()
+    var bad = List[Int]()
     bad.add_last(value: 5)
     bad.add_last(value: 0)
 
@@ -81,7 +81,7 @@ routine start()
     show(f"stored try: {try run(holder: holder, x: 0)}")
 
     # a local routine value called directly beneath the keyword
-    var g: failable Callable[(Integer,), Integer] = x => 10 // x
+    var g: failable Callable[(Int,), Int] = x => 10 // x
     show(f"local try: {try g(0)}")
     show(f"local ok: {try g(5)}")
     show("DONE")

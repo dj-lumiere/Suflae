@@ -4,8 +4,8 @@ import IO/Console
 
 # `(a, b) = (b, a)` swaps places: locals and member variables of an entity.
 entity Box
-    first: Integer
-    second: Integer
+    first: Int
+    second: Int
 
 routine start()
     var a = 1

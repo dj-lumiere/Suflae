@@ -6,7 +6,7 @@ import IO/Console
 # point like any other: a recovery keyword above it recovers it. A loop whose `then` ends in `return` always
 # returns, so nothing follows it.
 
-routine first_negative(xs: List[Integer]) -> Text
+routine first_negative(xs: List[Int]) -> Text
     each x in xs
         if x < 0
             return f"found {x}"
@@ -14,7 +14,7 @@ routine first_negative(xs: List[Integer]) -> Text
         show("searched all")
     return "none negative"
 
-routine stop_at_three(limit: Integer) -> Text
+routine stop_at_three(limit: Int) -> Text
     var n = 0
     until n >= limit
         n += 1
@@ -24,7 +24,7 @@ routine stop_at_three(limit: Integer) -> Text
         show(f"left at {n}")
     return f"stopped at {n}"
 
-failable routine ratio_steps(numerator: Integer, divisor: Integer) -> Integer
+failable routine ratio_steps(numerator: Int, divisor: Int) -> Int
     var n = 0
     until n >= numerator // divisor
         n += 1
@@ -32,9 +32,9 @@ failable routine ratio_steps(numerator: Integer, divisor: Integer) -> Integer
         return n
 
 routine start()
-    var empty = List[Integer]()
+    var empty = List[Int]()
     show(first_negative(xs: empty))
-    var some = List[Integer]()
+    var some = List[Int]()
     some.add_last(value: 4)
     some.add_last(value: 7)
     show(first_negative(xs: some))

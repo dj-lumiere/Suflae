@@ -8,6 +8,6 @@ Perm: FLAGS ["READ", "WRITE"]
 Shape: VARIANT
   arm Point: RECORD
   arm Text: RECORD
-Integer: RECORD
+Int: RECORD
 Comparable: true, Equatable: true
 DONE

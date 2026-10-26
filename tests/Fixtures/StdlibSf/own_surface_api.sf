@@ -4,8 +4,8 @@ import IO/Console
 import IterTools
 
 # Suflae's surface of the types it shares with RazorForge: Array, Text, Bytes, Character and the emittable
-# terminals count and index with Integer and build Suflae lists, while the values stay the same types.
-routine total(nums...: Integer) -> Integer
+# terminals count and index with Int and build Suflae lists, while the values stay the same types.
+routine total(nums...: Int) -> Int
     var sum = 0
     var i = 0
     until i >= nums.count()
@@ -13,7 +13,7 @@ routine total(nums...: Integer) -> Integer
         i = i + 1
     return sum
 
-routine last_two(nums...: Integer) -> List[Integer]
+routine last_two(nums...: Int) -> List[Int]
     return nums[nums.count() - 2 til nums.count()]
 
 routine start()

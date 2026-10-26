@@ -10,7 +10,7 @@ peek mana: 'Hero' has no member variable 'mana'
 after poke, alias.hp: 25
 after poke, alias.name: Bea
 poke mana: 'Hero' has no member variable 'mana'
-poke hp: 'Hero.hp' holds S64, and the value you gave is Integer. Give it a value of type S64.
+poke hp: 'Hero.hp' holds S64, and the value you gave is Int. Give it a value of type S64.
 point: Point 4
 poked: Point(x: 3, y: 4) -> Point(x: 3, y: 9)
 poke record: 'Point' is a record, so it does not change in place. Take the changed copy with 'p = poked(target: p, ...)'.

@@ -6,23 +6,23 @@ import ObjectHacker
 # Suflae's Memory: a row of places that start as zero, and its ranges, spans that share the same places.
 
 entity Counter
-    hits: Integer
+    hits: Int
 
 entity Box
     holder: Holder?
-    id: Integer
+    id: Int
 
 entity Holder
     kids: Memory[Box]
 
-routine keep_view() -> Span[Integer]
-    var whole = Memory[Integer](count: 6, fill: 0)
+routine keep_view() -> Span[Int]
+    var whole = Memory[Int](count: 6, fill: 0)
     whole[4] = 40
     # The span outlives the name `whole`: it keeps the memory alive.
     return whole[3 til 6]
 
 routine start()
-    var buf = Memory[Integer](count: 5, fill: 7)
+    var buf = Memory[Int](count: 5, fill: 7)
     show(f"made: {buf} capacity={buf.capacity()}")
     var empty = Memory[Text](capacity: 3)
     show(f"zero places: {empty} first is empty: {empty[0] == ""}")
@@ -74,7 +74,7 @@ routine start()
     row.grow(capacity: 7)
     show(f"grown: {row} capacity={row.capacity()}")
 
-    var nums = Memory[Integer](capacity: 40)
+    var nums = Memory[Int](capacity: 40)
     var k = 0
     until k >= 40
         nums[k] = (k * 17) % 40

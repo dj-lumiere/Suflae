@@ -115,7 +115,7 @@ failable routine Range[T].require_nonzero_step()
 @rf("Range.represent")
 routine Range[T].represent() -> Text
 
-### Returns the range's diagnostic text: its type around the written form, as `Range[Integer](0 til 10 by 2)`.
+### Returns the range's diagnostic text: its type around the written form, as `Range[Int](0 til 10 by 2)`.
 ### :returns: The resulting `Text` value.
 @rf("Range.diagnose")
 routine Range[T].diagnose() -> Text

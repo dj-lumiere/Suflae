@@ -3,7 +3,7 @@ module Tests/StdlibSf/MaybeEqualityApi
 # An optional compares and hashes by what it holds: two absent ones are equal, an absent and a present one differ,
 # two present ones compare their values. A record with an optional member variable so gets `==` and a hash.
 record Slot
-    item: Integer?
+    item: Int?
 
 routine start()
     show(f"both present, equal: {Slot(item: 1) == Slot(item: 1)}")

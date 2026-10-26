@@ -66,7 +66,7 @@ obeys Emitter[DictEntry[TKey, TValue]]
 ### :returns: A dict of the given pairs.
 common routine Dict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> Dict[TKey, TValue]
 needs TKey obeys Hashable, Equatable
-    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: pairs.count().to[Integer]())
+    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: pairs.count().to[Int]())
     var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
@@ -87,7 +87,7 @@ routine Dict[TKey, TValue](key: SecureHashKey) -> Dict[TKey, TValue]
 ### Creates an empty dictionary hashing with `key`, with room for `capacity` entries.
 ### :param key: The SipHash key.
 ### :param capacity: How many entries to make room for.
-routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, TValue]
+routine Dict[TKey, TValue](key: SecureHashKey, capacity: Int) -> Dict[TKey, TValue]
     var room: U64 = 16
     if capacity > 16
         room = capacity.to[U64]()
@@ -107,8 +107,8 @@ routine Dict[TKey, TValue](key: SecureHashKey, capacity: Integer) -> Dict[TKey, 
 # ============================================================================
 
 ### Returns the number of entries.
-routine Dict[TKey, TValue].count() -> Integer
-    return me.count.to[Integer]()
+routine Dict[TKey, TValue].count() -> Int
+    return me.count.to[Int]()
 
 ### Returns whether the dictionary has no entries.
 routine Dict[TKey, TValue].is_empty() -> Bool
@@ -225,7 +225,7 @@ routine Dict[TKey, TValue].setitem(key: TKey, value: TValue)
 
 ### Returns all keys in insertion order.
 routine Dict[TKey, TValue].keys() -> List[TKey]
-    var result = List[TKey](capacity: me.count.to[Integer]())
+    var result = List[TKey](capacity: me.count.to[Int]())
     var i: U64 = 0
     until i >= me.used
         if me.live.at(position: i)
@@ -235,7 +235,7 @@ routine Dict[TKey, TValue].keys() -> List[TKey]
 
 ### Returns all values in insertion order, matching `keys()`.
 routine Dict[TKey, TValue].values() -> List[TValue]
-    var result = List[TValue](capacity: me.count.to[Integer]())
+    var result = List[TValue](capacity: me.count.to[Int]())
     var i: U64 = 0
     until i >= me.used
         if me.live.at(position: i)
@@ -248,7 +248,7 @@ routine Dict[TKey, TValue].values() -> List[TValue]
 ### adds or removes an entry during the walk. Walk `items()` instead over a dict other jobs may change: the copy
 ### does not change under the loop.
 routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
-    var result = List[Tuple[TKey, TValue]](capacity: me.count.to[Integer]())
+    var result = List[Tuple[TKey, TValue]](capacity: me.count.to[Int]())
     var i: U64 = 0
     until i >= me.used
         if me.live.at(position: i)
@@ -287,7 +287,7 @@ failable routine DictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
 ### Returns an independent copy of this dictionary: its own entries, each key and value copied (a record is
 ### copied, an entity is shared).
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
-    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count.to[Integer]())
+    var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count.to[Int]())
     each entry in me
         result[entry.key] = entry.value
     return result

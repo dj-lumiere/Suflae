@@ -4,11 +4,11 @@ import IO/Console
 # A routine marked `@infix` is written between its operands.
 
 record Vec
-    x: Integer
-    y: Integer
+    x: Int
+    y: Int
 
 @infix
-routine Vec.dot(you: Vec) -> Integer
+routine Vec.dot(you: Vec) -> Int
     return me.x * you.x + me.y * you.y
 
 routine start()

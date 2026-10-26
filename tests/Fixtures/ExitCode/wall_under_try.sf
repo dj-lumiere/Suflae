@@ -10,13 +10,13 @@ crashable NegativeTotalError
 routine NegativeTotalError.crash_message() -> Text
     return "the total is negative"
 
-routine apply(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: failable Callable[(Int,), Int], x: Int) -> Int
     return f(x)
 
-routine share(total: Integer, parts: Integer) -> Integer
+routine share(total: Int, parts: Int) -> Int
     return total // parts
 
-failable routine split(total: Integer, parts: Integer) -> Integer
+failable routine split(total: Int, parts: Int) -> Int
     if total < 0
         throw NegativeTotalError()
     return share(total: total, parts: parts)

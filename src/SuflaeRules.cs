@@ -38,7 +38,7 @@ public sealed class SuflaeRules : LanguageRules
     /// <summary>
     /// Console and file I/O and the environment (arguments, variables, the working directory) are always available,
     /// so <c>show(...)</c> needs no import. The numbers
-    /// (<c>Integer</c>, <c>Decimal</c> and the fixed-width types) are in <c>System/Numerics</c>, which every file
+    /// (<c>Int</c>, <c>Decimal</c> and the fixed-width types) are in <c>System/Numerics</c>, which every file
     /// sees without one.
     /// </summary>
     public override IReadOnlyList<(string Module, IReadOnlyList<string>? Symbols)> PreludeImports { get; } =

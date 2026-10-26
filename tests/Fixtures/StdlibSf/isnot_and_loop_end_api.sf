@@ -4,9 +4,9 @@ module Tests/StdlibSf/IsnotAndLoopEndApi
 # whose only way out is `return`.
 
 entity Reader
-    position: Integer
+    position: Int
 
-failable routine Reader.reference() -> Integer
+failable routine Reader.reference() -> Int
     if me.position < 0
         throw AbsentValueError()
     return me.position

@@ -7,13 +7,13 @@ module Tests/StdlibSf/WorksEntityPathsApi
 import IO/Console
 
 entity Cell
-    n: Integer
+    n: Int
 
-routine call_times(f: Callable[(), Integer], times: S64)
+routine call_times(f: Callable[(), Int], times: S64)
     each i in 0 til times
         f()
 
-routine drain(rx: SharedReceiver[Cell]) -> Integer
+routine drain(rx: SharedReceiver[Cell]) -> Int
     var taken = 0
     each c in rx
         each i in 0 til 500

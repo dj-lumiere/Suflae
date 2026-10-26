@@ -5,7 +5,7 @@ import IO/Console
 # `ask[T]()` reads a line as a `T`, the type given or the one the value goes to. The fixtures read no input, so the
 # calls sit in a branch that never runs: this checks they build (each `T`, and `try` over it).
 routine read_three() -> Text
-    var n: Integer = ask()
+    var n: Int = ask()
     var m = ask[S32]()
     var bad = try ask[U8]()
     return f"{n + 1} {m * 2} {bad is None}"

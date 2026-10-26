@@ -24,7 +24,7 @@ record MemberVariableInfo
     ### The member variable's name.
     name: Text
     ### Its position in its type's declaration, from 0.
-    order: Integer
+    order: Int
     ### The type it holds.
     type: TypeInfo
     ### Whether it is `secret`.
@@ -33,7 +33,7 @@ record MemberVariableInfo
 ### What a type is made of, as `type_info(of:)` describes it. Each type is described once per call, so a type that
 ### holds itself (a node with a `next` node) ends: the member variable's `type` is that same `TypeInfo`.
 entity TypeInfo
-    ### The unqualified name (`Hero`, `List[Integer]`).
+    ### The unqualified name (`Hero`, `List[Int]`).
     name: Text
     ### The name with its module (`Game.Hero`).
     full_name: Text
@@ -123,7 +123,7 @@ secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
     each member in fact.memvars
         info.memvars.add_last(value: MemberVariableInfo(
             name: member.name,
-            order: member.order.to[Integer](),
+            order: member.order.to[Int](),
             type: info_from(fact: member.fact(), seen: seen),
             is_secret: member.is_secret,
         ))
@@ -157,7 +157,7 @@ record ParameterInfo
     ### The parameter's name.
     name: Text
     ### Its position among the routine's parameters, from 0.
-    order: Integer
+    order: Int
     ### The type it takes.
     type: TypeInfo
     ### Whether the routine gives it a value when the call leaves it out.
@@ -208,7 +208,7 @@ secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dic
     each parameter in fact.parameters
         parameters.add_last(value: ParameterInfo(
             name: parameter.name,
-            order: parameter.order.to[Integer](),
+            order: parameter.order.to[Int](),
             type: info_from(fact: parameter.make_fact(), seen: seen),
             has_default: parameter.has_default,
             default: parameter.default,
@@ -354,14 +354,14 @@ secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], ru
 
 # The description of a routine of the program's modules that carries an annotation. An empty module name matches
 # any module.
-secret failable routine annotated_routine(module_name: Text, name: Text, count: Integer) -> RoutineInfo
+secret failable routine annotated_routine(module_name: Text, name: Text, count: Int) -> RoutineInfo
     each fact in reached_routines()
         if fact.name == name and fact.parameters.count() == count and (module_name == "" or fact.module_name == module_name)
             return routine_info_from(fact: fact, owner: module_handle(), seen: Dict[U64, TypeInfo]())
     throw NoSuchRoutineError(owner: module_name, routine_name: name)
 
 # The description of a member routine or a common routine that carries an annotation.
-secret failable routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Integer) -> RoutineInfo
+secret failable routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Int) -> RoutineInfo
     var fact = maker()
     each listed in fact.handle.make_routines()
         if listed.name == name and listed.parameters.count() == count

@@ -1,6 +1,6 @@
 module IterTools
 
-# Suflae's surface of the emittable terminals and adapters that count: counts are `Integer`, and the
+# Suflae's surface of the emittable terminals and adapters that count: counts are `Int`, and the
 # collections they build are Suflae's own. A Suflae program calls these in place of the RazorForge routines of
 # the same names.
 
@@ -28,7 +28,7 @@ needs TKey obeys Hashable, Equatable
         result[pair.item0] = pair.item1
     return result
 
-### Collects the values into an `Array[T, N]`, in order. The bracket names the size: `xs.to[Array[Integer, 3]]()`.
+### Collects the values into an `Array[T, N]`, in order. The bracket names the size: `xs.to[Array[Int, 3]]()`.
 ### :throws: {ElementCountMismatchError} There are fewer or more than `N` values.
 failable routine Emittable[T].to[Array[T, N]]() -> Array[T, N]
 needs U64 N
@@ -45,20 +45,20 @@ needs RecordType T
     return result
 
 ### Returns how many values there are.
-routine Emittable[T].get_count() -> Integer
-    return me.get_count().to[Integer]()
+routine Emittable[T].get_count() -> Int
+    return me.get_count().to[Int]()
 
 ### Returns how many values satisfy `predicate`.
 ### :param predicate: The test applied to each value.
-routine Emittable[T].get_count(predicate: failable Callable[(T,), Bool]) -> Integer
-    return me.get_count(predicate: predicate).to[Integer]()
+routine Emittable[T].get_count(predicate: failable Callable[(T,), Bool]) -> Int
+    return me.get_count(predicate: predicate).to[Int]()
 
 ### Returns the values after the first `count`.
 ### :param count: How many values to leave out.
-routine Emittable[T].skip(count: Integer) -> SkipEmittable[T, Me]
+routine Emittable[T].skip(count: Int) -> SkipEmittable[T, Me]
     return me.skip(count: position_of(value: count))
 
 ### Returns the first `count` values.
 ### :param count: How many values to keep.
-routine Emittable[T].take(count: Integer) -> TakeEmittable[T, Me]
+routine Emittable[T].take(count: Int) -> TakeEmittable[T, Me]
     return me.take(count: position_of(value: count))

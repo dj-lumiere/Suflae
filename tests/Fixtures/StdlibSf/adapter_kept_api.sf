@@ -5,23 +5,23 @@ module Tests/StdlibSf/AdapterKeptApi
 import IterTools
 
 entity Holder
-    big: WhereEmittable[Integer, List[Integer]]
+    big: WhereEmittable[Int, List[Int]]
 
-routine bigger(xs: List[Integer]) -> WhereEmittable[Integer, List[Integer]]
+routine bigger(xs: List[Int]) -> WhereEmittable[Int, List[Int]]
     return xs.where(predicate: v => v > 1)
 
-routine fresh() -> WhereEmittable[Integer, List[Integer]]
+routine fresh() -> WhereEmittable[Int, List[Int]]
     return [4, 9, 2].where(predicate: v => v > 3)
 
-routine hold(walk: WhereEmittable[Integer, List[Integer]]) -> Holder
+routine hold(walk: WhereEmittable[Int, List[Int]]) -> Holder
     return Holder(big: walk)
 
 entity Stairs
-obeys Emitter[Integer]
-    current: Integer
-    top: Integer
+obeys Emitter[Int]
+    current: Int
+    top: Int
 
-failable routine Stairs.emit() -> Integer
+failable routine Stairs.emit() -> Int
     if me.current > me.top
         throw AbsentValueError()
     var value = me.current
@@ -29,7 +29,7 @@ failable routine Stairs.emit() -> Integer
     return value
 
 entity Lift
-    up: WhereEmittable[Integer, Stairs]
+    up: WhereEmittable[Int, Stairs]
 
 routine start()
     # A returned adapter over a list the caller made in the call.

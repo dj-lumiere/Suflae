@@ -6,10 +6,10 @@ import IO/Console
 # whole value takes a name after it (`is Monster(hp: 0) as m`). In `when` arms and after `if ... is`.
 
 record Weapon
-    power: Integer
+    power: Int
 
 record Shield
-    armor: Integer
+    armor: Int
 
 variant Item
     Weapon
@@ -19,11 +19,11 @@ record Chest
     item: Item
 
 record Monster
-    hp: Integer
+    hp: Int
     name: Text
 
 record Wall
-    height: Integer
+    height: Int
 
 variant Cell
     Chest

@@ -61,8 +61,8 @@ routine alert[T](value: T, end: Text = "\n")
 @rf("ask_line")
 failable routine ask_line() -> Text
 
-### Reads one line of standard input as a `T`: `var n: Integer = ask()` (the type the value goes to), or
-### `ask[Integer]()`. The line becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like
+### Reads one line of standard input as a `T`: `var n: Int = ask()` (the type the value goes to), or
+### `ask[Int]()`. The line becomes the value the way `line.to[T]()` makes it, so a line that isn't one fails like
 ### that does.
 ### :typeparam T: The type the line becomes.
 ### :returns: The line as a `T`.

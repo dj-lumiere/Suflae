@@ -2,7 +2,7 @@ module Collections
 
 import BuilderQuery
 
-### A growable ring of elements, counted and indexed with `Integer`, with O(1) adding and removing at both ends.
+### A growable ring of elements, counted and indexed with `Int`, with O(1) adding and removing at both ends.
 ###
 ### `RotatableList[T]` keeps its elements in a `Memory[T]` used as a ring: the elements sit one after another from a
 ### first place, wrapping past the end of the memory to its start. Reading or writing by position is O(1). Adding or
@@ -51,7 +51,7 @@ routine RotatableList[T]() -> RotatableList[T]
 ### :param capacity: The number of elements to make room for.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
-failable routine RotatableList[T](capacity: Integer) -> RotatableList[T]
+failable routine RotatableList[T](capacity: Int) -> RotatableList[T]
     return RotatableList[T](items: Memory[T](capacity: capacity), head: 0, count: 0)
 
 ### Creates a list of `count` copies of `fill_value`.
@@ -59,7 +59,7 @@ failable routine RotatableList[T](capacity: Integer) -> RotatableList[T]
 ### :param fill_value: The value every element starts as.
 ### :throws: {NegativeIndexError} if `count` is negative.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them.
-failable routine RotatableList[T](count: Integer, fill_value: T) -> RotatableList[T]
+failable routine RotatableList[T](count: Int, fill_value: T) -> RotatableList[T]
     return RotatableList[T](items: Memory[T](count: count, fill: fill_value), head: 0, count: count.to[U64]())
 
 ### Builds a list from its serialized element list.
@@ -77,7 +77,7 @@ failable common routine RotatableList[T].from_serial(value: SerialValue) -> Rota
 ### Builds the list a `[a, b, c]` literal writes.
 ### :param elements: The elements, in order.
 common routine RotatableList[T].from_literal(elements...: T) -> RotatableList[T]
-    var result = RotatableList[T](capacity: elements.count().to[Integer]())
+    var result = RotatableList[T](capacity: elements.count().to[Int]())
     var i: U64 = 0
     # Each element moves into the list: `add_last` makes the list's holder, and the caller releases the
     # literal's own afterwards.
@@ -91,12 +91,12 @@ common routine RotatableList[T].from_literal(elements...: T) -> RotatableList[T]
 # ============================================================================
 
 ### Returns the number of elements.
-routine RotatableList[T].count() -> Integer
-    return me.count.to[Integer]()
+routine RotatableList[T].count() -> Int
+    return me.count.to[Int]()
 
 ### Returns the number of elements the list holds without growing.
-routine RotatableList[T].capacity() -> Integer
-    return me.items.room().to[Integer]()
+routine RotatableList[T].capacity() -> Int
+    return me.items.room().to[Int]()
 
 ### Returns whether the list has no elements.
 routine RotatableList[T].is_empty() -> Bool
@@ -134,7 +134,7 @@ routine RotatableList[T].add_range(you: Emittable[T])
 ### :param source: The list to copy from.
 ### :param from: The first position of `source` to copy.
 ### :param count: How many elements to copy.
-failable routine RotatableList[T].add_range(source: RotatableList[T], from: Integer, count: Integer)
+failable routine RotatableList[T].add_range(source: RotatableList[T], from: Int, count: Int)
     var first = position_of(value: from)
     var n = position_of(value: count)
     if first + n > source.count
@@ -149,7 +149,7 @@ failable routine RotatableList[T].add_range(source: RotatableList[T], from: Inte
 ### Inserts `value` at `index`, moving the elements from there one place back.
 ### :param index: Where the new element goes, from 0 to `count()`.
 ### :param value: The value to insert.
-failable routine RotatableList[T].add_at(index: Integer, value: T)
+failable routine RotatableList[T].add_at(index: Int, value: T)
     var at = position_of(value: index)
     if at > me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)
@@ -180,7 +180,7 @@ failable routine RotatableList[T].remove_first() -> T
 
 ### Removes and returns the element at `index`, moving the elements after it one place forward.
 ### :param index: The position to remove.
-failable routine RotatableList[T].remove_at(index: Integer) -> T
+failable routine RotatableList[T].remove_at(index: Int) -> T
     var at = me.checked_position(index: index)
     me.straighten()
     var value = me.items.take_at(position: at)
@@ -190,7 +190,7 @@ failable routine RotatableList[T].remove_at(index: Integer) -> T
 
 ### Keeps the first `new_count` elements and removes the rest.
 ### :param new_count: How many elements to keep.
-failable routine RotatableList[T].truncate(new_count: Integer)
+failable routine RotatableList[T].truncate(new_count: Int)
     var kept = position_of(value: new_count)
     if kept > me.count
         throw IndexOutOfBoundsError(index: kept, count: me.count)
@@ -205,15 +205,15 @@ routine RotatableList[T].clear()
 ### Discards the oldest elements so at most the latest `n` remain, keeping the memory: the fixed-space step of a
 ### rolling "keep the latest N" history. When `n` is at least the count, nothing changes.
 ### :param n: The maximum number of most-recent elements to keep.
-failable routine RotatableList[T].keep_last(n: Integer)
+failable routine RotatableList[T].keep_last(n: Int)
     me.drop_oldest(kept: position_of(value: n))
     return
 
 ### Discards the newest elements so at most the first `n` remain, keeping the memory. When `n` is at least the
 ### count, nothing changes.
 ### :param n: The maximum number of oldest elements to keep.
-routine RotatableList[T].keep_first(n: Integer)
-    if n < me.count.to[Integer]()
+routine RotatableList[T].keep_first(n: Int)
+    if n < me.count.to[Int]()
         me.truncate(new_count: n)
     return
 
@@ -221,7 +221,7 @@ routine RotatableList[T].keep_first(n: Integer)
 ### fixed-size latest-N history, which never needs more room than `keeping`. With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of most-recent elements to keep afterward.
-failable routine RotatableList[T].add_last_keeping(value: T, keeping: Integer)
+failable routine RotatableList[T].add_last_keeping(value: T, keeping: Int)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -234,7 +234,7 @@ failable routine RotatableList[T].add_last_keeping(value: T, keeping: Integer)
 ### With `keeping` of zero nothing is kept.
 ### :param value: The value to add.
 ### :param keeping: The maximum number of elements to keep afterward.
-failable routine RotatableList[T].add_first_keeping(value: T, keeping: Integer)
+failable routine RotatableList[T].add_first_keeping(value: T, keeping: Int)
     var kept = position_of(value: keeping)
     if kept == 0
         me.cut(kept: 0)
@@ -248,8 +248,8 @@ failable routine RotatableList[T].add_first_keeping(value: T, keeping: Integer)
 ### :param new_capacity: The number of elements to make room for.
 ### :throws: {OutOfMemoryError} if the elements take more bytes than a `U64` counts, or there is no memory left for them. The list then holds
 ###     what it held.
-failable routine RotatableList[T].reserve(new_capacity: Integer)
-    if new_capacity > me.items.room().to[Integer]()
+failable routine RotatableList[T].reserve(new_capacity: Int)
+    if new_capacity > me.items.room().to[Int]()
         var room = room_of(capacity: new_capacity)
         me.straighten()
         me.items.grow_to(room: room)
@@ -289,22 +289,22 @@ routine RotatableList[T].last_or_default(default_value: T) -> T
 
 ### Returns the element at `index` (`xs[i]`).
 ### :param index: The position to read.
-failable routine RotatableList[T].getitem(index: Integer) -> T
+failable routine RotatableList[T].getitem(index: Int) -> T
     return me.items.at(position: me.place(index: me.checked_position(index: index)))
 
 ### Replaces the element at `index` (`xs[i] = v`).
 ### :param index: The position to write.
 ### :param value: The new element.
-failable routine RotatableList[T].setitem(index: Integer, value: T)
+failable routine RotatableList[T].setitem(index: Int, value: T)
     me.items.put(position: me.place(index: me.checked_position(index: index)), value: value)
     return
 
 ### Returns a new list of the elements at the positions in `range` (`xs[a til b]`). Positions outside the
 ### list are skipped, and a range that counts down (`by -1`) gives the elements in reverse.
 ### :param range: The positions to copy.
-routine RotatableList[T].getitem(range: Range[Integer]) -> RotatableList[T]
+routine RotatableList[T].getitem(range: Range[Int]) -> RotatableList[T]
     var result = RotatableList[T]()
-    var count = me.count.to[Integer]()
+    var count = me.count.to[Int]()
     each i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.items.at(position: me.place(index: i.to[U64]())))
@@ -316,13 +316,13 @@ routine RotatableList[T].getitem(range: Range[Integer]) -> RotatableList[T]
 
 ### Moves the first `n` elements to the back, keeping their order.
 ### :param n: How many positions to rotate by.
-failable routine RotatableList[T].rotate_left(n: Integer)
+failable routine RotatableList[T].rotate_left(n: Int)
     me.turn(count: position_of(value: n))
     return
 
 ### Moves the last `n` elements to the front, keeping their order.
 ### :param n: How many positions to rotate by.
-failable routine RotatableList[T].rotate_right(n: Integer)
+failable routine RotatableList[T].rotate_right(n: Int)
     var shift = position_of(value: n)
     if me.count == 0
         return
@@ -378,7 +378,7 @@ routine RotatableList[T].diagnose() -> Text
 
 ### Returns a new list holding copies of the elements.
 routine RotatableList[T].duplicate() -> RotatableList[T]
-    var result = RotatableList[T](capacity: me.count.to[Integer]())
+    var result = RotatableList[T](capacity: me.count.to[Int]())
     each element in me
         result.add_last(value: element)
     return result
@@ -426,7 +426,7 @@ routine RotatableList[T].sorted_by(compare: failable Callable[(T, T), Bool]) -> 
 ### Swaps the elements at `first` and `second` in place.
 ### :param first: One position.
 ### :param second: The other position.
-failable routine RotatableList[T].swap(first: Integer, second: Integer)
+failable routine RotatableList[T].swap(first: Int, second: Int)
     me.items.swap_at(first: me.place(index: me.checked_position(index: first)), second: me.place(index: me.checked_position(index: second)))
     return
 
@@ -447,7 +447,7 @@ secret routine RotatableList[T].place(index: U64) -> U64
     var room = me.items.room()
     return if place >= room then place - room else place
 ### The position `index` names, crashing unless it is the position of an element.
-secret failable routine RotatableList[T].checked_position(index: Integer) -> U64
+secret failable routine RotatableList[T].checked_position(index: Int) -> U64
     var at = position_of(value: index)
     if at >= me.count
         throw IndexOutOfBoundsError(index: at, count: me.count)

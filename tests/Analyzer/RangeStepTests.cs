@@ -40,7 +40,7 @@ public sealed class RangeStepTests
     public void Analyze_VariableStep_NoError()
     {
         string source = """
-                        routine walk(step: Integer)
+                        routine walk(step: Int)
                             each i in 10 til 0 by step
                                 nothing
                             return

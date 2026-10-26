@@ -3,16 +3,16 @@ module System
 import BuilderQuery
 
 # Suflae's surface of the fixed-size `Array[T, COUNT]`: the same record as RazorForge's, counted and indexed with
-# `Integer`. A Suflae program calls these in place of the RazorForge routines of the same names.
+# `Int`. A Suflae program calls these in place of the RazorForge routines of the same names.
 
 ### Returns the number of elements, `COUNT`.
-routine Array[T, COUNT].count() -> Integer
+routine Array[T, COUNT].count() -> Int
     var n: U64 = COUNT
-    return n.to[Integer]()
+    return n.to[Int]()
 
 ### Returns the element at `index` (`a[i]`).
 ### :param index: The position to read, from 0.
-failable routine Array[T, COUNT].getitem(index: Integer) -> T
+failable routine Array[T, COUNT].getitem(index: Int) -> T
 needs RecordType T
     return me.at(position: position_of(value: index))
 
@@ -26,7 +26,7 @@ needs RecordType T
 ### Replaces the element at `index` (`a[i] = v`). What the place held before is torn down.
 ### :param index: The position to write, from 0.
 ### :param value: The new element.
-failable routine Array[T, COUNT].setitem(index: Integer, value: T)
+failable routine Array[T, COUNT].setitem(index: Int, value: T)
     me.put(position: position_of(value: index), value: value)
     return
 
@@ -43,7 +43,7 @@ failable routine Array[T, COUNT].put(position: U64, value: T)
 
 ### Tears down what the place at `index` holds and leaves the place zero.
 ### :param index: The position to empty.
-failable routine Array[T, COUNT].erase(index: Integer)
+failable routine Array[T, COUNT].erase(index: Int)
     me.erase_at(position: position_of(value: index))
     return
 
@@ -61,7 +61,7 @@ failable routine Array[T, COUNT].erase_at(position: U64)
 ### :param from: The first place to carry from.
 ### :param into: The first place to carry into.
 ### :param count: How many places to carry.
-failable routine Array[T, COUNT].move(from: Integer, into: Integer, count: Integer)
+failable routine Array[T, COUNT].move(from: Int, into: Int, count: Int)
     if count.is_negative()
         throw NegativeIndexError(index: count)
     var n = count.to[U64]()
@@ -105,11 +105,11 @@ failable routine Array[T, COUNT].carry(source: U64, target: U64, count: U64)
 ### Returns a list of the elements at the positions in `range` (`a[x til y]`). Positions outside the array are
 ### skipped.
 ### :param range: The positions to copy.
-routine Array[T, COUNT].getitem(range: Range[Integer]) -> List[T]
+routine Array[T, COUNT].getitem(range: Range[Int]) -> List[T]
 needs RecordType T
     var result = List[T]()
     var n: U64 = COUNT
-    var count = n.to[Integer]()
+    var count = n.to[Int]()
     each i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.get_raw(index: i.to[U64]()).share())
@@ -118,12 +118,12 @@ needs RecordType T
 ### Returns the position of the first element equal to `value`.
 ### :param value: The value to look for.
 ### :throws: {AbsentValueError} No element equals `value`.
-failable routine Array[T, COUNT].index_of(value: T) -> Integer
+failable routine Array[T, COUNT].index_of(value: T) -> Int
 needs T obeys Equatable
     var i: U64 = 0
     until i >= COUNT
         if me.get_raw(index: i) == value
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
@@ -146,7 +146,7 @@ secret failable routine Array[T, COUNT].filled(position: U64) -> U64
     if T.type_kind() == TypeKind.ENTITY
         danger
             if me.slot(position: place).peek_as[Addr]().is_hollow()
-                throw EmptyPlaceError(index: place.to[Integer]())
+                throw EmptyPlaceError(index: place.to[Int]())
     return place
 
 ### What a place already checked holds, as it sits in memory (no holder of its own).

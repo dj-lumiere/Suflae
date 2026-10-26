@@ -75,8 +75,8 @@ needs T obeys Comparable
 # ============================================================================
 
 ### Returns the number of elements.
-routine SortedSet[T].count() -> Integer
-    return me.tree.count().to[Integer]()
+routine SortedSet[T].count() -> Int
+    return me.tree.count().to[Int]()
 
 ### Returns true if this set contains no elements.
 routine SortedSet[T].is_empty() -> Bool
@@ -123,7 +123,7 @@ routine SortedSet[T].remove(value: T) -> Bool
 ### :param rank: Zero-based position in sorted order.
 ### :returns: The element at that rank.
 ### :throws: {IndexOutOfBoundsError} if `rank >= count()`.
-failable routine SortedSet[T].get_by_rank(rank: Integer) -> T
+failable routine SortedSet[T].get_by_rank(rank: Int) -> T
     var position = position_of(value: rank)
     var count = me.tree.count()
     if position >= count

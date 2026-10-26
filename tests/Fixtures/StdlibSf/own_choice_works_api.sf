@@ -2,7 +2,7 @@ module Tests/StdlibSf/OwnChoiceWorksApi
 
 import IO/Console
 
-# A Suflae choice or flags hands its cases back in Suflae's own list, counted with Integer, and a Suflae
+# A Suflae choice or flags hands its cases back in Suflae's own list, counted with Int, and a Suflae
 # list of jobs runs them together.
 choice Color
     RED
@@ -13,11 +13,11 @@ flags Perm
     READ
     WRITE
 
-routine fetch(id: Integer) -> Integer
+routine fetch(id: Int) -> Int
     waitfor(5ms)
     return id * 10
 
-routine slow(id: Integer) -> Integer
+routine slow(id: Int) -> Int
     each i in 0 til 100
         if cancellation_requested()
             return -1

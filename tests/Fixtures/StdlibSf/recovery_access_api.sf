@@ -12,18 +12,18 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-failable routine pick(items: List[Integer], i: Integer) -> Integer
+failable routine pick(items: List[Int], i: Int) -> Int
     if i < 0
         throw NopeError(what: "negative")
     var v = items[i]
     return v
 
-failable routine letter(t: Text, i: Integer) -> Char
+failable routine letter(t: Text, i: Int) -> Char
     if i < 0
         throw AbsentValueError()
     return t[i]
 
-failable routine score(ages: Dict[Text, Integer], name: Text) -> Integer
+failable routine score(ages: Dict[Text, Int], name: Text) -> Int
     if name == ""
         throw NopeError(what: "empty")
     return ages[name] * 10
@@ -34,23 +34,23 @@ failable routine narrow(n: S64) -> S8
     var b = n.to[S8]()
     return b
 
-failable routine parsed(t: Text) -> Integer
+failable routine parsed(t: Text) -> Int
     if t == ""
         throw AbsentValueError()
-    return t.to[Integer]()
+    return t.to[Int]()
 
 # a failable routine with a subscript, called bare by another failable one
-failable routine last_of(items: List[Integer]) -> Integer
+failable routine last_of(items: List[Int]) -> Int
     return items[items.count() - 1]
 
-failable routine last_plus_one(items: List[Integer]) -> Integer
+failable routine last_plus_one(items: List[Int]) -> Int
     if items.count() > 1000
         throw AbsentValueError()
     return last_of(items: items) + 1
 
 routine start()
     var nums = [4, 5]
-    var empty: List[Integer] = []
+    var empty: List[Int] = []
     show(f"try pick(1): {try pick(items: nums, i: 1)}")
     show(f"try pick(9): {try pick(items: nums, i: 9)}")
     show(f"grab pick(9): {check pick(items: nums, i: 9)}")

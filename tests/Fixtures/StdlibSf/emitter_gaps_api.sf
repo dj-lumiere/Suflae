@@ -22,16 +22,16 @@ entity Cell[T]
 routine Cell[T].get() -> T
     return me.value
 
-record Countdown obeys Emittable[Integer]
-    start: Integer
+record Countdown obeys Emittable[Int]
+    start: Int
 
-entity CountdownWalk obeys Emitter[Integer]
-    next: Integer
+entity CountdownWalk obeys Emitter[Int]
+    next: Int
 
 routine Countdown.emitter() -> CountdownWalk
     return CountdownWalk(next: me.start)
 
-failable routine CountdownWalk.emit() -> Integer
+failable routine CountdownWalk.emit() -> Int
     if me.next < 0
         throw AbsentValueError()
     var current = me.next
@@ -55,11 +55,11 @@ routine start()
     show("gathered")
 
     # A routine of a generic entity reads its member variable.
-    var c = Cell[Integer](value: 5)
+    var c = Cell[Int](value: 5)
     show(c.get())
 
     # An adapter walks a user's own Emittable.
-    show(Countdown(start: 5).where(predicate: (n: Integer) => n % 2 == 1).to[List]())
+    show(Countdown(start: 5).where(predicate: (n: Int) => n % 2 == 1).to[List]())
 
     # A field-by-field construction infers the type arguments.
     var pair = Pair(first: 1, second: "one")

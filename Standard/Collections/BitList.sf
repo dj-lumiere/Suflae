@@ -97,7 +97,7 @@ secret failable routine BitList(capacity: U64) -> BitList
 ### :returns: An empty `BitList` with preallocated storage.
 ### :throws: {NegativeIndexError} if `capacity` is negative.
 ### :throws: {OutOfMemoryError} if `capacity` is more than a `U64` counts, or there is no memory left for the bits.
-failable routine BitList(capacity: Integer) -> BitList
+failable routine BitList(capacity: Int) -> BitList
     return BitList(capacity: room_of(capacity: capacity))
 
 ### Returns how many 64-bit words hold `bits` bits.
@@ -166,8 +166,8 @@ secret routine BitList.count_raw() -> U64
 
 ### Returns the number of logical bits currently stored in the list.
 ### :returns: The live bit count.
-routine BitList.count() -> Integer
-    return me.count_raw().to[Integer]()
+routine BitList.count() -> Int
+    return me.count_raw().to[Int]()
 
 secret routine BitList.capacity_raw() -> U64
     # Get current capacity in bits
@@ -175,8 +175,8 @@ secret routine BitList.capacity_raw() -> U64
 
 ### Returns the number of bits that can be stored before the next growth step.
 ### :returns: The current bit capacity (in bits, not words).
-routine BitList.capacity() -> Integer
-    return me.capacity_raw().to[Integer]()
+routine BitList.capacity() -> Int
+    return me.capacity_raw().to[Int]()
 
 ### Returns true if the list currently stores no logical bits.
 ### :returns: `true` when `count()` is zero.
@@ -251,7 +251,7 @@ secret failable routine BitList.reserve_raw(new_capacity: U64)
 ### :param new_capacity: The minimum capacity to reserve.
 ### :throws: {OutOfMemoryError} if `new_capacity` is more than a `U64` counts, or there is no memory left for the bits.
 ###     The bit list then stays as it was.
-failable routine BitList.reserve(new_capacity: Integer)
+failable routine BitList.reserve(new_capacity: Int)
     me.reserve_raw(new_capacity: room_of(capacity: new_capacity))
     return
 
@@ -274,7 +274,7 @@ secret failable routine BitList.getitem_raw(index: U64) -> Bool
 ### :param index: The zero-based logical position to read.
 ### :returns: The resulting `Bool` value.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.getitem(index: Integer) -> Bool
+failable routine BitList.getitem(index: Int) -> Bool
     return me.getitem_raw(index: position_of(value: index))
 
 secret failable routine BitList.setitem_raw(index: U64, value: Bool)
@@ -287,7 +287,7 @@ secret failable routine BitList.setitem_raw(index: U64, value: Bool)
 ### :param index: The zero-based logical position to update.
 ### :param value: The replacement bit value.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.setitem(index: Integer, value: Bool)
+failable routine BitList.setitem(index: Int, value: Bool)
     me.setitem_raw(index: position_of(value: index), value: value)
     return
 
@@ -318,7 +318,7 @@ secret failable routine BitList.flip_raw(index: U64)
 ### Toggles the bit at `index`.
 ### :param index: The zero-based bit position to flip.
 ### :throws: May throw {IndexOutOfBoundsError}.
-failable routine BitList.flip(index: Integer)
+failable routine BitList.flip(index: Int)
     me.flip_raw(index: position_of(value: index))
     return
 
@@ -349,8 +349,8 @@ secret routine BitList.count_trues_raw() -> U64
 
 ### Counts how many stored bits are set to `true`.
 ### :returns: The number of one-bits in the logical sequence.
-routine BitList.count_trues() -> Integer
-    return me.count_trues_raw().to[Integer]()
+routine BitList.count_trues() -> Int
+    return me.count_trues_raw().to[Int]()
 
 secret routine BitList.count_falses_raw() -> U64
     # Count number of bits set to 0
@@ -358,8 +358,8 @@ secret routine BitList.count_falses_raw() -> U64
 
 ### Counts how many stored bits are set to `false`.
 ### :returns: `count()` minus the number of one-bits.
-routine BitList.count_falses() -> Integer
-    return me.count_falses_raw().to[Integer]()
+routine BitList.count_falses() -> Int
+    return me.count_falses_raw().to[Int]()
 
 ### Returns `true` when at least one stored bit is set.
 ### :returns: `true` if any bit is `true`; `false` if all bits are clear.
@@ -393,11 +393,11 @@ routine BitList.is_none_true() -> Bool
 ### Returns the position of the first `true` bit.
 ### :returns: The lowest index whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit is `true`.
-failable routine BitList.first_true() -> Integer
+failable routine BitList.first_true() -> Int
     var i: U64 = 0
     until i >= me.count
         if me.get_bit_internal(i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
@@ -405,25 +405,25 @@ failable routine BitList.first_true() -> Integer
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `true`.
 ### :throws: {AbsentValueError} when no bit after `after` is `true`.
-failable routine BitList.next_true(after: Integer) -> Integer
+failable routine BitList.next_true(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= me.count
         throw AbsentValueError()
     var i: U64 = start + 1
     until i >= me.count
         if me.get_bit_internal(i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
 ### Returns the position of the first `false` bit.
 ### :returns: The lowest index whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit is `false`.
-failable routine BitList.first_false() -> Integer
+failable routine BitList.first_false() -> Int
     var i: U64 = 0
     until i >= me.count
         if not me.get_bit_internal(i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 
@@ -431,14 +431,14 @@ failable routine BitList.first_false() -> Integer
 ### :param after: The index to look past.
 ### :returns: The lowest index above `after` whose bit is `false`.
 ### :throws: {AbsentValueError} when no bit after `after` is `false`.
-failable routine BitList.next_false(after: Integer) -> Integer
+failable routine BitList.next_false(after: Int) -> Int
     var start: U64 = position_of(value: after)
     if start >= me.count
         throw AbsentValueError()
     var i: U64 = start + 1
     until i >= me.count
         if not me.get_bit_internal(i)
-            return i.to[Integer]()
+            return i.to[Int]()
         i = i +% 1
     throw AbsentValueError()
 

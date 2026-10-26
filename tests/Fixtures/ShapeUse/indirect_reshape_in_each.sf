@@ -4,12 +4,12 @@ import IO/Console
 # `grow` adds to the list the loop is visiting. Suflae cannot trace that at build time (its list is a shared
 # handle), so the loop marks the list's shape as in use and `add_last` crashes with ReshapingWhileInUseError.
 
-routine grow(xs: List[Integer])
+routine grow(xs: List[Int])
     xs.add_last(value: 99)
     return
 
 routine start()
-    var nums = List[Integer]()
+    var nums = List[Int]()
     nums.add_last(value: 1)
     nums.add_last(value: 2)
     each x in nums

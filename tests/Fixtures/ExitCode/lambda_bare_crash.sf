@@ -6,12 +6,12 @@ import IterTools
 # the call crashes loudly (status 82), and an `each` loop over an adapter holding it does not quietly end early:
 # the failure inside the lambda crashes the loop.
 
-routine apply(f: failable Callable[(Integer,), Integer], x: Integer) -> Integer
+routine apply(f: failable Callable[(Int,), Int], x: Int) -> Int
     return f(x)
 
 routine start()
     show(f"recovered: {try apply(f: x => 10 // x, x: 0)}")
-    var xs = List[Integer]()
+    var xs = List[Int]()
     xs.add_last(value: 5)
     xs.add_last(value: 0)
     xs.add_last(value: 2)

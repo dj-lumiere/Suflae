@@ -31,10 +31,10 @@ can be just its statements, and running it is one command: `suflae run hello.sf`
 import IO/Console
 
 entity Point
-    x: Integer
-    y: Integer
+    x: Int
+    y: Int
 
-global MOVES: Integer = 0
+global MOVES: Int = 0
 
 routine nudge(p: Point)
     p.x = p.x + 1
@@ -46,7 +46,7 @@ nudge(p: q)
 show(f"p.x = {p.x}")        # 4
 show(f"moves = {MOVES}")    # 1
 
-show(0.1 + 0.2 == 0.3)      # true: bare numbers are Integer and Decimal
+show(0.1 + 0.2 == 0.3)      # true: bare numbers are Int and Decimal
 show(99999999999999999999 * 99999999999999999999)
 ```
 
@@ -74,7 +74,7 @@ you a second name for the same entity, with nothing to write for the sharing. It
 uses it anymore, entities that point at each other included, and tasks can share it safely. An entity that may be missing is written `Point?` and must be checked against `None`
 before you use it.
 
-**Numbers are exact by default.** A bare `42` is an arbitrary-precision `Integer` and a bare `3.14`
+**Numbers are exact by default.** A bare `42` is an arbitrary-precision `Int` and a bare `3.14`
 is a base-10 `Decimal` with 34 significant digits, so `0.1 + 0.2 == 0.3` holds, and whole numbers never overflow. A number gets a
 fixed-width type (`S32`, `U64`, `B64`, …) when its declaration names one: `var x: U8 = 5`.
 

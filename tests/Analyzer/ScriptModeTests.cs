@@ -69,7 +69,7 @@ public sealed class ScriptModeTests
     {
         AssertHasErrorSuflae(source: """
                                      var total = 0
-                                     routine bump(n: Integer)
+                                     routine bump(n: Int)
                                          total = total + n
                                          return
                                      bump(n: 3)

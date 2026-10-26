@@ -17,14 +17,14 @@ record Box[T]
 routine wrap[T](x: T) -> Box[T]
     return Box[T](item: x)
 
-failable routine look(n: Integer) -> Integer
+failable routine look(n: Int) -> Int
     if n < 0
-        throw InvalidValueError(input: "negative", target: "Integer")
+        throw InvalidValueError(input: "negative", target: "Int")
     if n == 0
         throw AbsentValueError()
     return n
 
-routine three() -> List[Integer]
+routine three() -> List[Int]
     return [1, 2, 3]
 
 routine names(lights: List[Light]) -> Text
@@ -33,12 +33,12 @@ routine names(lights: List[Light]) -> Text
         out = out + f"{light} "
     return out
 
-routine arm_fstring(m: Integer?, other: Integer?) -> Text
+routine arm_fstring(m: Int?, other: Int?) -> Text
     when m
         is None => return f"none {other is None}"
         else as v => return f"{v} {other is None} {(v + 1) * 2}"
 
-routine fetch(id: Integer) -> Integer
+routine fetch(id: Int) -> Int
     waitfor(5ms)
     return id * 10
 
@@ -57,18 +57,18 @@ routine start()
     show(f"each_over_call: {total} {words}")
 
     # `??` takes the fallback for every arm that is not the value.
-    var a = check "x".to[Integer]() ?? 7
+    var a = check "x".to[Int]() ?? 7
     var b = check look(n: -1) ?? 1
     var c = check look(n: 0) ?? 2
     var d = check look(n: 5) ?? 3
     show(f"fallback_everywhere: {a} {b} {c} {d}")
 
     # A failable creator with type arguments, recovered.
-    var bad = try "x".serialize().to[List[Integer]]()
-    var good = try three().serialize().to[List[Integer]]()
+    var bad = try "x".serialize().to[List[Int]]()
+    var good = try three().serialize().to[List[Int]]()
     show(f"generic_ctor_recovered: {bad is None} {good is None}")
 
-    # End-relative positions and slices on Integer indices.
+    # End-relative positions and slices on Int indices.
     show(f"slices_from_the_back: {xs[^1]} {xs[1 til ^0].count()} {xs[^2 til ^0][0]}")
 
     # A `when` inside an `each` that leaves the loop from one arm.
@@ -83,7 +83,7 @@ routine start()
     show(f"all_cases: {names(lights: Light.all_cases())}{Light.count() * 10}")
 
     # A type argument that mentions the parameter's own name.
-    var outer = wrap[Box[Integer]](x: wrap[Integer](x: 7))
+    var outer = wrap[Box[Int]](x: wrap[Int](x: 7))
     show(f"box_of_box: {outer.item.item + 1}")
 
     # jobs gathered from a literal held in a name, inside an f-string hole.

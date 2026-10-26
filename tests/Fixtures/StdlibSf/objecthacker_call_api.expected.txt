@@ -23,5 +23,5 @@ direct twice: 4
 unused: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.unused' is not in this program: nothing in the program calls it, so the build left it out. Call it somewhere in the program, or mark its type '@reflectable' to keep every routine of the type.
 fly: 'Hero' has no routine 'fly'
 attack: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.attack': the argument 'power' is missing
-attack: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.attack': the argument 'power' takes S64, and the value given is Integer
+attack: 'Tests/StdlibSf/ObjectHackerCallApi.Hero.attack': the argument 'power' takes S64, and the value given is Int
 DONE

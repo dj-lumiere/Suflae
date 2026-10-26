@@ -12,15 +12,15 @@ obeys Hashable
 
 record Team
     lead: Player
-    size: Integer
+    size: Int
 
 record Point
-    x: Integer
-    y: Integer
+    x: Int
+    y: Int
 
 record Named
     name: Text
-    size: Integer
+    size: Int
 
 routine same[T](a: T, b: T) -> Bool
 needs T obeys Equatable
@@ -53,15 +53,15 @@ routine start()
     texts.add("Ada")
     show(f"text found: {texts.has(built)}")
 
-    var big: Integer = 18446744073709551616
-    var two: Integer = 2
+    var big: Int = 18446744073709551616
+    var two: Int = 2
     var made = two ** 64
     show(f"integer hash: {big.hash(k0: 3, k1: 5) == made.hash(k0: 3, k1: 5)}")
-    var numbers = Set[Integer]()
+    var numbers = Set[Int]()
     numbers.add(big)
     show(f"integer found: {numbers.has(made)}")
 
-    var sizes = Dict[Named, Integer]()
+    var sizes = Dict[Named, Int]()
     sizes[Named("Ada", big)] = 7
     show(f"record key: {sizes[Named(built, made)]}")
 

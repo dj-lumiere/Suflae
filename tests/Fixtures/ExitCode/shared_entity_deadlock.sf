@@ -6,9 +6,9 @@ import IO/Console
 # hanging.
 
 entity Tally
-    count: Integer
+    count: Int
 
-routine mix(a: Tally, b: Tally, times: Integer) -> Integer
+routine mix(a: Tally, b: Tally, times: Int) -> Int
     each _ in 1 to times
         a.count += b.count
     return times

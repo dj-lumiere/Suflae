@@ -1,6 +1,6 @@
 module Tests/StdlibSf/ShiftAmountApi
 
-# A shift amount and a subscript index may be any integer type: a literal, an Integer, a fixed-width variable or an
+# A shift amount and a subscript index may be any integer type: a literal, an Int, a fixed-width variable or an
 # expression. A shift by more than the width gives 0.
 
 import IO/Console

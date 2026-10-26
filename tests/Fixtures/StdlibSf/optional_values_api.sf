@@ -10,7 +10,7 @@ entity Node
     next: Node?
 
 record Slot
-    item: Integer?
+    item: Int?
 
 failable routine pick(n: S64) -> S64
     if n < 0

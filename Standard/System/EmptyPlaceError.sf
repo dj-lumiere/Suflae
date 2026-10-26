@@ -4,7 +4,7 @@ module System
 ### entity yet.
 crashable EmptyPlaceError
     ### The position that was read.
-    index: Integer
+    index: Int
 
 ### Returns the message the crash shows.
 @override

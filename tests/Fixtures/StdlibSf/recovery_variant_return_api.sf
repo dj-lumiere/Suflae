@@ -5,9 +5,9 @@ import IO/Console
 # is wrapped into the variant under `check`, `try`, and in a recovered value kept in a `var`.
 
 record Deposit
-    amount: Integer
+    amount: Int
 record Withdraw
-    amount: Integer
+    amount: Int
 variant Command
     Deposit
     Withdraw

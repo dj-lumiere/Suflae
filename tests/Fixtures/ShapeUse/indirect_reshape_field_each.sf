@@ -6,9 +6,9 @@ import IO/Console
 # ReshapingWhileInUseError instead of the loop silently skipping the new element.
 
 entity Bag
-    items: List[Integer]
+    items: List[Int]
 
-routine grow(xs: List[Integer])
+routine grow(xs: List[Int])
     xs.add_last(value: 99)
     return
 
@@ -20,7 +20,7 @@ routine Bag.spin()
     return
 
 routine start()
-    var b = Bag(items: List[Integer]())
+    var b = Bag(items: List[Int]())
     b.items.add_last(value: 1)
     b.spin()
     return

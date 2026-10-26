@@ -4,7 +4,7 @@ import IO/Console
 # A range step held in a variable is checked when the range is iterated: a negative step counts down, and a step
 # of zero crashes loudly (status 82) instead of looping forever.
 
-routine count_down(step: Integer)
+routine count_down(step: Int)
     each i in 10 til 0 by step
         show(f"step {i}")
     return

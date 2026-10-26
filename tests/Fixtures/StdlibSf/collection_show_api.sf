@@ -16,40 +16,40 @@ routine start()
     show(f"{words} {words:?}")
     var ages = {"ann": 31, "bob": 27}
     show(f"{ages} {ages:?}")
-    var no_ages = Dict[Text, Integer]()
+    var no_ages = Dict[Text, Int]()
     show(f"{no_ages} {no_ages:?}")
-    var sets = [{1: 10, 2: 5}, Dict[Integer, Integer]()]
+    var sets = [{1: 10, 2: 5}, Dict[Int, Int]()]
     show(sets)
     var seen = {2, 1}
     show(f"{seen} {seen:?}")
-    var none_seen = Set[Integer]()
+    var none_seen = Set[Int]()
     show(f"{none_seen} {none_seen:?}")
 
     show(f"{0 to 10} {0 til 10 by 2} {10 to 0 by -2}")
     var r = 0 til 10 by 2
     show(f"{r:?}")
 
-    var queue = PriorityQueue[Integer, Text]()
+    var queue = PriorityQueue[Int, Text]()
     queue.add(element: "d", priority: 4)
     queue.add(element: "a", priority: 1)
     queue.add(element: "c", priority: 3)
     queue.add(element: "b", priority: 2)
     show(f"{queue} {queue:?}")
     show(f"{queue.peek()} {queue.count()}")
-    var no_queue = PriorityQueue[Integer, Text]()
+    var no_queue = PriorityQueue[Int, Text]()
     show(no_queue)
 
-    var index = SortedDict[Integer, Text]()
+    var index = SortedDict[Int, Text]()
     index[3] = "c"
     index[1] = "a"
     show(f"{index} {index:?}")
-    var no_index = SortedDict[Integer, Text]()
+    var no_index = SortedDict[Int, Text]()
     show(f"{no_index} {no_index:?}")
-    var tree = SortedSet[Integer]()
+    var tree = SortedSet[Int]()
     tree.add(3)
     tree.add(1)
     show(f"{tree} {tree:?}")
-    var ranked = SortedList[Integer]()
+    var ranked = SortedList[Int]()
     ranked.add(3)
     ranked.add(1)
     ranked.add(3)

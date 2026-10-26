@@ -8,10 +8,10 @@ import ObjectHacker
 # history. A List keeps them from the first place on, so it adds and removes at its front by moving the rest.
 
 entity Box
-    id: Integer
+    id: Int
 
 routine start()
-    var xs = RotatableList[Integer](capacity: 4)
+    var xs = RotatableList[Int](capacity: 4)
     xs.add_last(value: 2)
     xs.add_last(value: 3)
     xs.add_first(value: 1)
@@ -43,7 +43,7 @@ routine start()
     history.clear()
     show(f"cleared: {history} empty={history.is_empty()}")
 
-    var queue = RotatableList[Integer]()
+    var queue = RotatableList[Int]()
     var i = 0
     until i >= 10
         queue.add_last(value: i)
@@ -69,7 +69,7 @@ routine start()
     boxes = RotatableList[Box]()
     show(f"released: {not seen.is_alive()}")
 
-    var empty = RotatableList[Integer]()
+    var empty = RotatableList[Int]()
     var removed = try empty.remove_first()
     show(f"empty remove: {removed is None}")
 

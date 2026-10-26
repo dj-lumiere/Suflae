@@ -1288,7 +1288,7 @@ internal sealed class EntityLoweringPass
             }
         }
 
-        // Only the memberwise construction stores fields; a written creator (`List[Integer](from: s)`) takes
+        // Only the memberwise construction stores fields; a written creator (`List[Int](from: s)`) takes
         // its arguments as parameters, projected like any call's.
         if (gmce.ResolvedType is EntityTypeSymbol && gmce.ResolvedRoutine is null or { IsSynthesized: true })
         {

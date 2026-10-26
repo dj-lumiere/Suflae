@@ -13,7 +13,7 @@ record Point
     x: S64
     y: S64
 
-routine count_secret(infos: List[MemberVariableInfo]) -> Integer
+routine count_secret(infos: List[MemberVariableInfo]) -> Int
     var n = 0
     each info in infos
         if info.is_secret

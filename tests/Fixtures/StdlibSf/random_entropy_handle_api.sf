@@ -7,16 +7,16 @@ import Random
 
 entity Board
     rng: Random
-    cells: List[Integer]
+    cells: List[Int]
 
-routine Board.cell_sum() -> Integer
+routine Board.cell_sum() -> Int
     var total = 0
     each c in me.cells
-        total += c + me.rng.range(low: 0, high: 1).to[Integer]()
+        total += c + me.rng.range(low: 0, high: 1).to[Int]()
     return total
 
-routine draw(rng: Random) -> Integer
-    return rng.range(low: 0, high: 10).to[Integer]()
+routine draw(rng: Random) -> Int
+    return rng.range(low: 0, high: 10).to[Int]()
 
 routine start()
     show(draw(rng: Random.from_entropy()) < 10)

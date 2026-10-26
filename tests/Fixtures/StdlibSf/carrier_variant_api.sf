@@ -10,12 +10,12 @@ routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
 crashable OtherError
-    code: Integer
+    code: Int
 
 routine OtherError.crash_message() -> Text
     return f"other {me.code}"
 
-failable routine inner(n: Integer) -> Integer
+failable routine inner(n: Int) -> Int
     if n == 3
         throw NopeError(what: f"three {n}")
     if n == 4
@@ -23,15 +23,15 @@ failable routine inner(n: Integer) -> Integer
     return n * 10
 
 # No error arm: the error passes on to the caller.
-failable routine passes(n: Integer) -> Integer
+failable routine passes(n: Int) -> Int
     when check inner(n: n)
-        is Integer as v =>
+        is Int as v =>
             return v + 1
 
 # Rethrows the caught error: it moves to this routine's carrier.
-failable routine rethrows(n: Integer) -> Integer
+failable routine rethrows(n: Int) -> Int
     when check inner(n: n)
-        is Integer as v =>
+        is Int as v =>
             return v + 2
         is Crashables as e =>
             throw e
@@ -40,19 +40,19 @@ routine start()
     var i = 2
     until i >= 5
         when check inner(n: i)
-            is Integer as v =>
+            is Int as v =>
                 show(f"ok {v}")
             is NopeError as e =>
                 show(f"nope arm: {e.what}")
             is Crashables as e =>
                 show(f"other arm: {e.crash_title()} / {e}")
         when check passes(n: i)
-            is Integer as v =>
+            is Int as v =>
                 show(f"passes ok {v}")
             is Crashables as e =>
                 show(f"passes caught {e.crash_message()}")
         when check rethrows(n: i)
-            is Integer as v =>
+            is Int as v =>
                 show(f"rethrows ok {v}")
             is Crashables as e =>
                 show(f"rethrows caught {e.crash_message()}")
@@ -60,14 +60,14 @@ routine start()
         if c is NopeError
             show("is NopeError")
         when c
-            is Integer as v =>
+            is Int as v =>
                 show(f"c ok {v}")
             is Crashables as e =>
                 show(f"c err {e}")
         when check inner(n: i)
             is AbsentValueError =>
                 show("absent")
-            is Integer as v =>
+            is Int as v =>
                 show(f"check ok {v}")
             is Crashables as e =>
                 show(f"check err {e}")
@@ -78,7 +78,7 @@ routine start()
     var k = 0
     until k >= 20000
         when check rethrows(n: 3 + k % 2)
-            is Integer as v =>
+            is Int as v =>
                 total += v
             is Crashables as e =>
                 total += 1

@@ -4,16 +4,16 @@ module Tests/StdlibSf/PresetBuildtimeApi
 # value it came to, and a preset made by a construction is one value everywhere.
 
 record Pair
-    left: Integer
+    left: Int
     right: Text
 
-routine square(n: Integer) -> Integer
+routine square(n: Int) -> Int
     return n * n
 
-routine pair_of(n: Integer) -> Pair
+routine pair_of(n: Int) -> Pair
     return Pair(left: square(n: n), right: f"{n}²")
 
-preset AREA: Integer = square(n: 12)
+preset AREA: Int = square(n: 12)
 preset NAME: Text = f"area {AREA}"
 preset BUILT: Pair = pair_of(n: 3)
 preset RATIO: Decimal = 1 / 8
