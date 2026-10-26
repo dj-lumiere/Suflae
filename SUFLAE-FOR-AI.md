@@ -589,7 +589,8 @@ routine Account.deposit(amount: Int)                       # member routine, rec
 - Call with named arguments in any order: `add(b: 2, a: 1)`, `greet(name: "Ada")`. A variable named like its
   parameter goes by its name alone, also beside written names: `area(width, height: 4)`. A member routine is
   called on its receiver: `acct.deposit(amount: 5)`.
-- Return types are always written, and a routine with no `->` returns nothing. A parameter may be written
+- Return types are always written, and a routine with no `->` returns nothing: a `return` with a value in it is
+  SF-S301, and so is a bare `return` in a routine with `-> T` (the value never sets the result type). A parameter may be written
   without a type (`routine describe(shape) -> Text`): the routine is made and checked for each type it is called
   with, and a value that lacks what the body uses is a build error naming that use ("(in 'describe' used with
   shape: Blob)"). A variadic parameter is written `name...: Type`.
