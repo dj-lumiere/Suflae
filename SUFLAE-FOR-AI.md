@@ -250,7 +250,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
 - A crash trace shows the program's types (`System.List[System.Int]`, never a handle type) and the program's
-  routines only: a standard library routine pushes no frame, and a crash inside one reports the line where the
+  routines only: a standard library routine has no frame on it, and a crash inside one reports the line where the
   program called it. `[debug] trace-stdlib = true` (for work on the library) puts the library routines the program can
   name on the trace too, as `(standard library)` frames. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.

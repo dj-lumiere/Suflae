@@ -422,7 +422,9 @@ public sealed partial class StdlibApiTests
         using var p = Process.Start(startInfo: psi)!;
         Task<string> outTask = p.StandardOutput.ReadToEndAsync();
         Task<string> errTask = p.StandardError.ReadToEndAsync();
-        int timeoutMs = TestHelpers.ChildTimeoutMs(baseMs: 300_000);
+        // The whole bundle builds as one debug program (a few hundred MB of IR): building it alone takes about four
+        // minutes, and writing the crash trace's table (the assembly step) adds most of a minute.
+        int timeoutMs = TestHelpers.ChildTimeoutMs(baseMs: 420_000);
         if (!p.WaitForExit(milliseconds: timeoutMs))
         {
             string hang = HangDiagnostics.Capture(root: p);
