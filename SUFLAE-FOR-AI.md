@@ -28,7 +28,7 @@ aliases (changing a collection while it is being looped over crashes at run time
 behind a call). A `record` is a value: copied on assignment, no identity. An `entity` is the one-of-a-kind
 object: it has identity, compared with `===`.
 
-The second axis is **machine visibility**. Suflae hides the machine. Numbers are `Integer`
+The second axis is **machine visibility**. Suflae hides the machine. Numbers are `Int`
 (arbitrary precision, never overflows) and `Decimal` (base-10, so `0.1 + 0.2 == 0.3`). Running out of
 memory is one wall with no "stack" vocabulary. There are no threads to create: concurrency is `f.to[Work](args)`
 whose work the runtime schedules, and shared entities are locked for you. A Suflae program has no
@@ -50,17 +50,17 @@ through a `.rf` module the program imports (section 18).
    (a copy would keep its own record and diverge), a service (`Clock`, `CpuClock`, `Environment`, `Entropy`) a
    `record` with no member variables (body `nothing`, routines `common`, called on the type). The console is the
    free routines `show` / `ask` / `alert`.
-4. **Bare numbers are `Integer` and `Decimal`**, not 64-bit machine numbers. `42` is an `Integer`, `3.14` a
+4. **Bare numbers are `Int` and `Decimal`**, not 64-bit machine numbers. `42` is an `Int`, `3.14` a
    `Decimal`. A literal adapts to an expected type (`var x: S32 = 5`, `xs[0]`, and a whole number written in base 10
    to a float or decimal type: `price: 5` for a `Decimal` parameter, but not `0xFF`), but variables of different
    number types never mix without an explicit conversion (`n.to[S64]()`, §5). The one exception is the two
-   default types: an `Integer` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
-   (`3.5 * 2` is `7`), and an `Integer` with more significant digits than a `Decimal` holds (34) crashes. Mixing
+   default types: an `Int` and a `Decimal` mix (`+ - * /`, `==`, `<`), the result is a `Decimal`
+   (`3.5 * 2` is `7`), and an `Int` with more significant digits than a `Decimal` holds (34) crashes. Mixing
    two chosen types (`S32` and `U32`) is SF-S767, whose message names a type holding both
    (`a.to[S64]() + b.to[S64]()`).
 5. **`/` divides as decimals, `//` is floor division.** `7 / 2` is `3.5` (a `Decimal`), `1 / 3` is `0.333…` to 34
-   significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Integer` values turns each into a `Decimal`
-   first, and an `Integer` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
+   significant digits, `7 // 2` is `3` and `7 % 2` is `1`. `/` of two `Int` values turns each into a `Decimal`
+   first, and an `Int` with more significant digits than a `Decimal` holds (34) crashes instead of rounding.
    `1.0 / 3` is `0.333…` too (§4). Every rounding a `Decimal` does (`/`, text read in, `round()`, `fixed(places:)`)
    is half up: x goes to the n (at the digit kept) with `n - 0.5 <= x < n + 0.5`, that is `floor(x + 0.5)`. `2.5` goes
    to `3`, `-2.5` to `-2`, `-7.125` to 2 places to `-7.12`, and `round()` of `-0.5` is `0`, `**`, `sqrt` and the
@@ -95,7 +95,7 @@ through a `.rf` module the program imports (section 18).
 11. **A module-level `var` is an error (SF-S435).** Module-level mutable state is `global name: Type = init`
     (§6). Constants are `preset`.
 12. **Blocks are indentation, four spaces per level.** No braces, no semicolons, no `:` after `if`.
-13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Integer]`. `<` is a
+13. **Type arguments use `[...]`, never `<...>`:** `List[Text]`, `Dict[Text, Int]`. `<` is a
     comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
 14. **Containment is a call on the container:** `xs.has(3)`, `"hello".has("ell")`, `xs.lacks(3)`, and a dict's
     keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
@@ -149,7 +149,7 @@ last executable that built.
 `preset` or `global`) of module `Foo`. An import brings the module it names, never the modules under it
 (`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
-`Integer`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
+`Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
 `PriorityQueue`, …), `IterTools` (emitter adapters), `Text/Patterns` (text patterns, below), `ObjectHacker`
@@ -189,7 +189,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 
 | Kind                    | Types                                                                      |
 |-------------------------|----------------------------------------------------------------------------|
-| Default numbers         | `Integer` (arbitrary precision), `Decimal` (base-10)                       |
+| Default numbers         | `Int` (arbitrary precision), `Decimal` (base-10)                       |
 | Fixed-width integers    | `S8 S16 S32 S64 S128 S256`, `U8 U16 U32 U64 U128 U256`                    |
 | Binary floats           | `B16 B32 B64 B128 BF16` (`BF16` computes on B32 values, rounding once)     |
 | Decimal floats          | `D32 D64 D128`                                                             |
@@ -198,7 +198,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 | Other                   | `Bool`, `Duration`, `ByteSize`, `Moment`/`LocalMoment`, tuples `(A, B)`    |
 
 - Every type in the table is usable with no import. There is no arbitrary-precision binary float or complex:
-  `B128` and `C256` are the widest, and exact arithmetic is `Integer` and the decimals.
+  `B128` and `C256` are the widest, and exact arithmetic is `Int` and the decimals.
 - Complex `* / abs norm reciprocal` round each part once from the exact value. `sqrt`, `ln`, the inverse functions
   and `tan`/`tanh` take principal branches, a `-0` part picking the side of a cut (`sqrt` of `-4 - 0i` is `0-2i`).
   `exp_unchecked`/`sinh_unchecked`/`cosh_unchecked` give inf past the range, the checked forms crash.
@@ -209,11 +209,11 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   (A x = b) are Gaussian elimination with partial pivoting and are failable: `SingularMatrixError` when a pivot is
   exactly 0 (no near-singular tolerance), and an inf or NaN during the computation crashes like checked float
   math. `inverse_unchecked()` is the raw IEEE result. There is no n×n matrix type.
-- **Counts, positions, widths and amounts are always `Integer`**, whatever the value's type: a fixed-width
+- **Counts, positions, widths and amounts are always `Int`**, whatever the value's type: a fixed-width
   number keeps its own type, but `x.count_ones()`, `x.leading_zeros()`, `x.ilog2()` and `x.signum()` return
-  `Integer`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes
-  (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Integer`.
-- **`Integer`** never overflows. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
+  `Int`, and shift and rotate amounts (`x.rotate_left(bits: 3)`, `x.arith_shift_right(bits: 1)`), radixes
+  (`x.to_text(radix: 16)`), places (`f.fixed(places: 2)`) and exponents (`f.scalbn(n: 2)`) are `Int`.
+- **`Int`** never overflows. A value in the `S64` range is held in the `Int` itself, with no heap. A bigger value shares its digits between copies. **`Decimal`** is exact for decimal fractions (`0.1 + 0.2 == 0.3`, money is
   safe) with 34 significant digits. `+ - *` are exact: a result that needs more than 34 digits crashes with
   `NumericOverflowError` (`try` recovers it) instead of rounding. `/`, `sqrt`, the transcendentals and `**` give the
   nearest 34-digit value (`1 / 3`), and a result beyond about `1e6144` crashes. A `Decimal` has one form per value:
@@ -228,14 +228,14 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 - Literals: `1_000_000`, `0xFF`, `0o777`, `0b1010`, `3.2e5`. Imaginary: `3 + 4i` (`C128` with no context).
 - A number carries no type of its own: it takes the type of the place it goes (an argument, an assignment,
   the other side of an operator, and a whole number written in base 10 goes where a float or `Decimal`
-  goes too), and otherwise it is an `Integer` (a `Decimal` with a fraction point). Where another type is
+  goes too), and otherwise it is an `Int` (a `Decimal` with a fraction point). Where another type is
   wanted with nothing around to give it, the declaration states it: `var x: U8 = 5`. A variable's type is
   never guessed from its later uses. A number that names its type (`5_u8`, `7s32`, `10n`, `2.5dn`) is
   SF-G010, and `migrate --step suffix` rewrites old code.
 - `inf` and `nan` are number literals (reserved words) that take their type from where they go: `var x: B64 = inf`,
   `limit: B32 = -inf` (negative infinity is `-` on `inf`), `return nan`, `x < inf`. The binary floats (B16 B32 B64
   B128) and D32 D64 D128 take them. With nothing giving a type (`var x = inf`) it is SF-S019, and where a
-  `Decimal`, `Integer` or integer type goes it is SF-S020 (a `Decimal` is always finite).
+  `Decimal`, `Int` or integer type goes it is SF-S020 (a `Decimal` is always finite).
 - A hex float (`0x1.8p3`, `0x1p-23` where a `B32` goes) is binary-float only and exact, and defaults to
   `B64`, never `Decimal`.
 - A literal out of range for its type is a build error (SF-S010): `-1` never fits an unsigned type; write
@@ -249,34 +249,34 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
   `Duration` that only goes forward, for measuring and deadlines), `CpuClock.now()` (processor time used). There is
   no `Moment.now()` or `LocalMoment.now_utc()`. `Char` case routines follow Unicode (one character to one, `ß` stays `ß`). `lines()` and `ask_lines()`
   start no new line after a final line ending.
-- A crash trace shows the program's types (`System.List[System.Integer]`, never a handle type) and the program's
+- A crash trace shows the program's types (`System.List[System.Int]`, never a handle type) and the program's
   routines only: a standard library routine pushes no frame, and a crash inside one reports the line where the
   program called it. `[debug] trace-stdlib = true` (for work on the library) puts the library routines the program can
   name on the trace too, as `(standard library)` frames. A runtime crash (a deadlock, running out of memory) has the same report. A lambda may capture an entity (it keeps
   one more handle). A variant holding only values copies with `=`. A file of only `var` lines is a script.
-- `Pair(first: 1, second: "one")` infers `Pair[Integer, Text]`. A routine of a generic entity (`Cell[T].get()`)
+- `Pair(first: 1, second: "one")` infers `Pair[Int, Text]`. A routine of a generic entity (`Cell[T].get()`)
   reads its members. An `Emittable[T]` user type gets its `Emitter` from `emitter()`, so IterTools adapters walk it.
   `CpuEventManager.when_interrupted` works.
-- A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Integer` mixed with a fixed-width number
+- A lambda whose parameter type can't be inferred is SF-S638 (annotate it). `Int` mixed with a fixed-width number
   is SF-S767. A protocol is not a value or element type (`List[Shape]` is SF-S502). `using` on an entity calls its
   `enter`/`exit` on that entity. Works giving no value can be gathered.
 - `var x: T` with no value is `lateinit var x: T`: every path gives it a value before a read, or SF-S202 (a `return`
   path doesn't count, a loop is left with what its `break`s assigned). An empty flags value shows as `none`, a
-  one-item tuple as `(1,)`. `try sv.to[List[Integer]]()` recovers a bad element too. A cancelled job nothing
+  one-item tuple as `(1,)`. `try sv.to[List[Int]]()` recovers a bad element too. A cancelled job nothing
   started is done (`is_done()` is true).
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
   `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
-- Tuples: `(1, "a")` has type `(Integer, Text)`; read `t.item0`, `t.item1`; destructure with
+- Tuples: `(1, "a")` has type `(Int, Text)`; read `t.item0`, `t.item1`; destructure with
   `var (q, r) = pair`. `(a, b) = (b, a)` swaps places (locals, member variables); any other tuple on the left is
   a build error.
 
 **Conversions: `x.to[T]()`, the one way to convert.**
 
 ```suflae
-var small = count.to[U8]()        # Integer to U8 (a bare literal is an Integer: 200.to[U8]())
-var n = "42".to[S64]()             # text parsing (also Integer, Decimal, B64, ...)
+var small = count.to[U8]()        # Int to U8 (a bare literal is an Int: 200.to[U8]())
+var n = "42".to[S64]()             # text parsing (also Int, Decimal, B64, ...)
 var one = 'x'.to[Text]()           # one-character text
 var raw = status.to[S32]()         # a choice's value (also to[S64]()), perms.to[U64]() a flags bitmask
 var wide: U64 = count.to()         # T left out: the declared type gives it
@@ -287,7 +287,7 @@ var why: Check[S64] = check line.to()
 ```
 
 **A byte's and a character's numbers are named routines, not conversions.** `b.value()` is a `Byte`'s value and
-`c.codepoint()` a `Char`'s code point, both `Integer`. `Byte(v)` makes a byte from a `U8` (`Byte(65)`, `Byte(n.to[U8]())`),
+`c.codepoint()` a `Char`'s code point, both `Int`. `Byte(v)` makes a byte from a `U8` (`Byte(65)`, `Byte(n.to[U8]())`),
 `Char.from_codepoint(n:)` a character (failable: a surrogate 0xD800..0xDFFF, below 0 or above 0x10FFFF fails).
 `c.to_byte()` is an ASCII character's byte (failable). `c.digit_value()` (`base: 10` default, `base: 16` also takes
 `a-f`/`A-F`) is failable, ASCII only. `b.to[U8]()`, `c.to[U32]()`, `v.to[Byte]()`, `n.to[Char]()` are build errors
@@ -295,7 +295,7 @@ var why: Check[S64] = check line.to()
 `>>` on a `Byte` is a build error pointing to `>>>`. A bare number where a `Byte` goes is a `Byte` (`b & 0x7F`),
 outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to `Byte(v)` and lists `n.to[Char]()`.
 
-- `Integer` converts to every fixed-width integer (`S8..S256`, `U8..U256`), to `Decimal`, and to
+- `Int` converts to every fixed-width integer (`S8..S256`, `U8..U256`), to `Decimal`, and to
   `B32`/`B64` (the nearest value, as does `Decimal`). Widening
   never fails. A value that does not fit `T`, or text that does not read as a `T`, crashes loudly
   (`IntegerOverflowError`, `InvalidValueError`, ...). Recover with `try` (gives `T?`) or `check` (gives
@@ -343,10 +343,10 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 ## 6. Variables, constants and globals
 
 ```suflae
-var count = 0                       # Integer
+var count = 0                       # Int
 var ratio: Decimal = 0.75
 var name: Text                      # declared now, assigned before it is read
-preset MAX_RETRIES: Integer = 5     # constant: explicit type, inlined at each use
+preset MAX_RETRIES: Int = 5     # constant: explicit type, inlined at each use
 ```
 
 - There is no `let` and no `const`: `var` for variables, `preset` for constants. A `preset` may be an
@@ -360,7 +360,7 @@ preset MAX_RETRIES: Integer = 5     # constant: explicit type, inlined at each u
 **`global` — module-level mutable state.**
 
 ```suflae
-global hits: Integer = 0
+global hits: Int = 0
 global greeting: Text = f"hits so far: {hits}"
 
 routine record_hit()
@@ -382,12 +382,12 @@ routine start()
   initializer reads another (directly or through free-routine calls), the one it reads goes first, so
   declaration order does not matter. A cycle, a self-reference included, is SF-S436. A global whose
   initializer reads another global must be a number, `Text` or `Bool` (SF-S437). A read hidden behind a
-  member-routine call (`global a: Integer = x.foo()`) is not followed by this ordering.
+  member-routine call (`global a: Int = x.foo()`) is not followed by this ordering.
 - A program with globals needs an entry point (an explicit `start()` or a script) (SF-S438).
 - **Every global is safe to use from concurrent jobs.** A single-statement read-modify-write
   (`hits = hits + 1`, `name = name + "!"`) is atomic. For fixed-width integers (`S8`..`S64`, `U8`..`U64`)
   and `B32`/`B64`, `g = g + d` and `g = g - d` compile to one lock-free atomic operation, which **wraps on
-  overflow** instead of crashing. Every other type (`Integer`, `Decimal`, `Text`, records, wider numbers)
+  overflow** instead of crashing. Every other type (`Int`, `Decimal`, `Text`, records, wider numbers)
   is serialized through a lock. A value read earlier and written back later
   (`var t = g`, other statements, then `g = t + 1`) can overwrite a change another job made in between, so
   write an update of a shared value based on itself as one statement (`g += 1`, `g = g + 1`, `e.count += 1`). A global and an entity's member variable are
@@ -397,7 +397,7 @@ routine start()
 
 ## 7. Operators
 
-- Arithmetic: `+ - * / // % **`. On `Integer`, `+ - *` never fail and `/` gives a `Decimal`. On fixed-width
+- Arithmetic: `+ - * / // % **`. On `Int`, `+ - *` never fail and `/` gives a `Decimal`. On fixed-width
   integers `/` is SF-S065, whose message points to `a // b` or `a.to[Decimal]() / b.to[Decimal]()`, and `+ - *` are **checked** (overflow crashes; recover with `try a + b`), `+% -% *%` wrap, and
   `+^ -^ *^` clamp to the type's range. On binary floats `B16..B128` and `D32..D128`, `+ - * / **` crash
   on a non-finite result and `+! -! *! /! **!` follow raw IEEE 754 (infinity and NaN pass through).
@@ -411,7 +411,7 @@ routine start()
   ask whether two entities are the same object (§10).
 - Logic: `and`, `or`, `not` (short-circuiting). Bits on integers: `&`, `|`, `^`, `~`, shifts `<<`, `>>`
   (sign-filling), `>>>` (zero-filling); there is no `<<<`. Shifting by the width or more gives 0 (or the
-  sign fill for `>>`). A shift amount and a subscript index may be an `Integer` or any fixed-width integer
+  sign fill for `>>`). A shift amount and a subscript index may be an `Int` or any fixed-width integer
   (`xs[i]` with `i: S64`); a negative one crashes. An operator is a call of its routine: `/` `truediv`, `//`
   `floordiv`, `%` `mod`, `<=>` `compare`, `<<` `shift_left`, `>>` `arith_shift_right`, `>>>` `logical_shift_right`.
   The float math names: natural log `ln`, `ln_1p`, `exp_m1`, `sin_pi`, `rsqrt` (1 / sqrt(x) rounded once, also on
@@ -496,8 +496,8 @@ with a `then` block. It runs once whenever the loop is left for the line after i
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
 (SF-G219): the case where the loop would not run even once is an `if` before the loop.
-A loop may carry values from one round to the next: `until n <= 1 with n: Integer = start, steps: Integer = 0`
-(`each x in xs with sum: Integer = 0` and `loop with i: Integer = 0` too). Each carried value is bound anew every round, from what the round's
+A loop may carry values from one round to the next: `until n <= 1 with n: Int = start, steps: Int = 0`
+(`each x in xs with sum: Int = 0` and `loop with i: Int = 0` too). Each carried value is bound anew every round, from what the round's
 `continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
 is stored, so `continue with x: y, y: x % y` swaps). The names are visible in the condition, the body and the
 `then` block, and nowhere after the loop. A body that carries values must not run off its end: every path ends in
@@ -505,8 +505,8 @@ is stored, so `continue with x: y, y: x % y` swaps). The names are visible in th
 in a loop without `with`. `break` takes no values.
 
 ```suflae
-routine collatz_steps(start: Integer) -> Integer
-    until n <= 1 with n: Integer = start, steps: Integer = 0
+routine collatz_steps(start: Int) -> Int
+    until n <= 1 with n: Int = start, steps: Int = 0
         var after = if n % 2 == 0 then n // 2 else 3 * n + 1
         continue with n: after, steps: steps + 1
     then
@@ -516,7 +516,7 @@ routine collatz_steps(start: Integer) -> Integer
 **`when` is the pattern match**, as a statement or an expression:
 
 ```suflae
-routine classify(n: Integer) -> Text
+routine classify(n: Int) -> Text
     when n
         == 0 => return "zero"
         < 0 => return "negative"
@@ -575,13 +575,13 @@ when terrain
 ## 9. Routines
 
 ```suflae
-routine add(a: Integer, b: Integer) -> Integer
+routine add(a: Int, b: Int) -> Int
     return a + b
 
 routine greet(name: Text, prefix: Text = "Hello") -> Text    # default value
     return f"{prefix}, {name}!"
 
-routine Account.deposit(amount: Integer)                       # member routine, receiver `me`
+routine Account.deposit(amount: Int)                       # member routine, receiver `me`
     me.balance = me.balance + amount
     return
 ```
@@ -600,8 +600,8 @@ routine Account.deposit(amount: Integer)                       # member routine,
   `routine Celsius(degrees: B64) -> Celsius` (`failable routine Celsius(...)` when it can fail). A conversion is
   a routine of its own, `routine Fahrenheit.to[Celsius]() -> Celsius` (§5).
 - **Lambdas** are single expressions: `x => x * 2`, `(a, b) => a + b`. They may read the surrounding
-  variables directly. Routine types are written `Callable[(Integer,), Integer]` (the parameter list is
-  always a tuple: `()`, `(T,)`, `(A, B)`), and `failable Callable[(Integer,), Integer]` for one that may fail
+  variables directly. Routine types are written `Callable[(Int,), Int]` (the parameter list is
+  always a tuple: `()`, `(T,)`, `(A, B)`), and `failable Callable[(Int,), Int]` for one that may fail
   (§11). A free routine's bare name is a value:
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
@@ -621,15 +621,15 @@ routine Account.deposit(amount: Integer)                       # member routine,
 
 ```suflae
 record Point                 # value: copied, no identity
-    x: Integer
-    y: Integer
+    x: Int
+    y: Int
 
 entity Account               # object: shared, has identity
     owner: Text
-    balance: Integer
+    balance: Int
 
 entity Node
-    value: Integer
+    value: Int
     next: Node?              # an entity slot that may be empty
 
 routine start()
@@ -667,7 +667,7 @@ routine start()
   can change while a `Set` or `Dict` holds it: `Set[Player]` without it is SF-S150, and so is a record holding
   such an entity. `obeys Comparable` with a `routine T.compare(you: T) -> ComparisonSign` (returning
   `ComparisonSign.ME_SMALL` / `SAME` / `ME_LARGE`) gives `< <= > >=`, or the builder compares member by member
-  in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Integer` and
+  in declaration order. Text and numbers already have all of these, and `Text`, `Bytes`, `Int` and
   `Decimal` hash their value (two equal ones hash the same however they were built). `D32`/`D64`/`D128` hash
   their value too, not the digits they keep: `1.0` and `1.00`, `+0` and `-0` hash the same, and every NaN hashes the same. An optional `T?` has `==`
   and a hash when `T` does: two absent ones are equal, an absent and a present one differ. When member variables
@@ -704,7 +704,7 @@ variant Number
   without is SF-S417. A flags member may say its bit the same way (`MINE: 0`, 0 to 63, every member or none).
   Equality, order and hashing come with every choice.
   `Color.all_cases()` gives every case as a `List[Color]`, and `Color.count()` how many there are (an
-  `Integer`); flags have the same two for their members.
+  `Int`); flags have the same two for their members.
 - **flags**: a set of options combined with `and` (`Permission.READ and Permission.WRITE`), tested with
   `has` / `has_any` / `lacks` / `==` (`perms.has(WRITE)`, `perms.has(READ and WRITE)` is all of them,
   `perms.has_any(READ and WRITE)` at least one, `perms.lacks(READ and WRITE)` none), and taken off with `without` (`perms.without(WRITE)`: where a
@@ -712,7 +712,7 @@ variant Number
   flags type is expected (`var marks: CellMarks = none`, `marks == none`, a preset or record preset). A `CellMarks?`
   slot takes `none` as the absent value. There is no `all_off()`.
 - **variant**: one value of one of the listed types; assign any member directly (`var n: Number = "hi"`,
-  `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Integer | Text`,
+  `var d: Number = none`) and take it apart with `when` / `is T as name`. Written in place: `-> Int | Text`,
   `List[Circle | Square]` (same types in any order = one type; a smaller one goes where a larger one is expected;
   `define Circle | Square as Shape` names it). A value of a member goes in as an argument, initializer, `return` or
   new value.
@@ -730,12 +730,12 @@ crashable NopeError
 routine NopeError.crash_message() -> Text
     return f"nope: {me.what}"
 
-failable routine parse(n: Integer) -> Integer
+failable routine parse(n: Int) -> Int
     if n < 0
         throw NopeError(what: f"{n} is negative")
     return n * 10
 
-failable routine find(items: List[Text], name: Text) -> Integer
+failable routine find(items: List[Text], name: Text) -> Int
     each i in 0 til items.count()
         if items[i] == name
             return i
@@ -759,7 +759,7 @@ failable routine find(items: List[Text], name: Text) -> Integer
 ```suflae
 routine start()
     when check parse(n: -1)
-        is Integer as v => show(f"ok {v}")
+        is Int as v => show(f"ok {v}")
         is NopeError as e => show(f"caught: {e.what}")
         is Crashables as e => show(f"{e.crash_title()}: {e.crash_message()}")
 
@@ -773,7 +773,7 @@ routine start()
 
     when check find(items: ["a", "b"], name: "z")
         is AbsentValueError => show("not found")
-        is Integer as i => show(f"at {i}")
+        is Int as i => show(f"at {i}")
         is Crashables as e => show(f"failed: {e}")
     return
 ```
@@ -783,7 +783,7 @@ routine start()
   failable is a wall: a failure inside it (its own `throw`, a checked operation, a bare call of a failable routine)
   crashes there, even under `try`/`check` above its caller. Checked operations, indexing and conversions are failable
   routines, so `try a + b` (a fixed-width overflow), `check a // b` (a division by zero), `try items[9]` (an index
-  out of range, a missing key), `300.to[S8]()` and `"x".to[Integer]()` are received. Each becomes the result's
+  out of range, a missing key), `300.to[S8]()` and `"x".to[Int]()` are received. Each becomes the result's
   failure (`try`: `None`, `check`: the error), and evaluation stops at the first one. `try`/`check` in front of an
   expression that reaches no failable call is SF-S760 (remove the keyword, or declare the routine `failable`).
 - **Routine values.** A lambda whose body can fail (a checked operation, indexing, a call of a failable routine)
@@ -936,7 +936,7 @@ show(f"{n.hex()} {price.fixed(2)} {name.pad_end(10)}|")
 - f-string specs are only `=`, `?` and `=?`. Everything else is a member routine called inside the braces:
   integers have `hex()`, `bin()`, `oct()`, `to_text(radix:)`; `Decimal` and floats have `fixed(places)`;
   `Text` has `pad_start(width)`, `pad_end(width)`, `center(width)`, `zero_pad(width)`.
-- `Text` counts and positions with `Integer`: `count()`, `count_of(...)`, `s[i]`, `find(other:)` /
+- `Text` counts and positions with `Int`: `count()`, `count_of(...)`, `s[i]`, `find(other:)` /
   `find_last(other:)` (failable: `try s.find(other: "x")`), `repeat(times:)`, and the widths of
   `pad_start`/`pad_end`/`center`/`zero_pad`. `split(separator:)`, `lines()` and `words()` give a `List[Text]`.
 - `Text` is a value. Useful members: `count()`, `is_empty()`, `starts_with(prefix:)`,
@@ -963,7 +963,7 @@ digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pa
 - `capture("name", p)`, `ignoring_case(p)`, and `TextPattern.of(pieces: [...], ignore_case: true)`.
 - Searches: `p.matches(text)` (whole text), failable `p.find(text)` (`try p.find(t)` gives `none`), `p.find_all(text)`
   (non-overlapping, `List[TextMatch]`), `p.replace(text: t, with: "#")`, `p.split(text)`. A `TextMatch` has `start()`,
-  `end()` (character positions, `Integer`), `text()`, failable `group("name")` (`CaptureNameError` for an unknown name,
+  `end()` (character positions, `Int`), `text()`, failable `group("name")` (`CaptureNameError` for an unknown name,
   `AbsentValueError` for a capture that took no part).
 - `BytesPattern` over `Bytes`: `byte(0x89)`, `bytes(b"PNG")`, `any_byte`, `byte_range(0x00 to 0x1F)`, `start_of_bytes`,
   `end_of_bytes`; `BytesMatch.bytes()`. Text and bytes pieces never mix (a type error).
@@ -975,8 +975,8 @@ digit.repeat(4)), text("-"), capture("month", digit.repeat(2))])` (a `preset` pa
 ## 14. Collections
 
 ```suflae
-var nums = [3, 1, 2]                      # List[Integer]
-var ages = {"ada": 36, "alan": 41}        # Dict[Text, Integer]
+var nums = [3, 1, 2]                      # List[Int]
+var ages = {"ada": 36, "alan": 41}        # Dict[Text, Int]
 var tags = {"red", "blue"}                # Set[Text]
 var empty = List[Text]()
 
@@ -997,21 +997,21 @@ each entry in ages
 - A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
   on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
   `{1: "a"}` given to an `Emittable[DictEntry[U16, Text]]` builds a `Dict[U16, Text]`. With nothing to go by,
-  `[1, 2]` is a `List[Integer]`. The empty set literal is `{}` and the empty dict literal `{:}`
-  (`s[b] = {:}` on a `List[Dict[Integer, Integer]]`). A `{}` where a dict is expected is SF-S558.
-- `sv.to[List[Integer]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
-  `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Integer]]()`). A type rebuilds itself in
+  `[1, 2]` is a `List[Int]`. The empty set literal is `{}` and the empty dict literal `{:}`
+  (`s[b] = {:}` on a `List[Dict[Int, Int]]`). A `{}` where a dict is expected is SF-S558.
+- `sv.to[List[Int]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
+  `sv.to[Point]()` does any other value; it is failable (`try sv.to[List[Int]]()`). A type rebuilds itself in
   `common routine T.from_serial!(value: SerialValue)`, which the builder writes for every type. The name is the
   builder's own: a program that writes or calls `from_serial` gets SF-S809 and uses `sv.to[T]()` instead. Every
   collection reads back (`Dict`, `Set`, `SortedDict`, `SortedList`, `SortedSet`, `RotatableList`), a dictionary's keys
-  from their text (`sv.to[Dict[Integer, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
+  from their text (`sv.to[Dict[Int, Text]]()`). A type holding a `secret` member variable, at any depth, can't be
   read back: naming it in `sv.to[T]()` is SF-S813.
 - A tuple arm is written without `is` (`(1, 2) => ...`). `is (1, 2)` is SF-G250, which names that spelling.
 - An entity goes into a variant parameter or variable as itself (`add_point(seat: ada)` with `variant Seat` holding
   `Player`), and a list literal whose type the context gives takes values of every member type
-  (`var keys: List[Integer | Text] = [1, "two"]`). Inside a `when` arm the matched variable may take a new value
+  (`var keys: List[Int | Text] = [1, "two"]`). Inside a `when` arm the matched variable may take a new value
   (`seat = "empty"`); the arm's name keeps the entity it matched, and later reads see the new value.
-- `n ** -1` on an `Integer` crashes with `NumericDomainError` (no integer result); `try n ** -1` gives `none`.
+- `n ** -1` on an `Int` crashes with `NumericDomainError` (no integer result); `try n ** -1` gives `none`.
 - `import Collections.SortedDict` makes the whole module available, as `import Collections` does. A file's `module`
   line names its module wherever it lives (`geometry/shapes.sf` with `module Geometry/Shapes` is imported as
   `Geometry/Shapes`).
@@ -1025,18 +1025,18 @@ each entry in ages
   shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
   and the queue does not change. A range shows as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`.
   `f"{xs:?}"` (diagnose) puts the qualified type and the count around the same text:
-  `System.List[System.Integer](count: 3, [1, 2, 3])`, `System.Dict[System.Integer, System.Integer](count: 0, {:})`.
+  `System.List[System.Int](count: 3, [1, 2, 3])`, `System.Dict[System.Int, System.Int](count: 0, {:})`.
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
-- Indices and counts are `Integer`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
-  `xs.enumerate()` (pairs `(Integer, T)`). A negative index crashes with `NegativeIndexError`; count from the
+- Indices and counts are `Int`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,
+  `xs.enumerate()` (pairs `(Int, T)`). A negative index crashes with `NegativeIndexError`; count from the
   end with `^` (`xs[^1]`).
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
   `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`, `RotatableList`. A `List` keeps its elements from the first
   place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
   `RotatableList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
   and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Array[T, COUNT]` is RazorForge's
-  fixed-size record, counted and indexed with `Integer` too. RazorForge's `SplitList` / `SplitArray`
+  fixed-size record, counted and indexed with `Int` too. RazorForge's `SplitList` / `SplitArray`
   (structure-of-arrays layouts) are not available in Suflae.
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
   `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
@@ -1054,7 +1054,7 @@ each entry in ages
   and the collection then stays as it was. Growing on the way (`add_last` past the capacity) is not failable:
   running out of memory there stops the program.
 - `Memory[T]` (`System/Memory`) is the row of places every collection keeps its elements in, and a program can use
-  it too: `Memory[Integer](capacity: 5)` makes five places that start as zero (`0`, `""`, `false`, no entity),
+  it too: `Memory[Int](capacity: 5)` makes five places that start as zero (`0`, `""`, `false`, no entity),
   `Memory[Text](count: 3, fill: "a")` fills them. `mem[i]`, `mem[i] = v`, `take(index:)`, `erase(index:)`,
   `move(from:, into:, count:)`, `swap`, `fill`, `rotate_left`, `reverse`, `sort()`, `sort_by(compare:)` and
   `grow(capacity:)` work on it. A range `mem[1 til 4]` is a `Span[T]`: a view that shares the places with no copy
@@ -1071,7 +1071,7 @@ each entry in ages
   failable `emit()`) is walked as it is: `each n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
   An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
   member variable, a returned value, an argument, or the next link of a chain. So a member variable or a return type
-  may name an adapter (`big: WhereEmittable[Integer, List[Integer]]`, `-> WhereEmittable[Integer, List[Integer]]`),
+  may name an adapter (`big: WhereEmittable[Int, List[Int]]`, `-> WhereEmittable[Int, List[Int]]`),
   and the adapter stays valid after the variable that named the collection is given another value or goes away.
   Changing the collection's shape while an `each` walks it crashes, as below.
 - Library routines written for every emittable (`to[List]()`, `sum()`, `first()`, `where(...)`, `select(...)`,
@@ -1084,14 +1084,14 @@ each entry in ages
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
   (pairs), `to[RotatableList]()`, `to[BitList]()` (Bools), `to[PriorityQueue]()` (`(priority, element)` pairs).
-  `to[Array[T, N]]()` names the size (`xs.to[Array[Integer, 3]]()`) and is failable: fewer or more than `N` values
+  `to[Array[T, N]]()` names the size (`xs.to[Array[Int, 3]]()`) and is failable: fewer or more than `N` values
   throw `ElementCountMismatchError`.
 
 **Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that
 its next element is really the next one, so it is not allowed:
 
 ```suflae
-routine grow(xs: List[Integer])
+routine grow(xs: List[Int])
     xs.add_last(value: 99)
     return
 
@@ -1118,9 +1118,9 @@ routine start()
 
 ## 15. Console, files and resources
 
-- Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Integer = ask()`,
-  failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Integer, Integer) = ask()`,
-  `"3 4".to[(Integer, Integer)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
+- Output: `show(...)`, `alert(...)` (stderr). Input: `ask_line()`, `ask[T]()` (a line as a `T`: `var n: Int = ask()`,
+  failing like `to[T]()`; a tuple reads the line's words, one item each: `var (a, b): (Int, Int) = ask()`,
+  `"3 4".to[(Int, Int)]()`, a `Text` item is the word itself), `ask_word()`, `ask_all()`,
   `ask_lines()`, `ask_words()`. A blank line is `""`. At the end of the input `ask_line()`/`ask_word()` crash with
   `EndOfInputError` (`IO/Errors`): read until the end with `when check ask_line()` + `is EndOfInputError => break`.
   An `ask_line()` right after `ask_word()` skips the line end the word left.
@@ -1176,12 +1176,12 @@ value, as in `p.total.to[Work]()`), defers the call into a `Work[T]`, and starts
 nothing. **Nothing runs until a verb starts it.** Where the work runs is the runtime's business.
 
 ```suflae
-routine fetch(id: Integer) -> Integer
+routine fetch(id: Int) -> Int
     waitfor(50ms)            # this job waits, others run meanwhile
     return id * 10
 
 routine start()
-    var a = fetch.to[Work](id: 1)           # Work[Integer], not started
+    var a = fetch.to[Work](id: 1)           # Work[Int], not started
     a.start_now()                        # starts it now
     show(f"one => {a.retrieve()}")       # wait for the value
 
@@ -1252,12 +1252,12 @@ routine start()
 - There is no thread type in Suflae.
 
 ```suflae
-failable routine checked(n: Integer) -> Integer
+failable routine checked(n: Int) -> Int
     if n < 0
         throw VerificationFailedError()
     return n
 
-routine slow(n: Integer) -> Integer
+routine slow(n: Int) -> Int
     each i in 0 til 2000
         if cancellation_requested()
             return -1
@@ -1271,7 +1271,7 @@ routine start()
     good.start_now()
     show(f"good: {good.retrieve()}")     # 3
     when check bad.retrieve()
-        is Integer as v => show(f"bad: {v}")
+        is Int as v => show(f"bad: {v}")
         is Crashables as e => show(f"bad failed: {e.crash_message()}")
     var running = slow.to[Work](n: 1)
     running.start_now()
@@ -1285,7 +1285,7 @@ routine start()
 **Mailboxes** (always available): one `Mailbox[T]` that every job that adds or takes holds.
 
 ```suflae
-routine produce(m: Mailbox[Integer], n: Integer) -> Integer
+routine produce(m: Mailbox[Int], n: Int) -> Int
     var i = 1
     until i > n
         m.add_last(value: i)
@@ -1294,7 +1294,7 @@ routine produce(m: Mailbox[Integer], n: Integer) -> Integer
     return n
 
 routine start()
-    var m = Mailbox[Integer](capacity: 2)
+    var m = Mailbox[Int](capacity: 2)
     var job = produce.to[Work](m: m, n: 5)
     job.start_now()
     var first = m.remove_first()
@@ -1325,7 +1325,7 @@ of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when ano
 asks the process to stop. Its routines are called on the type:
 
 ```suflae
-global stop_requests: Integer = 0
+global stop_requests: Int = 0
 
 routine on_stop()
     show("stopping")
@@ -1437,12 +1437,12 @@ routine start()
   `BuilderQuery`). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
   (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
   (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
-  ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Integer` obeys `Comparable`, so
+  ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Int` obeys `Comparable`, so
   `Equatable` too), `obeys_protocol(name:)`, `cases` (a choice's or flags' case names) and
   `arms` (a variant's arm types). `memvars(of: x)` is `type_info(of: x).memvars`.
 - `peek(target:, memvar:) -> Unknown` is failable: `NoSuchMemberVariableError` for a name the type does not have.
 - `poke(target:, memvar:, value:)` changes an entity in place, under its lock; the value must be of the member
-  variable's exact type (`MemberVariableTypeError` names both types: a bare `5` is an `Integer`, so give an
+  variable's exact type (`MemberVariableTypeError` names both types: a bare `5` is an `Int`, so give an
   `S64` slot a typed variable). Given a record it throws `PokeKindError`: take the changed copy with
   `p = poked(target: p, memvar:, value:)` instead (`poked` given an entity throws `PokeKindError` too).
 - `watch(target:)`: an observation that does not keep the entity alive; `is_alive()`.
@@ -1503,7 +1503,7 @@ routine Memoize.around(call: Invocation) -> Unknown
         else as hit => return hit
 
 @Memoize(limit: 100)
-routine fib(n: Integer) -> Integer
+routine fib(n: Int) -> Int
     if n < 2
         return n
     return fib(n: n - 1) + fib(n: n - 2)
@@ -1612,7 +1612,7 @@ writes `!`. `steal` and `expand` are not Suflae words.
 
 The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
 operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `each x in xs`). Anywhere
-else they are names: `var to = 3`, `routine step(by: Integer, to: Integer)`, `by + to`. Two places keep them
+else they are names: `var to = 3`, `routine step(by: Int, to: Int)`, `by + to`. Two places keep them
 keywords: a `when` arm that starts with `is`/`isnot`, and `else as p`. `not` starts an expression, so it is always a
 keyword.
 
@@ -1645,7 +1645,7 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 ## 24. Status (do not generate as if shipped)
 
 Built and tested: the language described above, end to end: shared entities with cycle collection,
-nullable entities, script mode, globals, `Integer`/`Decimal` defaults, the error model, Work
+nullable entities, script mode, globals, `Int`/`Decimal` defaults, the error model, Work
 concurrency, the iterate-and-mutate checks, C through imported `.rf` modules, and `ObjectHacker`'s
 `Unknown`, `type_info`, `peek`/`poke`/`poked`, `call`/`create`, the program's own annotations, `when_changed`, `implant` and `watch`. The `StdlibSf` fixtures run in CI with their expected output.
 
@@ -1656,5 +1656,5 @@ Not built yet:
   hot reload and `morph` come after 0.5.
 
 When generating Suflae: start from the closest `Suflae/tests/Fixtures/StdlibSf/*.sf` program, name every
-argument, return a value on every path of a routine that has one, use bare `Integer`/`Decimal` numbers, and
+argument, return a value on every path of a routine that has one, use bare `Int`/`Decimal` numbers, and
 prefer `when` over nested conditionals.
