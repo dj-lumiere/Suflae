@@ -1026,7 +1026,9 @@ each entry in ages
   shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
   and the queue does not change. A range shows as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`.
   `f"{xs:?}"` (diagnose) puts the qualified type and the count around the same text:
-  `System.List[System.Int](count: 3, [1, 2, 3])`, `System.Dict[System.Int, System.Int](count: 0, {:})`.
+  `System.List[System.Int](count: 3, [1, 2, 3])`, `System.Dict[System.Int, System.Int](count: 0, {:})`. There a
+  text element is quoted with its escapes (`["a\", \"b"]` is one text), and a variant, alone or as an element, names
+  the member type its value has (`S32(1)`, `Text("a")`, `none`).
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
   slice `xs[1 til 3]` returns a new list.
 - Indices and counts are `Int`: `xs.count()`, `xs[i]`, `xs[1 til 3]`, `remove_at(index:)`,

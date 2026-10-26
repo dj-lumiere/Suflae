@@ -300,13 +300,13 @@ routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
 routine Dict[TKey, TValue].represent() -> Text
     if me.is_empty()
         return "{:}"
-    return f"{{{me.entries_text()}}}"
+    return f"{{{me.entries_text(diagnosing: false)}}}"
 
 @override
 routine Dict[TKey, TValue].diagnose() -> Text
     if me.is_empty()
         return me.full_type_name() + "(count: 0, {:})"
-    return f"{me.full_type_name()}(count: {me.count}, {{{me.entries_text()}}})"
+    return f"{me.full_type_name()}(count: {me.count}, {{{me.entries_text(diagnosing: true)}}})"
 
 # ============================================================================
 # Comparison
@@ -395,12 +395,13 @@ secret routine Dict[TKey, TValue].make_room()
     return
 
 ### The entries as text: `"a": 1, "b": 2`.
-secret routine Dict[TKey, TValue].entries_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine Dict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
     each entry in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(entry.key)}: {nested_repr(entry.value)}"
+        result = f"{result}{nested_form(value: entry.key, diagnosing: diagnosing)}: {nested_form(value: entry.value, diagnosing: diagnosing)}"
         first = false
     return result

@@ -13,6 +13,15 @@ module System
 routine nested_repr(value: T) -> Text
 needs AnyType T
 
+### A container element's form in a `represent()` or, with `diagnosing`, in a `diagnose()`: there a text is quoted
+### with its escapes and a variant element names the member type its value has (`S32(1)`).
+### :param value: The element.
+### :param diagnosing: Whether the container is writing its `diagnose()`.
+### :returns: The element's text.
+@rf("nested_form")
+routine nested_form(value: T, diagnosing: Bool) -> Text
+needs AnyType T
+
 ### Returns this choice's discriminant: `status.to[S32]()`.
 ### :returns: The discriminant.
 @rf("T.to")

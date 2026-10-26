@@ -212,11 +212,11 @@ routine SortedList[T].to[List[T]]() -> List[T]
 
 @override
 routine SortedList[T].represent() -> Text
-    return f"[{me.items_text()}]"
+    return f"[{me.items_text(diagnosing: false)}]"
 
 @override
 routine SortedList[T].diagnose() -> Text
-    return f"{me.full_type_name()}(count: {me.count()}, [{me.items_text()}])"
+    return f"{me.full_type_name()}(count: {me.count()}, [{me.items_text(diagnosing: true)}])"
 
 ### Returns true if both lists contain exactly the same elements in the same order.
 ### :param you: The list to compare against.
@@ -253,13 +253,14 @@ failable common routine SortedList[T].from_serial(value: SerialValue) -> SortedL
     return result
 
 ### The elements as text: `1, 2, 3`.
-secret routine SortedList[T].items_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine SortedList[T].items_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
     each value in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(value)}"
+        result = f"{result}{nested_form(value: value, diagnosing: diagnosing)}"
         first = false
     return result
 

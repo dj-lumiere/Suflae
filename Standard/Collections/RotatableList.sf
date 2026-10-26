@@ -369,12 +369,12 @@ needs T obeys Equatable
 ### Returns the list as text: `[1, 2, 3]`.
 @override
 routine RotatableList[T].represent() -> Text
-    return me.elements_text()
+    return me.elements_text(diagnosing: false)
 
 ### Returns the list's diagnostic text: its type, count and elements.
 @override
 routine RotatableList[T].diagnose() -> Text
-    return f"{me.full_type_name()}(count: {me.count}, {me.elements_text()})"
+    return f"{me.full_type_name()}(count: {me.count}, {me.elements_text(diagnosing: true)})"
 
 ### Returns a new list holding copies of the elements.
 routine RotatableList[T].duplicate() -> RotatableList[T]
@@ -520,13 +520,14 @@ secret routine RotatableList[T].make_room(extra: U64)
     return
 
 ### The elements as text: `[1, 2, 3]`.
-secret routine RotatableList[T].elements_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine RotatableList[T].elements_text(diagnosing: Bool) -> Text
     var result = "["
     var first = true
     each element in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(element)}"
+        result = f"{result}{nested_form(value: element, diagnosing: diagnosing)}"
         first = false
     return f"{result}]"
 

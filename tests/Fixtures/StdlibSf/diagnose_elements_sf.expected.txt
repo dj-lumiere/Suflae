@@ -1,0 +1,8 @@
+a: S32(1)
+b: S64(1)
+list of variants: System.List[System.S32 | S64](count: 2, [S32(1), S64(1)])
+one text: System.List[System.Text](count: 1, ["a\", \"b"])
+two texts: System.List[System.Text](count: 2, ["a", "b"])
+represent stays plain: ["a", "b"]
+dict: System.Dict[System.Text, System.Int](count: 1, {"k\"": 2})
+set: System.Set[System.Text](count: 1, {"t\\"})

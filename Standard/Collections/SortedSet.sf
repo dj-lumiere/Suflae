@@ -202,12 +202,12 @@ routine SortedSet[T].to[List[T]]() -> List[T]
 
 @override
 routine SortedSet[T].represent() -> Text
-    return f"{{{me.items_text()}}}"
+    return f"{{{me.items_text(diagnosing: false)}}}"
 
 ### Returns a diagnostic form that includes the runtime type name and element count.
 @override
 routine SortedSet[T].diagnose() -> Text
-    return f"{me.full_type_name()}(count: {me.count()}, {{{me.items_text()}}})"
+    return f"{me.full_type_name()}(count: {me.count()}, {{{me.items_text(diagnosing: true)}}})"
 
 ### Returns true if both sets contain exactly the same values.
 ### :param you: The other set to compare against.
@@ -244,13 +244,14 @@ failable common routine SortedSet[T].from_serial(value: SerialValue) -> SortedSe
     return result
 
 ### The elements as text: `1, 2, 3`.
-secret routine SortedSet[T].items_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine SortedSet[T].items_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
     each value in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(value)}"
+        result = f"{result}{nested_form(value: value, diagnosing: diagnosing)}"
         first = false
     return result
 

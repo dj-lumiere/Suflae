@@ -238,13 +238,13 @@ routine SortedDict[TKey, TValue].to[List[DictEntry[TKey, TValue]]]() -> List[Dic
 routine SortedDict[TKey, TValue].represent() -> Text
     if me.is_empty()
         return "{:}"
-    return f"{{{me.entries_text()}}}"
+    return f"{{{me.entries_text(diagnosing: false)}}}"
 
 @override
 routine SortedDict[TKey, TValue].diagnose() -> Text
     if me.is_empty()
         return me.full_type_name() + "(count: 0, {:})"
-    return f"{me.full_type_name()}(count: {me.count()}, {{{me.entries_text()}}})"
+    return f"{me.full_type_name()}(count: {me.count()}, {{{me.entries_text(diagnosing: true)}}})"
 
 ### Serializes this dictionary to a `SerialValue.Dict`; keys render via `represent`, values serialize.
 ### :returns: The `SerialValue.Dict` mapping each key's text to its value's serialized form.
@@ -277,13 +277,14 @@ secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> DictEntry[TKey, T
     return DictEntry[TKey, TValue](key: me.tree.key_at(rank: rank), value: me.tree.value_at(rank: rank))
 
 ### The entries as text: `"a": 1, "b": 2`.
-secret routine SortedDict[TKey, TValue].entries_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine SortedDict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
     each entry in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(entry.key)}: {nested_repr(entry.value)}"
+        result = f"{result}{nested_form(value: entry.key, diagnosing: diagnosing)}: {nested_form(value: entry.value, diagnosing: diagnosing)}"
         first = false
     return result
 

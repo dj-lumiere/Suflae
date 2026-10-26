@@ -254,11 +254,11 @@ routine Set[T].to[List[T]]() -> List[T]
 
 @override
 routine Set[T].represent() -> Text
-    return f"{{{me.values_text()}}}"
+    return f"{{{me.values_text(diagnosing: false)}}}"
 
 @override
 routine Set[T].diagnose() -> Text
-    return f"{me.full_type_name()}(count: {me.count}, {{{me.values_text()}}})"
+    return f"{me.full_type_name()}(count: {me.count}, {{{me.values_text(diagnosing: true)}}})"
 
 # ============================================================================
 # Comparison
@@ -337,12 +337,13 @@ secret routine Set[T].make_room()
     return
 
 ### The values as text: `1, 2, 3`.
-secret routine Set[T].values_text() -> Text
+### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
+secret routine Set[T].values_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
     each val in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_repr(val)}"
+        result = f"{result}{nested_form(value: val, diagnosing: diagnosing)}"
         first = false
     return result
