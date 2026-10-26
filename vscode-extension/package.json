@@ -108,7 +108,9 @@
           "interface:suflae": {
             "foreground": "#8CCBFF",
             "fontStyle": "italic"
-          }
+          },
+          "recordType:suflae": "#4EC9B0",
+          "entityType:suflae": "#5CB2FF"
         }
       }
     },
