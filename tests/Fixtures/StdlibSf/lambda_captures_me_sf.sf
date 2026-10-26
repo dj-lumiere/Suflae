@@ -1,0 +1,24 @@
+module Tests/StdlibSf/LambdaCapturesMeSf
+
+import IO/Console
+
+# A lambda made in a member routine may read `me`: it keeps the entity, so a change made to the entity later is seen
+# when the lambda is called.
+
+entity Counter
+    n: S64
+
+routine Counter.adder() -> Callable[(S64,), S64]
+    return (k: S64) => me.n + k
+
+routine Counter.checked_adder() -> failable Callable[(S64,), S64]
+    return (k: S64) => me.n + k
+
+routine start()
+    var c = Counter(n: 10)
+    var add = c.adder()
+    show(f"10 + 5: {add(5)}")
+    c.n = 20
+    show(f"20 + 5: {add(5)}")
+    var checked = c.checked_adder()
+    show(f"checked 20 + 1: {checked(1)}")
