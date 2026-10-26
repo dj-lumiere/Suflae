@@ -75,9 +75,11 @@ through a `.rf` module the program imports (section 18).
 7. **A routine that can fail is declared `failable`** (`failable routine parse(...)`, `failable` first, before
    `dangerous` or `common`). `routine parse!(...)` is SF-G222, and call sites never mark the call. A bare call crashes loudly on failure. To recover, prefix the call with `try` / `check` and
    take the result apart with `when`. There is no try/catch and no `try_parse` name form (§11).
-8. **Conditional expressions are top-level only.** `return if c then a else b` works;
-   `f(x: if c then a else b)` and `(if c then a else b) + 1` are parse errors by design. Use `when` or a
-   named intermediate.
+8. **Conditional expressions are top-level only.** `if c then a else b` is the whole value of `var x =` (also
+   `global`), a plain `x =`, or `return`. Anywhere else it is SF-G112 by design: inside parentheses, an argument
+   (`f(x: if c then a else b)`), an operand (`(if c then a else b) + 1`, `x += if ...`), a subscript, an f-text
+   slot, a branch or condition of another conditional (`else if ...` too), a `when` arm's value, and directly
+   after `try`/`check`. Use `when` or a named intermediate.
 9. **Changing a collection while `each`-looping it is banned.** `each x in xs` with `xs.add_last(...)` in the
    body is a build error (SF-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
@@ -603,9 +605,10 @@ routine Account.deposit(amount: Integer)                       # member routine,
   (§11). A free routine's bare name is a value:
   `nums.select(transform: double)`.
 - Any routine can run concurrently: `f.to[Work](...)` defers a call into a `Work[T]` (§16).
-- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@crash_only`,
+- **Annotations are a fixed set** the builder gives an effect (`@positional`, `@infix`, `@inline`, `@noinline`, `@crash_only`,
   `@test`/`@case`/`@skip`/`@time_limit`, `@reflectable`, …), all lowercase. Any other lowercase name is SF-G221, and a
-  misspelling names the close one. A name that starts with a capital is the program's own annotation (§19): a record
+  misspelling names the close one. `@noinline` keeps a routine out of its callers (its own body is still optimized),
+  and `@inline` with `@noinline` on one routine is SF-G227. A name that starts with a capital is the program's own annotation (§19): a record
   that obeys `Annotation`, and SF-S706 when there is none. There is no `@deprecated`, no `@initonly` and no `@bench`
   yet.
 - **Routine tests.** `suflae test` builds a file once per `@test` routine, calling it in place of the program's own
