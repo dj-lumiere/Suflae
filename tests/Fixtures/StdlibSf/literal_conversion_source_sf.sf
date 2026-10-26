@@ -1,0 +1,18 @@
+module Tests/StdlibSf/LiteralConversionSourceSf
+
+import IO/Console
+
+# A bare number takes its type from where it goes, and a conversion is where it goes: with a conversion written only
+# from S64, `5.to[Wid]()` reads the 5 as an S64. A conversion Int has is still taken from Int.
+
+record Wid
+    v: S64
+
+routine S64.to[Wid]() -> Wid
+    return Wid(v: me * 10)
+
+routine start()
+    var a = 5.to[Wid]()
+    show(f"5 to Wid: {a.v}")
+    var b = 7.to[S16]()
+    show(f"7 to S16: {b}")
