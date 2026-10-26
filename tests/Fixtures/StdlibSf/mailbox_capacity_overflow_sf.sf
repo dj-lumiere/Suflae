@@ -1,0 +1,22 @@
+module Tests/StdlibSf/MailboxCapacityOverflowSf
+
+import IO/Console
+
+# A mailbox whose capacity needs more memory than a U64 counts fails with OutOfMemoryError, and a negative capacity
+# with IntegerOverflowError. try and check receive both. A mailbox of a usable capacity still works after that.
+
+routine start()
+    when try Mailbox[Int](capacity: 2305843009213693952)
+        is None => show("capacity 2^61: None")
+        else => show("capacity 2^61: made")
+    when check Mailbox[Int](capacity: 10 ** 30)
+        is IntegerOverflowError => show("capacity 10^30: IntegerOverflowError")
+        else => show("capacity 10^30: made")
+    when check Mailbox[Int](capacity: -1)
+        is IntegerOverflowError => show("capacity -1: IntegerOverflowError")
+        else => show("capacity -1: made")
+    var q = Mailbox[Int](capacity: 2)
+    q.add_last(value: 4)
+    q.close()
+    each v in q
+        show(f"received {v}")

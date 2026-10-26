@@ -24,7 +24,9 @@ obeys Emittable[T]
 ### a taker).
 ### :param capacity: How many values it holds.
 ### :returns: The new mailbox.
-routine Mailbox[T](capacity: Int) -> Mailbox[T]
+### :throws: {OutOfMemoryError} The mailbox would need more memory than the heap has room for.
+### :throws: {IntegerOverflowError} `capacity` is negative or past `U64_MAX`.
+failable routine Mailbox[T](capacity: Int) -> Mailbox[T]
     var (transmitter, receiver) = make_shared_channel[T](capacity: capacity.to[U64]())
     return Mailbox[T](transmitter: transmitter, receiver: receiver)
 

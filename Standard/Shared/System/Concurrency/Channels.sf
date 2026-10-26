@@ -39,16 +39,18 @@ obeys Emitter[T]
 ### full = backpressure). Clone the `Transmitter` for multiple producers (fan-in).
 ### :param capacity: The buffer depth (0 = rendezvous).
 ### :returns: A `(Transmitter[T], Receiver[T])` tuple sharing one channel.
+### :throws: {OutOfMemoryError} The buffer is more bytes than a `U64` counts, or the heap has no room for it.
 @rf("make_channel")
-secret routine make_channel[T](capacity: U64) -> (Transmitter[T], Receiver[T])
+secret failable routine make_channel[T](capacity: U64) -> (Transmitter[T], Receiver[T])
 
 ### Creates a multi-consumer channel and returns its `(Transmitter, SharedReceiver)` pair. Clone the
 ### `SharedReceiver` (one per consumer) for a worker pool — any free worker takes the next item (consumer
 ### fan-out, not broadcast). `capacity` as in `make_channel`.
 ### :param capacity: The buffer depth (0 = rendezvous).
 ### :returns: A `(Transmitter[T], SharedReceiver[T])` tuple sharing one channel.
+### :throws: {OutOfMemoryError} The buffer is more bytes than a `U64` counts, or the heap has no room for it.
 @rf("make_shared_channel")
-secret routine make_shared_channel[T](capacity: U64) -> (Transmitter[T], SharedReceiver[T])
+secret failable routine make_shared_channel[T](capacity: U64) -> (Transmitter[T], SharedReceiver[T])
 
 ### Transmits one item, moving its ownership into the channel. Blocks/parks while the buffer is full
 ### (backpressure); for a rendezvous channel waits until a consumer takes it. FAILABLE: throws

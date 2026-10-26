@@ -1,0 +1,4 @@
+capacity 2^61: None
+capacity 10^30: IntegerOverflowError
+capacity -1: IntegerOverflowError
+received 4
