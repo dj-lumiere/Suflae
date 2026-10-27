@@ -1635,7 +1635,7 @@ keyword.
 
 ## 23. Relation to RazorForge and interop
 
-RazorForge is the same object model where an entity lives in one place, reached by permission or through a
+RazorForge is the same object model where an entity has one original, reached by permission or through a
 manager (explicit `steal` hand-overs, deterministic teardown at scope exit), and the machine visible
 (fixed-width numbers by default, OS threads, build-time reflection). Suflae reaches an entity through any
 number of names and hides the machine. The two share the grammar and the standard library, which is written in RazorForge.
@@ -1645,7 +1645,7 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 - **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Maybe` and `Range` are the same
   types in both languages.
 - **An entity keeps its language.** An entity declared in an imported `.rf` module stays a RazorForge
-  entity (kept in one place, no reference count); it is not shared like a Suflae entity. As a local, or as a
+  entity (one original, no reference count); it is not shared like a Suflae entity. As a local, or as a
   member variable of a Suflae entity, it just works: construct it, call its routines (mutating ones
   included), and it is released once. It has one holder at a time: keeping it under a second name
   (`var d = c`), putting a named one into a member variable, or handing it to a `.rf` routine that
