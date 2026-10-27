@@ -148,7 +148,7 @@ last executable that built.
 **Imports.** `import Foo/Bar` imports a module; `import Foo.bar` imports one member (a type, routine,
 `preset` or `global`) of module `Foo`. An import brings the module it names, never the modules under it
 (`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
-it (`System`: the basic types, `List`/`Dict`/`Set`, `Maybe`, errors; `System/Numerics`: the number types,
+it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/Numerics`: the number types,
 `Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
 (`IO/Console`), files (`IO/File`), and the environment (`IO/Environment`). Import the rest: `Collections` (`SortedDict`, `BitList`,
@@ -342,7 +342,9 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 
 **Optionals and `none`.**
 
-- `T?` is the optional type (`Maybe[T]` for values). For an entity, `E?` is a handle that may be empty.
+- `T?` is the optional type, `Optional[T]`. It is the one named type whose kind follows what it holds: over a value
+  it is a value (copied by `=`), and over an entity `E?` is a handle that may be empty. `Maybe` is an unknown type
+  whose error names `Optional[T]` and `T?` (`migrate --step type-names` renames it).
 - `None` (capital) is the type and pattern (`is None`, `isnot None`); `none` (lowercase) is the value.
 - `none` is legal only where the target type can be absent: `T?`, a variant with a `None`
   member, an `E?` slot. `var x = none` is an error: `none` has no type of its own.
@@ -764,7 +766,7 @@ failable routine find(items: List[Text], name: Text) -> Int
 
 | Keyword       | Result                           | Holds                                      |
 |---------------|----------------------------------|--------------------------------------------|
-| `try EXPR`    | `Maybe[T]`, written `T?`         | the value, or `None` (any failure)         |
+| `try EXPR`    | `T?` (`Optional[T]`)             | the value, or `None` (any failure)         |
 | `check EXPR`  | `Check[T]` = `T \| Crashables`   | the value, or the caught error             |
 
 ```suflae
@@ -832,11 +834,11 @@ routine start()
   its first throw: if it ends the program after being rethrown or passed on, the report shows that trace and a
   `Thrown again at file:line:col` line. Every crash report is headed by the error's crash title (`Parse error: ...`,
   the type name in sentence case unless the crashable writes its own `crash_title`), runtime crashes too.
-- `is None` is an arm of `Maybe` only (and the success arm of `Check[None]`). A `Check` has no
+- `is None` is an arm of `Optional` only (and the success arm of `Check[None]`). A `Check` has no
   absent state: "not found" in a `Check` is `is AbsentValueError`.
-- Users never write `Maybe`/`Check` as a return type (SF-S806), only a keyword produces one.
+- Users never write `T?`/`Check` as a return type (SF-S806), only a keyword produces one.
   `Check` is meant to be taken apart where it is made: they cannot be a parameter type
-  (SF-S754), a member variable type (SF-S755), or copied from one variable to another (SF-S758). `Maybe` is
+  (SF-S754), a member variable type (SF-S755), or copied from one variable to another (SF-S758). `Optional` is
   an ordinary optional value and may be stored.
 
 **Crashables.** `crashable X` declares an error type. It is a record (a value, no identity) with its own
@@ -1162,7 +1164,7 @@ routine start()
 - Files are read and written whole or through sessions. There is no mapped storage in Suflae
   (`FileManager.open_storage` is gone): read the bytes with `read_bytes`, or a session in chunks.
 - The environment (`Environment`, always available): `arguments()` (a list, the program's own name left out),
-  `variable(name:)` (`try` gives a `Maybe`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
+  `variable(name:)` (`try` gives an `Optional`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
   `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
   `Directory` and build paths from it. `Entropy.next_u64()` gives random bits from the operating system,
   `Random.from_entropy()` a generator seeded with them.
@@ -1642,7 +1644,7 @@ number of names and hides the machine. The two share the grammar and the standar
 
 A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may not import Suflae files.
 
-- **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Maybe` and `Range` are the same
+- **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Optional` and `Range` are the same
   types in both languages.
 - **An entity keeps its language.** An entity declared in an imported `.rf` module stays a RazorForge
   entity (one original, no reference count); it is not shared like a Suflae entity. As a local, or as a

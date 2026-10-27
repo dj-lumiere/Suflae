@@ -225,7 +225,7 @@ public partial class SuflaeLexer
             [key: "return"] = TokenType.Return,
             [key: "throw"] = TokenType.Throw,
             [key: "todo"] = TokenType.Todo,
-            // Recovery prefix keywords: wrap a failable call into a carrier (Maybe/Check).
+            // Recovery prefix keywords: wrap a failable call into a carrier (Optional/Check).
             // Bare words only — `try_foo`/`check_foo` tokenize as single identifiers, untouched.
             [key: "try"] = TokenType.Try,
             [key: "check"] = TokenType.Check,

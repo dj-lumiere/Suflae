@@ -87,7 +87,7 @@ single-statement update such as `COUNT = COUNT + 1` is atomic across parallel ta
 
 **Failure is loud, and recovery takes one keyword.** A routine that can `throw` is declared
 `failable routine parse(...)`, and calls to it are written like any other call. A bare call that fails
-crashes with a message (exit status 82). `try` or `check` in front of the call recovers it as `Maybe[T]`
+crashes with a message (exit status 82). `try` or `check` in front of the call recovers it as `T?` (`Optional[T]`)
 or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
 **Nothing unsafe is reachable.** `danger` blocks, `dangerous` routines, raw handles, and `steal` are

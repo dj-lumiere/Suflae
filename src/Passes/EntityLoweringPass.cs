@@ -1102,7 +1102,7 @@ internal sealed class EntityLoweringPass
         Expression inner = LowerExpression(expr: ipe.Expression);
         if (!IsRoamedType(t: inner.ResolvedType))
         {
-            // Not a Roamed operand — leave the IsPattern as-is (Maybe/variant handled downstream).
+            // Not a Roamed operand — leave the IsPattern as-is (Optional/variant handled downstream).
             return ReferenceEquals(objA: inner, objB: ipe.Expression)
                 ? ipe
                 : ipe with { Expression = inner };

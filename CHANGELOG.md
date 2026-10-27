@@ -36,10 +36,12 @@ file only once its other old spellings are gone.
 **Failure and recovery**
 - A routine that can fail says so on its declaration: `failable routine parse(...)`. `routine parse!(...)` is
   `SF-G222` (`migrate --step failable`). A call never writes `!` (`SF-G211`).
-- Recovery is a keyword at the call: `try f(x)` gives a `Maybe[T]`, `check f(x)` gives a `Check[T]`. The
+- Recovery is a keyword at the call: `try f(x)` gives a `T?` (`Optional[T]`), `check f(x)` gives a `Check[T]`. The
   `try_f` / `check_f` / `lookup_f` routines are gone. Default `migrate` writes `try f(x)` for `try_f(x)` (and
   `try r.f(x)` for `r.try_f(x)`) and `check f(x)` for `check_f(x)` and `lookup_f(x)`, and the build error on an old
   name names the keyword.
+- `Maybe[T]` is `Optional[T]`, written `T?`. `Maybe` is an unknown type whose error names `Optional[T]` and `T?`,
+  and `migrate --step type-names` renames it.
 - Failures rise only through failable routines. A `throw` in a routine that is not `failable` crashes there with the
   crashable's message, so `pierce` is gone and is an ordinary name: `migrate --step pierce` writes `throw` for each
   `pierce` in a routine that is not failable and lists the ones in failable routines, where a `throw` goes to the

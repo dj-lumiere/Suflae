@@ -4,69 +4,69 @@ module System
 # checks that the two still match.
 
 ### Represents an optional value: a `T` or `None`, written `T?`.
-### `Maybe[T]` holds either a `T` or nothing, without carrying crash information. A `when` on it names the `T`
+### `Optional[T]` holds either a `T` or nothing, without carrying crash information. A `when` on it names the `T`
 ### member and `None` (`is None`).
 ### :typeparam T: The wrapped value type.
-@rf("Maybe")
-record Maybe[T]
+@rf("Optional")
+record Optional[T]
     nothing
 
 ### Returns the display form of this optional value.
 ### Present values are rendered using the wrapped value's text form.
 ### :returns: The resulting `Text` value.
-@rf("Maybe.represent")
-routine Maybe[T].represent() -> Text
+@rf("Optional.represent")
+routine Optional[T].represent() -> Text
 
 ### Returns the diagnostic form of this optional value.
-### This form keeps the `Maybe` wrapper visible for debugging and logs.
+### This form keeps the `Optional` wrapper visible for debugging and logs.
 ### :returns: The resulting `Text` value.
-@rf("Maybe.diagnose")
-routine Maybe[T].diagnose() -> Text
+@rf("Optional.diagnose")
+routine Optional[T].diagnose() -> Text
 
 ### `unwrap` for a single-owner entity: it cannot be shared, so the caller gets an independent duplicate,
 ### which needs the entity to declare it can be copied.
-@rf("Maybe.unwrap")
-failable routine Maybe[T].unwrap() -> T
+@rf("Optional.unwrap")
+failable routine Optional[T].unwrap() -> T
 needs EntityType T
 needs T obeys Copyable
 
 ### `unwrap` for a variant: one with an entity arm cannot be shared, so the caller gets a duplicate.
-@rf("Maybe.unwrap")
-failable routine Maybe[T].unwrap() -> T
+@rf("Optional.unwrap")
+failable routine Optional[T].unwrap() -> T
 needs VariantType T
 needs T obeys Copyable
 
 ### `unwrap_or` for a single-owner entity: the present value comes back as a duplicate (see `unwrap`).
-@rf("Maybe.unwrap_or")
-routine Maybe[T].unwrap_or(fallback: T) -> T
+@rf("Optional.unwrap_or")
+routine Optional[T].unwrap_or(fallback: T) -> T
 needs EntityType T
 needs T obeys Copyable
 
 ### `unwrap_or` for a variant: the present value comes back as a duplicate (see `unwrap`).
-@rf("Maybe.unwrap_or")
-routine Maybe[T].unwrap_or(fallback: T) -> T
+@rf("Optional.unwrap_or")
+routine Optional[T].unwrap_or(fallback: T) -> T
 needs VariantType T
 needs T obeys Copyable
 
 ### MOVES the wrapped value out, CONSUMING this optional (marks it absent). Unlike `unwrap` (which
 ### co-owns via a retaining copy and leaves the optional intact), this hands the payload's SINGLE
-### reference to the caller and empties the carrier — the model a `Maybe[Entity]` requires (an entity is
+### reference to the caller and empties the carrier — the model an `Optional[Entity]` requires (an entity is
 ### single-owner: it cannot be co-owned/retained, only moved). The carrier's own `destruct` then no-ops on
 ### `value` (guarded by `is_present()`), so the moved-out payload is freed exactly once by its new owner.
 ### A re-`strip_out` of the now-absent optional fails LOUDLY (AbsentValueError), never silently corrupts.
 ### :returns: The contained `T` value, moved out.
-### :throws: {AbsentValueError} if this `Maybe` is absent.
-@rf("Maybe.strip_out")
-failable routine Maybe[T].strip_out() -> T
+### :throws: {AbsentValueError} if this `Optional` is absent.
+@rf("Optional.strip_out")
+failable routine Optional[T].strip_out() -> T
 
-@rf("Maybe.is_present")
-routine Maybe[T].is_present() -> Bool
+@rf("Optional.is_present")
+routine Optional[T].is_present() -> Bool
 
 ### Returns whether both optionals are equal: both absent, or both present with equal values.
 ### :param you: The other optional to compare against.
 ### :returns: `true` when both are absent or both hold equal values, `false` when only one is absent.
-@rf("Maybe.eq")
-routine Maybe[T].eq(you: Maybe[T]) -> Bool
+@rf("Optional.eq")
+routine Optional[T].eq(you: Optional[T]) -> Bool
 needs T obeys Equatable
 
 ### Returns a keyed hash of this optional: a fixed value when absent, the value's own hash when present, so equal
@@ -74,6 +74,6 @@ needs T obeys Equatable
 ### :param k0: The first 64-bit key word.
 ### :param k1: The second 64-bit key word.
 ### :returns: The resulting `U64` value.
-@rf("Maybe.hash")
-routine Maybe[T].hash(k0: U64, k1: U64) -> U64
+@rf("Optional.hash")
+routine Optional[T].hash(k0: U64, k1: U64) -> U64
 needs T obeys Hashable

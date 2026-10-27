@@ -19,7 +19,7 @@ common routine Environment.arguments() -> List[Text]
 ### doesn't matter).
 ### :param name: The variable's name.
 ### :returns: Its value.
-### :throws: {AbsentValueError} when it isn't set (`try Environment.variable(name:)` gives a `Maybe`).
+### :throws: {AbsentValueError} when it isn't set (`try Environment.variable(name:)` gives an `Optional`).
 @rf("Environment.variable")
 failable common routine Environment.variable(name: Text) -> Text
 
