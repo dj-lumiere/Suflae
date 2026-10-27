@@ -1004,7 +1004,7 @@ each (name, age) in ages
 
 - `List`, `Dict` and `Set` are always available; `[]`, `{k: v}` and `{a, b}` are their literals. The
   specialized containers (`SortedDict`, `SortedList`, `SortedSet`, `PriorityQueue`,
-  `BitList`, `Array[T, COUNT]`) are constructor-only and come from `import Collections`.
+  `BitList`, `Items[T, COUNT]`) are constructor-only and come from `import Collections`.
 - A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
   on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
   `{1: "a"}` given to an `Emittable[(U16, Text)]` builds a `Dict[U16, Text]`. With nothing to go by,
@@ -1030,7 +1030,7 @@ each (name, age) in ages
   (`animal.name()` with `protocol Animal obeys Named`), and an associated type (`T/Item`) stands for the obeying
   type's own (`relates Text as Item`).
 - **Showing a collection.** `show(xs)` and `f"{xs}"` write the elements, each in the form it has inside a
-  collection (`Text` quoted `"a"`, `Char` as `'a'`, everything else its `represent`): `List`, `Array` and the
+  collection (`Text` quoted `"a"`, `Char` as `'a'`, everything else its `represent`): `List`, `Items` and the
   other sequences `[1, 2, 3]`, sets `{1, 2}`, dictionaries `{1: 10, 2: 20}`, the empty set `{}` and the empty
   dictionary `{:}`. `Dict` and `Set` show in insertion order, the sorted collections in order. A `PriorityQueue`
   shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
@@ -1045,11 +1045,11 @@ each (name, age) in ages
   `xs.enumerate()` (pairs `(Int, T)`). A negative index crashes with `NegativeIndexError`; count from the
   end with `^` (`xs[^1]`).
 - The collections are Suflae's own, written in Suflae: `List`, `Dict`, `Set`, `SortedList`, `SortedSet`,
-  `SortedDict`, `PriorityQueue`, `BitList`, `BitArray`, `RotatableList`. A `List` keeps its elements from the first
+  `SortedDict`, `PriorityQueue`, `BitList`, `Bits`, `RotatableList`. A `List` keeps its elements from the first
   place on: it is the stack (O(1) at the back), and adding or removing at its front moves the rest (O(n)).
   `RotatableList` (`import Collections`) is the queue and deque: O(1) at both ends, `rotate_left`/`rotate_right`,
-  and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Array[T, COUNT]` is RazorForge's
-  fixed-size record, counted and indexed with `Int` too. RazorForge's `SplitList` / `SplitArray`
+  and a fixed-size latest-N history (`add_last_keeping`, `keep_last`). `Items[T, COUNT]` is RazorForge's
+  fixed-size record, counted and indexed with `Int` too. RazorForge's `SplitList` / `SplitItems`
   (structure-of-arrays layouts) are not available in Suflae.
 - Indexing `xs[i]` and `d[k]` crash when the index or key is missing; recover with `try xs[i]` /
   `try d[k]`. `remove_first()`, `remove_last()`, `remove_at(index:)`, `first()`, `last()` are failable the
@@ -1100,7 +1100,7 @@ each (name, age) in ages
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
   (pairs), `to[RotatableList]()`, `to[BitList]()` (Bools), `to[PriorityQueue]()` (`(priority, element)` pairs).
-  `to[Array[T, N]]()` names the size (`xs.to[Array[Int, 3]]()`) and is failable: fewer or more than `N` values
+  `to[Items[T, N]]()` names the size (`xs.to[Items[Int, 3]]()`) and is failable: fewer or more than `N` values
   throw `ElementCountMismatchError`.
 
 **Changing a collection while looping over it.** After an add or remove, the loop can no longer trust that

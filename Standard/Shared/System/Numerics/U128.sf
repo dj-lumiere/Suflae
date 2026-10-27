@@ -321,19 +321,19 @@ routine U128.is_power_of_two() -> Bool
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("U128.to_bytes_le")
-routine U128.to_bytes_le() -> Array[Byte, 16]
+routine U128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("U128.to_bytes_be")
-routine U128.to_bytes_be() -> Array[Byte, 16]
+routine U128.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds a `U128` from its little-endian raw byte representation.
 @rf("U128.from_bytes_le")
-common routine U128.from_bytes_le(bytes: Array[Byte, 16]) -> U128
+common routine U128.from_bytes_le(bytes: Items[Byte, 16]) -> U128
 
 ### Builds a `U128` from its big-endian raw byte representation.
 @rf("U128.from_bytes_be")
-common routine U128.from_bytes_be(bytes: Array[Byte, 16]) -> U128
+common routine U128.from_bytes_be(bytes: Items[Byte, 16]) -> U128
 
 ### Returns `true` if this value is zero.
 ### :returns: `true` if `me == 0`.

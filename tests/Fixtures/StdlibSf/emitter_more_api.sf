@@ -1,6 +1,6 @@
 module Tests/StdlibSf/EmitterMoreApi
 
-# Collecting into a fixed-size Array, and terminals and adapters straight on an emitter.
+# Collecting into a fixed-size Items, and terminals and adapters straight on an emitter.
 import IterTools
 
 # An emitter the program writes: each step hands out the next number up to `last`.
@@ -22,13 +22,13 @@ routine make() -> List[Int]
 routine start()
     var xs = [4, 1, 3]
 
-    # to[Array[T, N]]: the bracket names the size, a different count fails.
-    show(f"array: {xs.to[Array[Int, 3]]()}")
-    show(f"array from where: {xs.where(predicate: v => v > 1).to[Array[Int, 2]]()}")
-    when try xs.to[Array[Int, 2]]()
+    # to[Items[T, N]]: the bracket names the size, a different count fails.
+    show(f"array: {xs.to[Items[Int, 3]]()}")
+    show(f"array from where: {xs.where(predicate: v => v > 1).to[Items[Int, 2]]()}")
+    when try xs.to[Items[Int, 2]]()
         is None => show("array of 2: none")
         else => show("array of 2: some")
-    var short = check xs.to[Array[Int, 5]]()
+    var short = check xs.to[Items[Int, 5]]()
     when short
         is ElementCountMismatchError as e => show(e.crash_message())
         else => show("array of 5: some")

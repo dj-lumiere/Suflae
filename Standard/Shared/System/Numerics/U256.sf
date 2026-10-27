@@ -314,19 +314,19 @@ routine U256.rotate_right(bits: U32) -> U256
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("U256.to_bytes_le")
-routine U256.to_bytes_le() -> Array[Byte, 32]
+routine U256.to_bytes_le() -> Items[Byte, 32]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("U256.to_bytes_be")
-routine U256.to_bytes_be() -> Array[Byte, 32]
+routine U256.to_bytes_be() -> Items[Byte, 32]
 
 ### Builds a `U256` from its little-endian raw byte representation.
 @rf("U256.from_bytes_le")
-common routine U256.from_bytes_le(bytes: Array[Byte, 32]) -> U256
+common routine U256.from_bytes_le(bytes: Items[Byte, 32]) -> U256
 
 ### Builds a `U256` from its big-endian raw byte representation.
 @rf("U256.from_bytes_be")
-common routine U256.from_bytes_be(bytes: Array[Byte, 32]) -> U256
+common routine U256.from_bytes_be(bytes: Items[Byte, 32]) -> U256
 
 ### Returns `true` if this value is zero.
 ### :returns: `true` if `me == 0`.

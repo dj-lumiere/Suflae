@@ -200,11 +200,11 @@ failable routine parse_decimal_d128(from_text: Text) -> D128
 
 ### Returns the raw bytes of this value in little-endian order.
 @rf("D128.to_bytes_le")
-routine D128.to_bytes_le() -> Array[Byte, 16]
+routine D128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw bytes of this value in big-endian order.
 @rf("D128.to_bytes_be")
-routine D128.to_bytes_be() -> Array[Byte, 16]
+routine D128.to_bytes_be() -> Items[Byte, 16]
 
 ### Truncates toward zero to an unsigned 128-bit integer. Throws on a non-finite value, a
 ### negative value, or an integer part beyond U128.

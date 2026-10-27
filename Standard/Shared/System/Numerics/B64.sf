@@ -306,12 +306,12 @@ routine B64.diagnose() -> Text
 ### Returns the raw bytes of this value in little-endian order.
 ### :returns: The resulting `Array[Byte, 8]` value.
 @rf("B64.to_bytes_le")
-routine B64.to_bytes_le() -> Array[Byte, 8]
+routine B64.to_bytes_le() -> Items[Byte, 8]
 
 ### Returns the raw bytes of this value in big-endian order.
 ### :returns: The resulting `Array[Byte, 8]` value.
 @rf("B64.to_bytes_be")
-routine B64.to_bytes_be() -> Array[Byte, 8]
+routine B64.to_bytes_be() -> Items[Byte, 8]
 
 ### Returns a keyed hash of this value using SipHash-2-4.
 ### :param k0: The first 64-bit key word.

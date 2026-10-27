@@ -320,19 +320,19 @@ routine S16.swap_bytes() -> S16
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("S16.to_bytes_le")
-routine S16.to_bytes_le() -> Array[Byte, 2]
+routine S16.to_bytes_le() -> Items[Byte, 2]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("S16.to_bytes_be")
-routine S16.to_bytes_be() -> Array[Byte, 2]
+routine S16.to_bytes_be() -> Items[Byte, 2]
 
 ### Builds an `S16` from its little-endian raw byte representation.
 @rf("S16.from_bytes_le")
-common routine S16.from_bytes_le(bytes: Array[Byte, 2]) -> S16
+common routine S16.from_bytes_le(bytes: Items[Byte, 2]) -> S16
 
 ### Builds an `S16` from its big-endian raw byte representation.
 @rf("S16.from_bytes_be")
-common routine S16.from_bytes_be(bytes: Array[Byte, 2]) -> S16
+common routine S16.from_bytes_be(bytes: Items[Byte, 2]) -> S16
 
 ### Returns `true` if this value is greater than zero.
 ### :returns: `true` if `me > 0`.

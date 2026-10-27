@@ -16,11 +16,11 @@ secret preset SORTED_LEAST: U64 = 31
 secret entity SortedNode[K, V]
 needs K obeys Comparable
     ### The keys of the entries, in order.
-    keys: Array[K, 63]
+    keys: Items[K, 63]
     ### The values of the entries.
-    values: Array[V, 63]
+    values: Items[V, 63]
     ### The nodes under this one.
-    branches: Array[SortedNode[K, V], 64]
+    branches: Items[SortedNode[K, V], 64]
     ### How many entries the node holds.
     count: U64
     ### How many branches the node has.
@@ -48,9 +48,9 @@ needs K obeys Comparable
 ### :param leaf: Whether the node has no branches.
 routine SortedNode[K, V](leaf: Bool) -> SortedNode[K, V]
     return SortedNode[K, V](
-        keys: Array[K, 63](),
-        values: Array[V, 63](),
-        branches: Array[SortedNode[K, V], 64](),
+        keys: Items[K, 63](),
+        values: Items[V, 63](),
+        branches: Items[SortedNode[K, V], 64](),
         count: 0,
         fan: 0,
         size: 0,

@@ -340,19 +340,19 @@ routine S128.swap_bytes() -> S128
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("S128.to_bytes_le")
-routine S128.to_bytes_le() -> Array[Byte, 16]
+routine S128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("S128.to_bytes_be")
-routine S128.to_bytes_be() -> Array[Byte, 16]
+routine S128.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds an `S128` from its little-endian raw byte representation.
 @rf("S128.from_bytes_le")
-common routine S128.from_bytes_le(bytes: Array[Byte, 16]) -> S128
+common routine S128.from_bytes_le(bytes: Items[Byte, 16]) -> S128
 
 ### Builds an `S128` from its big-endian raw byte representation.
 @rf("S128.from_bytes_be")
-common routine S128.from_bytes_be(bytes: Array[Byte, 16]) -> S128
+common routine S128.from_bytes_be(bytes: Items[Byte, 16]) -> S128
 
 ### Returns `true` if this value is greater than zero.
 ### :returns: `true` if `me > 0`.

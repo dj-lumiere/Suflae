@@ -293,19 +293,19 @@ routine U8.is_power_of_two() -> Bool
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("U8.to_bytes_le")
-routine U8.to_bytes_le() -> Array[Byte, 1]
+routine U8.to_bytes_le() -> Items[Byte, 1]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("U8.to_bytes_be")
-routine U8.to_bytes_be() -> Array[Byte, 1]
+routine U8.to_bytes_be() -> Items[Byte, 1]
 
 ### Builds a `U8` from its little-endian raw byte representation.
 @rf("U8.from_bytes_le")
-common routine U8.from_bytes_le(bytes: Array[Byte, 1]) -> U8
+common routine U8.from_bytes_le(bytes: Items[Byte, 1]) -> U8
 
 ### Builds a `U8` from its big-endian raw byte representation.
 @rf("U8.from_bytes_be")
-common routine U8.from_bytes_be(bytes: Array[Byte, 1]) -> U8
+common routine U8.from_bytes_be(bytes: Items[Byte, 1]) -> U8
 
 ### Returns `false` if `from` is `0`; `true` for any other value.
 ### :returns: `true` if `from != 0`.

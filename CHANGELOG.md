@@ -117,6 +117,9 @@ file only once its other old spellings are gone.
   `xs.emitter()` just before the loop, or write `each x in xs`.
 
 **Standard library**
+- The fixed-size run of values is `Items[T, N]` and the run of bits is `Bits[N]`: `Array` and `BitArray` are unknown
+  types whose error names the new one, and `migrate --step type-names` renames them. A dictionary entry is the tuple
+  `(key, value)`: `each (k, v) in d`, or `e.item0` / `e.item1`.
 - A module is its folder. The base module is `System` and every file sees it and the modules under it
   (`System/Numerics`, `System/Text`, `System/Temporal`, `System/Concurrency`, `System/Cpu`, ...) without an import.
   Importing a parent does not import its children (`migrate --step modules`).
@@ -253,7 +256,7 @@ file only once its other old spellings are gone.
   that obeys `Emitter[T]` or `Emittable[T]` works with every library routine written for emittables.
 - An emittable collects into any collection with `to[...]`: `to[List]`, `to[Set]`, `to[Dict]` (of `(key, value)`
   pairs), `to[SortedList]`, `to[SortedSet]`, `to[SortedDict]`, `to[RotatableList]`, `to[BitList]`,
-  `to[PriorityQueue]` (of `(priority, element)` pairs), and `to[Array[T, N]]`.
+  `to[PriorityQueue]` (of `(priority, element)` pairs), and `to[Items[T, N]]`.
 - `Math3D` has `Matrix2R2C` and `Matrix3R3C` beside `Matrix4R4C`, with the same routines, `vec2` and `vec3`, a 2D
   `rotation`, `rotation_x`, `rotation_y`, `rotation_z` and `from_quaternion` on `Matrix3R3C`, and `scaling`. All three
   have `inverse()`, `inverse_unchecked()` and `solve(b:)` (A x = b), computed by Gaussian elimination with partial

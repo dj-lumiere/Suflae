@@ -320,19 +320,19 @@ routine S8.swap_bytes() -> S8
 
 ### Returns the raw byte representation of this value in little-endian order.
 @rf("S8.to_bytes_le")
-routine S8.to_bytes_le() -> Array[Byte, 1]
+routine S8.to_bytes_le() -> Items[Byte, 1]
 
 ### Returns the raw byte representation of this value in big-endian order.
 @rf("S8.to_bytes_be")
-routine S8.to_bytes_be() -> Array[Byte, 1]
+routine S8.to_bytes_be() -> Items[Byte, 1]
 
 ### Builds an `S8` from its little-endian raw byte representation.
 @rf("S8.from_bytes_le")
-common routine S8.from_bytes_le(bytes: Array[Byte, 1]) -> S8
+common routine S8.from_bytes_le(bytes: Items[Byte, 1]) -> S8
 
 ### Builds an `S8` from its big-endian raw byte representation.
 @rf("S8.from_bytes_be")
-common routine S8.from_bytes_be(bytes: Array[Byte, 1]) -> S8
+common routine S8.from_bytes_be(bytes: Items[Byte, 1]) -> S8
 
 ### Returns `true` if this value is greater than zero.
 ### :returns: `true` if `me > 0`.

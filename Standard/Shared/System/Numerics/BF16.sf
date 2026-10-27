@@ -33,12 +33,12 @@ common routine BF16.signaling_nan() -> BF16
 ### Returns the raw bytes of this value in little-endian order.
 ### :returns: The resulting `Array[Byte, 2]` value.
 @rf("BF16.to_bytes_le")
-routine BF16.to_bytes_le() -> Array[Byte, 2]
+routine BF16.to_bytes_le() -> Items[Byte, 2]
 
 ### Returns the raw bytes of this value in big-endian order.
 ### :returns: The resulting `Array[Byte, 2]` value.
 @rf("BF16.to_bytes_be")
-routine BF16.to_bytes_be() -> Array[Byte, 2]
+routine BF16.to_bytes_be() -> Items[Byte, 2]
 
 ### Returns `true` when this value encodes a NaN.
 @rf("BF16.is_nan")

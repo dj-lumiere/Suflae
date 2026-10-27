@@ -34,11 +34,11 @@ common routine Decimal.from_bits(bits: U128) -> Decimal
 
 ### Returns the raw 16 bytes of this value in little-endian order.
 @rf("Decimal.to_bytes_le")
-routine Decimal.to_bytes_le() -> Array[Byte, 16]
+routine Decimal.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw 16 bytes of this value in big-endian order.
 @rf("Decimal.to_bytes_be")
-routine Decimal.to_bytes_be() -> Array[Byte, 16]
+routine Decimal.to_bytes_be() -> Items[Byte, 16]
 
 ### Builds a Decimal from a sign + U128 coefficient at the given exponent (rounds to <= 34 digits).
 @rf("Decimal.from_components")
