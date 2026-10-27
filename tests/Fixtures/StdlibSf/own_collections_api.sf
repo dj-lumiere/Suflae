@@ -30,7 +30,7 @@ routine start()
     d["c"] = 3
     var sum = 0
     each e in d
-        sum = sum + e.value
+        sum = sum + e.item1
     show(f"d={d} count={d.count()} d[a]={d["a"]} sum={sum} keys={d.keys()} keys_count={d.keys().count()}")
     d.remove(key: "a")
     show(f"after remove={d} count={d.count()} has_a={d.has_key("a")}")

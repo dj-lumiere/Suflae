@@ -492,8 +492,8 @@ loop                      # doesn't end by itself: break, return or throw leaves
         break
 ```
 
-`each` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry has
-`.key` and `.value`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
+`each` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry is
+the tuple `(key, value)`, `each (k, v) in d` or `e.item0` / `e.item1`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
 `IterTools`) produce tuples that `each (a, b) in ...` takes apart.
 
 Loops are `until c`, `loop` and `each`. `until c` stops when `c` becomes true, tested before each round: write the
@@ -998,8 +998,8 @@ ages["grace"] = 85
 show(ages["ada"])
 if ages.has_key("alan")
     show("found")
-each entry in ages
-    show(f"{entry.key} -> {entry.value}")
+each (name, age) in ages
+    show(f"{name} -> {age}")
 ```
 
 - `List`, `Dict` and `Set` are always available; `[]`, `{k: v}` and `{a, b}` are their literals. The
@@ -1007,7 +1007,7 @@ each entry in ages
   `BitList`, `Array[T, COUNT]`) are constructor-only and come from `import Collections`.
 - A collection literal takes its element types from where it goes, as a number does: `bytes.add_range(you: [3, 4])`
   on a `List[U8]` builds a `List[U8]`, `total(xs: [5, 6])` for `xs: Emittable[S64]` builds a `List[S64]`, and
-  `{1: "a"}` given to an `Emittable[DictEntry[U16, Text]]` builds a `Dict[U16, Text]`. With nothing to go by,
+  `{1: "a"}` given to an `Emittable[(U16, Text)]` builds a `Dict[U16, Text]`. With nothing to go by,
   `[1, 2]` is a `List[Int]`. The empty set literal is `{}` and the empty dict literal `{:}`
   (`s[b] = {:}` on a `List[Dict[Int, Int]]`). A `{}` where a dict is expected is SF-S558.
 - `sv.to[List[Int]]()` reads a list back from the `SerialValue` that `xs.serialize()` gives, as
@@ -1596,11 +1596,11 @@ number). At most 20 are shown per batch.
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
+| SF-S517       | `each` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `each x in xs` |
 | SF-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
 ## 22. Keywords
-| SF-S517       | `each` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `each x in xs` |
 
 A keyword can still be a name when written between backticks (`` `check` ``), and so can words with one space
 between them (`` `total count` ``); `` `count` `` and `count` are the same name.

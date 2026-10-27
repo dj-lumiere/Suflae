@@ -67,9 +67,9 @@ routine start()
         i = i + 1
     var total = 0
     each entry in names
-        total = total + entry.value
+        total = total + entry.item1
     var gone = try names["k1"]
-    show(f"dict: count={names.count()} first={names.first().key} last={names.last().key} total={total} k1 gone: {gone is None}")
+    show(f"dict: count={names.count()} first={names.first().item0} last={names.last().item0} total={total} k1 gone: {gone is None}")
     show(f"rank 1={names.get_by_rank(i: 1)} get_or={names.get_or(key: "zz", default: 9)}")
 
     var box = Box(id: 1)

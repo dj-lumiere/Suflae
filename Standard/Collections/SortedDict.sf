@@ -30,7 +30,7 @@ import BuilderQuery
 ### :see: {SortedList[T]} for a sorted sequence that allows duplicates.
 entity SortedDict[TKey, TValue]
 relates SortedDictEmitter[TKey, TValue] as Emitter, TKey as Key, TValue as Value
-obeys Emittable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
+obeys Emittable[(TKey, TValue)], KeyFindable, KeyContainer, DictLiteral[TKey, TValue]
 needs TKey obeys Comparable
     ### The tree holding the entries.
     secret tree: SortedTree[TKey, TValue]
@@ -39,7 +39,7 @@ needs TKey obeys Comparable
 ### :typeparam TKey: The key type.
 ### :typeparam TValue: The value type.
 entity SortedDictEmitter[TKey, TValue]
-obeys Emitter[DictEntry[TKey, TValue]]
+obeys Emitter[(TKey, TValue)]
 needs TKey obeys Comparable
     ### The tree being walked, shared with the dictionary.
     secret tree: SortedTree[TKey, TValue]
@@ -56,16 +56,16 @@ routine SortedDict[TKey, TValue]() -> SortedDict[TKey, TValue]
 
 ### Creates a sorted dict containing the given key-value `pairs` (stored in sorted key order). Variadic
 ### constructor behind the `{k: v, …}` dict-literal syntax (the `DictLiteral` opt-in).
-### :param pairs: The key-value pairs as `DictEntry[TKey, TValue]` values; a later duplicate key overwrites.
+### :param pairs: The key-value pairs as `(TKey, TValue)` values; a later duplicate key overwrites.
 ### :returns: A sorted dict of the given pairs.
-common routine SortedDict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> SortedDict[TKey, TValue]
+common routine SortedDict[TKey, TValue].from_literal(pairs...: (TKey, TValue)) -> SortedDict[TKey, TValue]
 needs TKey obeys Comparable
     var result = SortedDict[TKey, TValue]()
     var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     until i >= pairs.count()
-        result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
+        result[pairs.get_raw(index: i).item0] = pairs.get_raw(index: i).item1
         i = i +% 1
     return result
 
@@ -144,9 +144,9 @@ routine SortedDict[TKey, TValue].remove(key: TKey) -> Bool
 ### Returns the entry at the given zero-based sorted rank.
 ### Rank 0 is the entry with the smallest key; rank `count()-1` is the largest.
 ### :param i: The zero-based sorted rank to read.
-### :returns: The {DictEntry[TKey, TValue]} at that sorted position.
+### :returns: The `(TKey, TValue)` tuple at that sorted position.
 ### :throws: {IndexOutOfBoundsError} if `i >= count()`.
-failable routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> DictEntry[TKey, TValue]
+failable routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> (TKey, TValue)
     var position = position_of(value: i)
     var count = me.tree.count()
     if position >= count
@@ -159,26 +159,26 @@ failable routine SortedDict[TKey, TValue].get_by_rank(i: Int) -> DictEntry[TKey,
 
 ### Returns the entry with the smallest key.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].min() -> DictEntry[TKey, TValue]
+failable routine SortedDict[TKey, TValue].min() -> (TKey, TValue)
     if me.is_empty()
         throw AbsentValueError()
     return me.entry_at(rank: 0)
 
 ### Returns the entry with the largest key.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].max() -> DictEntry[TKey, TValue]
+failable routine SortedDict[TKey, TValue].max() -> (TKey, TValue)
     if me.is_empty()
         throw AbsentValueError()
     return me.entry_at(rank: me.tree.count() - 1)
 
 ### Returns the entry with the smallest key. Alias for {SortedDict[TKey, TValue].min()}.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].first() -> DictEntry[TKey, TValue]
+failable routine SortedDict[TKey, TValue].first() -> (TKey, TValue)
     return me.min()
 
 ### Returns the entry with the largest key. Alias for {SortedDict[TKey, TValue].max()}.
 ### :throws: {AbsentValueError} The dictionary is empty.
-failable routine SortedDict[TKey, TValue].last() -> DictEntry[TKey, TValue]
+failable routine SortedDict[TKey, TValue].last() -> (TKey, TValue)
     return me.max()
 
 # ============================================================================
@@ -215,17 +215,17 @@ routine SortedDict[TKey, TValue].emitter() -> SortedDictEmitter[TKey, TValue]
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine SortedDictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
+failable routine SortedDictEmitter[TKey, TValue].emit() -> (TKey, TValue)
     if me.index >= me.tree.count()
         throw AbsentValueError()
     var rank = me.index
     me.index = me.index + 1
-    return DictEntry[TKey, TValue](key: me.tree.key_at(rank: rank), value: me.tree.value_at(rank: rank))
+    return (me.tree.key_at(rank: rank), me.tree.value_at(rank: rank))
 
-### Creates a {List[DictEntry[TKey, TValue]]} from all entries of `from` in ascending key order.
+### Creates a `List[(TKey, TValue)]` from all entries of `from` in ascending key order.
 ### :returns: A new list of all entries in key-ascending order.
-routine SortedDict[TKey, TValue].to[List[DictEntry[TKey, TValue]]]() -> List[DictEntry[TKey, TValue]]
-    var result = List[DictEntry[TKey, TValue]](capacity: me.count())
+routine SortedDict[TKey, TValue].to[List[(TKey, TValue)]]() -> List[(TKey, TValue)]
+    var result = List[(TKey, TValue)](capacity: me.count())
     each entry in me
         result.add_last(value: entry)
     return result
@@ -252,7 +252,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
     var result = RF::System.Dict[Text, SerialValue]()
     each entry in me
-        result[entry.key.represent()] = entry.value.serialize()
+        result[entry.item0.represent()] = entry.item1.serialize()
     return SerialValue(result.duplicate())
 
 ### Builds the dictionary from its serialized entry table.
@@ -263,7 +263,7 @@ failable common routine SortedDict[TKey, TValue].from_serial(value: SerialValue)
     when value
         is RF::System.Dict[Text, SerialValue] as entries =>
             each entry in entries
-                result[serial_key[TKey](key: entry.key)] = serial_decode[TValue](value: entry.value)
+                result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
         else =>
             throw SerialShapeError(detail: "expected an entry table")
     return result
@@ -273,8 +273,8 @@ failable common routine SortedDict[TKey, TValue].from_serial(value: SerialValue)
 # ============================================================================
 
 ### The entry at `rank`, which must be below the count.
-secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> DictEntry[TKey, TValue]
-    return DictEntry[TKey, TValue](key: me.tree.key_at(rank: rank), value: me.tree.value_at(rank: rank))
+secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> (TKey, TValue)
+    return (me.tree.key_at(rank: rank), me.tree.value_at(rank: rank))
 
 ### The entries as text: `"a": 1, "b": 2`.
 ### :param diagnosing: Whether this is for `diagnose()`, where a text element is quoted with its escapes.
@@ -284,7 +284,7 @@ secret routine SortedDict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     each entry in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_form(value: entry.key, diagnosing: diagnosing)}: {nested_form(value: entry.value, diagnosing: diagnosing)}"
+        result = f"{result}{nested_form(value: entry.item0, diagnosing: diagnosing)}: {nested_form(value: entry.item1, diagnosing: diagnosing)}"
         first = false
     return result
 

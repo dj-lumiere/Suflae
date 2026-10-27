@@ -25,7 +25,7 @@ import BuilderQuery
 ### :see: {Set[T]} for the set counterpart.
 entity Dict[TKey, TValue]
 relates DictEmitter[TKey, TValue] as Emitter, TKey as Key, TValue as Value
-obeys Emittable[DictEntry[TKey, TValue]], KeyFindable, KeyContainer, Copyable, DictLiteral[TKey, TValue]
+obeys Emittable[(TKey, TValue)], KeyFindable, KeyContainer, Copyable, DictLiteral[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     ### The probe table from hashes to entry positions.
     secret index: HashIndex
@@ -46,7 +46,7 @@ needs TKey obeys Hashable, Equatable
 
 ### Walks the entries of a {Dict[TKey, TValue]} in insertion order.
 entity DictEmitter[TKey, TValue]
-obeys Emitter[DictEntry[TKey, TValue]]
+obeys Emitter[(TKey, TValue)]
     ### The walk over which entry places are live.
     secret live: MemoryEmitter[Bool]
     ### The walk over the keys.
@@ -62,16 +62,16 @@ obeys Emitter[DictEntry[TKey, TValue]]
 
 ### Creates a dict containing the given key-value `pairs`. Variadic constructor behind the `{k: v, …}`
 ### dict-literal syntax (the `DictLiteral` opt-in). A later duplicate key overwrites.
-### :param pairs: The key-value pairs as `DictEntry[TKey, TValue]` values.
+### :param pairs: The key-value pairs as `(TKey, TValue)` values.
 ### :returns: A dict of the given pairs.
-common routine Dict[TKey, TValue].from_literal(pairs...: DictEntry[TKey, TValue]) -> Dict[TKey, TValue]
+common routine Dict[TKey, TValue].from_literal(pairs...: (TKey, TValue)) -> Dict[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: pairs.count().to[Int]())
     var i: U64 = 0
     # Each pair is read in place: `add` makes the dictionary's holders, and the caller releases the
     # literal's own afterwards.
     until i >= pairs.count()
-        result[pairs.get_raw(index: i).key] = pairs.get_raw(index: i).value
+        result[pairs.get_raw(index: i).item0] = pairs.get_raw(index: i).item1
         i = i +% 1
     return result
 
@@ -271,11 +271,11 @@ routine Dict[TKey, TValue].emitter() -> DictEmitter[TKey, TValue]
 
 ### Returns the next entry.
 ### :throws: {AbsentValueError} The walk is over.
-failable routine DictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
+failable routine DictEmitter[TKey, TValue].emit() -> (TKey, TValue)
     until me.left == 0
         me.left = me.left - 1
         if me.live.emit()
-            return DictEntry[TKey, TValue](key: me.keys.emit(), value: me.vals.emit())
+            return (me.keys.emit(), me.vals.emit())
         me.keys.skip()
         me.vals.skip()
     throw AbsentValueError()
@@ -289,7 +289,7 @@ failable routine DictEmitter[TKey, TValue].emit() -> DictEntry[TKey, TValue]
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count.to[Int]())
     each entry in me
-        result[entry.key] = entry.value
+        result[entry.item0] = entry.item1
     return result
 
 # ============================================================================
@@ -319,10 +319,10 @@ needs TValue obeys Equatable
     if me.count != you.count
         return false
     each entry in me
-        var slot = you.find_slot(key: entry.key)
+        var slot = you.find_slot(key: entry.item0)
         if not you.index.holds(slot: slot)
             return false
-        if you.vals.at(position: you.index.entry(slot: slot)) != entry.value
+        if you.vals.at(position: you.index.entry(slot: slot)) != entry.item1
             return false
     return true
 
@@ -331,7 +331,7 @@ needs TValue obeys Equatable
 routine Dict[TKey, TValue].serialize() -> SerialValue
     var result = RF::System.Dict[Text, SerialValue]()
     each entry in me
-        result[entry.key.represent()] = entry.value.serialize()
+        result[entry.item0.represent()] = entry.item1.serialize()
     return SerialValue(result.duplicate())
 
 ### Builds the dictionary from its serialized entry table.
@@ -342,7 +342,7 @@ failable common routine Dict[TKey, TValue].from_serial(value: SerialValue) -> Di
     when value
         is RF::System.Dict[Text, SerialValue] as entries =>
             each entry in entries
-                result[serial_key[TKey](key: entry.key)] = serial_decode[TValue](value: entry.value)
+                result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
         else =>
             throw SerialShapeError(detail: "expected an entry table")
     return result
@@ -402,6 +402,6 @@ secret routine Dict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     each entry in me
         if not first
             result = f"{result}, "
-        result = f"{result}{nested_form(value: entry.key, diagnosing: diagnosing)}: {nested_form(value: entry.value, diagnosing: diagnosing)}"
+        result = f"{result}{nested_form(value: entry.item0, diagnosing: diagnosing)}: {nested_form(value: entry.item1, diagnosing: diagnosing)}"
         first = false
     return result
