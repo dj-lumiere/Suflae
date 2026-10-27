@@ -112,6 +112,9 @@ file only once its other old spellings are gone.
   of `x` and gives another number. Convert with `x.to[T]()`, or write a number where the type is expected
   (`var level: U8 = 200`). `migrate --step numbers` rewrites the calls between binary integer and float types and
   lists the rest.
+- An `each` over an emitter that has run out is `SF-S517`: a second `each` over a named emitter after one that ended
+  by itself, or an `each` inside a loop over an emitter made outside it. Such a loop ran zero times. Make a new
+  `xs.emitter()` just before the loop, or write `each x in xs`.
 
 **Standard library**
 - A module is its folder. The base module is `System` and every file sees it and the modules under it

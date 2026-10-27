@@ -1076,7 +1076,10 @@ each entry in ages
   with `emitter()`. `each` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
   for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `each x in it`,
   which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
-  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An entity a program writes that obeys `Emitter[T]` (it has a
+  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An emitter hands out each value once: an `each` over a named
+  emitter after one that ended by itself (no `break`), or an `each` inside a loop over an emitter made outside it, is
+  SF-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `each x in nums` /
+  `each x in nums.emitter()`. An entity a program writes that obeys `Emitter[T]` (it has a
   failable `emit()`) is walked as it is: `each n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
   An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
   member variable, a returned value, an argument, or the next link of a chain. So a member variable or a return type
@@ -1593,6 +1596,7 @@ number). At most 20 are shown per batch.
 | SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
 ## 22. Keywords
+| SF-S517       | `each` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `each x in xs` |
 
 A keyword can still be a name when written between backticks (`` `check` ``), and so can words with one space
 between them (`` `total count` ``); `` `count` `` and `count` are the same name.
