@@ -312,7 +312,8 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
   nothing gives it (`var n = count.to()`, mid-chain `count.to().add(1)`) it is SF-S645: write
   `.to[S64]()`.
 - A pair with no conversion is SF-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
-  Converting a value to its own type is SF-S646 too (use the value as it is).
+  Converting a value to its own type is SF-S646 too (use the value as it is), and so is building a type from a
+  value of that type (`Int(1)`: `1` is an `Int` already).
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
   they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: hp)` putting an `S64` in an arm);
   a value computed from one value of another type is a conversion, `x.to[T]()` (`local.to[Moment]()`,

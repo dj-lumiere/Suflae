@@ -1,0 +1,15 @@
+module Tests/StdlibSf/RoutineListApi
+
+# A list of routines that take nothing is built with its type written out, `List[Callable[(), Int]]()`, and so is a
+# list of routines that take one value.
+
+routine start()
+    var makers = List[Callable[(), Int]]()
+    makers.add_last(() => 7)
+    makers.add_last(() => 8)
+    var steps = List[Callable[(Int,), Int]]()
+    steps.add_last(x => x * 2)
+    var first = makers[0]
+    var second = makers[1]
+    var step = steps[0]
+    show(f"{makers.count()} {first()} {second()} {step(5)}")

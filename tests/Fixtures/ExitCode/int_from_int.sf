@@ -1,0 +1,3 @@
+routine start()
+    var a = Int(1)
+    show(a)

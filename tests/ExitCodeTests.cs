@@ -171,6 +171,18 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "SF-S413", actualString: stdout + stderr);
     }
 
+    /// <summary><c>Int(1)</c> builds an <c>Int</c> from a value that is one already: SF-S646, which says to use the
+    /// value as it is, where the LLVM emitter used to stop.</summary>
+    [Fact]
+    public void IntBuiltFromAnInt_IsS646()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "int_from_int.sf", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "SF-S646", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "from a value that is an 'Int' already", actualString: stdout + stderr);
+    }
+
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
         string verb = "buildandrun")
     {
