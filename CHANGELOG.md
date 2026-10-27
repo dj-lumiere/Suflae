@@ -108,6 +108,10 @@ file only once its other old spellings are gone.
   members count 0, 1, 2, ... in order. Some with and some without is `SF-S417`.
 - The flags value with no member on is `none` (`var marks: CellMarks = none`, also in presets and record presets).
   `all_off()` is gone, and its build error names `none`.
+- A number type built from one number with `T(x)` (`U8(x)`, `S64(ratio)`) is `SF-S655`, because it reads the bits
+  of `x` and gives another number. Convert with `x.to[T]()`, or write a number where the type is expected
+  (`var level: U8 = 200`). `migrate --step numbers` rewrites the calls between binary integer and float types and
+  lists the rest.
 
 **Standard library**
 - A module is its folder. The base module is `System` and every file sees it and the modules under it

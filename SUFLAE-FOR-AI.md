@@ -314,6 +314,11 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 - A pair with no conversion is SF-S646 at the call ("There is no conversion from 'Text' to 'Bool'.").
   Converting a value to its own type is SF-S646 too (use the value as it is), and so is building a type from a
   value of that type (`Int(1)`: `1` is an `Int` already).
+- A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
+  SF-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`, and for a
+  literal (`U8(200)`) to a declaration of the type (`var level: U8 = 200`), where the builder checks that it fits.
+  `migrate --step numbers` rewrites `T(x)` to `x.to[T]()` between binary integer and float types, types
+  `var b = U8(200)` as `var b: U8 = 200`, and lists the rest (decimal types, `BF16`, a literal inside an expression).
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as
   they are (`Point(x: 1, y: 2)`, `Retained(from: steal e)`, `SerialValue(from: hp)` putting an `S64` in an arm);
   a value computed from one value of another type is a conversion, `x.to[T]()` (`local.to[Moment]()`,

@@ -1,0 +1,4 @@
+routine start()
+    var x: S64 = 300
+    var a = U8(x)
+    show(f"{a}")

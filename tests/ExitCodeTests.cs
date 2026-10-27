@@ -183,6 +183,18 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "from a value that is an 'Int' already", actualString: stdout + stderr);
     }
 
+    /// <summary><c>U8(x)</c> with an <c>S64</c> <c>x</c> would read the bits of <c>x</c> and change the number:
+    /// SF-S655, which points to <c>x.to[U8]()</c>.</summary>
+    [Fact]
+    public void NumberBuiltFromBits_IsS655()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "number_from_bits.sf", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "SF-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "'x.to[U8]()'", actualString: stdout + stderr);
+    }
+
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
         string verb = "buildandrun")
     {
