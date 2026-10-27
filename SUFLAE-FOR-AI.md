@@ -317,6 +317,10 @@ outside 0..255 a build error. `migrate --step bytes` rewrites `v.to[Byte]()` to 
 - A number type built from one number with `T(x)` (`U8(x)` with an `S64` `x`, `S64(ratio)`, `Decimal(n)`) is
   SF-S655: it would read the bits of `x` and give another number. The message points to `x.to[T]()`, and for a
   literal (`U8(200)`) to a declaration of the type (`var level: U8 = 200`), where the builder checks that it fits.
+  In a generic routine `T(x)` is checked per use: `make[U8](x: 300)` with `return T(x)` is SF-S655 naming
+  `make[U8]` and pointing to `x.to[T]()`. `Char(n)` (bits taken as a codepoint, unchecked) and `Bool(x)` (lowest
+  bit only, `Bool(2)` is `false`) are SF-S655 too, pointing to `Char.from_codepoint(n: n)` (takes an `Int`) and
+  `x != 0`.
   `migrate --step numbers` rewrites `T(x)` to `x.to[T]()` between binary integer and float types, types
   `var b = U8(200)` as `var b: U8 = 200`, and lists the rest (decimal types, `BF16`, a literal inside an expression).
 - Constructor or conversion, by one checkable rule: a constructor's arguments become parts of the new value as

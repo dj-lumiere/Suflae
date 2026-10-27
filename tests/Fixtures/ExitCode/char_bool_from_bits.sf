@@ -1,0 +1,5 @@
+routine start()
+    var n: U32 = 65
+    var two: U8 = 2
+    show(f"{Char(n)}")
+    show(f"{Bool(two)}")

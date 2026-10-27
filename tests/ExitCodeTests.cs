@@ -195,6 +195,31 @@ public sealed class ExitCodeTests
         Assert.Contains(expectedSubstring: "'x.to[U8]()'", actualString: stdout + stderr);
     }
 
+    /// <summary><c>T(x)</c> in a generic routine reads bits once <c>make[U8]</c> makes <c>T</c> a <c>U8</c>: SF-S655
+    /// names the instance and points to <c>x.to[T]()</c>.</summary>
+    [Fact]
+    public void GenericNumberBuiltFromBits_IsS655()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "generic_number_from_bits.sf", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "SF-S655", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "'T(x)' in 'make[U8]'", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "'x.to[T]()'", actualString: stdout + stderr);
+    }
+
+    /// <summary><c>Char(n)</c> and <c>Bool(x)</c> read bits too: SF-S655, pointing to <c>Char.from_codepoint</c>
+    /// and to a comparison.</summary>
+    [Fact]
+    public void CharAndBoolBuiltFromBits_AreS655()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "char_bool_from_bits.sf", verb: "check");
+
+        Assert.NotEqual(expected: 0, actual: exit);
+        Assert.Contains(expectedSubstring: "'Char.from_codepoint(n: n.to[Int]())'", actualString: stdout + stderr);
+        Assert.Contains(expectedSubstring: "'two != 0'", actualString: stdout + stderr);
+    }
+
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
         string verb = "buildandrun")
     {

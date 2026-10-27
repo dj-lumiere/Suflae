@@ -1,0 +1,5 @@
+routine make[T](x: S64) -> T
+    return T(x)
+
+routine start()
+    show(f"{make[U8](x: 300)}")
