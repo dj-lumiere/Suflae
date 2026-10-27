@@ -313,6 +313,7 @@ file only once its other old spellings are gone.
 - Converting the smallest `S128` or `S256` to `B128` crashed. `B128.rem` crashed on operands near the top of the
   range.
 - A range that reaches the ends of its type runs to the end and stops there.
+- `fs[0]()` calls the routine at that index (it was an internal build error).
 
 ### Removed
 - `Result[T]`, `Lookup[T]`, `Crashable`, `absent`, `discard`, `pierce`, and the `try_` / `check_` / `lookup_`
