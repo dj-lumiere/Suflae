@@ -32,6 +32,6 @@ routine run_program(
 ### :returns: The same names and values.
 secret routine shared_env(env: Dict[Text, Text]) -> RF::System.Dict[Text, Text]
     var result = RF::System.Dict[Text, Text]()
-    each name in env.keys()
+    for name in env.keys()
         result[name] = env[name]
     return result

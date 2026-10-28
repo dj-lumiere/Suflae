@@ -90,14 +90,14 @@ routine start()
     show(f"add: {c.add(amount: two)}")
     log_line(text: "hi")
     show(health())
-    each line in trace
+    for line in trace
         show(line)
-    each line in routes
+    for line in routes
         show(line)
-    each r in routines(in: "Tests/StdlibSf/ObjectHackerAnnotationApi")
+    for r in routines(in: "Tests/StdlibSf/ObjectHackerAnnotationApi")
         if r.name == "health"
-            each a in r.annotations
+            for a in r.annotations
                 show(f"health annotation: {a}")
-    each a in type_info(of: Hero(name: "x")).annotations
+    for a in type_info(of: Hero(name: "x")).annotations
         show(f"hero annotation: {a}")
     show("DONE")

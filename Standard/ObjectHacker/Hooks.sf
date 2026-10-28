@@ -83,7 +83,7 @@ secret routine drop_change_hook_held(key: U64, hook: U64) -> Bool
                 else as table =>
                     var left = List[ChangeHook]()
                     var found = false
-                    each listed in table.hooks
+                    for listed in table.hooks
                         if listed.id == hook
                             found = true
                         else
@@ -175,7 +175,7 @@ secret routine hooks_after(key: U64, memvar: Text)
     var running = change_to_run(key: key, memvar: memvar, values: values)
     hooks_leave()
     if values.count() == 2
-        each listed in running
+        for listed in running
             var handler = listed.handler
             handler(memvar, values[0], values[1])
 
@@ -205,6 +205,6 @@ secret routine change_to_run(key: U64, memvar: Text, values: List[Unknown]) -> L
                         else as now =>
                             values.add_last(value: old)
                             values.add_last(value: now)
-                            each listed in table.hooks
+                            for listed in table.hooks
                                 running.add_last(value: listed)
                             return running

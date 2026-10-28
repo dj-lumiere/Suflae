@@ -135,7 +135,7 @@ routine Zip4Emittable[TFirst, TSecond, TThird, TFourth, TFirstSource, TSecondSou
 @rf("Zip4Emitter.emit")
 failable routine Zip4Emitter[TFirst, TSecond, TThird, TFourth, TFirstEmitter, TSecondEmitter, TThirdEmitter, TFourthEmitter].emit() -> Tuple[TFirst, TSecond, TThird, TFourth]
 
-### Returns a lazy adapter that pairs each value of `a` with a value of `b`: `each (name, age) in zip(a: names, b: ages)`.
+### Returns a lazy adapter that pairs each value of `a` with a value of `b`: `for (name, age) in zip(a: names, b: ages)`.
 ### Stops when either source runs out.
 ### :param a: The first source.
 ### :param b: The second source.

@@ -38,7 +38,7 @@ routine start()
     var kept = keep_view()
     show(f"kept view: {kept}")
 
-    each x in buf
+    for x in buf
         buf[0] = x
     show(f"after loop: {buf}")
     show(f"have 20: {buf.has(20)} have 3: {buf.has(3)}")

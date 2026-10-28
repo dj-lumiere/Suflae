@@ -120,23 +120,23 @@ secret routine new_info(fact: TypeFact, seen: Dict[U64, TypeInfo]) -> TypeInfo
         handle: fact.handle,
     )
     seen[fact.type_id] = info
-    each member in fact.memvars
+    for member in fact.memvars
         info.memvars.add_last(value: MemberVariableInfo(
             name: member.name,
             order: member.order.to[Int](),
             type: info_from(fact: member.fact(), seen: seen),
             is_secret: member.is_secret,
         ))
-    each name in fact.protocols
+    for name in fact.protocols
         info.protocols.add_last(value: name)
-    each name in fact.cases
+    for name in fact.cases
         info.cases.add_last(value: name)
-    each arm in fact.arms
+    for arm in fact.arms
         info.arms.add_last(value: info_from(fact: arm.fact(), seen: seen))
-    each listed in fact.handle.make_routines()
+    for listed in fact.handle.make_routines()
         if listed.is_built
             info.routines.add_last(value: routine_info_from(fact: listed, owner: fact.handle, seen: seen))
-    each maker in fact.handle.make_creators()
+    for maker in fact.handle.make_creators()
         if maker.is_built
             info.creators.add_last(value: routine_info_from(fact: maker, owner: fact.handle, seen: seen))
     return info
@@ -205,7 +205,7 @@ secret routine returns_from(fact: RoutineFact, seen: Dict[U64, TypeInfo]) -> Typ
 
 secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dict[U64, TypeInfo]) -> RoutineInfo
     var parameters = List[ParameterInfo]()
-    each parameter in fact.parameters
+    for parameter in fact.parameters
         parameters.add_last(value: ParameterInfo(
             name: parameter.name,
             order: parameter.order.to[Int](),
@@ -214,7 +214,7 @@ secret routine routine_info_from(fact: RoutineFact, owner: TypeHandle, seen: Dic
             default: parameter.default,
         ))
     var annotations = List[Unknown]()
-    each value in fact.annotations
+    for value in fact.annotations
         annotations.add_last(value: value)
     return RoutineInfo(
         name: fact.name,
@@ -304,7 +304,7 @@ failable routine create(type: TypeInfo, args: Dict[Text, Unknown]) -> Unknown
 routine types(in: Text) -> List[TypeInfo]
     var seen = Dict[U64, TypeInfo]()
     var found = List[TypeInfo]()
-    each fact in reached_types()
+    for fact in reached_types()
         if fact.module_name == in
             found.add_last(value: info_from(fact: fact, seen: seen))
     return found
@@ -315,7 +315,7 @@ routine types(in: Text) -> List[TypeInfo]
 routine routines(in: Text) -> List[RoutineInfo]
     var seen = Dict[U64, TypeInfo]()
     var found = List[RoutineInfo]()
-    each fact in reached_routines()
+    for fact in reached_routines()
         if fact.module_name == in and fact.is_built
             found.add_last(value: routine_info_from(fact: fact, owner: module_handle(), seen: seen))
     return found
@@ -355,7 +355,7 @@ secret routine new_invocation(routine_info: RoutineInfo, args: List[Unknown], ru
 # The description of a routine of the program's modules that carries an annotation. An empty module name matches
 # any module.
 secret failable routine annotated_routine(module_name: Text, name: Text, count: Int) -> RoutineInfo
-    each fact in reached_routines()
+    for fact in reached_routines()
         if fact.name == name and fact.parameters.count() == count and (module_name == "" or fact.module_name == module_name)
             return routine_info_from(fact: fact, owner: module_handle(), seen: Dict[U64, TypeInfo]())
     throw NoSuchRoutineError(owner: module_name, routine_name: name)
@@ -363,7 +363,7 @@ secret failable routine annotated_routine(module_name: Text, name: Text, count: 
 # The description of a member routine or a common routine that carries an annotation.
 secret failable routine annotated_member(maker: Callable[(), TypeFact], name: Text, count: Int) -> RoutineInfo
     var fact = maker()
-    each listed in fact.handle.make_routines()
+    for listed in fact.handle.make_routines()
         if listed.name == name and listed.parameters.count() == count
             return routine_info_from(fact: listed, owner: fact.handle, seen: Dict[U64, TypeInfo]())
     throw NoSuchRoutineError(owner: fact.name, routine_name: name)

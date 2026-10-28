@@ -15,7 +15,7 @@ record Point
 
 routine count_secret(infos: List[MemberVariableInfo]) -> Int
     var n = 0
-    each info in infos
+    for info in infos
         if info.is_secret
             n = n + 1
     return n
@@ -25,7 +25,7 @@ routine start()
     var alias = hero
 
     show(f"type: {type_name(of: hero)}")
-    each info in memvars(of: hero)
+    for info in memvars(of: hero)
         show(f"memvar {info.order}: {info.name}: {info.type.name}, secret: {info.is_secret}")
     show(f"memvars: {count_secret(infos: memvars(of: hero))} secret, last at {memvars(of: hero)[^1].order + 1}")
 

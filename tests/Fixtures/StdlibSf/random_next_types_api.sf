@@ -17,7 +17,7 @@ routine start()
     first_draws()
     var rng = make_random(seed: 2026)
     var all_in_unit = true
-    each i in 0 til 1000
+    for i in 0 til 1000
         var x = rng.next[B64]()
         if x < 0.0 or x >= 1.0
             all_in_unit = false

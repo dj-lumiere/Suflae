@@ -12,7 +12,7 @@ namespace Suflae.Passes;
 /// elements crashes instead of leaving the user of those positions pointing at the wrong place (the
 /// IterGuard). The shape is the element count and positions; element values may still change. Two uses:
 /// <list type="bullet">
-/// <item>an <c>each</c> loop over a named container (a <see cref="LoopStatement"/> whose
+/// <item>a <c>for</c> loop over a named container (a <see cref="LoopStatement"/> whose
 /// <see cref="LoopStatement.IterationSourceName"/> is set): <c>xs.begin_shape_use()</c> before the loop,
 /// <c>xs.end_shape_use()</c> after it and before every <c>return</c> inside it;</item>
 /// <item>a statement that reaches an entity element through a <c>modify_at</c>/<c>view_at</c> token
@@ -36,7 +36,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     private const string ModifyAt = "modify_at";
     private const string ViewAt = "view_at";
 
-    /// <summary>The containers whose shape the enclosing <c>each</c> loops use, outermost first.</summary>
+    /// <summary>The containers whose shape the enclosing <c>for</c> loops use, outermost first.</summary>
     private readonly List<Expression> _loopShapeUses = [];
 
     private int _tempCount;
@@ -75,7 +75,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
 
     /// <summary>
     /// Lowers one statement to the statements that replace it. <paramref name="preceding"/> holds the
-    /// already-lowered statements before it in the same block, where an <c>each</c> loop's iterator
+    /// already-lowered statements before it in the same block, where a <c>for</c> loop's iterator
     /// declaration (and so its source's type) is found.
     /// </summary>
     private List<Statement> LowerStatement(Statement stmt, List<Statement> preceding)
@@ -157,7 +157,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     }
 
     /// <summary>
-    /// An <c>each</c> loop over a named container that counts shape uses is bracketed by
+    /// A <c>for</c> loop over a named container that counts shape uses is bracketed by
     /// <c>begin_shape_use</c>/<c>end_shape_use</c>, and its body is lowered with the container on the
     /// loop stack so a <c>return</c> inside closes the use.
     /// </summary>
@@ -180,7 +180,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     }
 
     /// <summary>
-    /// The hidden variables holding the emitter each enclosing <c>each</c> loop walks (<c>_lf_iter_N</c>). The program
+    /// The hidden variables holding the emitter each enclosing <c>for</c> loop walks (<c>_lf_iter_N</c>). The program
     /// cannot name one, and a loop over an emitter opens no shape use, so no use of an emitter's shape is ever open
     /// when its loop takes the next step: the step's <c>emit</c> needs no <c>control_to_reshape</c>.
     /// </summary>
@@ -193,7 +193,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             : loop.IterationSourcePath is { } path
                 ? LoopSourceByPath(path: path, preceding: preceding)
                 : null;
-        // A loop over an adapter (`each x in xs.where(...)`) walks the container at the head of the chain, and a
+        // A loop over an adapter (`for x in xs.where(...)`) walks the container at the head of the chain, and a
         // loop over a global walks the global's field of the module's globals: both are found from the iterator the
         // loop walks.
         if (loop.AdapterSourcePath != null || source == null || !HasShapeUse(container: source))
@@ -201,7 +201,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             source = WalkedContainer(loop: loop) ?? (loop.AdapterSourcePath == null ? source : null);
         }
 
-        // A loop over an emitter (`each n in steps`) walks the emitter itself: what the walk changes is where the emitter
+        // A loop over an emitter (`for n in steps`) walks the emitter itself: what the walk changes is where the emitter
         // is, not the shape of a container.
         if (source == null || !HasShapeUse(container: source) || IsEmitter(type: source.ResolvedType))
         {
@@ -224,7 +224,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     private readonly Dictionary<string, Expression> _initializers = new(comparer: StringComparer.Ordinal);
 
     /// <summary>
-    /// The container a lowered <c>each</c> loop walks, found from its iterator's declaration
+    /// The container a lowered <c>for</c> loop walks, found from its iterator's declaration
     /// (<c>var _lf_iter_N = source.iter()</c>): the receiver of <c>iter()</c>, followed back through a variable bound
     /// to an adapter (<c>_lf_src_N = xs.where(...)</c>) and through the adapter chain to its head. A copy of the
     /// head's read path, or null when the head is not a named handle.
@@ -238,7 +238,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
             return null;
         }
 
-        // `each x in xs.where(...)` walks `_lf_src_N`, bound to the adapter chain.
+        // `for x in xs.where(...)` walks `_lf_src_N`, bound to the adapter chain.
         if (loop.AdapterSourcePath != null && Unprojected(expr: walked) is IdentifierExpression adapterName &&
             _initializers.TryGetValue(key: adapterName.Name, value: out Expression? chain) &&
             UnwrapHandleCreation(expr: chain) is CallExpression adapterChain)
@@ -383,7 +383,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     }
 
     /// <summary>
-    /// The named source of an <c>each</c> loop, typed from its iterator declaration among the statements
+    /// The named source of a <c>for</c> loop, typed from its iterator declaration among the statements
     /// before the loop (`var _iter = xs.iter()`).
     /// </summary>
     private static Expression? LoopSource(string name, List<Statement> preceding)
@@ -420,7 +420,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     }
 
     /// <summary>
-    /// A field-chain or element source of an <c>each</c> loop (<c>me.items</c>, <c>grid[0]</c>): the analyzed
+    /// A field-chain or element source of a <c>for</c> loop (<c>me.items</c>, <c>grid[0]</c>): the analyzed
     /// receiver of its iterator declaration among the statements before the loop, copied so the shape-use
     /// calls read it again without sharing the declaration's nodes.
     /// </summary>
@@ -529,7 +529,7 @@ internal sealed class ShapeUseLoweringPass(PostprocessingContext ctx)
     /// <summary>
     /// <paramref name="stmt"/> with the receiver of every call that can change a container's shape checked where the
     /// call runs: <c>handle.control()</c> in front of a <c>@reshaping</c> call becomes
-    /// <c>handle.control_to_reshape()</c>, which crashes with ReshapingWhileInUseError while an <c>each</c> loop over the
+    /// <c>handle.control_to_reshape()</c>, which crashes with ReshapingWhileInUseError while a <c>for</c> loop over the
     /// entity, or a call on one of its elements, is running. Reaches every receiver: a name, an element
     /// (<c>rows[0].add_last(...)</c>), a call result, a global's field.
     /// </summary>

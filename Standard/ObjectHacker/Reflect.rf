@@ -254,7 +254,7 @@ secret routine unknown_nothing() -> Unknown
 ### given, and every value is of its parameter's type.
 secret routine arguments_fit(fact: RoutineFact, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Bool
     var matched: U64 = 0
-    each parameter in fact.parameters
+    for parameter in fact.parameters
         when try args[parameter.name]
             is None =>
                 if not parameter.has_default
@@ -264,13 +264,13 @@ secret routine arguments_fit(fact: RoutineFact, args: Roamed[SF::System.Dict[Tex
                     return false
                 matched = matched + 1
     var named_count: U64 = 0
-    each name in args.keys()
+    for name in args.keys()
         named_count = named_count + 1
     return matched == named_count
 
 ### Why the arguments given do not fit a routine, for its error.
 secret routine argument_problem(fact: RoutineFact, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Text
-    each parameter in fact.parameters
+    for parameter in fact.parameters
         when try args[parameter.name]
             is None =>
                 if not parameter.has_default
@@ -278,9 +278,9 @@ secret routine argument_problem(fact: RoutineFact, args: Roamed[SF::System.Dict[
             else as supplied =>
                 if supplied.kind().type_id != parameter.type_id
                     return f"the argument '{parameter.name}' takes {parameter.make_fact().name}, and the value given is {supplied.type_fact().name}"
-    each name in args.keys()
+    for name in args.keys()
         var known = false
-        each parameter in fact.parameters
+        for parameter in fact.parameters
             if parameter.name == name
                 known = true
         if not known
@@ -304,7 +304,7 @@ secret routine choose_routine(facts: SF::System.List[RoutineFact], name: Text, a
     var any_named = false
     var any_built = false
     var left_out = name
-    each fact in facts
+    for fact in facts
         if fact.name == name or fact.full_name == name
             if not any_named
                 left_out = fact.full_name
@@ -319,14 +319,14 @@ secret routine choose_routine(facts: SF::System.List[RoutineFact], name: Text, a
         return RoutineChoice(index: 0, problem: "NO_SUCH", full_name: name, detail: "")
     if not any_built
         return RoutineChoice(index: 0, problem: "NOT_BUILT", full_name: left_out, detail: "")
-    each fact in facts
+    for fact in facts
         if fact.is_built and (fact.name == name or fact.full_name == name)
             return RoutineChoice(index: 0, problem: "ARGUMENTS", full_name: fact.full_name, detail: argument_problem(fact: fact, args: args))
     return RoutineChoice(index: 0, problem: "NO_SUCH", full_name: name, detail: "")
 
 ### Why the arguments given do not fit the routine at `index` of `facts`, or `""` when they fit.
 secret routine listed_argument_problem(facts: SF::System.List[RoutineFact], index: U64, args: Roamed[SF::System.Dict[Text, Unknown]]) -> Text
-    each fact in facts
+    for fact in facts
         if fact.index == index and not arguments_fit(fact: fact, args: args)
             return argument_problem(fact: fact, args: args)
     return ""

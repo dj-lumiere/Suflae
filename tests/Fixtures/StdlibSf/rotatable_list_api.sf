@@ -35,7 +35,7 @@ routine start()
     show(f"reversed: {xs}")
 
     var history = RotatableList[Text](capacity: 3)
-    each word in ["a", "b", "c", "d", "e"]
+    for word in ["a", "b", "c", "d", "e"]
         history.add_last_keeping(value: word, keeping: 3)
     show(f"history: {history} capacity={history.capacity()}")
     history.keep_first(n: 2)
@@ -51,7 +51,7 @@ routine start()
             queue.remove_first()
         i = i + 1
     var total = 0
-    each n in queue
+    for n in queue
         total = total + n
     show(f"queue: {queue} total={total} have 7: {queue.has(7)}")
     show(f"copy equal: {queue.duplicate() == queue} slice: {queue[1 til 3]}")

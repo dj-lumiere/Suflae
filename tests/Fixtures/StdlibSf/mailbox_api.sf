@@ -2,8 +2,8 @@ module Tests/StdlibSf/MailboxApi
 
 import IO/Console
 
-# A mailbox carries values from one job to another in order: `add_last` waits while it is full, `each` and
-# `remove_first` wait while it is empty, and `each` ends once it is closed and empty.
+# A mailbox carries values from one job to another in order: `add_last` waits while it is full, `for` and
+# `remove_first` wait while it is empty, and `for` ends once it is closed and empty.
 routine produce(q: Mailbox[Int], n: Int) -> Int
     var i = 1
     until i > n
@@ -20,7 +20,7 @@ routine start()
     var total = first
     var seen = List[Int]()
     seen.add_last(value: first)
-    each x in q
+    for x in q
         total = total + x
         seen.add_last(value: x)
     show(f"total: {total} order: {seen}")

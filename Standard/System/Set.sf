@@ -184,32 +184,32 @@ failable routine SetEmitter[T].emit() -> T
 
 routine Set[T].union(other: Set[T]) -> Set[T]
     var result = Set[T](key: SecureHashKey.random(), capacity: (me.count + other.count).to[Int]())
-    each val in me
+    for val in me
         result.add(value: val)
-    each val in other
+    for val in other
         result.add(value: val)
     return result
 
 routine Set[T].intersection(other: Set[T]) -> Set[T]
     var result = Set[T]()
-    each val in me
+    for val in me
         if other.has(val)
             result.add(value: val)
     return result
 
 routine Set[T].difference(other: Set[T]) -> Set[T]
     var result = Set[T]()
-    each val in me
+    for val in me
         if other.lacks(val)
             result.add(value: val)
     return result
 
 routine Set[T].symmetric_difference(other: Set[T]) -> Set[T]
     var result = Set[T]()
-    each val in me
+    for val in me
         if other.lacks(val)
             result.add(value: val)
-    each val in other
+    for val in other
         if me.lacks(val)
             result.add(value: val)
     return result
@@ -217,7 +217,7 @@ routine Set[T].symmetric_difference(other: Set[T]) -> Set[T]
 routine Set[T].is_subset(other: Set[T]) -> Bool
     if me.count > other.count
         return false
-    each val in me
+    for val in me
         if other.lacks(val)
             return false
     return true
@@ -225,13 +225,13 @@ routine Set[T].is_subset(other: Set[T]) -> Bool
 routine Set[T].is_superset(other: Set[T]) -> Bool
     if other.count > me.count
         return false
-    each val in other
+    for val in other
         if me.lacks(val)
             return false
     return true
 
 routine Set[T].is_disjoint(other: Set[T]) -> Bool
-    each val in me
+    for val in me
         if other.has(val)
             return false
     return true
@@ -244,7 +244,7 @@ routine Set[T].is_disjoint(other: Set[T]) -> Bool
 ### :returns: A new {List[T]} containing all elements of `from`.
 routine Set[T].to[List[T]]() -> List[T]
     var result = List[T](capacity: me.count())
-    each val in me
+    for val in me
         result.add_last(value: val)
     return result
 
@@ -267,7 +267,7 @@ routine Set[T].diagnose() -> Text
 routine Set[T].eq(other: Set[T]) -> Bool
     if me.count != other.count
         return false
-    each val in me
+    for val in me
         if other.lacks(val)
             return false
     return true
@@ -276,7 +276,7 @@ routine Set[T].eq(other: Set[T]) -> Bool
 @override
 routine Set[T].serialize() -> SerialValue
     var result = RF::System.List[SerialValue]()
-    each val in me
+    for val in me
         result.add_last(value: val.serialize())
     return SerialValue(result.duplicate())
 
@@ -286,7 +286,7 @@ failable common routine Set[T].from_serial(value: SerialValue) -> Set[T]
     var result = Set[T]()
     when value
         is RF::System.List[SerialValue] as items =>
-            each item in items
+            for item in items
                 result.add(value: serial_decode[T](value: item))
         else =>
             throw SerialShapeError(detail: "expected a list")
@@ -341,7 +341,7 @@ secret routine Set[T].make_room()
 secret routine Set[T].values_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
-    each val in me
+    for val in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: val, diagnosing: diagnosing)}"

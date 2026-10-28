@@ -4,7 +4,7 @@ using System.Text;
 namespace Suflae.Tests.Meta;
 
 /// <summary>
-/// End-to-end check of Suflae container shape use (the runtime IterGuard): an `each` loop marks its list's
+/// End-to-end check of Suflae container shape use (the runtime IterGuard): a `for` loop marks its list's
 /// shape as in use, and a change hidden behind a call (which Suflae cannot trace at build time, its list
 /// being a shared <c>Roamed</c> handle) crashes with ReshapingWhileInUseError instead of leaving the loop
 /// reading moved memory. RazorForge rejects the same program at build time (ShapeEffectTests). Builds and
@@ -16,9 +16,9 @@ public sealed class ContainerShapeUseTests
     private static readonly string RepoRoot = LocateRepoRoot();
 
     [Fact]
-    public void IndirectReshapeDuringEach_CrashesWithReshapingWhileInUse()
+    public void IndirectReshapeDuringFor_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_each.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_in_for.sf");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -32,9 +32,9 @@ public sealed class ContainerShapeUseTests
     /// silently skipped the element added behind it.
     /// </summary>
     [Fact]
-    public void IndirectReshapeDuringEachOverAField_CrashesWithReshapingWhileInUse()
+    public void IndirectReshapeDuringForOverAField_CrashesWithReshapingWhileInUse()
     {
-        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_each.sf");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "indirect_reshape_field_for.sf");
 
         Assert.True(condition: exit != 0,
             userMessage: $"expected a crash, got exit 0\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -49,10 +49,10 @@ public sealed class ContainerShapeUseTests
     /// run on silently (safety matrix C45, cells sf-shape-lambda, -global, -adapter, -nested).
     /// </summary>
     [Theory]
-    [InlineData("reshape_lambda_capture_each.sf")]
-    [InlineData("reshape_global_each.sf")]
-    [InlineData("reshape_adapter_each.sf")]
-    [InlineData("reshape_element_list_each.sf")]
+    [InlineData("reshape_lambda_capture_for.sf")]
+    [InlineData("reshape_global_for.sf")]
+    [InlineData("reshape_adapter_for.sf")]
+    [InlineData("reshape_element_list_for.sf")]
     public void ReshapeThroughOtherPaths_CrashesWithReshapingWhileInUse(string fixture)
     {
         (int exit, string stdout, string stderr) = RunFixture(fixture: fixture);

@@ -10,19 +10,19 @@ entity Cell
     n: Int
 
 routine call_times(f: Callable[(), Int], times: S64)
-    each i in 0 til times
+    for i in 0 til times
         f()
 
 routine drain(rx: SharedReceiver[Cell]) -> Int
     var taken = 0
-    each c in rx
-        each i in 0 til 500
+    for c in rx
+        for i in 0 til 500
             c.n = c.n + 1
         taken = taken + 1
     return taken
 
 routine bump_first(cs: List[Cell], times: S64)
-    each i in 0 til times
+    for i in 0 til times
         cs[0].n = cs[0].n + 1
 
 routine start()
@@ -35,9 +35,9 @@ routine start()
     var sent = Cell(n: 0)
     var (tx, rx) = make_shared_channel[Cell](capacity: 4)
     var drains = [drain.to[Work](rx: rx), drain.to[Work](rx: rx)]
-    each d in drains
+    for d in drains
         d.start_now()
-    each i in 0 til 4
+    for i in 0 til 4
         tx.transmit(item: sent)
     tx.close()
     var taken = drains.gather()

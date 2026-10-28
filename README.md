@@ -91,7 +91,7 @@ crashes with a message (exit status 82). `try` or `check` in front of the call r
 or `Check[T]` (which keeps the error). Out of memory and runaway recursion are fatal and not recoverable.
 
 **Nothing unsafe is reachable.** `danger` blocks, `dangerous` routines, raw handles, and `steal` are
-not part of Suflae. Changing a list while an `each` loop walks it is stopped with a clear error: at
+not part of Suflae. Changing a list while a `for` loop walks it is stopped with a clear error: at
 build time when you do it directly, at run time when a called routine does it.
 
 ## Quick start

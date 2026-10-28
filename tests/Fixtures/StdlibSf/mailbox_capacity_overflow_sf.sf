@@ -18,5 +18,5 @@ routine start()
     var q = Mailbox[Int](capacity: 2)
     q.add_last(value: 4)
     q.close()
-    each v in q
+    for v in q
         show(f"received {v}")

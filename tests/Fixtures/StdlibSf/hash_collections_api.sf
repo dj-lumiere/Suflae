@@ -27,7 +27,7 @@ routine start()
             squares.remove(key: i // 2)
         i = i + 1
     var sum = 0
-    each entry in squares
+    for entry in squares
         sum = sum + entry.item1
     show(f"squares: count={squares.count()} sum={sum} 199={squares[199]} have 10: {squares.has_key(10)}")
     show(f"copy equal: {squares.duplicate() == squares}")

@@ -354,7 +354,7 @@ failable routine BitsEmitter[BITS].emit() -> Bool
 ### :note: Bit-by-bit comparison is required because the trailing bits of the
 ###        last byte are unspecified — a raw `memcmp` would compare padding.
 routine Bits[BITS].eq(you: Bits[BITS]) -> Bool
-    each i in 0 til BITS
+    for i in 0 til BITS
         if me.getitem_raw(index: i) != you.getitem_raw(index: i)
             return false
     return true
@@ -364,7 +364,7 @@ routine Bits[BITS].eq(you: Bits[BITS]) -> Bool
 ### :param you: The other bit array to compare against.
 ### :returns: `ME_SMALL`, `SAME`, or `ME_LARGE`.
 routine Bits[BITS].compare(you: Bits[BITS]) -> ComparisonSign
-    each i in 0 til BITS
+    for i in 0 til BITS
         var a = me.getitem_raw(index: i)
         var b = you.getitem_raw(index: i)
         if a != b

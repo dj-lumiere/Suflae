@@ -110,7 +110,7 @@ needs RecordType T
     var result = List[T]()
     var n: U64 = COUNT
     var count = n.to[Int]()
-    each i in range
+    for i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.get_raw(index: i.to[U64]()).share())
     return result

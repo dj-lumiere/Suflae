@@ -60,7 +60,7 @@ failable routine List[T](count: Int, fill_value: T) -> List[T]
 ### Returns a RazorForge list of copies of the elements, for a RazorForge library routine that takes one.
 routine List[T].to[RF::System.List[T]]() -> RF::System.List[T]
     var result = RF::System.List[T](capacity: me.count)
-    each element in me
+    for element in me
         result.add_last(value: element)
     return result
 
@@ -70,7 +70,7 @@ failable common routine List[T].from_serial(value: SerialValue) -> List[T]
     var result = List[T]()
     when value
         is RF::System.List[SerialValue] as items =>
-            each item in items
+            for item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
             throw SerialShapeError(detail: "expected a list")
@@ -133,7 +133,7 @@ routine List[T].add_first(value: T)
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
 routine List[T].add_range(you: Emittable[T])
-    each value in you
+    for value in you
         me.add_last(value: value)
     return
 
@@ -276,7 +276,7 @@ failable routine List[T].setitem(index: Int, value: T)
 routine List[T].getitem(range: Range[Int]) -> List[T]
     var result = List[T]()
     var count = me.count.to[Int]()
-    each i in range
+    for i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.items.at(position: i.to[U64]()))
     return result
@@ -306,7 +306,7 @@ needs T obeys Equatable
 ### :param value: The value to look for.
 routine List[T].has(value: T) -> Bool
 needs T obeys Equatable
-    each element in me
+    for element in me
         if element == value
             return true
     return false
@@ -331,7 +331,7 @@ routine List[T].diagnose() -> Text
 ### Returns a new list holding copies of the elements.
 routine List[T].duplicate() -> List[T]
     var result = List[T](capacity: me.count.to[Int]())
-    each element in me
+    for element in me
         result.add_last(value: element)
     return result
 
@@ -339,7 +339,7 @@ routine List[T].duplicate() -> List[T]
 @override
 routine List[T].serialize() -> SerialValue
     var result = RF::System.List[SerialValue]()
-    each element in me
+    for element in me
         result.add_last(value: element.serialize())
     return SerialValue(result.duplicate())
 
@@ -434,7 +434,7 @@ secret routine List[T].grow_for(needed: U64)
 secret routine List[T].elements_text(diagnosing: Bool) -> Text
     var result = "["
     var first = true
-    each element in me
+    for element in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: element, diagnosing: diagnosing)}"

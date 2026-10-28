@@ -192,7 +192,7 @@ failable routine SortedSetEmitter[T].emit() -> T
 ### :returns: A new {List[T]} containing all elements in ascending order.
 routine SortedSet[T].to[List[T]]() -> List[T]
     var result = List[T](capacity: me.count())
-    each value in me
+    for value in me
         result.add_last(value: value)
     return result
 
@@ -227,7 +227,7 @@ routine SortedSet[T].eq(you: SortedSet[T]) -> Bool
 @override
 routine SortedSet[T].serialize() -> SerialValue
     var result = RF::System.List[SerialValue]()
-    each value in me
+    for value in me
         result.add_last(value: value.serialize())
     return SerialValue(result.duplicate())
 
@@ -237,7 +237,7 @@ failable common routine SortedSet[T].from_serial(value: SerialValue) -> SortedSe
     var result = SortedSet[T]()
     when value
         is RF::System.List[SerialValue] as items =>
-            each item in items
+            for item in items
                 result.add(value: serial_decode[T](value: item))
         else =>
             throw SerialShapeError(detail: "expected a list")
@@ -248,7 +248,7 @@ failable common routine SortedSet[T].from_serial(value: SerialValue) -> SortedSe
 secret routine SortedSet[T].items_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
-    each value in me
+    for value in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: value, diagnosing: diagnosing)}"
@@ -259,6 +259,6 @@ secret routine SortedSet[T].items_text(diagnosing: Bool) -> Text
 routine Emittable[T].to[SortedSet[T]]() -> SortedSet[T]
 needs T obeys Comparable
     var result = SortedSet[T]()
-    each item in me
+    for item in me
         result.add(value: item)
     return result

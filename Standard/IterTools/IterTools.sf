@@ -7,7 +7,7 @@ module IterTools
 ### Collects the values into a list, in order.
 routine Emittable[T].to[List[T]]() -> List[T]
     var result = List[T]()
-    each item in me
+    for item in me
         result.add_last(value: item)
     return result
 
@@ -15,7 +15,7 @@ routine Emittable[T].to[List[T]]() -> List[T]
 routine Emittable[T].to[Set[T]]() -> Set[T]
 needs T obeys Hashable, Equatable
     var result = Set[T]()
-    each item in me
+    for item in me
         result.add(value: item)
     return result
 
@@ -23,7 +23,7 @@ needs T obeys Hashable, Equatable
 routine Emittable[Tuple[TKey, TValue]].to[Dict[TKey, TValue]]() -> Dict[TKey, TValue]
 needs TKey obeys Hashable, Equatable
     var result = Dict[TKey, TValue]()
-    each item in me
+    for item in me
         var pair: Tuple[TKey, TValue] = item
         result[pair.item0] = pair.item1
     return result
@@ -35,7 +35,7 @@ needs U64 N
 needs RecordType T
     var result = Items[T, N]()
     var filled: U64 = 0
-    each item in me
+    for item in me
         if filled >= N
             throw ElementCountMismatchError(expected: N, found: N + 1)
         result.put(position: filled, value: item)

@@ -1,7 +1,7 @@
 module Tests/StdlibSf/RandomEntropyHandleApi
 
 # A Random from `Random.from_entropy()` is held like any other: passed to a routine, kept in a variable, and kept in an
-# entity's member variable that a routine uses inside an `each` loop over another member.
+# entity's member variable that a routine uses inside a `for` loop over another member.
 
 import Random
 
@@ -11,7 +11,7 @@ entity Board
 
 routine Board.cell_sum() -> Int
     var total = 0
-    each c in me.cells
+    for c in me.cells
         total += c + me.rng.range(low: 0, high: 1).to[Int]()
     return total
 

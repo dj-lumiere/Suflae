@@ -57,7 +57,7 @@ routine start()
     show(f"take: {stairs(top: 9).take(count: 2).to[List]()}")
     show(f"skip: {stairs(top: 5).skip(count: 3).to[List]()}")
     var big = stairs(top: 8).where(predicate: v => v > 5)
-    each v in big
+    for v in big
         show(f"kept: {v}")
 
     # A terminal takes what the emitter has not handed out yet.

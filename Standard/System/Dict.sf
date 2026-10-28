@@ -244,7 +244,7 @@ routine Dict[TKey, TValue].values() -> List[TValue]
     return result
 
 ### Returns a copy of the keys and values as they are now, in insertion order, as pairs:
-### `each (k, v) in d.items()`. `each e in d` walks the dict itself and is faster, but crashes when another job
+### `for (k, v) in d.items()`. `for e in d` walks the dict itself and is faster, but crashes when another job
 ### adds or removes an entry during the walk. Walk `items()` instead over a dict other jobs may change: the copy
 ### does not change under the loop.
 routine Dict[TKey, TValue].items() -> List[(TKey, TValue)]
@@ -288,7 +288,7 @@ failable routine DictEmitter[TKey, TValue].emit() -> (TKey, TValue)
 ### copied, an entity is shared).
 routine Dict[TKey, TValue].duplicate() -> Dict[TKey, TValue]
     var result = Dict[TKey, TValue](key: SecureHashKey.random(), capacity: me.count.to[Int]())
-    each entry in me
+    for entry in me
         result[entry.item0] = entry.item1
     return result
 
@@ -318,7 +318,7 @@ routine Dict[TKey, TValue].eq(you: Dict[TKey, TValue]) -> Bool
 needs TValue obeys Equatable
     if me.count != you.count
         return false
-    each entry in me
+    for entry in me
         var slot = you.find_slot(key: entry.item0)
         if not you.index.holds(slot: slot)
             return false
@@ -330,7 +330,7 @@ needs TValue obeys Equatable
 @override
 routine Dict[TKey, TValue].serialize() -> SerialValue
     var result = RF::System.Dict[Text, SerialValue]()
-    each entry in me
+    for entry in me
         result[entry.item0.represent()] = entry.item1.serialize()
     return SerialValue(result.duplicate())
 
@@ -341,7 +341,7 @@ failable common routine Dict[TKey, TValue].from_serial(value: SerialValue) -> Di
     var result = Dict[TKey, TValue]()
     when value
         is RF::System.Dict[Text, SerialValue] as entries =>
-            each entry in entries
+            for entry in entries
                 result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
         else =>
             throw SerialShapeError(detail: "expected an entry table")
@@ -399,7 +399,7 @@ secret routine Dict[TKey, TValue].make_room()
 secret routine Dict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
-    each entry in me
+    for entry in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: entry.item0, diagnosing: diagnosing)}: {nested_form(value: entry.item1, diagnosing: diagnosing)}"

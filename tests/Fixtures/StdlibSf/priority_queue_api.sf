@@ -20,7 +20,7 @@ routine start()
     show(f"count={pq.count()} peek={pq.peek()} priority={pq.peek_priority()} have test: {pq.has(element: "test")}")
     show(f"first={pq.remove()} then={pq.remove()} left={pq.count()}")
     var total = 0
-    each (priority, element) in pq.unordered()
+    for (priority, element) in pq.unordered()
         total = total + priority
     show(f"priority sum: {total} front: {pq.peek_entry()} ordered: {pq.ordered()}")
     show(f"drained: {pq.drain()} empty={pq.is_empty()}")

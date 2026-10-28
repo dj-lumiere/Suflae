@@ -32,7 +32,7 @@ routine start()
     show(f"PATH set: {(try Environment.variable(name: "PATH")).is_present()}")
     # The snapshot keeps each name as the system spells it, and Windows spells this one Path.
     var path_listed = false
-    each name in Environment.to[Dict[Text, Text]]().keys()
+    for name in Environment.to[Dict[Text, Text]]().keys()
         if name.to_uppercase() == "PATH"
             path_listed = true
     show(f"PATH in the snapshot: {path_listed}")

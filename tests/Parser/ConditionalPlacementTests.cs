@@ -97,3 +97,29 @@ public sealed class NoinlineAnnotationTests
         Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "SF-G227"));
     }
 }
+
+/// <summary>
+/// The loop over a range or a collection is <c>for</c>. A loop written with <c>each</c> is SF-G229, whose quick fix
+/// writes <c>for</c>, and the parser reads it as that loop.
+/// </summary>
+public sealed class ForLoopKeywordTests
+{
+    [Fact]
+    public void Parse_ForLoop_Parses()
+    {
+        AssertParsesSuflae(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    for x in xs\n" +
+                                   "        sum += x\n    for (i, x) in xs.enumerate()\n        sum += i\n    return sum\n");
+    }
+
+    [Fact]
+    public void Parse_EachLoop_IsG229WithForFix()
+    {
+        (_, Builder.Parser.Parser parser) =
+            ParseSuflaeWithErrors(source: "routine total(xs: List[S64]) -> S64\n    var sum: S64 = 0\n    each x in xs\n" +
+                                          "        sum += x\n    return sum\n");
+        Builder.Diagnostics.GrammarException error = Assert.Single(collection: parser.GetStructuredErrors());
+        Assert.Equal(expected: Builder.Diagnostics.GrammarDiagnosticCode.EachKeyword, actual: error.Code);
+        Assert.Equal(expected: "for", actual: error.Fix?.Edits[index: 0].NewText);
+        Assert.Contains(collection: parser.GetErrors(), filter: e => e.Contains(value: "SF-G229"));
+    }
+}

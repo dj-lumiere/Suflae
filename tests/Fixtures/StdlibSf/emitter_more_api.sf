@@ -47,13 +47,13 @@ routine start()
     # Walking an emitter the program writes goes through the emitter itself.
     var steps = Steps(current: 1, last: 3)
     show(f"first step: {steps.emit()}")
-    each n in steps
+    for n in steps
         show(f"step: {n}")
 
     # An adapter given another value later keeps the list it now walks, a list made in that statement too.
     var kept = xs.where(predicate: v => v > 3)
     kept = make().where(predicate: v => v > 4)
     var noise = [100, 200, 300, 400]
-    each k in kept
+    for k in kept
         show(f"kept: {k}")
     show(f"noise: {noise.count()}")

@@ -8,6 +8,6 @@ module System
 ### :returns: A new Suflae list of copies of the elements.
 routine List[T].to[SF::System.List[T]]() -> SF::System.List[T]
     var result = SF::System.List[T](capacity: me.count.to[Int]())
-    each element in me
+    for element in me
         result.add_last(value: element)
     return steal result

@@ -18,7 +18,7 @@ routine start()
     q.rotate_right(n: 1)
     q.keep_last(n: 2)
     var total = 0
-    each x in q
+    for x in q
         total = total + x
     show(f"kept={q} total={total} has1={q.has(1)}")
 

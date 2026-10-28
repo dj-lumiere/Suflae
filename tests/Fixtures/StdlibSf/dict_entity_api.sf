@@ -18,7 +18,7 @@ routine start()
     # Remove tombstones an entry — the sparse trace must SKIP it (live-only, R2).
     d.remove(key: 2)
     show(f"count after remove(2): {d.count()}")
-    each e in d
+    for e in d
         show(f"entry {e.item0} -> {e.item1.id}")
 
     show("DONE")

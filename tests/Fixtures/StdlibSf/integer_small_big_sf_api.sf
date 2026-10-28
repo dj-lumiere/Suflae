@@ -52,10 +52,10 @@ routine start()
     values.add_last(value: 18446744073709551616)
     values.add_last(value: -18446744073709551616)
     values.add_last(value: 340282366920938463463374607431768211461)
-    each a in values
+    for a in values
         show_one(a: a)
-    each a in values
-        each b in values
+    for a in values
+        for b in values
             show_pair(a: a, b: b)
     var two_64 = 18446744073709551616
     show(f"{two_64 - 1} {two_64 - two_64} {-two_64 + two_64} {(max + 1) - two_64}")

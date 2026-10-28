@@ -80,7 +80,7 @@ through a `.rf` module the program imports (section 18).
    (`f(x: if c then a else b)`), an operand (`(if c then a else b) + 1`, `x += if ...`), a subscript, an f-text
    slot, a branch or condition of another conditional (`else if ...` too), a `when` arm's value, and directly
    after `try`/`check`. Use `when` or a named intermediate.
-9. **Changing a collection while `each`-looping it is banned.** `each x in xs` with `xs.add_last(...)` in the
+9. **Changing a collection while `for`-looping it is banned.** `for x in xs` with `xs.add_last(...)` in the
    body is a build error (SF-S625); the same change made inside a called routine crashes at run time with
    `ReshapingWhileInUseError`. Change it after the loop.
 10. **A result you do not need takes no marker** (`drop` and `discard` are SF-G150): `seen.add(value: v)` on its own line simply drops the `Bool`.
@@ -99,10 +99,10 @@ through a `.rf` module the program imports (section 18).
     comparison, and chained comparisons (`0 <= x <= 10`) are one expression.
 14. **Containment is a call on the container:** `xs.has(3)`, `"hello".has("ell")`, `xs.lacks(3)`, and a dict's
     keys are `d.has_key("key")` / `d.lacks_key("key")` (not `.has`). Flags test with `has` / `has_any` / `lacks`.
-    `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `each x in xs`.
+    `x in xs` as a test is a grammar error (SF-G212); `in` belongs only to `for x in xs`.
 15. **There is no `class`, `def`, `fn`, `let`, `const`, `for`, `match`, `async`, `await`, `try`/`catch`,
     `null`, `print`, `main` or `pass` statement.** A line with no work is `nothing`. The words are `entity`/`record`, `routine`, `var`,
-    `preset`, `each`, `when`, `to[Work]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
+    `preset`, `for`, `when`, `to[Work]`, `retrieve()`, `try`/`check`, `none`, `show`, `start`.
 
 ## 3. Program shape
 
@@ -110,7 +110,7 @@ Script mode — loose statements run top to bottom as the body of an implicit `s
 
 ```suflae
 var total = 0
-each n in 1 to 5
+for n in 1 to 5
     total += n
 show(f"total = {total}")
 ```
@@ -477,14 +477,14 @@ else
 if not (list.is_empty())
     show("has items")
 
-each x in 1 to 5
+for x in 1 to 5
     if x == 2
         continue
     if x > 4
         break
     show(f"x={x}")
 
-each (i, word) in words.enumerate()
+for (i, word) in words.enumerate()
     show(f"{i}: {word}")
 
 until n >= 10             # stops when n >= 10, tested before each round
@@ -496,22 +496,23 @@ loop                      # doesn't end by itself: break, return or throw leaves
         break
 ```
 
-`each` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry is
-the tuple `(key, value)`, `each (k, v) in d` or `e.item0` / `e.item1`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
-`IterTools`) produce tuples that `each (a, b) in ...` takes apart.
+`for` works over ranges, collections, text (one `Char` at a time), dictionaries (each entry is
+the tuple `(key, value)`, `for (k, v) in d` or `e.item0` / `e.item1`) and anything that `obeys Emittable`. `enumerate()` and `zip(a:, b:)` (from
+`IterTools`) produce tuples that `for (a, b) in ...` takes apart.
 
-Loops are `until c`, `loop` and `each`. `until c` stops when `c` becomes true, tested before each round: write the
+Loops are `until c`, `loop` and `for`. `until c` stops when `c` becomes true, tested before each round: write the
 condition that ends the loop. `loop` doesn't end by itself: only a `break`, `return` or `throw` leaves it, so the
 lines after a `loop` without a `break` never run (SF-S786) and a routine whose last statement is such a loop needs no
 `return` after it. `while` is not a keyword: a loop written with it is SF-G224, and `migrate --step until` rewrites it
 (`while true` → `loop`, `while not c` → `until c`, an integer comparison turned around, `while i < n` →
-`until i >= n`, a float comparison and anything else → `until not (c)`, listed). An `until`, `each` or `loop` may end
+`until i >= n`, a float comparison and anything else → `until not (c)`, listed). `each` is a reserved word: a loop
+written `each x in xs` is SF-G229, and `migrate --step for` rewrites it to `for`. An `until`, `for` or `loop` may end
 with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
 (SF-G219): the case where the loop would not run even once is an `if` before the loop.
 A loop may carry values from one round to the next: `until n <= 1 with n: Int = start, steps: Int = 0`
-(`each x in xs with sum: Int = 0` and `loop with i: Int = 0` too). Each carried value is bound anew every round, from what the round's
+(`for x in xs with sum: Int = 0` and `loop with i: Int = 0` too). Each carried value is bound anew every round, from what the round's
 `continue with n: after, steps: steps + 1` passes (every carried name once, in any order, all computed before any
 is stored, so `continue with x: y, y: x % y` swaps). The names are visible in the condition, the body and the
 `then` block, and nowhere after the loop. A body that carries values must not run off its end: every path ends in
@@ -751,7 +752,7 @@ failable routine parse(n: Int) -> Int
     return n * 10
 
 failable routine find(items: List[Text], name: Text) -> Int
-    each i in 0 til items.count()
+    for i in 0 til items.count()
         if items[i] == name
             return i
     throw AbsentValueError()
@@ -809,8 +810,8 @@ routine start()
   routines that take a routine value take it as `failable Callable[...]` (`select`, `where`, `take_while`,
   `skip_while`, `distinct_by`, `select_many`, `any`, `all`, `accumulate`, `get_count`, `min_by`, `max_by`,
   `sort_by`, `sorted_by`). An adapter (`select`, `where`, ...) keeps the lambda and calls it later, so a call that
-  works on the adapter (`s.to[List]()`) or an `each` loop over it can fail through it:
-  `try items.select(transform: x => 10 // x).to[List]()` is received, and an `each` loop over such an adapter passes
+  works on the adapter (`s.to[List]()`) or a `for` loop over it can fail through it:
+  `try items.select(transform: x => 10 // x).to[List]()` is received, and a `for` loop over such an adapter passes
   the lambda's failure on in a failable routine and crashes anywhere else. A handler given to `CpuEventManager`
   that fails crashes the program.
 - The keyword reaches up to `??`: `try f() ?? d` means `(try f()) ?? d`.
@@ -898,7 +899,7 @@ and the last call wins. A crash keeps 82 whatever was set.
 routine largest[T](items: List[T]) -> T
 needs T obeys Comparable
     var best = items[0]
-    each x in items
+    for x in items
         if x > best
             best = x
     return best
@@ -1002,7 +1003,7 @@ ages["grace"] = 85
 show(ages["ada"])
 if ages.has_key("alan")
     show("found")
-each (name, age) in ages
+for (name, age) in ages
     show(f"{name} -> {age}")
 ```
 
@@ -1081,25 +1082,25 @@ each (name, age) in ages
   holds a range is now written `Span[T]` (the build names each one, and `migrate` renames the older `Buffer[T]` to
   `Memory[T]`).
 - **Emitters.** What walks a value one step at a time is an emitter; what can be walked (`obeys Emittable`) gives one
-  with `emitter()`. `each` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
-  for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `each x in it`,
+  with `emitter()`. `for` takes it for you, and you may take it yourself: `var it = nums.emitter()`, then `it.emit()`
+  for the next value (it crashes with `AbsentValueError` at the end, `try it.emit()` gives `None`) or `for x in it`,
   which goes on from where `it` is. Terminals and adapters on an emitter also take the values it has not handed out
-  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An emitter hands out each value once: an `each` over a named
-  emitter after one that ended by itself (no `break`), or an `each` inside a loop over an emitter made outside it, is
-  SF-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `each x in nums` /
-  `each x in nums.emitter()`. An entity a program writes that obeys `Emitter[T]` (it has a
-  failable `emit()`) is walked as it is: `each n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
+  yet (`it.to[List]()`, `it.sum()`, `it.where(...)`). An emitter hands out each value once: a `for` over a named
+  emitter after one that ended by itself (no `break`), or a `for` inside a loop over an emitter made outside it, is
+  SF-S517 (it would run zero times), so make a new `nums.emitter()` just before the loop, or write `for x in nums` /
+  `for x in nums.emitter()`. An entity a program writes that obeys `Emitter[T]` (it has a
+  failable `emit()`) is walked as it is: `for n in steps` calls `steps.emit()` until it throws `AbsentValueError`.
   An adapter keeps the collection it walks alive (one more reference to it) wherever the adapter goes: a variable, a
   member variable, a returned value, an argument, or the next link of a chain. So a member variable or a return type
   may name an adapter (`big: WhereEmittable[Int, List[Int]]`, `-> WhereEmittable[Int, List[Int]]`),
   and the adapter stays valid after the variable that named the collection is given another value or goes away.
-  Changing the collection's shape while an `each` walks it crashes, as below.
+  Changing the collection's shape while a `for` walks it crashes, as below.
 - Library routines written for every emittable (`to[List]()`, `sum()`, `first()`, `where(...)`, `select(...)`,
   `take(count:)`, ...) work on an entity the program writes that obeys `Emitter[T]` or `Emittable[T]`, and a
   protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
   works on the program's entities the same way.
 - Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
-  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `each` or by collecting:
+  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `for` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
@@ -1117,7 +1118,7 @@ routine grow(xs: List[Int])
 
 routine start()
     var nums = [1, 2]
-    each x in nums
+    for x in nums
         grow(xs: nums)        # crashes: ReshapingWhileInUseError
     return
 ```
@@ -1129,7 +1130,7 @@ routine start()
 - When the change is inside a called routine, the builder cannot see that `xs` and `nums` are the same
   list, so the loop marks the list as in use and the change crashes at run time with
   `ReshapingWhileInUseError`. The same holds for a change made by a lambda that captured the list, for a loop
-  over a global list, for a loop over an adapter of the list (`each x in nums.where(...)` walks `nums`), and for
+  over a global list, for a loop over an adapter of the list (`for x in nums.where(...)` walks `nums`), and for
   a change through an element (`rows[0].add_last(...)` while a loop walks `rows[0]`).
 - Changing the list after the loop, after `break`, or after a `return` out of the loop is fine. Changing an
   element's contents (`boxes[0].n = 5`) is not an add or remove and is always fine.
@@ -1284,7 +1285,7 @@ failable routine checked(n: Int) -> Int
     return n
 
 routine slow(n: Int) -> Int
-    each i in 0 til 2000
+    for i in 0 til 2000
         if cancellation_requested()
             return -1
         waitfor(1ms)
@@ -1325,7 +1326,7 @@ routine start()
     job.start_now()
     var first = m.remove_first()
     var total = first
-    each x in m
+    for x in m
         total = total + x
     show(f"total: {total}")
     return
@@ -1333,7 +1334,7 @@ routine start()
 
 `add_last` waits while the mailbox is full (`capacity: 0`: each `add_last` waits for a taker) and crashes with
 `ChannelClosedError` once the mailbox is closed. `remove_first()` takes one value, waiting while it is empty, and
-crashes once it is closed and empty. `each x in m` waits while it is empty and ends when it is closed and empty.
+crashes once it is closed and empty. `for x in m` waits while it is empty and ends when it is closed and empty.
 Nothing closes a mailbox by itself: the side that is done calls `close()`. Several jobs taking from one mailbox
 each get different values. `m.count()` and `m.is_closed()` are snapshots another job can change at once.
 `m.add_last_if_room(value: x)` never waits: it adds and returns `true` when there is room, returns `false` when the
@@ -1343,7 +1344,7 @@ it, so one full subscriber does not hold up the rest).
 A statement is one step for the jobs that share an entity, so two statements can be split by another job. A
 shared `Dict` has one-step forms for that: `d.set_if_absent(key: k, value: v)` adds the key only when it is missing
 and says whether it did (`if d.lacks_key(k)` then `d[k] = v` can let two jobs both add), and `d.items()` returns a copy
-of the pairs to walk, `each (k, v) in d.items()` (`each e in d` crashes when another job adds or removes an entry during the walk).
+of the pairs to walk, `for (k, v) in d.items()` (`for e in d` crashes when another job adds or removes an entry during the walk).
 
 ## 17. Process events
 
@@ -1433,7 +1434,7 @@ routine start()
     var hero = Hero(name: "Ada", hp: 10, seed: 7)
     var alias = hero
     show(type_name(of: hero))                          # Hero
-    each info in memvars(of: hero)
+    for info in memvars(of: hero)
         show(f"{info.order}: {info.name}: {info.type.name}, secret: {info.is_secret}")
     show(peek(target: hero, memvar: "hp"))             # 10 (an Unknown)
     var hp: S64 = 25
@@ -1595,7 +1596,7 @@ number). At most 20 are shown per batch.
 | SF-S435       | `var` at module level                               | `global name: Type = init`, or move it            |
 | SF-S444       | routine reads a script's top-level `var`            | pass it as an argument, or make it a `global`     |
 | SF-S619       | reading through an `E?` before checking it          | `if e isnot None`                                 |
-| SF-S625       | adding/removing on the list being `each`-looped     | change it after the loop                          |
+| SF-S625       | adding/removing on the list being `for`-looped     | change it after the loop                          |
 | SF-S704       | crashable without `crash_message()`                 | write `routine X.crash_message() -> Text`         |
 | SF-S712       | `@throws` leaves out an error the routine throws    | add it to the list, or recover it inside          |
 | SF-S760       | `try`/`check` over nothing that can fail            | remove the keyword, or declare the routine `failable` |
@@ -1605,8 +1606,9 @@ number). At most 20 are shown per batch.
 | SF-G216       | `and`/`or`, or `&`/`\|`/shifts, mixed bare          | add parentheses: `a or (b and c)`                 |
 | SF-G224       | a loop written `while c`                            | `until` with the condition that ends it, or `loop` |
 | SF-G225       | a line written `pass`                               | `nothing`, the line with no work                  |
+| SF-G229       | a loop written `each x in xs`                       | `for x in xs` (`migrate --step for`)              |
 | SF-S516       | `by 0` on a range                                   | a non-zero step, negative to count down           |
-| SF-S517       | `each` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `each x in xs` |
+| SF-S517       | `for` over an emitter that ran out                 | a new `xs.emitter()` before the loop, or `for x in xs` |
 | SF-W008       | a Work that nothing starts                       | `.start_now()` or `.retrieve()` it                |
 | SF-S642       | `to[Work]` on a non-routine, or over generic values | convert a routine, with concrete types           |
 
@@ -1622,7 +1624,7 @@ Every reserved word in Suflae. There is NO `for`, `def`, `fn`, `let`, `const`, `
 - **Bindings**: `var` `preset` `global` `lateinit`
 - **Visibility / receiver**: `secret` `posted` `common` · **Self**: `me` `Me`
 - **Protocols and constraints**: `obeys` `needs` `relates` `everywhere`
-- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `each` `with`
+- **Control flow**: `if` `elseif` `else` `then` `when` `is` `isnot` `until` `loop` `for` `with`
   `break` `continue` `return` `throw` `todo` `becomes`
 - **Failure**: `failable` (on a routine's declaration: `failable routine parse(...)`) · **Recovery**: `try` `check`
 - **Ranges**: `in` (loops only) `to` `til` `by`
@@ -1638,7 +1640,7 @@ A routine that can fail says so with `failable` before `routine`: `routine parse
 writes `!`. `steal` and `expand` are not Suflae words.
 
 The word operators `to` `til` `by` `is` `isnot` `in` `as` `and` `or` are keywords only where an
-operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `each x in xs`). Anywhere
+operator stands, right after something that ends an expression (`0 to 10`, `a and b`, `for x in xs`). Anywhere
 else they are names: `var to = 3`, `routine step(by: Int, to: Int)`, `by + to`. Two places keep them
 keywords: a `when` arm that starts with `is`/`isnot`, and `else as p`. `not` starts an expression, so it is always a
 keyword.

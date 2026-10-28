@@ -79,7 +79,7 @@ needs AnyType T
 
 ### Finds the member variable a verb names, with the type it holds.
 secret failable routine memvar_type(fact: TypeFact, memvar: Text) -> TypeFact
-    each member in fact.memvars
+    for member in fact.memvars
         if member.name == memvar
             return member.fact()
     throw NoSuchMemberVariableError(type_name: fact.name, memvar: memvar)

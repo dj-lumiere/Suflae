@@ -249,14 +249,14 @@ public class DocFindingsTests
             filter: e => e.Message.Contains(value: "Keyed.eq"));
     }
 
-    /// <summary>Adding to the list an `each` loop goes through, written in the loop's body, doesn't build.</summary>
+    /// <summary>Adding to the list a `for` loop goes through, written in the loop's body, doesn't build.</summary>
     [Fact]
     public void Analyze_ListChangedInItsOwnLoop_ReportsError()
     {
         string source = """
                         routine start()
                             var xs = [1, 2, 3]
-                            each x in xs
+                            for x in xs
                                 xs.add_last(value: 9)
                         """;
 

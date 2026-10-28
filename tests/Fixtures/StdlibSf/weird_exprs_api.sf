@@ -29,7 +29,7 @@ routine three() -> List[Int]
 
 routine names(lights: List[Light]) -> Text
     var out = ""
-    each light in lights
+    for light in lights
         out = out + f"{light} "
     return out
 
@@ -49,10 +49,10 @@ routine start()
 
     # A loop over a list nothing names, built by a call or a method.
     var total = 0
-    each x in three()
+    for x in three()
         total = total + x
     var words = 0
-    each w in "a b c".words()
+    for w in "a b c".words()
         words = words + 1
     show(f"each_over_call: {total} {words}")
 
@@ -71,9 +71,9 @@ routine start()
     # End-relative positions and slices on Int indices.
     show(f"slices_from_the_back: {xs[^1]} {xs[1 til ^0].count()} {xs[^2 til ^0][0]}")
 
-    # A `when` inside an `each` that leaves the loop from one arm.
+    # A `when` inside a `for` that leaves the loop from one arm.
     var seen = 0
-    each x in three()
+    for x in three()
         when x
             == 3 => break
             else => seen = seen + x

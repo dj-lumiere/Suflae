@@ -34,7 +34,7 @@ routine start()
     var mine = Account(owner: "Lumi", balance: 100)
     var other = Account(owner: "Kim", balance: 150)
     var accounts = [mine, other]
-    each account in accounts
+    for account in accounts
         account.deposit(amount: 1)
     show(f"after: {mine.balance} {other.balance}")
     show(f"first: {accounts[0].owner}, same as mine: {accounts[0] === mine}")

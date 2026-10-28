@@ -184,7 +184,7 @@ routine PriorityQueue[TPriority, TElement].add_all(elements: List[TElement], pri
     return
 
 ### Empties the queue into its `(priority, element)` pairs, smallest priority first: the order repeated `remove()`
-### calls give (`each (priority, element) in pq.drain()`).
+### calls give (`for (priority, element) in pq.drain()`).
 ### :returns: The pairs, in removal order.
 routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)]
     var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Int]())
@@ -195,7 +195,7 @@ routine PriorityQueue[TPriority, TElement].drain() -> List[(TPriority, TElement)
     return result
 
 ### Copies the `(priority, element)` pairs smallest priority first, leaving the queue as it is
-### (`each (priority, element) in pq.ordered()`).
+### (`for (priority, element) in pq.ordered()`).
 ### :returns: The pairs, in removal order.
 routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElement)]
     var copy = PriorityQueue[TPriority, TElement](capacity: me.count.to[Int]())
@@ -206,7 +206,7 @@ routine PriorityQueue[TPriority, TElement].ordered() -> List[(TPriority, TElemen
     return copy.drain()
 
 ### Copies the `(priority, element)` pairs in storage order, which is NOT priority order: the cheap walk for when the
-### order does not matter (`each (priority, element) in pq.unordered()`).
+### order does not matter (`for (priority, element) in pq.unordered()`).
 ### :returns: The pairs, in heap storage order.
 routine PriorityQueue[TPriority, TElement].unordered() -> List[(TPriority, TElement)]
     var result = List[Tuple[TPriority, TElement]](capacity: me.count.to[Int]())
@@ -298,7 +298,7 @@ secret failable routine PriorityQueue[TPriority, TElement].make_room(room: U64)
 secret routine PriorityQueue[TPriority, TElement].entries_text(diagnosing: Bool) -> Text
     var result = "["
     var first = true
-    each i in me.shown_order()
+    for i in me.shown_order()
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: me.priorities.at(position: i), diagnosing: diagnosing)}: {nested_form(value: me.elements.at(position: i), diagnosing: diagnosing)}"
@@ -329,7 +329,7 @@ secret routine PriorityQueue[TPriority, TElement].shown_order() -> List[U64]
 routine Emittable[Tuple[TPriority, TElement]].to[PriorityQueue[TPriority, TElement]]() -> PriorityQueue[TPriority, TElement]
 needs TPriority obeys Comparable
     var result = PriorityQueue[TPriority, TElement]()
-    each item in me
+    for item in me
         var pair: Tuple[TPriority, TElement] = item
         result.add(element: pair.item1, priority: pair.item0)
     return result

@@ -13,7 +13,7 @@ routine collatz_steps(start: Int) -> Int
 
 ### The sum of the values before the first negative one: `then` runs after the `break` too.
 routine sum_until_negative(xs: List[Int]) -> Int
-    each x in xs with sum: Int = 0, count: Int = 0
+    for x in xs with sum: Int = 0, count: Int = 0
         if x < 0
             break
         continue with sum: sum + x, count: count + 1

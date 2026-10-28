@@ -8,22 +8,22 @@ import Ledger
 # each other, and the program stops with a deadlock error in every build mode instead of hanging.
 
 routine ledger_first(times: Int) -> Int
-    each _ in 1 to times
+    for _ in 1 to times
         balance = checks + 1
     return times
 
 routine audit_first(times: Int) -> Int
-    each _ in 1 to times
+    for _ in 1 to times
         checks = balance + 1
     return times
 
 routine globals_first(t: Tally, times: Int) -> Int
-    each _ in 1 to times
+    for _ in 1 to times
         balance = t.count + 1
     return times
 
 routine entity_first(t: Tally, times: Int) -> Int
-    each _ in 1 to times
+    for _ in 1 to times
         t.count = balance + 1
     return times
 

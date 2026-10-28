@@ -1,11 +1,11 @@
 module System/Concurrency
 
 ### A mailbox that jobs pass values through, in order: `Mailbox[T](capacity: 8)`, then `m.add_last(value: x)` on
-### one side and `each x in m` (or `m.remove_first()`) on the other. Hand the same mailbox to every job that adds or
+### one side and `for x in m` (or `m.remove_first()`) on the other. Hand the same mailbox to every job that adds or
 ### takes.
 ###
-### `add_last` waits while the mailbox is full, `each` and `remove_first` wait while it is empty. `close()` ends it,
-### from either side: a later `add_last` crashes with `ChannelClosedError`, and `each` takes what is left and then
+### `add_last` waits while the mailbox is full, `for` and `remove_first` wait while it is empty. `close()` ends it,
+### from either side: a later `add_last` crashes with `ChannelClosedError`, and `for` takes what is left and then
 ### ends. Nothing closes a mailbox by itself, so the side that is done calls `close()`. A mailbox nobody closes leaves
 ### its readers waiting, which the runtime reports as a deadlock instead of hanging quietly.
 ###
@@ -53,7 +53,7 @@ failable routine Mailbox[T].remove_first() -> T
     var drain = me.receiver.emitter()
     return drain.emit()
 
-### Ends the mailbox: a later `add_last` crashes, and `each` takes what is left and then ends.
+### Ends the mailbox: a later `add_last` crashes, and `for` takes what is left and then ends.
 routine Mailbox[T].close()
     me.transmitter.close()
     return
@@ -69,7 +69,7 @@ routine Mailbox[T].is_closed() -> Bool
 routine Mailbox[T].count() -> Int
     return me.receiver.count().to[Int]()
 
-### Takes values in order (`each x in m`), waiting while the mailbox is empty, until it is closed and empty.
+### Takes values in order (`for x in m`), waiting while the mailbox is empty, until it is closed and empty.
 ### :returns: The walk over the mailbox.
 routine Mailbox[T].emitter() -> RF::System.ChannelDrain[T]
     return me.receiver.emitter()

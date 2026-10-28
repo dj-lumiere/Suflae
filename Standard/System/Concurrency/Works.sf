@@ -126,7 +126,7 @@ routine Work[T].destruct()
 ### :throws: {WorkStartError} if a Work of the list was started already.
 ### :throws: {TaskSpawnError} if a Work could not be started.
 failable routine List[Work[T]].start_now()
-    each job in me
+    for job in me
         if not job.state.is_waiting()
             throw WorkStartError(reason: "You called start_now() on a list holding a Work that was already started. " +
                 "Start a Work once.")
@@ -138,10 +138,10 @@ failable routine List[Work[T]].start_now()
 ### :returns: `false` if a Work could not be started.
 routine List[Work[T]].launch_together() -> Bool
     var started = true
-    each job in me
+    for job in me
         if not job.launch_held()
             started = false
-    each job in me
+    for job in me
         job.release()
     return started
 
@@ -156,12 +156,12 @@ failable routine List[Work[T]].race() -> T
         if not me.launch_together()
             throw TaskSpawnError()
         var race = C::rf_race_begin()
-        each job in me
+        for job in me
             job.join_race(race: race)
         var winner = (C::rf_race_wait(race: race)).to[Int]()
         C::rf_race_end(race: race)
         var value = me[winner].result()
-        each job in me
+        for job in me
             job.reap()
         return value
 
@@ -174,7 +174,7 @@ failable routine List[Work[T]].gather() -> List[T]
     if not me.launch_together()
         throw TaskSpawnError()
     var results = List[T]()
-    each job in me
+    for job in me
         results.add_last(value: job.retrieve())
     return results
 
@@ -190,7 +190,7 @@ failable routine List[Work[T]].next_finished() -> Work[T]
         if not me.launch_together()
             throw TaskSpawnError()
         var race = C::rf_race_begin()
-        each job in me
+        for job in me
             job.join_race(race: race)
         var winner = (C::rf_race_wait(race: race)).to[Int]()
         C::rf_race_end(race: race)
@@ -202,7 +202,7 @@ failable routine List[Work[T]].next_finished() -> Work[T]
 routine List[Work[T]].gather_all() -> List[Check[T]]
     me.launch_together()
     var results = List[Check[T]]()
-    each job in me
+    for job in me
         results.add_last(value: check job.retrieve())
     return results
 
@@ -224,8 +224,8 @@ routine List[Work[T]].take_finished() -> List[Work[T]]
 ### Cancels every Work and waits for each to stop, dropping what it came to. Work nothing started yet never
 ### runs. Running work sees the request at its next wait or through `cancellation_requested()`.
 routine List[Work[T]].cancel_all()
-    each job in me
+    for job in me
         job.cancel()
-    each job in me
+    for job in me
         job.wind_down()
     return

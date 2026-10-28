@@ -34,7 +34,7 @@ routine start()
     show(f"removed again: {remove_hook(target: hero, hook: first)}")
     remove_hook(target: hero, hook: second)
     hero.hp = 1
-    each line in log
+    for line in log
         show(line)
     show(f"{hero.name} {hero.hp} {other.hp} {p.x}")
     show("DONE")

@@ -6,7 +6,7 @@ global visits: S64 = 0
 global big: Int = 0
 
 routine visit(name: Text) -> Text
-    each _ in 1 to 10000
+    for _ in 1 to 10000
         visits = visits + 1
         big += 1
         yield_now()

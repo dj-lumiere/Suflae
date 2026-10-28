@@ -49,7 +49,7 @@ record Wrapped[T]
 
 routine List[Wrapped[T]].unwrapped() -> List[T]
     var result = List[T]()
-    each w in me
+    for w in me
         result.add_last(w.value)
     return result
 
@@ -108,7 +108,7 @@ routine start()
     var words = ["a", "b", "c"]
     show(words.join(separator: "-"))
     var line = "red green blue"
-    each (i, w) in line.words().enumerate(start: 1)
+    for (i, w) in line.words().enumerate(start: 1)
         show(f"{i} {w}")
 
     # Collections are read back from their serialized form.

@@ -11,7 +11,7 @@ entity Board
     total: Decimal
 
 routine add_points(board: Board, times: S64)
-    each i in 0 til times
+    for i in 0 til times
         board.score += 1
         board.total += 0.5
 
@@ -27,7 +27,7 @@ routine Book.add(account: Account, amount: Decimal, note: Text)
     me.lines.add_last(f"{account.member} {note}")
 
 routine pay(book: Book, payer: Account, payee: Account, times: S64)
-    each i in 0 til times
+    for i in 0 til times
         book.add(account: payer, amount: -1, note: f"to {payee.member}")
         book.add(account: payee, amount: 1, note: f"from {payer.member}")
 

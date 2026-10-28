@@ -5,7 +5,7 @@ using TypeModel.Enums;
 namespace Suflae.Passes;
 
 /// <summary>
-/// Walking an emitter goes on from where it is (<c>each n in steps</c> takes the values <c>steps</c> has not handed out
+/// Walking an emitter goes on from where it is (<c>for n in steps</c> takes the values <c>steps</c> has not handed out
 /// yet). An entity a Suflae program writes that obeys <c>Emitter[T]</c> and writes no <c>emitter()</c> gets one that
 /// gives the entity itself: <c>routine Steps.emitter() -> Steps</c> with <c>return me</c>. It is the entity's own
 /// routine, so it takes and gives the entity's handle as the entity's other routines do (its <c>emit</c> among them),

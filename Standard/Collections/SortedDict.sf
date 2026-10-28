@@ -226,7 +226,7 @@ failable routine SortedDictEmitter[TKey, TValue].emit() -> (TKey, TValue)
 ### :returns: A new list of all entries in key-ascending order.
 routine SortedDict[TKey, TValue].to[List[(TKey, TValue)]]() -> List[(TKey, TValue)]
     var result = List[(TKey, TValue)](capacity: me.count())
-    each entry in me
+    for entry in me
         result.add_last(value: entry)
     return result
 
@@ -251,7 +251,7 @@ routine SortedDict[TKey, TValue].diagnose() -> Text
 @override
 routine SortedDict[TKey, TValue].serialize() -> SerialValue
     var result = RF::System.Dict[Text, SerialValue]()
-    each entry in me
+    for entry in me
         result[entry.item0.represent()] = entry.item1.serialize()
     return SerialValue(result.duplicate())
 
@@ -262,7 +262,7 @@ failable common routine SortedDict[TKey, TValue].from_serial(value: SerialValue)
     var result = SortedDict[TKey, TValue]()
     when value
         is RF::System.Dict[Text, SerialValue] as entries =>
-            each entry in entries
+            for entry in entries
                 result[serial_key[TKey](key: entry.item0)] = serial_decode[TValue](value: entry.item1)
         else =>
             throw SerialShapeError(detail: "expected an entry table")
@@ -281,7 +281,7 @@ secret routine SortedDict[TKey, TValue].entry_at(rank: U64) -> (TKey, TValue)
 secret routine SortedDict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
     var result = ""
     var first = true
-    each entry in me
+    for entry in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: entry.item0, diagnosing: diagnosing)}: {nested_form(value: entry.item1, diagnosing: diagnosing)}"
@@ -292,7 +292,7 @@ secret routine SortedDict[TKey, TValue].entries_text(diagnosing: Bool) -> Text
 routine Emittable[Tuple[TKey, TValue]].to[SortedDict[TKey, TValue]]() -> SortedDict[TKey, TValue]
 needs TKey obeys Comparable
     var result = SortedDict[TKey, TValue]()
-    each item in me
+    for item in me
         var pair: Tuple[TKey, TValue] = item
         result[pair.item0] = pair.item1
     return result

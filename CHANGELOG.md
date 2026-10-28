@@ -68,6 +68,8 @@ file only once its other old spellings are gone.
 - A loop is `until c` (it stops when `c` becomes true) or `loop` (it ends only with `break`, `return` or `throw`).
   `while` is not a keyword: `while c` is `SF-G224` (`migrate --step until`). `until false` warns (`SF-W304`, quick
   fix `loop`). A loop takes no `else` (`SF-G219`). A loop's `then` block runs after `break` too.
+- The loop over a range or a collection is `for x in xs`. `each` is a reserved word: `each x in xs` is `SF-G229`
+  (default `migrate`, `migrate --step for`).
 - A line with no work is `nothing`. `pass` is `SF-G225` (`migrate --step nothing`). A type declaration with an empty
   body is `SF-S211` (write `nothing` under the header).
 - A number takes its type from where it goes or from its declaration (`var x: U8 = 5`). Type suffixes (`5_u8`,
@@ -114,14 +116,14 @@ file only once its other old spellings are gone.
   of `x` and gives another number. Convert with `x.to[T]()`, or write a number where the type is expected
   (`var level: U8 = 200`). `migrate --step numbers` rewrites the calls between binary integer and float types and
   lists the rest.
-- An `each` over an emitter that has run out is `SF-S517`: a second `each` over a named emitter after one that ended
-  by itself, or an `each` inside a loop over an emitter made outside it. Such a loop ran zero times. Make a new
-  `xs.emitter()` just before the loop, or write `each x in xs`.
+- A `for` over an emitter that has run out is `SF-S517`: a second `for` over a named emitter after one that ended
+  by itself, or a `for` inside a loop over an emitter made outside it. Such a loop ran zero times. Make a new
+  `xs.emitter()` just before the loop, or write `for x in xs`.
 
 **Standard library**
 - The fixed-size run of values is `Items[T, N]` and the run of bits is `Bits[N]`: `Array` and `BitArray` are unknown
   types whose error names the new one, and `migrate --step type-names` renames them. A dictionary entry is the tuple
-  `(key, value)`: `each (k, v) in d`, or `e.item0` / `e.item1`.
+  `(key, value)`: `for (k, v) in d`, or `e.item0` / `e.item1`.
 - A module is its folder. The base module is `System` and every file sees it and the modules under it
   (`System/Numerics`, `System/Text`, `System/Temporal`, `System/Concurrency`, `System/Cpu`, ...) without an import.
   Importing a parent does not import its children (`migrate --step modules`).
@@ -143,7 +145,7 @@ file only once its other old spellings are gone.
 - `Matrix4R4C.inverse()` is failable: a singular matrix throws `SingularMatrixError` (0.1 gave the zero matrix).
   The inverse is Gaussian elimination with partial pivoting, so a result that isn't exact can differ from 0.1's in
   its last bits. `inverse_unchecked()` gives the raw result (infinities or NaN for a singular matrix).
-- Channels are `Mailbox[T]` (`add_last`, `add_last_if_room`, `remove_first`, `close`, `each x in m`). Default
+- Channels are `Mailbox[T]` (`add_last`, `add_last_if_room`, `remove_first`, `close`, `for x in m`). Default
   `migrate` lists each `make_channel` for a rewrite by hand.
 - `List` keeps its elements from the first place on. The ring operations (`rotate_left`, `keep_last`, ...) are
   `RotatableList`'s (default `migrate` lists them).
@@ -164,7 +166,7 @@ file only once its other old spellings are gone.
   in `[0, 1)` (the top 24 / 53 bits of a draw). `next[U32]()` and `next[B64]()` give the same values the old routines
   did for the same seed. An old name is a build error that names the new form, and default `migrate` and
   `migrate --step random` rewrite it.
-- `Dict.items()` gives `(key, value)` tuples: `each (k, v) in d.items()`. `d[k] = v` adds a missing key, and
+- `Dict.items()` gives `(key, value)` tuples: `for (k, v) in d.items()`. `d[k] = v` adds a missing key, and
   `d.add(key:, value:)` is rewritten to it.
 - `PriorityQueue` holds `(priority, element)` tuples and has `unordered`, `ordered` and `drain`.
 - `Duration` `//` and `%` follow the integer rules, and overflow or division by zero crashes.
@@ -258,7 +260,7 @@ file only once its other old spellings are gone.
 - `C256.to[C64]()` rounds each part once (it went through `B64`, rounding twice).
 - Collections, `Text`, `Bytes` and the IO routines count with `Integer`. `Memory` and `Span`. `List`, `Dict`,
   `Set`, `PriorityQueue` and the sorted collections are built for Suflae.
-- Emitters: `var it = xs.emitter()`, then `it.emit()` or `each x in it`, which goes on from where `it` is. An
+- Emitters: `var it = xs.emitter()`, then `it.emit()` or `for x in it`, which goes on from where `it` is. An
   emitter is an emittable, so `it.to[List]()`, `it.sum()` and the adapters work on it. An entity a program writes
   that obeys `Emitter[T]` or `Emittable[T]` works with every library routine written for emittables.
 - An emittable collects into any collection with `to[...]`: `to[List]`, `to[Set]`, `to[Dict]` (of `(key, value)`
@@ -278,7 +280,7 @@ file only once its other old spellings are gone.
   the type's own rule.
 - `Decimal`, `D32`, `D64` and `D128` are `Hashable`: equal values hash the same whatever their digits.
 - `T(from: SerialValue)` builds a value from serial data (`SerialShapeError`).
-- Changing a collection's shape during `each` over it crashes with `ReshapingWhileInUseError`, also when the change
+- Changing a collection's shape during `for` over it crashes with `ReshapingWhileInUseError`, also when the change
   comes from a lambda that captured the collection, goes through an element, or the loop walks an adapter of it.
 - `TextPattern` and `BytesPattern`: patterns built from named pieces, matched in time linear in the input, with
   `from_regex`, `matches`, `find`, `find_all`, `replace` and `split`.

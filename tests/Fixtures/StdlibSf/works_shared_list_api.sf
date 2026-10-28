@@ -1,13 +1,13 @@
 module Tests/StdlibSf/WorksSharedListApi
 
 # jobs and recovery over lists: two jobs changing one element of a shared list keep every update, a job
-# can give back a list it built, `check` recovers a routine that builds a list, `each` walks the list a call gives
+# can give back a list it built, `check` recovers a routine that builds a list, `for` walks the list a call gives
 # back, and two Bytes join with `+`.
 
 import IO/Console
 
 routine bump(xs: List[S64], times: S64) -> S64
-    each i in 0 til times
+    for i in 0 til times
         xs[0] = xs[0] + 1
     return xs[0]
 
@@ -25,12 +25,12 @@ routine start()
     jobs.gather()
     show(data[0])
     var built = [filled.to[Work](n: 1), filled.to[Work](n: 2)]
-    each (i, xs) in built.gather().enumerate()
+    for (i, xs) in built.gather().enumerate()
         show(f"{i} {xs}")
     when check filled(n: 3)
         is List[S64] as v => show(v)
         is Crashables as e => show("failed")
-    each (i, row) in rows().enumerate()
+    for (i, row) in rows().enumerate()
         show(f"{i} {row}")
     var a = b"ab"
     show((a + a).count())

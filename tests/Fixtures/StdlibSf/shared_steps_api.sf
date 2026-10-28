@@ -21,7 +21,7 @@ routine start()
     var seats = Dict[Text, Int]()
     show(f"first: {seats.set_if_absent(key: "ada", value: 1)} again: {seats.set_if_absent(key: "ada", value: 9)}")
     seats["bob"] = 2
-    each (name, seat) in seats.items()
+    for (name, seat) in seats.items()
         seats[f"{name}2"] = seat + 10
     show(f"seats: {seats.count()} ada={seats["ada"]} ada2={seats["ada2"]} bob2={seats["bob2"]}")
 

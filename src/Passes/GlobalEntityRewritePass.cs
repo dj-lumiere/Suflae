@@ -165,7 +165,7 @@ internal sealed class GlobalEntityRewritePass(PostprocessingContext ctx)
             },
             LoopStatement s => s with { Body = RewriteStmt(stmt: s.Body) },
             ExpandStatement s => s with { Body = RewriteStmt(stmt: s.Body) },
-            EachStatement s => s with
+            ForStatement s => s with
             {
                 Iterable = RW(e: s.Iterable),
                 Body = RewriteStmt(stmt: s.Body)

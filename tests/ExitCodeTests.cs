@@ -55,7 +55,7 @@ public sealed class ExitCodeTests
     }
 
     /// <summary>A lambda's failure is recovered only beneath a recovery keyword: called with no keyword above
-    /// the call (here by an <c>each</c> loop over a <c>select</c>) it crashes with status 82, and the loop does
+    /// the call (here by a <c>for</c> loop over a <c>select</c>) it crashes with status 82, and the loop does
     /// not quietly end early.</summary>
     [Fact]
     public void LambdaFailureWithoutKeyword_CrashesLoudly()

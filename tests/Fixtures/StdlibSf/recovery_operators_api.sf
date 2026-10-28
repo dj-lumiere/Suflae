@@ -34,7 +34,7 @@ failable routine sum_quotients(n: Int) -> Int
     if n < 0
         throw AbsentValueError()
     var total = 0
-    each i in 0 til 3
+    for i in 0 til 3
         total = total + 60 // (n - i)
     return total
 

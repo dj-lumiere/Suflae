@@ -77,12 +77,12 @@ routine start()
     show(f"direct sum: {p.sum()} origin: {Point.origin()}")
 
     var info = type_info(of: hero)
-    each r in info.routines
+    for r in info.routines
         var params = List[Text]()
-        each param in r.parameters
+        for param in r.parameters
             params.add_last(value: f"{param.name}: {param.type.name} default={param.has_default}")
         show(f"routine {r.name} {r.kind} {params} returns {returns_name(info: r)}")
-    each c in info.creators
+    for c in info.creators
         show(f"creator {c.name} with {c.parameters.count()} parameters")
 
     var made = create(type: info, args: {"name": Unknown(from: "Cid"), "hp": Unknown(from: three)})
@@ -95,15 +95,15 @@ routine start()
     show(f"gauge routines: {gauge_info.routines.count()}")
     show(f"halved: {call(target: gauge, name: "halved", args: Dict[Text, Unknown]())}")
 
-    each r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
+    for r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
         show(f"module routine {r.name}")
-    each t in types(in: "Tests/StdlibSf/ObjectHackerCallApi")
+    for t in types(in: "Tests/StdlibSf/ObjectHackerCallApi")
         show(f"module type {t.name} {t.kind}")
     var n: S64 = 21
-    each r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
+    for r in routines(in: "Tests/StdlibSf/ObjectHackerCallApi")
         if r.name == "twice"
             show(f"twice: {call(info: r, args: {"n": Unknown(from: n)})}")
-    each r in type_info(of: p).routines
+    for r in type_info(of: p).routines
         if r.name == "origin"
             show(f"origin by info: {call(info: r, args: Dict[Text, Unknown]())}")
     show(f"direct twice: {twice(n: 2)}")

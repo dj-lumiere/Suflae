@@ -1,0 +1,18 @@
+module Tests/ShapeUse/ReshapeGlobalFor
+
+import IO/Console
+# A loop over a global list calls a routine that adds to the same global: the change crashes with
+# ReshapingWhileInUseError.
+
+global NUMS: List[Int] = [1, 2]
+
+routine grow()
+    NUMS.add_last(value: 9)
+    return
+
+routine start()
+    for x in NUMS
+        show(f"visiting {x}")
+        grow()
+    show("not reached")
+    return

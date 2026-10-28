@@ -68,7 +68,7 @@ failable common routine RotatableList[T].from_serial(value: SerialValue) -> Rota
     var result = RotatableList[T]()
     when value
         is RF::System.List[SerialValue] as items =>
-            each item in items
+            for item in items
                 result.add_last(value: serial_decode[T](value: item))
         else =>
             throw SerialShapeError(detail: "expected a list")
@@ -126,7 +126,7 @@ routine RotatableList[T].add_first(value: T)
 ### Adds every element of `you` at the back, in order.
 ### :param you: The elements to add.
 routine RotatableList[T].add_range(you: Emittable[T])
-    each value in you
+    for value in you
         me.add_last(value: value)
     return
 
@@ -305,7 +305,7 @@ failable routine RotatableList[T].setitem(index: Int, value: T)
 routine RotatableList[T].getitem(range: Range[Int]) -> RotatableList[T]
     var result = RotatableList[T]()
     var count = me.count.to[Int]()
-    each i in range
+    for i in range
         if not i.is_negative() and i < count
             result.add_last(value: me.items.at(position: me.place(index: i.to[U64]())))
     return result
@@ -354,7 +354,7 @@ needs T obeys Equatable
 ### :param value: The value to look for.
 routine RotatableList[T].has(value: T) -> Bool
 needs T obeys Equatable
-    each element in me
+    for element in me
         if element == value
             return true
     return false
@@ -379,7 +379,7 @@ routine RotatableList[T].diagnose() -> Text
 ### Returns a new list holding copies of the elements.
 routine RotatableList[T].duplicate() -> RotatableList[T]
     var result = RotatableList[T](capacity: me.count.to[Int]())
-    each element in me
+    for element in me
         result.add_last(value: element)
     return result
 
@@ -387,7 +387,7 @@ routine RotatableList[T].duplicate() -> RotatableList[T]
 @override
 routine RotatableList[T].serialize() -> SerialValue
     var result = RF::System.List[SerialValue]()
-    each element in me
+    for element in me
         result.add_last(value: element.serialize())
     return SerialValue(result.duplicate())
 
@@ -524,7 +524,7 @@ secret routine RotatableList[T].make_room(extra: U64)
 secret routine RotatableList[T].elements_text(diagnosing: Bool) -> Text
     var result = "["
     var first = true
-    each element in me
+    for element in me
         if not first
             result = f"{result}, "
         result = f"{result}{nested_form(value: element, diagnosing: diagnosing)}"
@@ -534,6 +534,6 @@ secret routine RotatableList[T].elements_text(diagnosing: Bool) -> Text
 ### Collects the values into a rotatable list, in order.
 routine Emittable[T].to[RotatableList[T]]() -> RotatableList[T]
     var result = RotatableList[T]()
-    each item in me
+    for item in me
         result.add_last(value: item)
     return result

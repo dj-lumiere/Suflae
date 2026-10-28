@@ -18,7 +18,7 @@ routine fetch(id: Int) -> Int
     return id * 10
 
 routine slow(id: Int) -> Int
-    each i in 0 til 100
+    for i in 0 til 100
         if cancellation_requested()
             return -1
         waitfor(5ms)
@@ -26,7 +26,7 @@ routine slow(id: Int) -> Int
 
 routine names(colors: List[Color]) -> Text
     var out = ""
-    each c in colors
+    for c in colors
         out = out + f"{c} "
     return out
 

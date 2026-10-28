@@ -1,6 +1,6 @@
 module System
 
-### The values of an emittable, each paired with its position: `each (i, x) in xs.enumerate()`.
+### The values of an emittable, each paired with its position: `for (i, x) in xs.enumerate()`.
 ### :typeparam T: The value type.
 ### :typeparam TSource: The emittable.
 entity EnumerateEmittable[T, TSource]

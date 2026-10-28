@@ -265,7 +265,7 @@ internal sealed class EntityLoweringPass
             IfStatement ifs => LowerIfStatement(stmt: stmt, ifs: ifs),
             WhileStatement w => LowerWhileStatement(stmt: stmt, w: w),
             LoopStatement loop => LowerLoopStatement(stmt: stmt, loop: loop),
-            EachStatement f => LowerEachStatement(stmt: stmt, f: f),
+            ForStatement f => LowerForStatement(stmt: stmt, f: f),
             WhenStatement whenStmt => LowerWhenStatement(stmt: stmt, whenStmt: whenStmt),
             UsingStatement u => LowerUsingStatement(stmt: stmt, u: u),
             DangerStatement d => LowerDangerStatement(stmt: stmt, d: d),
@@ -307,7 +307,7 @@ internal sealed class EntityLoweringPass
             : loop with { Body = b };
     }
 
-    private Statement LowerEachStatement(Statement stmt, EachStatement f)
+    private Statement LowerForStatement(Statement stmt, ForStatement f)
     {
         Statement b = LowerStatement(stmt: f.Body);
         return ReferenceEquals(objA: b, objB: f.Body)

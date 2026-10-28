@@ -11,8 +11,8 @@ import Math3D
 routine largest2(m: Matrix2R2C) -> B32
     var size: U64 = 2
     var largest: B32 = 0.0
-    each r in 0 til size
-        each c in 0 til size
+    for r in 0 til size
+        for c in 0 til size
             largest = largest.max(you: m.get(row: r, col: c).abs())
     return largest
 
@@ -20,8 +20,8 @@ routine largest2(m: Matrix2R2C) -> B32
 routine largest3(m: Matrix3R3C) -> B32
     var size: U64 = 3
     var largest: B32 = 0.0
-    each r in 0 til size
-        each c in 0 til size
+    for r in 0 til size
+        for c in 0 til size
             largest = largest.max(you: m.get(row: r, col: c).abs())
     return largest
 
@@ -29,8 +29,8 @@ routine largest3(m: Matrix3R3C) -> B32
 routine largest4(m: Matrix4R4C) -> B32
     var size: U64 = 4
     var largest: B32 = 0.0
-    each r in 0 til size
-        each c in 0 til size
+    for r in 0 til size
+        for c in 0 til size
             largest = largest.max(you: m.get(row: r, col: c).abs())
     return largest
 

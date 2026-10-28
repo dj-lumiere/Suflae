@@ -54,7 +54,7 @@ routine start()
     # A chain of adapters in a variable: each link keeps the one it walks.
     var chain = [1, 2, 3, 4, 5, 6].where(predicate: v => v % 2 == 0).select(transform: v => v * 100)
     noise = [1]
-    each c in chain
+    for c in chain
         show(f"chain: {c}")
 
     # An adapter over an emitter the program writes, in a member variable.

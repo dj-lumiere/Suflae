@@ -303,7 +303,7 @@ internal static class WrapperForwarderSynthesis
         // inner value through RF surface (`danger` + Hijacked), not the wrapper. (`iter`/`access`/`control` are
         // builder-internal — direct calls are banned so an iterator/borrow can't outlive its
         // source — but STDLIB bodies may chain them, and a forwarder carrying its wrapper file's
-        // path IS stdlib, so `iter` forwards fine and the SF list stays `each`-iterable.)
+        // path IS stdlib, so `iter` forwards fine and the SF list stays `for`-iterable.)
         if (inner.IsDangerous)
         {
             return false;
