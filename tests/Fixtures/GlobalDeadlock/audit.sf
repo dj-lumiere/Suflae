@@ -1,0 +1,8 @@
+module Audit
+
+# A module of its own with its own global and the shared entity the jobs in main.sf use.
+
+global checks: Int = 1
+
+entity Tally
+    count: Int

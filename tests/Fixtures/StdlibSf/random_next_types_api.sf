@@ -1,0 +1,27 @@
+module Tests/StdlibSf/RandomNextTypesApi
+
+# next[T]() names the type it draws: an integer type over its full range, B32 / B64 in [0, 1). A seed replays its
+# stream, so these are the first draws of seed 2026, and Entropy draws the same types from the system.
+
+import Random
+
+routine first_draws()
+    show(make_random(seed: 2026).next[U8]())
+    show(make_random(seed: 2026).next[S16]())
+    show(make_random(seed: 2026).next[U64]())
+    show(make_random(seed: 2026).next[S128]())
+    show(make_random(seed: 2026).next[B32]())
+    show(make_random(seed: 2026).next[B64]())
+
+routine start()
+    first_draws()
+    var rng = make_random(seed: 2026)
+    var all_in_unit = true
+    each i in 0 til 1000
+        var x = rng.next[B64]()
+        if x < 0.0 or x >= 1.0
+            all_in_unit = false
+    show(all_in_unit)
+    var e = Entropy.next[B64]()
+    show(e >= 0.0 and e < 1.0)
+    show(Entropy.next[U32]() != Entropy.next[U32]() or Entropy.next[U32]() != Entropy.next[U32]())

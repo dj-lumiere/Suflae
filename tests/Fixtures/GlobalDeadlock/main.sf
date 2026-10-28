@@ -1,0 +1,43 @@
+module GlobalDeadlockMain
+
+import Audit
+import Ledger
+
+# Two jobs whose statements use globals of two modules in opposite orders finish: every global of a program is
+# behind one lock. Then two jobs whose statements use the globals and a shared entity in opposite orders wait on
+# each other, and the program stops with a deadlock error in every build mode instead of hanging.
+
+routine ledger_first(times: Int) -> Int
+    each _ in 1 to times
+        balance = checks + 1
+    return times
+
+routine audit_first(times: Int) -> Int
+    each _ in 1 to times
+        checks = balance + 1
+    return times
+
+routine globals_first(t: Tally, times: Int) -> Int
+    each _ in 1 to times
+        balance = t.count + 1
+    return times
+
+routine entity_first(t: Tally, times: Int) -> Int
+    each _ in 1 to times
+        t.count = balance + 1
+    return times
+
+routine start()
+    var modules = [
+        ledger_first.to[Work](times: 200000),
+        audit_first.to[Work](times: 200000),
+    ]
+    modules.gather()
+    show("modules done")
+    var t = Tally(count: 1)
+    var mixed = [
+        globals_first.to[Work](t: t, times: 1000000),
+        entity_first.to[Work](t: t, times: 1000000),
+    ]
+    mixed.gather()
+    show("not reached")

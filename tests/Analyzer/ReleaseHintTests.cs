@@ -44,6 +44,18 @@ public class ReleaseHintTests
         Assert.Contains(expectedSubstring: "write 'try halve(...)'", actualString: errors);
     }
 
+    [Fact]
+    public void TypedDraw_NamesTheTypeArgument()
+    {
+        string errors = Errors(source: """
+                                       import Random
+
+                                       routine start()
+                                           var r = make_random(seed: 1).next_b64()
+                                       """);
+        Assert.Contains(expectedSubstring: "It is 'next[B64]()' now", actualString: errors);
+    }
+
     [Theory]
     [InlineData("Atomic[S64]", "A number every job changes is a 'global' or a member variable of an entity")]
     [InlineData("CircularList[S64]", "It is called 'RotatableList' now (migrate --step type-names rewrites it).")]

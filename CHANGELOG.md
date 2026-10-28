@@ -159,6 +159,11 @@ file only once its other old spellings are gone.
   and there is no `touch`. The directories and the environment variables are `Environment`'s, random bytes are
   `Entropy`'s.
 - `ask_line` and `ask_word` fail with `EndOfInputError` at the end of input.
+- A random draw names its type: `rng.next[T]()` and `Entropy.next[T]()` replace `next_u64()`, `next_u32()` and
+  `next_b64()`. An integer `T` (`U8` to `U128`, `S8` to `S128`) covers its full range, and `B32` / `B64` give a value
+  in `[0, 1)` (the top 24 / 53 bits of a draw). `next[U32]()` and `next[B64]()` give the same values the old routines
+  did for the same seed. An old name is a build error that names the new form, and default `migrate` and
+  `migrate --step random` rewrite it.
 - `Dict.items()` gives `(key, value)` tuples: `each (k, v) in d.items()`. `d[k] = v` adds a missing key, and
   `d.add(key:, value:)` is rewritten to it.
 - `PriorityQueue` holds `(priority, element)` tuples and has `unordered`, `ordered` and `drain`.
@@ -302,6 +307,8 @@ file only once its other old spellings are gone.
 
 ### Fixed
 
+- Two jobs whose statements use the globals and a shared entity in opposite orders hung in a release build. A program
+  with globals has the deadlock check on in every build mode, so they stop with a `Deadlock error`.
 - An entity captured by a lambda that several jobs call, sent between jobs, or reached as an element of a list the
   jobs share is changed one statement at a time, so no update is lost.
 - Two jobs adding to one `List` lost updates.

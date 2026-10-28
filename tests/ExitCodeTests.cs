@@ -137,6 +137,46 @@ public sealed class ExitCodeTests
         Assert.DoesNotContain(expectedSubstring: "AccessManager", actualString: stdout + stderr);
     }
 
+    /// <summary>Two jobs whose statements use globals of two modules in opposite orders finish (every global is behind
+    /// one lock), and two whose statements use the globals and a shared entity in opposite orders end with a deadlock
+    /// error, in a debug build and in a release build, never hanging.</summary>
+    [Theory]
+    [InlineData("debug")]
+    [InlineData("release")]
+    public void GlobalsAndEntityDeadlock_CrashesLoudly_InEveryMode(string mode)
+    {
+        string dir = Path.Combine(path1: Path.GetTempPath(), path2: $"sf-global-deadlock-{mode}-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(path: dir);
+        try
+        {
+            foreach (string file in Directory.GetFiles(
+                         path: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", "GlobalDeadlock"]), searchPattern: "*.sf"))
+            {
+                File.Copy(sourceFileName: file, destFileName: Path.Combine(path1: dir, path2: Path.GetFileName(path: file)));
+            }
+
+            File.WriteAllText(path: Path.Combine(path1: dir, path2: "config.toml"),
+                contents: "[package]\nname = \"global-deadlock\"\nversion = \"0.0.1\"\nsuflae-version = \"0.5.0\"\n\n" +
+                          $"[target]\nmode = \"{mode}\"\n");
+            (int exit, string stdout, string stderr) = RunSource(sfPath: Path.Combine(path1: dir, path2: "main.sf"),
+                name: $"global deadlock ({mode})");
+
+            Assert.True(condition: exit == 82,
+                userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+            Assert.Contains(expectedSubstring: "modules done", actualString: stdout);
+            Assert.DoesNotContain(expectedSubstring: "not reached", actualString: stdout);
+            Assert.Contains(expectedSubstring: "Deadlock error", actualString: stdout + stderr);
+        }
+        finally
+        {
+            try { Directory.Delete(path: dir, recursive: true); }
+            catch
+            {
+                /* best effort */
+            }
+        }
+    }
+
     /// <summary>An entity from an imported `.rf` module works as a local and as a member variable of a Suflae entity:
     /// its routines are built as RazorForge code and it is released once.</summary>
     [Fact]
@@ -223,7 +263,15 @@ public sealed class ExitCodeTests
     private static (int Exit, string Stdout, string Stderr) RunFixture(string fixture, string folder = "ExitCode",
         string verb = "buildandrun")
     {
-        string sfPath = Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]);
+        return RunSource(sfPath: Path.Combine(paths: [RepoRoot, "tests", "Fixtures", folder, fixture]), name: fixture,
+            verb: verb);
+    }
+
+    /// <summary>Builds and runs (or checks) <paramref name="sfPath"/>, failing the test when it doesn't finish in
+    /// time (a hang).</summary>
+    private static (int Exit, string Stdout, string Stderr) RunSource(string sfPath, string name,
+        string verb = "buildandrun")
+    {
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
@@ -250,7 +298,7 @@ public sealed class ExitCodeTests
                 /* best effort */
             }
 
-            Assert.Fail(message: $"{fixture} did not finish.");
+            Assert.Fail(message: $"{name} did not finish.");
         }
 
         return (p.ExitCode, outTask.Result, errTask.Result);

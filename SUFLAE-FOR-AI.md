@@ -1166,8 +1166,11 @@ routine start()
 - The environment (`Environment`, always available): `arguments()` (a list, the program's own name left out),
   `variable(name:)` (`try` gives an `Optional`), `to[Dict[Text, Text]]()` (a copy), `working_directory()`,
   `home_directory()`, `temp_directory()`. Nothing is set: there is no changing the working directory, keep a
-  `Directory` and build paths from it. `Entropy.next_u64()` gives random bits from the operating system,
-  `Random.from_entropy()` a generator seeded with them.
+  `Directory` and build paths from it. `Entropy.next[T]()` gives random bits from the operating system,
+  `Random.from_entropy()` a generator seeded with them (`make_random(seed:)` one that replays its stream). A draw
+  names its type: `rng.next[T]()` gives an integer type (`U8` to `U128`, `S8` to `S128`) over its full range, and
+  `B32` / `B64` a value in `[0, 1)`. `next_u64()` / `next_u32()` / `next_b64()` are build errors that name the new
+  form (`migrate --step random`). `rng.chance(probability:)` and `rng.range(low:, high:)` stay.
 - `FileManager.read_text` / `write_text` are safe inside a job's work: it waits while other jobs run.
 - `migrate --step files` rewrites `OsFileManager` / `OsEnvironment` / `OsEntropy` → `FileManager` /
   `Environment` / `Entropy`, the directory routines → `Environment`,
@@ -1264,9 +1267,12 @@ routine start()
   statements is not.
 - **Jobs waiting on each other stop the program.** Two jobs that use two shared entities in one statement
   each, in opposite orders, can each hold up the step the other needs. `[debug] deadlock-check` (on in a `debug`
-  build, off in the release modes, `= false` / `= true` in config.toml overrides) then stops the program with a
+  build, off in the release modes except in a program with globals, `= false` / `= true` in config.toml overrides)
+  then stops the program with a
   `Deadlock error` that says which job waits for an entity which other job is using, instead of hanging. The
-  message names jobs and entities only.
+  message names jobs and entities only. All the globals of a program are behind one lock, so statements that use
+  globals of several modules never wait on each other, and a statement that uses globals and a shared entity, run by
+  two jobs in opposite orders, ends with a `Deadlock error` in every build mode.
 - There is no thread type in Suflae.
 
 ```suflae

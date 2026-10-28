@@ -42,25 +42,75 @@ routine make_random(seed: U64) -> Random
 @rf("Random.from_entropy")
 common routine Random.from_entropy() -> Random
 
-### Advances the generator and returns the next 64-bit output.
-### This is the core primitive; all other draws derive from it.
+### Advances the generator and returns the next 64 random bits: `rng.next[U64]()`.
+### This is the core draw, and every other one is built from it.
 ### :returns: The next uniformly distributed `U64` in the full 64-bit range.
-@rf("Random.next_u64")
-routine Random.next_u64() -> U64
+@rf("Random.next")
+routine Random.next[U64]() -> U64
 
-### Advances the generator and returns the next 32-bit output.
-### Uses the high 32 bits of a fresh 64-bit draw, which carry the strongest
-### statistical quality in xoshiro256**.
-### :returns: The next uniformly distributed `U32` in the full 32-bit range.
-@rf("Random.next_u32")
-routine Random.next_u32() -> U32
+### Advances the generator and returns the next `U8` over its full range: the high 8 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `U8`.
+@rf("Random.next")
+routine Random.next[U8]() -> U8
 
-### Advances the generator and returns the next double in the half-open unit
-### interval `[0.0, 1.0)`.
-### Uses the top 53 bits of a fresh draw, matching the mantissa width of `B64`.
+### Advances the generator and returns the next `U16` over its full range: the high 16 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `U16`.
+@rf("Random.next")
+routine Random.next[U16]() -> U16
+
+### Advances the generator and returns the next `U32` over its full range: the high 32 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `U32`.
+@rf("Random.next")
+routine Random.next[U32]() -> U32
+
+### Advances the generator and returns the next `S8` over its full range: the high 8 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `S8`.
+@rf("Random.next")
+routine Random.next[S8]() -> S8
+
+### Advances the generator and returns the next `S16` over its full range: the high 16 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `S16`.
+@rf("Random.next")
+routine Random.next[S16]() -> S16
+
+### Advances the generator and returns the next `S32` over its full range: the high 32 bits of one 64-bit draw,
+### which carry the strongest statistical quality in xoshiro256**.
+### :returns: The next uniformly distributed `S32`.
+@rf("Random.next")
+routine Random.next[S32]() -> S32
+
+### Advances the generator and returns the next `S64` over its full range: the 64 bits of one draw.
+### :returns: The next uniformly distributed `S64`.
+@rf("Random.next")
+routine Random.next[S64]() -> S64
+
+### Advances the generator twice and returns the next `U128` over its full range: the first draw is the high 64
+### bits, the second the low 64 bits.
+### :returns: The next uniformly distributed `U128`.
+@rf("Random.next")
+routine Random.next[U128]() -> U128
+
+### Advances the generator twice and returns the next `S128` over its full range: the bits of `next[U128]()`.
+### :returns: The next uniformly distributed `S128`.
+@rf("Random.next")
+routine Random.next[S128]() -> S128
+
+### Advances the generator and returns the next `B64` in the half-open unit interval `[0.0, 1.0)`: the top 53 bits of
+### a draw (the width of a `B64` mantissa) times 2^-53, so every multiple of 2^-53 below 1 is equally likely.
 ### :returns: A uniformly distributed `B64` in `[0.0, 1.0)`.
-@rf("Random.next_b64")
-routine Random.next_b64() -> B64
+@rf("Random.next")
+routine Random.next[B64]() -> B64
+
+### Advances the generator and returns the next `B32` in the half-open unit interval `[0.0, 1.0)`: the top 24 bits of
+### a draw (the width of a `B32` mantissa) times 2^-24, so every multiple of 2^-24 below 1 is equally likely.
+### :returns: A uniformly distributed `B32` in `[0.0, 1.0)`.
+@rf("Random.next")
+routine Random.next[B32]() -> B32
 
 ### Returns whether a Bernoulli trial with the given success probability
 ### succeeds. A probability of `0.0` never succeeds and `1.0` always does.
