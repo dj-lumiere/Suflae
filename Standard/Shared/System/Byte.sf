@@ -4,8 +4,8 @@ module System
 # checks that the two still match.
 
 ### Represents one raw 8-bit byte.
-### `Byte` is a binary payload type, not a text character, so its display form
-### always uses an escaped hexadecimal representation.
+### `Byte` is a binary payload type, not a text character. It displays as the byte literal that makes it
+### (`b'L'`, `b'\x0A'`).
 @rf("Byte")
 record Byte
 obeys Copyable, Bitwiseable, Invertible
@@ -88,16 +88,14 @@ routine Byte.is_digit() -> Bool
 @rf("Byte.is_hex_digit")
 routine Byte.is_hex_digit() -> Bool
 
-### Returns the display form of this byte.
-### Raw bytes are rendered as `\\xHH` so output remains unambiguous regardless of
-### encoding context.
+### Returns the display form of this byte: the byte literal that makes it. A printable ASCII byte shows as its
+### letter (`b'L'`), the quote and the backslash as `b'\''` and `b'\\'`, and any other byte as two uppercase hex digits
+### (`b'\x0A'`, `b'\xFF'`).
 ### :returns: The resulting `Text` value.
 @rf("Byte.represent")
 routine Byte.represent() -> Text
 
-### Returns the diagnostic form of this byte.
-### The diagnostic form includes both the unsigned numeric value and the escaped
-### byte representation.
+### Returns the diagnostic form of this byte, the same byte literal as its display form (`b'L'`, `b'\x0A'`).
 ### :returns: The resulting `Text` value.
 @rf("Byte.diagnose")
 routine Byte.diagnose() -> Text

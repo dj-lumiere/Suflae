@@ -5,7 +5,7 @@ parts=["hello", "world"] count=2 first=hello
 pad=[007] [  ab] [**ab**]
 words=["a", "b", "c"] lines=2 rep=ababab
 built=hi empty=[] one=x
-bytes=6 b0=\x61 find=1 parts=3
+bytes=6 b0=b'a' find=1 parts=3
 slice=3 rep=10 commas=2
 cp=98 digit=7 off=c
 weighted=200 skip=[20, 30, 40] take=2

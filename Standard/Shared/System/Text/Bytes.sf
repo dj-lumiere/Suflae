@@ -183,7 +183,7 @@ routine Bytes.emitter() -> BytesEmitter
 failable routine BytesEmitter.emit() -> Byte
 
 ### Returns the display form of this byte sequence.
-### Each byte is rendered using its escaped `\\xHH` representation.
+### Each byte is rendered as `\xHH` with two uppercase hex digits.
 ### :returns: The resulting `Text` value.
 @rf("Bytes.represent")
 routine Bytes.represent() -> Text

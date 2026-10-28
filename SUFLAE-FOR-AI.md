@@ -267,7 +267,9 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 - A `Moment` shows as `2026-03-05 09:00:00` (each part zero-padded), a `LocalMoment` adds `Z` or `+09:00`.
 - Text: `"..."`, formatted `f"x={x}"`, raw `r"C:\path"`, raw formatted `rf"..."`. `{{` / `}}` are literal
   braces in an f-string. Escapes: `\n \t \r \\ \" \' \0` and `\uXXXXXX` (six hex digits). Characters:
-  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes).
+  `'A'`, `'한'`. Bytes: `b"abc"`, `br"..."`, a single byte `b'x'` (ASCII only; `\xFF` escapes). A `Byte` shows
+  (alone or in a `List[Byte]`) as the byte literal that makes it: `b'L'`, `b'\''`, `b'\\'`, and `b'\x0A'` (two
+  uppercase hex digits) for any byte that is not printable ASCII. `Bytes` shows `\xHH` per byte.
 - Tuples: `(1, "a")` has type `(Int, Text)`; read `t.item0`, `t.item1`; destructure with
   `var (q, r) = pair`. `(a, b) = (b, a)` swaps places (locals, member variables); any other tuple on the left is
   a build error.
