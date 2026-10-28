@@ -158,8 +158,9 @@ public sealed class ExitCodeTests
             File.WriteAllText(path: Path.Combine(path1: dir, path2: "config.toml"),
                 contents: "[package]\nname = \"global-deadlock\"\nversion = \"0.0.1\"\nsuflae-version = \"0.5.0\"\n\n" +
                           $"[target]\nmode = \"{mode}\"\n");
+            // A build and a run take well under a minute: a hang fails in 2 minutes (scaled on CI), not 5.
             (int exit, string stdout, string stderr) = RunSource(sfPath: Path.Combine(path1: dir, path2: "main.sf"),
-                name: $"global deadlock ({mode})");
+                name: $"global deadlock ({mode})", timeoutBaseMs: 120_000);
 
             Assert.True(condition: exit == 82,
                 userMessage: $"expected exit 82, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
@@ -268,9 +269,10 @@ public sealed class ExitCodeTests
     }
 
     /// <summary>Builds and runs (or checks) <paramref name="sfPath"/>, failing the test when it doesn't finish in
-    /// time (a hang).</summary>
+    /// time (a hang) with what the build and the program wrote until then.</summary>
+    /// <param name="timeoutBaseMs">The time limit before <see cref="TestHelpers.ChildTimeoutMs"/> scales it.</param>
     private static (int Exit, string Stdout, string Stderr) RunSource(string sfPath, string name,
-        string verb = "buildandrun")
+        string verb = "buildandrun", int timeoutBaseMs = 300_000)
     {
         var psi = new ProcessStartInfo
         {
@@ -290,7 +292,8 @@ public sealed class ExitCodeTests
         using var p = Process.Start(startInfo: psi)!;
         Task<string> outTask = p.StandardOutput.ReadToEndAsync();
         Task<string> errTask = p.StandardError.ReadToEndAsync();
-        if (!p.WaitForExit(milliseconds: TestHelpers.ChildTimeoutMs(baseMs: 300_000)))
+        int timeoutMs = TestHelpers.ChildTimeoutMs(baseMs: timeoutBaseMs);
+        if (!p.WaitForExit(milliseconds: timeoutMs))
         {
             try { p.Kill(entireProcessTree: true); }
             catch
@@ -298,7 +301,11 @@ public sealed class ExitCodeTests
                 /* best effort */
             }
 
-            Assert.Fail(message: $"{name} did not finish.");
+            // The pipes close once the process tree is gone: what was written so far tells where it stopped.
+            string partialOut = outTask.Wait(millisecondsTimeout: 5_000) ? outTask.Result : "(not read)";
+            string partialErr = errTask.Wait(millisecondsTimeout: 5_000) ? errTask.Result : "(not read)";
+            Assert.Fail(message: $"{name} did not finish in {timeoutMs / 1000} s.\n--- stdout ---\n{partialOut}\n" +
+                                 $"--- stderr ---\n{partialErr}");
         }
 
         return (p.ExitCode, outTask.Result, errTask.Result);
