@@ -798,7 +798,16 @@ internal sealed class EntityLoweringPass
         var clauses = new List<WhenClause>(capacity: whenStmt.Clauses.Count);
         foreach (WhenClause cl in whenStmt.Clauses)
         {
+            // The name an arm binds (`is Dict as d`, `else as item`, a `for` loop's element) reads the value the
+            // subject holds, so it is borrowed like a parameter: returning it hands the caller a holder of its own.
+            string? bound = ArmBindingName(pattern: cl.Pattern);
+            bool added = bound != null && _borrowNames.Add(item: bound);
             Statement nb = LowerStatement(stmt: cl.Body);
+            if (added)
+            {
+                _borrowNames.Remove(item: bound!);
+            }
+
             clauses.Add(item: ReferenceEquals(objA: nb, objB: cl.Body)
                 ? cl
                 : cl with { Body = nb });
@@ -811,6 +820,19 @@ internal sealed class EntityLoweringPass
         return changed
             ? whenStmt with { Expression = subj, Clauses = clauses }
             : stmt;
+    }
+
+    /// <summary>The one name a `when` arm binds to the subject's value, or null when it binds none.</summary>
+    private static string? ArmBindingName(Pattern pattern)
+    {
+        return pattern switch
+        {
+            TypePattern { VariableName: { } typed } => typed,
+            ElsePattern { VariableName: { } rest } => rest,
+            IdentifierPattern { Name: var name } => name,
+            GuardPattern { InnerPattern: var inner } => ArmBindingName(pattern: inner),
+            _ => null
+        };
     }
 
     /// <summary>A recovery variant's return of its value (or of the error it fails with) hands the value over as

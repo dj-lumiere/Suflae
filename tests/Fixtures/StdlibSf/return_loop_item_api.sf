@@ -1,0 +1,19 @@
+module Tests/StdlibSf/ReturnLoopItemApi
+
+# returning the element a `for` loop is on hands the caller a holder of its own: the list keeps its element,
+# and both are released once.
+
+failable routine find(items: List[Dict[Text, Text]]) -> Dict[Text, Text]
+    for item in items
+        return item
+    throw AbsentValueError()
+
+failable routine first_key(items: List[Dict[Text, Text]]) -> Text
+    var item = find(items)
+    return item["a"]
+
+routine start()
+    var items = [{"a": "1"}]
+    show(first_key(items))
+    show(first_key(items))
+    show(f"{items}")
