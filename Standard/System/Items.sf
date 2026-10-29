@@ -2,7 +2,7 @@ module System
 
 import BuilderQuery
 
-# Suflae's surface of the fixed-size `Array[T, COUNT]`: the same record as RazorForge's, counted and indexed with
+# Suflae's surface of the fixed-size `Items[T, COUNT]`: the same record as RazorForge's, counted and indexed with
 # `Int`. A Suflae program calls these in place of the RazorForge routines of the same names.
 
 ### Returns the number of elements, `COUNT`.

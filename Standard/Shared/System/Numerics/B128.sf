@@ -440,12 +440,12 @@ routine B128.high_bits() -> U64
 routine B128.hash() -> U64
 
 ### Returns the raw bytes of this value in little-endian order.
-### :returns: The resulting `Array[Byte, 16]` value.
+### :returns: The resulting `Items[Byte, 16]` value.
 @rf("B128.to_bytes_le")
 routine B128.to_bytes_le() -> Items[Byte, 16]
 
 ### Returns the raw bytes of this value in big-endian order.
-### :returns: The resulting `Array[Byte, 16]` value.
+### :returns: The resulting `Items[Byte, 16]` value.
 @rf("B128.to_bytes_be")
 routine B128.to_bytes_be() -> Items[Byte, 16]
 

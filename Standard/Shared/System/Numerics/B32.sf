@@ -284,12 +284,12 @@ routine B32.represent() -> Text
 routine B32.diagnose() -> Text
 
 ### Returns the raw bytes of this value in little-endian order.
-### :returns: The resulting `Array[Byte, 4]` value.
+### :returns: The resulting `Items[Byte, 4]` value.
 @rf("B32.to_bytes_le")
 routine B32.to_bytes_le() -> Items[Byte, 4]
 
 ### Returns the raw bytes of this value in big-endian order.
-### :returns: The resulting `Array[Byte, 4]` value.
+### :returns: The resulting `Items[Byte, 4]` value.
 @rf("B32.to_bytes_be")
 routine B32.to_bytes_be() -> Items[Byte, 4]
 
