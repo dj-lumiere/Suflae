@@ -510,7 +510,9 @@ lines after a `loop` without a `break` never run (SF-S786) and a routine whose l
 `return` after it. `while` is not a keyword: a loop written with it is SF-G224, and `migrate --step until` rewrites it
 (`while true` → `loop`, `while not c` → `until c`, an integer comparison turned around, `while i < n` →
 `until i >= n`, a float comparison and anything else → `until not (c)`, listed). `each` is a reserved word: a loop
-written `each x in xs` is SF-G229, and `migrate --step for` rewrites it to `for`. An `until`, `for` or `loop` may end
+written `each x in xs` is SF-G229, and `migrate --step for` rewrites it to `for`. A `for` loop variable (and each
+name of a destructured element) is bound again every round, so assigning it is SF-S251 (over a range too): put the
+new value in a variable of its own, or write the element through the collection (`xs[i] = ...`). An `until`, `for` or `loop` may end
 with a `then` block. It runs once whenever the loop is left for the line after it: when the loop ends by itself and after its own
 `break` (a `break` of a loop inside only leaves that loop). A `return` or `throw` leaves the routine and skips it. A
 loop whose `then` ends in `return` always returns, so the routine needs nothing after it. Loops have no `else`
