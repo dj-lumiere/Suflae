@@ -166,6 +166,13 @@ internal sealed class EntityLoweringPass
         }
     }
 
+    /// <summary>Whether <paramref name="file"/> is a `.rf` module of the program (not the standard library's).</summary>
+    private bool IsRazorForgeModuleFile(string? file)
+    {
+        return file != null && Builder.Frontends.Languages.HasSourceExtension(fileName: file) &&
+               Builder.Frontends.Languages.OfFile(fileName: file) == Language.RazorForge && !IsStdlibPath(file: file);
+    }
+
     private bool IsStdlibPath(string file)
     {
         string? root = _registry.StdlibPath;
@@ -192,6 +199,13 @@ internal sealed class EntityLoweringPass
         if (r.Body != null)
         {
             r = r with { Body = UsingLoweringPass.LowerBody(body: r.Body, registry: _registry) };
+        }
+
+        // A routine of a `.rf` module the program imports is RazorForge code: an entity it makes has one original and
+        // is handed back as it is (a `List` its `squares` returns), so nothing in it becomes a shared handle.
+        if (IsRazorForgeModuleFile(file: r.Location.FileName))
+        {
+            return r;
         }
 
         _roamedLocals.Clear();
@@ -228,6 +242,11 @@ internal sealed class EntityLoweringPass
     /// </summary>
     internal Statement LowerVariantBody(Statement body, RoutineInfo routine)
     {
+        if (IsRazorForgeModuleFile(file: routine.Location?.FileName))
+        {
+            return body;
+        }
+
         _roamedLocals.Clear();
         _borrowNames.Clear();
         _inLibraryRoutine = routine.Location?.FileName is { } variantFile && IsStdlibPath(file: variantFile);
@@ -1636,13 +1655,15 @@ internal sealed class EntityLoweringPass
     // without re-roaming it into a `Roamed[List]`. Mirrors TypeResolver.ResolveType's `Realm != "RF"`
     // gate on the type-annotation side; the realm survives on the construction callee's identifier
     // (Parser.Expressions parses `RF::System.List` into `IdentifierExpression { Realm = "RF" }`).
-    // A RazorForge entity (`RF::System.List`) keeps its single owner in Suflae code for now, however it was
-    // reached: by an `RF::` name or as what a routine hands back.
-    private static bool IsRazorForgeEntity(EntityTypeSymbol entity)
+    // A RazorForge library entity (`RF::System.List`) keeps its single original in Suflae code, however it was
+    // reached: by an `RF::` name or as what a routine hands back. An entity of a `.rf` module the program imports is
+    // held in Suflae code like a Suflae entity, by a shared handle.
+    private bool IsRazorForgeEntity(EntityTypeSymbol entity)
     {
         string? declaredIn = ((entity.GenericDefinition as EntityTypeSymbol) ?? entity).Location?.FileName;
         return Builder.Frontends.Languages.HasSourceExtension(fileName: declaredIn) &&
-               Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge;
+               Builder.Frontends.Languages.OfFile(fileName: declaredIn) == TypeModel.Enums.Language.RazorForge &&
+               !IsRazorForgeModuleFile(file: declaredIn);
     }
 
     /// <summary>Whether a Suflae slot naming <paramref name="entity"/> holds it through a handle: an entity of Suflae's

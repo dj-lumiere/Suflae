@@ -1,0 +1,11 @@
+routine squares(count: S64) -> List[S64]
+    var result = List[S64]()
+    for i in 1 to count
+        result.add_last(i * i)
+    return result
+
+routine total(values: List[S64]) -> S64
+    var sum: S64 = 0
+    for v in values
+        sum += v
+    return sum

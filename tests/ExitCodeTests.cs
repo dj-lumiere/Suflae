@@ -190,26 +190,38 @@ public sealed class ExitCodeTests
         Assert.Equal(expected: "2\n12\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>A parameter written as a bare `.rf` entity name is SF-S439, as `RF::Counter` is.</summary>
+    /// <summary>A List a `.rf` routine makes and returns stays that module's list: the routine's body is RazorForge
+    /// code, so its construction is not made a shared handle, and the Suflae side reads and converts the list.</summary>
     [Fact]
-    public void RazorForgeEntity_BareNameParameter_IsS439()
+    public void RazorForgeRoutine_ReturnsList_ReadsInSuflae()
     {
-        (int exit, string stdout, string stderr) =
-            RunFixture(fixture: "rf_entity_param.sf", folder: "RfInterop", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_list_return.sf", folder: "RfInterop");
 
-        Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "SF-S439", actualString: stdout + stderr);
+        Assert.True(condition: exit == 0,
+            userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Equal(expected: "[1, 4, 9, 16]\n130\n14", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
-    /// <summary>Keeping a `.rf` entity under a second name is SF-S413: both names would release it.</summary>
+    /// <summary>A `.rf` entity is a parameter like a Suflae entity: the routine works on the same object.</summary>
     [Fact]
-    public void RazorForgeEntity_SecondName_IsS413()
+    public void RazorForgeEntity_Parameter_IsShared()
     {
-        (int exit, string stdout, string stderr) =
-            RunFixture(fixture: "rf_entity_alias.sf", folder: "RfInterop", verb: "check");
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_param.sf", folder: "RfInterop");
 
-        Assert.NotEqual(expected: 0, actual: exit);
-        Assert.Contains(expectedSubstring: "SF-S413", actualString: stdout + stderr);
+        Assert.True(condition: exit == 0,
+            userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Equal(expected: "2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
+    }
+
+    /// <summary>A second name for a `.rf` entity reaches the same object, as for a Suflae entity.</summary>
+    [Fact]
+    public void RazorForgeEntity_SecondName_IsShared()
+    {
+        (int exit, string stdout, string stderr) = RunFixture(fixture: "rf_entity_alias.sf", folder: "RfInterop");
+
+        Assert.True(condition: exit == 0,
+            userMessage: $"expected exit 0, got {exit}\n--- stdout ---\n{stdout}\n--- stderr ---\n{stderr}");
+        Assert.Equal(expected: "2\n2", actual: stdout.Replace(oldValue: "\r\n", newValue: "\n").Trim());
     }
 
     /// <summary><c>Int(1)</c> builds an <c>Int</c> from a value that is one already: SF-S646, which says to use the

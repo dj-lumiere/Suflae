@@ -1,0 +1,10 @@
+import Stats
+
+# A List a `.rf` routine makes and hands back, crossed into a Suflae list and back.
+routine start()
+    var rf_list = squares(count: 4)
+    var xs = rf_list.to[List]()
+    show(xs)
+    xs.add_last(100)
+    show(total(values: xs.to[RF::List]()))
+    show(total(values: squares(count: 3)))

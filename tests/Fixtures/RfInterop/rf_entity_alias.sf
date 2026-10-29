@@ -1,8 +1,11 @@
 import Tally
 
-# A Counter from the `.rf` module has one holder: keeping it under a second name is a build error.
+# A Counter from the `.rf` module is shared like a Suflae entity: a second name reaches the same Counter.
 routine start()
     var xs = List[Text]()
     var c = Counter(n: 0, names: xs.to[RF::List]())
     var d = c
     d.bump(name: "x")
+    c.bump(name: "y")
+    show(d.total())
+    show(c.names.count())

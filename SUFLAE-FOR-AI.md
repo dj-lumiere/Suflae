@@ -1656,16 +1656,13 @@ A Suflae program may import RazorForge (`.rf`) modules; a RazorForge program may
 
 - **Values cross freely.** `Text`, numbers, `Bytes`, records, tuples, `Optional` and `Range` are the same
   types in both languages.
-- **An entity keeps its language.** An entity declared in an imported `.rf` module stays a RazorForge
-  entity (one original, no reference count); it is not shared like a Suflae entity. As a local, or as a
-  member variable of a Suflae entity, it just works: construct it, call its routines (mutating ones
-  included), and it is released once. It has one holder at a time: keeping it under a second name
-  (`var d = c`), putting a named one into a member variable, or handing it to a `.rf` routine that
-  keeps what it is given is SF-S413. Make it where it goes (`Board(counter: Counter(...))`).
-- **A RazorForge entity may not cross a Suflae routine signature by value (SF-S439).** As a parameter or a
-  (non-constructor) return type it would be released more than once. This holds however the type is
-  written, `Counter` or `RF::Counter`. Keep it in a member variable of a
-  Suflae entity and pass that entity, or do the work on it inside the `.rf` module.
+- **An entity of an imported `.rf` module is held like a Suflae entity.** In Suflae code it is a shared
+  handle: a second name (`var d = c`) or a member variable reaches the same entity, a Suflae routine takes
+  it as a parameter or gives it back (`routine bump_twice(c: Counter)`), a `.rf` routine's entity result
+  (`new_counter(start: 5)`) is received by name, and it is released when nothing holds it. The `.rf`
+  routines' own bodies keep RazorForge's rules.
+- **A RazorForge library entity (`RF::List`) keeps one original.** It may not cross a Suflae routine
+  signature by value (SF-S439), and keeping it under a second name is SF-S413.
 - `RF::Name` and `SF::Name` name a type in a specific language when both have one with that name.
 - **Collections do not cross as-is.** Suflae's `List` is not RazorForge's (`RF::List`, counted with `U64`).
   Convert at the boundary: `rf_list.to[List]()` makes a Suflae list from a RazorForge one, and
