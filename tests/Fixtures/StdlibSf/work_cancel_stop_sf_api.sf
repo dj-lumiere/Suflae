@@ -1,0 +1,35 @@
+module Tests/StdlibSf/WorkCancelStopSfApi
+
+# A cancelled job is told by its next wait, which returns early, and a wait after that stops it: a loop of waits that
+# never asks cancellation_requested() still ends, its entities let go of.
+
+entity Tally
+    items: List[Int]
+
+routine spin()
+    loop
+        waitfor(50ms)
+
+routine spin_holding() -> Int
+    var tally = Tally(items: [1, 2])
+    loop
+        waitfor(50ms)
+        tally.items.add_last(3)
+
+routine start()
+    var job = spin.to[Work]()
+    job.start_now()
+    waitfor(100ms)
+    job.cancel()
+    when check job.retrieve()
+        is CancelRequested => show("spin cancelled")
+        else => show("spin finished")
+    var holding = spin_holding.to[Work]()
+    holding.start_now()
+    waitfor(100ms)
+    holding.cancel()
+    when check holding.retrieve()
+        is Int as n => show(f"holding finished {n}")
+        is CancelRequested => show("holding cancelled")
+        is Crashables as e => show(e.crash_message())
+    show("DONE")

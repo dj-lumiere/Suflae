@@ -1233,8 +1233,9 @@ routine start()
   The crash report's trace ends with `work in start()` (the line that made the
   Work) and `Thrown again at` names the `retrieve()` line.
 - `job.cancel()` asks the work to stop. Work nothing started yet never runs. Running work sees the request
-  at its next wait (`waitfor`, `retrieve`, a channel) or through `cancellation_requested()`, and stops
-  there. Retrieving a cancelled Work waits for it to stop, then crashes with `CancelRequested` (the name
+  at its next wait (`waitfor`, `retrieve`, a channel), which returns early, or through
+  `cancellation_requested()`. Work that waits again after that stops at that wait, its entities let go of,
+  so a loop of waits that never asks still ends. Retrieving a cancelled Work waits for it to stop, then crashes with `CancelRequested` (the name
   carries no `Error` because cancelling is not a failure). Recover it with `check`/`try`.
 - Starting a Work twice, or retrieving it twice, crashes with `WorkStartError`.
 - `jobs.start_now()` starts every Work of a `List[Work[T]]` together: each one is made ready first and then all are

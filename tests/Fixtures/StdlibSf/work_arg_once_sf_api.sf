@@ -1,0 +1,49 @@
+module Tests/StdlibSf/WorkArgOnceSfApi
+
+# Each argument of a Work, or of a channel's transmit, is computed once and in the order written, entity results
+# included (the builder hands each entity to the other job and needs it a second time for that).
+
+entity Box
+    v: Int
+
+record Pair
+    box: Box
+    tag: Int
+
+entity Counter
+    n: Int
+
+routine Counter.make() -> Box
+    me.n += 1
+    show(f"make called, now {me.n}")
+    return Box(v: me.n)
+
+routine Counter.pair() -> Pair
+    me.n += 1
+    show(f"pair called, now {me.n}")
+    return Pair(box: Box(v: me.n), tag: 7)
+
+routine both(first: Int, p: Pair, box: Box) -> Int
+    return first + p.box.v + p.tag + box.v
+
+routine tick(c: Counter) -> Int
+    c.n += 100
+    return c.n
+
+routine work(box: Box) -> Int
+    return box.v
+
+routine start()
+    var counter = Counter(n: 0)
+    var job = work.to[Work](box: counter.make())
+    job.start_now()
+    show(f"got {job.retrieve()}, counter {counter.n}")
+    var job2 = both.to[Work](first: tick(c: counter), p: counter.pair(), box: counter.make())
+    job2.start_now()
+    show(f"got {job2.retrieve()}, counter {counter.n}")
+    var (tx, rx) = make_channel[Box](capacity: 1)
+    tx.transmit(item: counter.make())
+    tx.close()
+    for b in rx
+        show(f"received {b.v}, counter {counter.n}")
+    show("DONE")
