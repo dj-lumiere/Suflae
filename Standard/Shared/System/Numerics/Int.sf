@@ -12,7 +12,7 @@ module System/Numerics
 ### read-only list of 64-bit limbs shared by copies: copying shares the list (no number data is copied), and the last
 ### copy to go ends it. Division is Euclidean: `a // b` and `a % b`
 ### satisfy `a == b * (a // b) + a % b` with `0 <= a % b < |b|`. The bitwise operators act on the two's-complement
-### form. There is no `/`: an integer quotient is `//`, and a fractional one is computed in `Decimal`.
+### form. An integer quotient is `//`, and a fractional one is computed in `Decimal` with `/` operator.
 ### :see: {Decimal}
 @rf("Int")
 record Int
