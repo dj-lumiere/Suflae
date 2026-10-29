@@ -1,0 +1,30 @@
+module Tests/StdlibSf/ReceiverModuleTypeSfApi
+
+# A member routine on a generic type whose type argument is this module's own type (`List[Duo].sums`,
+# `List[Tally].total`) belongs to that one instance: the argument names the module's type and does not declare a
+# type parameter.
+
+entity Tally
+    n: S64
+
+record Duo
+    a: S64
+    b: S64
+
+routine List[Tally].total() -> S64
+    var s: S64 = 0
+    for t in me
+        s += t.n
+    return s
+
+routine List[Duo].sums() -> S64
+    var s: S64 = 0
+    for d in me
+        s += d.a + d.b
+    return s
+
+routine start()
+    var tallies = [Tally(n: 7), Tally(n: 5)]
+    show(tallies.total())
+    var duos = [Duo(a: 1, b: 2), Duo(a: 3, b: 4)]
+    show(duos.sums())
