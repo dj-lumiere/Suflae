@@ -94,11 +94,16 @@ file only once its other old spellings are gone.
 - A range counts down only with a negative step: `10 to 1` is empty, write `10 to 1 by -1`. Default `migrate` adds
   the step where both ends are literals and lists the ranges whose start is not a literal.
 - A chained comparison goes one way. There is no `<<<`.
+- A conditional value `if c then a else b` stands only as the whole value of `var x =`, `x =`, `preset`, `global`
+  or `return`. Inside parentheses, an argument, an operand, a subscript, an f-text slot, a branch of another
+  conditional or right after `try` / `check` it is `SF-G112`: give it a name first, or choose the value with `when`.
+- A routine's `return` matches its `->`: a `return` with a value in a routine without `->` (or with `-> None`), and a
+  bare `return` in a routine with `-> T`, is `SF-S301`. The return type is never taken from the returned values.
 - A constructor is `routine T(...)`. `routine T.create(...)` declares an ordinary member routine named `create`.
   Default `migrate` rewrites it to `routine T(...)` (and a call `T.create(...)` to `T(...)`), and a member routine
   `create` that gives back its own type is warning `SF-W104`.
 - A `var` that hides a parameter or an outer local is `SF-S008`. An unknown annotation is `SF-G221`.
-- The right side of a compound assignment is checked like a binary expression (`Integer += S64` is `SF-S502`).
+- The right side of a compound assignment is checked like a binary expression (`Int += S64` is `SF-S502`).
 - `==` compares values and `===` tells whether two names refer to the same entity. Two entities with equal member
   variables are `==` (`Player("Ada") == Player("Ada")` is true) and not `===`. `===` and `!==` take entities only.
 - `discard` is gone. A result you do not need takes no marker: write the call on its own line (`discard` and
@@ -170,6 +175,8 @@ file only once its other old spellings are gone.
   `d.add(key:, value:)` is rewritten to it.
 - `PriorityQueue` holds `(priority, element)` tuples and has `unordered`, `ordered` and `drain`.
 - `Duration` `//` and `%` follow the integer rules, and overflow or division by zero crashes.
+- A `Byte` shows as the byte literal that makes it, alone or inside a collection: `b'L'`, `b'\x0A'`, `b'\''`,
+  `b'\\'`. `Bytes` still shows its text with `\xHH` escapes.
 - `Indexable` is `ViewingIndexable` and `MutableIndexable` is `ModifyingIndexable` (the build error names the new
   name, and so does the one on `PQEntry`, `gather` and `race`).
 - Concurrency: `suspended` is gone. Any routine runs concurrently through `f.to[Work](args)` (default `migrate`
@@ -187,7 +194,7 @@ file only once its other old spellings are gone.
 
 **Language**
 - A routine that returns nothing ends without `return`.
-- `Integer / Integer` is a `Decimal` (`7 / 2` is `3.5`). An `Integer` and a `Decimal` mix in arithmetic and give a
+- `Int / Int` is a `Decimal` (`7 / 2` is `3.5`). An `Int` and a `Decimal` mix in arithmetic and give a
   `Decimal`.
 - Loops carry values: `until c with total = 0`, `continue with total: v`, and `then` sees them.
 - A `when` that gives a value ends a block arm with `becomes value`. One arm can match several values
@@ -199,6 +206,8 @@ file only once its other old spellings are gone.
   lacks it.
 - Backtick names, tuple swap `(a, b) = (b, a)`, record patterns, inline variants `A | B`, `define` type aliases,
   generic variants, `@infix` routines, named and short arguments mixed (`area(width, height: 4)`), `todo`.
+- `@noinline` keeps a routine out of its callers (its own body is still optimized). `@inline` with `@noinline` on one
+  routine is `SF-G227`.
 - Presets are computed at buildtime. Hex float literals (`0x1.8p3`) for binary floats.
 - `@throws([...])` lists what a routine throws and the builder checks it.
 - A crashable has no size limit. A `Check` bound to a name keeps its own error after later failures, and a failure
@@ -258,7 +267,7 @@ file only once its other old spellings are gone.
   complex type (it named the part and its float type), and a NaN part reads as the positive quiet NaN.
 - A complex number's `hash` is the same for `+0` and `-0` parts, as `==` treats them.
 - `C256.to[C64]()` rounds each part once (it went through `B64`, rounding twice).
-- Collections, `Text`, `Bytes` and the IO routines count with `Integer`. `Memory` and `Span`. `List`, `Dict`,
+- Collections, `Text`, `Bytes` and the IO routines count with `Int`. `Memory` and `Span`. `List`, `Dict`,
   `Set`, `PriorityQueue` and the sorted collections are built for Suflae.
 - Emitters: `var it = xs.emitter()`, then `it.emit()` or `for x in it`, which goes on from where `it` is. An
   emitter is an emittable, so `it.to[List]()`, `it.sum()` and the adapters work on it. An entity a program writes
@@ -324,7 +333,7 @@ file only once its other old spellings are gone.
 - Importing a module that has globals.
 - A stack overflow crashes with exit code 82 and reports that the program ran out of memory.
 - A crash inside the standard library points to the caller's line.
-- `Integer ** -n` crashes with `NumericDomainError`.
+- `Int ** -n` crashes with `NumericDomainError`.
 - `List[S64](capacity: x)` with a wrong argument names the constructor's parameters (`SF-S502`).
 - A syntax error inside a value `when` no longer reports the rest of the routine as top-level statements.
 - Converting the smallest `S128` or `S256` to `B128` crashed. `B128.rem` crashed on operands near the top of the
@@ -344,6 +353,9 @@ file only once its other old spellings are gone.
 - `@readonly`, `@reshaping`, `import Numerics`.
 - Number type suffixes and the `B*_INFINITY` / `B*_NAN` presets.
 - Flags' `all_off()` (write `none`).
+- `Array` and `BitArray` (now `Items` and `Bits`), `Maybe` (now `Optional[T]`, written `T?`), `DictEntry` (now a
+  `(key, value)` tuple).
+- The `each` loop keyword (now `for`), `next_u64()`, `next_u32()` and `next_b64()` (now `next[T]()`).
 
 ## [0.1.0] — 2026-08-28
 

@@ -163,13 +163,16 @@ that does not build. Point yours at [`SUFLAE-FOR-AI.md`](SUFLAE-FOR-AI.md) toget
 ## Command line
 
 ```
-suflae <source-file>                  Build and run the file
-suflae buildandrun [entry-file]       Build and run
-suflae build [entry-file]             Build a native executable for this OS (no run)
-suflae check [entry-file]             Type-check only
-suflae codegen [entry-file] [out.ll]  Stop at LLVM IR
-suflae parse | tokenize <source-file> Front-end inspection
-suflae --lsp                          Run the language server over stdio
+suflae new [folder]                    Start a project (config.toml, main.sf, editor files)
+suflae migrate [--check] <paths>...    Move sources from the previous release to this one
+suflae check [--json] [entry-file]     Check the program without building it
+suflae build [entry-file]              Build a native executable for this OS (no run)
+suflae run [entry-file]                Build the program and run it
+suflae test <dir-or-file>...           Run test programs against their expected output
+suflae fmt [--check] <file-or-dir>...  Format sources in place
+suflae lint <file-or-dir>...           Report code that is not in the canonical style
+suflae docs <source-dir> <output-dir>  Write the API reference pages of a library
+suflae lsp                             Run the language server (for an editor)
 suflae help | version
 ```
 
@@ -186,7 +189,7 @@ a field, and to pass one across a Suflae routine's signature you share it throug
 
 ## Not there yet
 
-The REPL, runtime reflection, and hot reload are planned and not implemented. Async networking is
+The REPL and hot reload are planned and not implemented (runtime reflection is `import ObjectHacker`). Async networking is
 missing in both languages. See the status note at the end of [`SUFLAE-FOR-AI.md`](SUFLAE-FOR-AI.md)
 for the current state.
 
