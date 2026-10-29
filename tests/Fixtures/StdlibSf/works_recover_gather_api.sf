@@ -1,0 +1,49 @@
+module Tests/StdlibSf/WorksRecoverGatherApi
+
+# recovering a gather: `try` and `check` on a list of jobs give the values when every job finishes and the
+# failure when one fails, and the list keeps its jobs afterwards. A recovered routine walking a list of
+# entities leaves every entity in the list.
+
+import IO/Console
+
+entity Box
+    v: S64
+
+routine twice(n: S64) -> S64
+    return n * 2
+
+failable routine half(n: S64) -> S64
+    if n == 3
+        throw InvalidValueError(input: f"{n}", target: "an even number")
+    return n // 2
+
+failable routine total(boxes: List[Box]) -> S64
+    var sum: S64 = 0
+    for box in boxes
+        if box.v < 0
+            throw InvalidValueError(input: f"{box.v}", target: "a count")
+        sum = sum + box.v
+    return sum
+
+routine start()
+    var jobs: List[Work[S64]] = [twice.to[Work](n: 1), twice.to[Work](n: 2)]
+    when try jobs.gather()
+        is None => show("none")
+        else as values => show(values)
+    var more: List[Work[S64]] = [twice.to[Work](n: 3), twice.to[Work](n: 4)]
+    when check more.gather()
+        is List[S64] as values => show(values)
+        is Crashables as e => show("failed")
+    var failing: List[Work[S64]] = [half.to[Work](n: 4), half.to[Work](n: 3)]
+    when try failing.gather()
+        is None => show("none")
+        else as values => show(values)
+    show(jobs.count())
+    var boxes = [Box(v: 1), Box(v: 2)]
+    when try total(boxes: boxes)
+        is None => show("none")
+        else as sum => show(sum)
+    when try total(boxes: boxes)
+        is None => show("none")
+        else as sum => show(sum)
+    show(boxes[0].v + boxes[1].v)
