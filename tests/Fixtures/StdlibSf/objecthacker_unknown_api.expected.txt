@@ -4,7 +4,7 @@ Point: Point(x: 1, y: 2) integer=false text=false
 Color: GREEN integer=false text=false
 to Point: x=1
 to Text: absent
-serialized: SerialValue({"x": SerialValue(1), "y": SerialValue(2)})
+serialized: {"x":1,"y":2}
 peek through Unknown: 2
 poked through Unknown: Point(x: 1, y: 7), kept: Point(x: 1, y: 2)
 hero.hp after poke through Unknown: 40

@@ -151,7 +151,8 @@ those names bare (another name of `Foo` used bare is SF-S007 with a hint) unless
 whole, and a routine is always reachable with its module in front (`Foo.qux(...)`). `as` adds a second
 name and both work: `import Foo.bar as b` → `b` and `Foo.bar` (no bare `bar`), `import Foo as F` →
 `F.qux(...)` and `Foo.qux(...)` (no bare names of `Foo`). An import brings the module it names, never the modules under it
-(`import IO` doesn't bring `IO/Console`). Always available without an import: `System` and every module under
+(`import IO` doesn't bring `IO/Console`). A folder that holds modules but is no module itself (`import IO`) is
+SF-S105 listing the modules in it. Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/Numerics`: the number types,
 `Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input

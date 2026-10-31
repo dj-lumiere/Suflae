@@ -147,11 +147,13 @@ routine List[Work[T]].launch_together() -> Bool
 
 ### Races the jobs, driving them concurrently until the first one finishes, and returns that winner's
 ### value, or throws its failure. Every Work of the list is freed afterwards, the losers too.
-### :throws: {TaskSpawnError} if the list is empty (there is nothing to race) or a Work cannot be started.
+### :throws: {WorkStartError} if the list is empty (there is no work to race).
+### :throws: {TaskSpawnError} if a Work cannot be started.
 ### :returns: The value produced by the first Work to finish.
 failable routine List[Work[T]].race() -> T
     if me.is_empty()
-        throw TaskSpawnError()
+        throw WorkStartError(reason: "You called race() on an empty list, so there is no work to race. " +
+            "Put the Works in the list first.")
     danger
         if not me.launch_together()
             throw TaskSpawnError()
@@ -181,11 +183,13 @@ failable routine List[Work[T]].gather() -> List[T]
 ### Waits until one of the jobs finishes, takes it out of the list and returns it, starting the ones nothing
 ### started. Called again and again it hands the jobs over in the order they finish, so each result is handled as
 ### soon as it is there. `retrieve` the returned Work for its value or its failure.
-### :throws: {TaskSpawnError} if the list is empty or a Work cannot be started.
+### :throws: {WorkStartError} if the list is empty (there is no work to wait for).
+### :throws: {TaskSpawnError} if a Work cannot be started.
 ### :returns: The first Work of the list to finish.
 failable routine List[Work[T]].next_finished() -> Work[T]
     if me.is_empty()
-        throw TaskSpawnError()
+        throw WorkStartError(reason: "You called next_finished() on an empty list, so there is no work to wait " +
+            "for. Put the Works in the list first.")
     danger
         if not me.launch_together()
             throw TaskSpawnError()

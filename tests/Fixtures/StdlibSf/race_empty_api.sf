@@ -1,0 +1,11 @@
+module Tests/StdlibSf/RaceEmptyApi
+
+# Racing an empty list is a WorkStartError that says there is no work, not a failure to start a task.
+
+routine start()
+    var jobs: List[Work[Int]] = []
+    when check jobs.race()
+        is Int as winner => show(f"winner {winner}")
+        is WorkStartError as problem => show(problem.reason)
+        else => show("other failure")
+    return
