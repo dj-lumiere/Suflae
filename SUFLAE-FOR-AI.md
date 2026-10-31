@@ -247,6 +247,7 @@ harmless. A standard library module is its folder (`Suflae/Standard/System/Text/
 - Durations: `50ms`, `5s`, `2m`, `1h`, `1d`, `1w` (also `us`, `ns`). Sizes: `4kb`, `4kib`, `2mb`, `2mib`,
   `1gb`, `1gib`. A size displays as its byte count grouped in threes by `_`: `{4kib}` is `4_096B`, never split
   into units (`kb_size()`, `mib_size()`, ... convert to a unit).
+- A `Duration`'s counts are `S64` (`Duration.from_seconds(s:)`, `d * n`, `a // b`), so an `Int` variable needs `to[S64]()` first. A `LocalMoment`'s moment and offset are `secret`: read them with `to[Moment]()` and `utc_offset()`.
 - Duration `//` and `%` leave a remainder that is never negative (`-10s // 3s` is `-4`), and overflow or `// 0s`
   crashes. `Moment(year:, …)` crashes with `InvalidMomentError` on a part out of range (month 13, February 30,
   hour 25). The time is read from `Clock`, called on the type: `Clock.now()` (a `Moment`), `Clock.monotonic()` (a
@@ -1046,8 +1047,8 @@ for (name, age) in ages
   dictionary `{:}`. `Dict` and `Set` show in insertion order, the sorted collections in order. A `PriorityQueue`
   shows its `priority: element` pairs in the order they come out, the next one first (`[1: "a", 2: "b", 4: "d"]`),
   and the queue does not change. A range shows as it is written: `0 to 10`, `0 til 10 by 2`, `10 to 0 by -2`.
-  `f"{xs:?}"` (diagnose) puts the qualified type and the count around the same text:
-  `System.List[System.Int](count: 3, [1, 2, 3])`, `System.Dict[System.Int, System.Int](count: 0, {:})`. There a
+  `f"{xs:?}"` (diagnose) puts the type and the count around the same text:
+  `List[Int](count: 3, [1, 2, 3])`, `Dict[Int, Int](count: 0, {:})`. There a
   text element is quoted with its escapes (`["a\", \"b"]` is one text), and a variant, alone or as an element, names
   the member type its value has (`S32(1)`, `Text("a")`, `none`).
 - Collections are entities: shared, not copied. `xs.duplicate()` makes an independent copy, and a range
@@ -1068,7 +1069,7 @@ for (name, age) in ages
 - `dict[k] = v` replaces the value of a key that is there and adds the key otherwise. `set.add(value:)`,
   `set.remove(value:)`, `dict.remove(key:)` return `Bool`:
   a result you do not need is simply left (no marker). `Dict` and `Set` iterate in insertion order.
-- Lists: `add_first`, `add_last`, `add_at`, `contains`, `sort()`, `sorted()`, `sort_by(...)`,
+- Lists: `add_first`, `add_last`, `add_at`, `add_range(you:)`, `has(value:)`, `lacks(value:)` (there is no `contains`), `sort()`, `sorted()`, `sort_by(...)`,
   `reverse_in_place()`, `clear()`, `is_empty()`. `SortedList`/`SortedSet` have no positional index.
 - Making room up front is failable: `reserve(new_capacity:)` on `List`, `RotatableList`, `BitList` and
   `PriorityQueue`, and the creators `List[T](capacity:)`, `List[T](count:, fill_value:)`, `RotatableList[T](capacity:)`,
@@ -1106,7 +1107,7 @@ for (name, age) in ages
   protocol the program writes with a routine for every type that obeys it (`routine Greetable.greet_twice() -> Text`)
   works on the program's entities the same way.
 - Emitter adapters (`import IterTools`): `where`, `select`, `take`, `skip`, `take_while`, `distinct`,
-  `reverse`, `enumerate`, `zip(a:, b:)`, `chain`, `min_by`, … are lazy; finish with `for` or by collecting:
+  `reverse`, `enumerate`, `zip(a:, b:)`, `min_by`, … are lazy (there is no `chain` or `extend` routine in Suflae yet: `add_range(you:)` appends one list to another); finish with `for` or by collecting:
   `nums.where(predicate: x => x % 2 == 0).to[List]()`.
 - **Collecting** names the collection without its element type: `to[List]()`, `to[Set]()`, `to[Dict]()` (the
   values are `(key, value)` tuples), and in `Collections` `to[SortedList]()`, `to[SortedSet]()`, `to[SortedDict]()`
