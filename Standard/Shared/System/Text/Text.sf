@@ -83,10 +83,10 @@ routine Text.mul(count: U64) -> Text
 
 ### Returns whether both values are equal.
 ### Equality requires the same length and the same character at each position.
-### :param other: The other text to compare against.
+### :param you: The other text to compare against.
 ### :returns: The resulting `Bool` value.
 @rf("Text.eq")
-routine Text.eq(other: Text) -> Bool
+routine Text.eq(you: Text) -> Bool
 
 ### Compares this value with the other value.
 ### Comparison is lexicographic over stored characters.

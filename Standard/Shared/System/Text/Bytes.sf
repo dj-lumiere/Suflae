@@ -83,10 +83,10 @@ routine Bytes.add(other: Bytes) -> Bytes
 
 ### Returns whether both values are equal.
 ### Equality requires the same length and the same byte at each position.
-### :param other: The other byte sequence to compare against.
+### :param you: The other byte sequence to compare against.
 ### :returns: The resulting `Bool` value.
 @rf("Bytes.eq")
-routine Bytes.eq(other: Bytes) -> Bool
+routine Bytes.eq(you: Bytes) -> Bool
 
 ### Compares this value with the other value.
 ### Comparison is lexicographic over raw byte values; a shorter sequence that is a

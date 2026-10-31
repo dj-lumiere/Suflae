@@ -152,7 +152,9 @@ whole, and a routine is always reachable with its module in front (`Foo.qux(...)
 name and both work: `import Foo.bar as b` → `b` and `Foo.bar` (no bare `bar`), `import Foo as F` →
 `F.qux(...)` and `Foo.qux(...)` (no bare names of `Foo`). An import brings the module it names, never the modules under it
 (`import IO` doesn't bring `IO/Console`). A folder that holds modules but is no module itself (`import IO`) is
-SF-S105 listing the modules in it. Always available without an import: `System` and every module under
+SF-S105 listing the modules in it. A module the Suflae standard library doesn't have (`BuilderQuery`, `Simd`) is
+SF-S116 at the import ("'BuilderQuery' isn't a module of the Suflae standard library, so a Suflae file can't import
+it"). Always available without an import: `System` and every module under
 it (`System`: the basic types, `List`/`Dict`/`Set`, `Optional`, errors; `System/Numerics`: the number types,
 `Int`, `Decimal`; `System/Text`: `Text`, `Bytes`; `System/Temporal`: `Duration`, `Moment`;
 `System/Concurrency`: `Work`, `Mailbox`; `System/Cpu`: `CpuEventManager`; `System/Memory`, `System/Serialization`), console output and input
@@ -1469,8 +1471,8 @@ routine start()
   values of one type that are equal by that type's own `==` (values of two types are never equal), and `u.hash()`
   is the kept value's hash, so `Unknown` works as a `Set`/`Dict` key. A kept type with no `==` or no hash fails
   loudly when compared or hashed (`UnknownOperationError`, naming the type).
-- `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program does not import
-  `BuilderQuery`). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
+- `type_name(of:)`: the unqualified type name (this replaces `x.type_name()`: a program can't import
+  `BuilderQuery`, SF-S116). `type_info(of:) -> TypeInfo`: an entity with `name`, `full_name`, `module_name`, `kind`
   (`TypeKind`: `RECORD`, `ENTITY`, `CRASHABLE`, `CHOICE`, `FLAGS`, `VARIANT`, `ROUTINE`), `memvars`
   (`List[MemberVariableInfo]`: `name`, `order`, `type: TypeInfo`, `is_secret`, in declaration order, `secret`
   ones included), `protocols` (names, the protocols it obeys and the ones they refine: `Int` obeys `Comparable`, so
